@@ -9,16 +9,42 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLog;
+
 
 public class Intake extends SubsystemBase {
-    
+    private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+    private final IntakeIO io;
+    private final Alert EncoderDisconnectedAlert;
+    private final TalonFX UpperMotor;
+    private final TalonFX LowerMotor;
+    private final TalonFX ExtendMotor;
 
+
+
+  public Intake(IntakeIO io) {
+    this.io = io;
+    EncoderDisconnectedAlert = new Alert("Intake encoder disconnected!", AlertType.kError);
+    UpperMotor = new TalonFX(constants.DriveMotorId, TunerConstants.swerveDrivetrainConstants.CANBusName);
+  }    
+
+    public void periodic() {
+    io.updateInputs(inputs);
+    Logger.processInputs("Intake", inputs);
+    }
+
+    /**
+     * puts intake in active position
+     */
     public Command extendIntake(){
         return this.runOnce(this::extend);
     }
@@ -26,12 +52,27 @@ public class Intake extends SubsystemBase {
      * intakes fuel, plz use toggle
      */
     public Command intakeFuel(){
-        return this.run(this::setIntakeMotorSpeeds);
-    }
-    private void setIntakeMotorSpeeds(){
+        return this.startEnd(
+            this::setIntakeMotorSpeeds,
+            this::stopIntakeMotors);
+    } 
 
+    public Command stop(){
+        return this.run(this::stopIntakeMotors);
+    }
+    
+    private void setIntakeMotorSpeeds(){
+        
+        Logger.recordOutput("Intake/Set", true);
+    }
+    
+    private void stopIntakeMotors(){
+        
+        Logger.recordOutput("Intake/Stopped", true);
     }
     private void extend(){
+
+        Logger.recordOutput("Intake/Extended", true);
 
     }
 }
