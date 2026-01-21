@@ -34,7 +34,9 @@ public class Intake extends SubsystemBase {
   public Intake(IntakeIO io) {
     this.io = io;
     EncoderDisconnectedAlert = new Alert("Intake encoder disconnected!", AlertType.kError);
-    UpperMotor = new TalonFX(constants.DriveMotorId, TunerConstants.swerveDrivetrainConstants.CANBusName);
+    UpperMotor = new TalonFX(Constants.motorIDConstants.UPPER_INTAKE_MOTOR_ID, TunerConstants.swerveDrivetrainConstants.CANBusName);
+    LowerMotor = new TalonFX(Constants.motorIDConstants.LOWER_INTAKE_MOTOR_ID, TunerConstants.swerveDrivetrainConstants.CANBusName);
+    ExtendMotor = new TalonFX(Constants.motorIDConstants.EXTEND_INTAKE_MOTOR_ID, TunerConstants.swerveDrivetrainConstants.CANBusName);
   }    
 
     public void periodic() {
@@ -49,30 +51,34 @@ public class Intake extends SubsystemBase {
         return this.runOnce(this::extend);
     }
     /**
-     * intakes fuel, plz use toggle
+     * intakes fuel and stops when done, plz use toggle
      */
     public Command intakeFuel(){
         return this.startEnd(
             this::setIntakeMotorSpeeds,
             this::stopIntakeMotors);
     } 
-
+    /**
+     * stops the intake
+     */
     public Command stop(){
         return this.run(this::stopIntakeMotors);
     }
     
     private void setIntakeMotorSpeeds(){
-        
+        UpperMotor.set(0.8);
+        LowerMotor.set(0.8);
         Logger.recordOutput("Intake/Set", true);
     }
     
     private void stopIntakeMotors(){
-        
+        UpperMotor.stopMotor();
+        LowerMotor.stopMotor();
         Logger.recordOutput("Intake/Stopped", true);
     }
+
     private void extend(){
-
+        //write when i figure out what we're doing
         Logger.recordOutput("Intake/Extended", true);
-
     }
 }
