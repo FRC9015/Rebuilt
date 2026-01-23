@@ -50,6 +50,10 @@ public class Intake extends SubsystemBase {
     public Command extendIntake(){
         return this.runOnce(this::extend);
     }
+        public Command retractIntake(){
+        return this.runOnce(this::retract);
+    }
+
     /**
      * intakes fuel and stops when done, plz use toggle
      */
@@ -80,5 +84,10 @@ public class Intake extends SubsystemBase {
     private void extend(){
         //write when i figure out what we're doing
         Logger.recordOutput("Intake/Extended", true);
+    }
+
+    private void retract(){
+        
+        Logger.recordOutput("Intake/Retracted", true);
     }
 }
