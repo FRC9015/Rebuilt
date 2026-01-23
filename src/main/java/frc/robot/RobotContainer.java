@@ -24,6 +24,8 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.shooter.Shooter;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -38,6 +40,14 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driverController = new CommandXboxController(1);
+
+private double topShooterPowerScale = 0.5;
+private double bottomShooterPowerScale = 0.5;
+
+
+private final Shooter topMotor = new Shooter(11);
+private final Shooter bottomMotor = new Shooter(22);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -143,6 +153,36 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    driverController.a().whileTrue(runShooterPrototype());
+    driverController.b().whileTrue(checkShooterUpdate());
+    driverController.povDown().onTrue(Commands.runOnce(()-> topShooterPowerScale-=0.1));
+    driverController.povUp().onTrue(Commands.runOnce(()-> topShooterPowerScale+=0.1));
+    driverController.povLeft().onTrue(Commands.runOnce(()-> topShooterPowerScale-=0.05));
+    driverController.povRight().onTrue(Commands.runOnce(()-> topShooterPowerScale+=0.05));
+    driverController.x().onTrue(Commands.runOnce(()-> topShooterPowerScale+=0.01));
+    driverController.y().onTrue(Commands.runOnce(()-> topShooterPowerScale-=0.01));
+    driverController.leftBumper().onTrue(Commands.runOnce(()-> bottomShooterPowerScale+=0.01));
+    driverController.rightBumper().onTrue(Commands.runOnce(()-> bottomShooterPowerScale-=0.01));
+  }
+
+  public Command runShooterPrototype() {
+
+   
+    return Commands.startEnd(()-> 
+    { double topshooterSpeed = topShooterPowerScale;
+      double bottomshooterSpeed = bottomShooterPowerScale;
+      System.out.println("top shooter speed: " + topshooterSpeed);
+      System.out.println("bottom shooter speed: " + bottomshooterSpeed);
+      topMotor.shootForward(topshooterSpeed);
+    bottomMotor.shootBackward(bottomshooterSpeed);}, ()-> {topMotor.stop(); bottomMotor.stop();});
+
+  }
+
+  public Command checkShooterUpdate () {
+
+   return Commands.runOnce(()-> System.out.println(topShooterPowerScale));
+
   }
 
   /**
