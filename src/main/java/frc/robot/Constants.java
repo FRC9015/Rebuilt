@@ -32,7 +32,6 @@ public final class Constants {
   public static class motorIDConstants {
     //placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
-    public static final int LOWER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
 
     

@@ -26,7 +26,6 @@ public class Intake extends SubsystemBase {
     private final IntakeIO io;
     private final Alert EncoderDisconnectedAlert;
     private final TalonFX UpperMotor;
-    private final TalonFX LowerMotor;
     private final TalonFX ExtendMotor;
 
 
@@ -35,7 +34,6 @@ public class Intake extends SubsystemBase {
     this.io = io;
     EncoderDisconnectedAlert = new Alert("Intake encoder disconnected!", AlertType.kError);
     UpperMotor = new TalonFX(Constants.motorIDConstants.UPPER_INTAKE_MOTOR_ID, TunerConstants.swerveDrivetrainConstants.CANBusName);
-    LowerMotor = new TalonFX(Constants.motorIDConstants.LOWER_INTAKE_MOTOR_ID, TunerConstants.swerveDrivetrainConstants.CANBusName);
     ExtendMotor = new TalonFX(Constants.motorIDConstants.EXTEND_INTAKE_MOTOR_ID, TunerConstants.swerveDrivetrainConstants.CANBusName);
   }    
 
@@ -71,13 +69,11 @@ public class Intake extends SubsystemBase {
     
     private void setIntakeMotorSpeeds(){
         UpperMotor.set(0.8);
-        LowerMotor.set(0.8);
         Logger.recordOutput("Intake/Set", true);
     }
     
     private void stopIntakeMotors(){
         UpperMotor.stopMotor();
-        LowerMotor.stopMotor();
         Logger.recordOutput("Intake/Stopped", true);
     }
 
