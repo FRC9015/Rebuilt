@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.AutoLog;
 
@@ -46,26 +47,17 @@ public class Intake extends SubsystemBase {
      * puts intake in active position
      */
     public Command extendIntake(){
-        return this.runOnce(this::extend);
-    }
-        public Command retractIntake(){
-        return this.runOnce(this::retract);
+    return this.startRun(
+    this::extend, 
+    this::setIntakeMotorSpeeds);    }
+    
+    public Command retractIntake(){
+        return new SequentialCommandGroup(
+            this.runOnce(this::stopIntakeMotors),
+            this.runOnce(this::retract));
     }
 
-    /**
-     * intakes fuel and stops when done, plz use toggle
-     */
-    public Command intakeFuel(){
-        return this.startEnd(
-            this::setIntakeMotorSpeeds,
-            this::stopIntakeMotors);
-    } 
-    /**
-     * stops the intake
-     */
-    public Command stop(){
-        return this.run(this::stopIntakeMotors);
-    }
+
     
     private void setIntakeMotorSpeeds(){
         UpperMotor.set(0.8);
