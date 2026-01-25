@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drive.intake;
+package frc.robot.subsystems.intake;
 
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
