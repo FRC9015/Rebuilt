@@ -4,7 +4,7 @@ import org.littletonrobotics.junction.AutoLog;
 
 
 
-public class IntakeIO {
+public interface IntakeIO {
     
 /** Class representing the inputs for the Intake. */
   @AutoLog
