@@ -72,3 +72,5 @@ public class Intake extends SubsystemBase {
     Logger.processInputs("Intake/Pivot", pivotInputs);
   }
 }
+
+
