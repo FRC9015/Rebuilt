@@ -1,10 +1,9 @@
-package frc.robot.subsystems.drive.climb;
-
-import org.littletonrobotics.junction.Logger;
+package frc.robot.subsystems.climb;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.drive.climb.ClimbIO.ClimbIOInputs;
+import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs;
+import org.littletonrobotics.junction.Logger;
 
 public class Climb extends SubsystemBase {
   private final ClimbIO io;
@@ -30,6 +29,6 @@ public class Climb extends SubsystemBase {
 
     Logger.recordOutput("Climber/Setpoint", position.getClimbEncoderPositions());
     Logger.recordOutput("Climber/Output", output);
-    Logger.recordOutput("Climber/PositionInput", inputs.climberPosition);    
-  } 
+    Logger.recordOutput("Climber/PositionInput", inputs.climberPosition);
+  }
 }

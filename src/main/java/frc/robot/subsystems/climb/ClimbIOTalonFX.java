@@ -1,4 +1,4 @@
-package frc.robot.subsystems.drive.climb;
+package frc.robot.subsystems.climb;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -14,9 +14,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.Servo;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
-
 
 public class ClimbIOTalonFX implements ClimbIO {
 
@@ -30,8 +28,7 @@ public class ClimbIOTalonFX implements ClimbIO {
   private final VoltageOut voltageOut = new VoltageOut(0.0);
   private final MotionMagicVoltage positionVoltage = new MotionMagicVoltage(0.0);
 
-  public ClimbIOTalonFX(
-      int topMotorID, int climbID1, int climbID2) {
+  public ClimbIOTalonFX(int topMotorID, int climbID1, int climbID2) {
     topMotor = new TalonFX(topMotorID);
     climbMotor1 = new TalonFX(climbID1);
 
@@ -86,6 +83,4 @@ public class ClimbIOTalonFX implements ClimbIO {
   public double getPosition() {
     return climbMotor1.getPosition().getValueAsDouble();
   }
-
-
 }
