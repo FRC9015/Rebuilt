@@ -2,6 +2,8 @@ package frc.robot.subsystems.intake;
 
 import org.littletonrobotics.junction.AutoLog;
 
+import edu.wpi.first.wpilibj.Alert;
+
 public interface IntakeIO {
 
   /** Class representing the inputs for the Intake. */
@@ -12,8 +14,9 @@ public interface IntakeIO {
     public double IntakeAppliedVolts = 0.0;
     public double IntakeCurrentAmps = 0.0;
     public boolean IntakeEncoderConnected = false;
-    public double IntakeEncoderValue = 0.0;
+    public double IntakeEncoderPosition = 0.0;
     public double IntakeRPM = 0.0;
+    public Alert intakeEncoderDisconnectedAlert = new Alert("Intake encoder disconnected", Alert.AlertType.kWarning);
   }
 
   /** Method to update the inputs of the Intake subsystem. */
@@ -28,6 +31,10 @@ public interface IntakeIO {
 
   public default void setIntakePosition(double position) {
 
+  }
+
+  public default double getVelocity() {
+    return 0.0;
   }
 
   default void stop() {}

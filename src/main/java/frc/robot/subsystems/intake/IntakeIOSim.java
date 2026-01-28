@@ -1,3 +1,6 @@
 package frc.robot.subsystems.intake;
 
-public class IntakeIOSim implements IntakeIO {}
+public class IntakeIOSim implements IntakeIO {
+
+    
+}

@@ -1,6 +1,8 @@
 package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,55 +15,39 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase {
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
   private final IntakeIO io;
-  private final Alert EncoderDisconnectedAlert;
-  private final TalonFX UpperMotor;
-  private final TalonFX ExtendMotor;
+
+  private PIDController intakePIDController;
+
+  private double kP = 0.0;
+  private double kI = 0.0;
+  private double kD = 0.0;
+  private double toleranceMeters = 0.0;
 
   public Intake(IntakeIO io) {
     this.io = io;
-    EncoderDisconnectedAlert = new Alert("Intake encoder disconnected!", AlertType.kError);
-    UpperMotor =
-        new TalonFX(
-            Constants.motorIDConstants.UPPER_INTAKE_MOTOR_ID,
-            TunerConstants.swerveDrivetrainConstants.CANBusName);
-    ExtendMotor =
-        new TalonFX(
-            Constants.motorIDConstants.EXTEND_INTAKE_MOTOR_ID,
-            TunerConstants.swerveDrivetrainConstants.CANBusName);
+    intakePIDController = new PIDController(kP, kI, kD);
+    intakePIDController.setTolerance(toleranceMeters);
   }
 
+
+  //Minimum Value of speedValue: -512.0
+  //Maximum Value of speedValkue: 511.998046875
+
+  public void setIntakeSpeed(double speedValue) {
+    intakePIDController.setSetpoint(speedValue);
+    double currentValue = intakePIDController.calculate(io.getVelocity());
+    io.setIntakeSpeed(currentValue);
+
+  }
+
+  @Override
   public void periodic() {
     io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
+    Logger.processInputs("Elevator", inputs);
+
+    inputs.intakeEncoderDisconnectedAlert.set(!inputs.IntakeEncoderConnected);
   }
 
-  /** puts intake in active position */
-  public Command extendIntake() {
-    return this.startRun(this::extend, this::setIntakeMotorSpeeds);
-  }
-
-  public Command retractIntake() {
-    return new SequentialCommandGroup(
-        this.runOnce(this::stopIntakeMotors), this.runOnce(this::retract));
-  }
-
-  private void setIntakeMotorSpeeds() {
-    UpperMotor.set(0.8);
-    Logger.recordOutput("Intake/Set", true);
-  }
-
-  private void stopIntakeMotors() {
-    UpperMotor.stopMotor();
-    Logger.recordOutput("Intake/Stopped", true);
-  }
-
-  private void extend() {
-    // write when i figure out what we're doing
-    Logger.recordOutput("Intake/Extended", true);
-  }
-
-  private void retract() {
-
-    Logger.recordOutput("Intake/Retracted", true);
-  }
 }
+
+
