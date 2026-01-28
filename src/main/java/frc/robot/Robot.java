@@ -150,5 +150,6 @@ public class Robot extends LoggedRobot {
   public void simulationPeriodic() {
     // simulation period method in your Robot
     SimulatedArena.getInstance().simulationPeriodic();
+    robotContainer.displaySimFieldToAdvantageScope();
   }
 }
