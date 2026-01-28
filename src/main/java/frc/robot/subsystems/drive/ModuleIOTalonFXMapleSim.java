@@ -28,7 +28,8 @@ import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 public class ModuleIOTalonFXMapleSim extends ModuleIOTalonFX {
   private final SwerveModuleSimulation simulation;
 
-  public ModuleIOTalonFXMapleSim(SwerveModuleConstants constants, SwerveModuleSimulation simulation) {
+  public ModuleIOTalonFXMapleSim(
+      SwerveModuleConstants constants, SwerveModuleSimulation simulation) {
     super(constants);
 
     this.simulation = simulation;
