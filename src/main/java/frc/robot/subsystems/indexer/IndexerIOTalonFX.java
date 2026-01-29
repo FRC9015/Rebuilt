@@ -26,7 +26,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
-/** the. */
+/** IO implementation for the Indexer subsystem using a TalonFX motor controller. */
 public class IndexerIOTalonFX implements IndexerIO {
 
   private final TalonFX motor1;
