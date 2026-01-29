@@ -49,9 +49,9 @@ public class Indexer extends SubsystemBase {
 
   /**
    * Sets the indexer's RPM.
+   * Sets the indexer's voltage.
    *
-   * @param voltage The desired RPM for the indexer.
-   */
+   * @param voltage The desired voltage for the indexer.
   public void setVoltage(double voltage) {
     io.setVoltage(voltage);
     Logger.recordOutput("Indexer/setVoltage", voltage);
