@@ -7,6 +7,16 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -27,5 +37,30 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public static class CameraConstants {
+    public static AprilTagFieldLayout aprilTagLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+    public static final Transform3d starboardPose =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(13.5), Units.inchesToMeters(0), Units.inchesToMeters(7)),
+            new Rotation3d(0, -Units.degreesToRadians(15), Units.degreesToRadians(0)));
+
+    public static final Transform3d bowPose =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(13.5), Units.inchesToMeters(6.5), Units.inchesToMeters(7)),
+            new Rotation3d(0, -Units.degreesToRadians(15), Units.degreesToRadians(0)));
+
+    public static final Transform3d sternPose =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(13.5), Units.inchesToMeters(-6.5), Units.inchesToMeters(7)),
+            new Rotation3d(0, -Units.degreesToRadians(15), Units.degreesToRadians(0)));
+
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
   }
 }
