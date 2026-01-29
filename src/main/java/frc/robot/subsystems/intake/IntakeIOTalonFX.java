@@ -105,6 +105,9 @@ public class IntakeIOTalonFX implements IntakeIO {
             .withSlot(1));
   }
 
+  // Minimum Value of speedValue: -512.0
+  // Maximum Value of speedValkue: 511.998046875
+  // Unit of output: RPS
   @Override
   public void setIntakePosition(double position) {
 
@@ -120,9 +123,13 @@ public class IntakeIOTalonFX implements IntakeIO {
   @Override
   public void setIntakePosition(double position) {
     
-    final PositionVoltage pivotPositionControl = new PositionVoltage(0.0);
+    final double clampedPosition = MathUtil.clamp(
+      position,
+      Constants.intakeConstants.INTAKE_MIN_POS,
+      Constants.intakeConstants.INTAKE_MAX_POS
+    );
 
-    pivotMotor.setControl(pivotPositionControl.withPosition(position).withFeedForward(kFeedForward)); 
+    pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition).withSlot(0));
   } 
 
   public double getPosition() {
