@@ -16,10 +16,7 @@ package frc.robot.subsystems.indexer;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.littletonrobotics.junction.Logger;
 
 /** The Indexer subsystem controls the indexer mechanism. */
@@ -46,7 +43,7 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
 
     // Update alerts
-    encoderDisconnectedAlert.set(!inputs.indexerEncoderConnected);
+    encoderDisconnectedAlert.set(!inputs.IndexerEncoderConnected);
     JamAlert.set(inputs.JamDetected);
   }
 
@@ -90,10 +87,8 @@ public class Indexer extends SubsystemBase {
    *
    * @return The RPM of the indexer.
    */
-
-  public double getRPM()
-   {
-    return inputs.indexerRPM;
+  public double getRPM() {
+    return inputs.IndexerRPM;
   }
 
   /**
@@ -101,9 +96,8 @@ public class Indexer extends SubsystemBase {
    *
    * @return The applied voltage.
    */
-
   public double getAppliedVolts() {
-    return inputs.indexerAppliedVolts;
+    return inputs.IndexerAppliedVolts;
   }
 
   /**
@@ -112,7 +106,7 @@ public class Indexer extends SubsystemBase {
    * @return The current in amps.
    */
   public double getCurrentAmps() {
-    return inputs.indexerCurrentAmps;
+    return inputs.IndexerCurrentAmps;
   }
 
   /**
@@ -125,40 +119,26 @@ public class Indexer extends SubsystemBase {
     return this.startEnd(() -> setVoltage(-voltage), () -> stop());
   }
 
-  /** idk auto stuff copy pasted from reefscape end effector 
-  public Command runIndexerAuto(double voltage) {
-    return this.run(() -> setVoltage(-voltage));
-  }
-
-  
-  public Command runIndexerAutoCommand() {
-    return new SequentialCommandGroup(
-        new InstantCommand(this::autoIndexerVoltage),
-        new WaitCommand(0.25),
-        new InstantCommand(this::stop));
-  }
-
-  public Command runIndexerAutoCommandL1() {
-    return new SequentialCommandGroup(
-        new InstantCommand(this::autoIndexerVoltageL1),
-        new WaitCommand(0.4),
-        new InstantCommand(this::stop));
-  }
-  
-  private void autoIndexerVoltage() {
-    io.setRPM(-4);
-  }
-
-  private void autoIndexerVoltageL1() {
-    io.setRPM(-4);
-  }
   /**
-   * Runs the indexer in reverse at the specified RPM.
+   * idk auto stuff copy pasted from reefscape end effector public Command runIndexerAuto(double
+   * voltage) { return this.run(() -> setVoltage(-voltage)); }
+   *
+   * <p>public Command runIndexerAutoCommand() { return new SequentialCommandGroup( new
+   * InstantCommand(this::autoIndexerVoltage), new WaitCommand(0.25), new
+   * InstantCommand(this::stop)); }
+   *
+   * <p>public Command runIndexerAutoCommandL1() { return new SequentialCommandGroup( new
+   * InstantCommand(this::autoIndexerVoltageL1), new WaitCommand(0.4), new
+   * InstantCommand(this::stop)); }
+   *
+   * <p>private void autoIndexerVoltage() { io.setRPM(-4); }
+   *
+   * <p>private void autoIndexerVoltageL1() { io.setRPM(-4); } /** Runs the indexer in reverse at
+   * the specified RPM.
    *
    * @param voltage Voltage provided to the motor.
    * @return A command that runs the indexer in reverse.
    */
-
   public Command runIndexerReverse(double voltage) {
     return this.startEnd(() -> setVoltage(voltage), () -> stop());
   }
