@@ -74,7 +74,6 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.IntakeRPM = motorRPM.getValueAsDouble();
     inputs.IntakeAppliedVolts = motorVolts.getValueAsDouble();
     inputs.IntakeCurrentAmps = intakeMotor.getStatorCurrent().getValueAsDouble();
-    inputs.IntakeEncoderPosition = motorPosition.getValueAsDouble();
     inputs.IntakeEncoderConnected = false;
   }
 
