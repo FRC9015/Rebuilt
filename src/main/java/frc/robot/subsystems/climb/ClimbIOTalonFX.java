@@ -23,8 +23,8 @@ public class ClimbIOTalonFX implements ClimbIO {
   public StatusSignal<Current> motorAmps;
   public StatusSignal<AngularVelocity> motorRPM;
   public StatusSignal<Angle> motorPosition;
-  private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tunning/minPosition", 0.0);
-  private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tunning/maxPOsition", 1.0);
+  private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
+  private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private final VoltageOut voltageOut = new VoltageOut(0.0);
   private final MotionMagicVoltage positionVoltage = new MotionMagicVoltage(0.0);
 
