@@ -43,5 +43,5 @@ public interface IndexerIO {
    *
    * @param rpm The desired RPM.
    */
-  default void setRPM(double rpm) {}
+  default void setVoltage(double rpm) {}
 }

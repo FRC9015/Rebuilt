@@ -83,7 +83,7 @@ public class IndexerIOTalonFX implements IndexerIO {
   }
 
   @Override
-  public void setRPM(double voltage) {
+  public void setVoltage(double voltage) {
     motor1.setVoltage(MathUtil.clamp(voltage, -12.0, 12.0));
   }
 }
