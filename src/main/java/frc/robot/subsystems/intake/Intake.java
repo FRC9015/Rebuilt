@@ -1,15 +1,8 @@
 package frc.robot.subsystems.intake;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.generated.TunerConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -30,22 +23,19 @@ public class Intake extends SubsystemBase {
     intakePIDController.setTolerance(toleranceMeters);
   }
 
-
-  //Minimum Value of speedValue: -512.0
-  //Maximum Value of speedValkue: 511.998046875
+  // Minimum Value of speedValue: -512.0
+  // Maximum Value of speedValkue: 511.998046875
 
   public void setIntakeSpeed(double speedValue) {
     intakePIDController.setSetpoint(speedValue);
     double currentValue = intakePIDController.calculate(io.getVelocity());
     io.setIntakeSpeed(currentValue);
-
   }
 
   public void setIntakeReverseSpeed(double speedValue) {
     intakePIDController.setSetpoint(-speedValue);
     double currentValue = intakePIDController.calculate(io.getVelocity());
     io.setIntakeSpeed(-currentValue);
-
   }
 
   public Command runIntakeAtSpeed(double speed) {
@@ -55,10 +45,11 @@ public class Intake extends SubsystemBase {
 
   public Command runIntakeAtReverseSpeed(double speed) {
     Logger.recordOutput("Intake/Speed", speed);
-    return this.startEnd(() -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
+    return this.startEnd(
+        () -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
   }
 
-  public Command stopIntake () {
+  public Command stopIntake() {
     return this.run(() -> io.stop());
   }
 
@@ -67,9 +58,5 @@ public class Intake extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Elevator", inputs);
 
-    inputs.intakeEncoderDisconnectedAlert.set(!inputs.IntakeEncoderConnected);
   }
-
 }
-
-

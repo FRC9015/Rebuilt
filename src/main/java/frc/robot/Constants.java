@@ -7,6 +7,10 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -33,5 +37,24 @@ public final class Constants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+  }
+
+  public static class intakeConstants {
+  public static final Slot0Configs intakeSlotConfigs = 
+   new Slot0Configs()
+            .withKP(2)
+            .withKI(0)
+            .withKD(0.05)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+  public static final FeedbackConfigs GROUND_FEEDBACK_CONFIGS =
+        new FeedbackConfigs()
+        .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final double INTAKE_DEPLOYED_POSITION = 100.0;
+    public static final double INTAKE_STOWED_POSITION = 0.0;
   }
 }
