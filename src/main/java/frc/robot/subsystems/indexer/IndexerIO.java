@@ -15,7 +15,7 @@ package frc.robot.subsystems.indexer;
 
 import org.littletonrobotics.junction.AutoLog;
 
-/** Interface for the End Effector Input/Output operations. */
+/** Interface for the Indexer Input/Output operations. */
 public interface IndexerIO {
   /** Class representing the inputs for the End Effector. */
   @AutoLog
