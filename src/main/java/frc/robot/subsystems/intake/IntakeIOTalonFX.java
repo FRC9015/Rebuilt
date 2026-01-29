@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -31,7 +32,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tunning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tunning/maxPOsition", 1.0);
   private final VoltageOut voltageOut = new VoltageOut(0.0);
-  private final MotionMagicVoltage positionVoltage = new MotionMagicVoltage(0.0);
+  private final MotionMagicVoltage intakeMagicVoltage = new MotionMagicVoltage(0.0);
 
   private final double kFeedForward = 0.5; // Feedforward value for position control (in volts)
 
@@ -42,8 +43,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     // Configure motor
     TalonFXConfiguration motorConfig = 
       new TalonFXConfiguration()
-        .withSlot0(Constants.intakeConstants.intakeSlotConfigs)
-        .withFeedback(Constants.intakeConstants.GROUND_FEEDBACK_CONFIGS);
+        .withSlot0(Constants.intakeConstants.intakeSlotPositionConfigs)
+        .withSlot1(Constants.intakeConstants.intakeSlotVelocityConfigs)
+        .withFeedback(Constants.intakeConstants.GROUND_FEEDBACK_CONFIGS)
+        .withMotionMagic(Constants.intakeConstants.GROUND_MAGIC_CONFIGS);
 
   
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -74,7 +77,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.IntakeAppliedVolts = motorVolts.getValueAsDouble();
     inputs.IntakeEncoderPosition = pivotMotor.getPosition().getValueAsDouble();
     inputs.IntakeCurrentSpeed =
-     intakeMotor.getVelocity().getValueAsDouble();
+     intakeMotor.getVelocity();
     inputs.IntakeRPM = motorRPM.getValueAsDouble();
     inputs.IntakeAppliedVolts = motorVolts.getValueAsDouble();
     inputs.IntakeCurrentAmps = intakeMotor.getStatorCurrent().getValueAsDouble();
@@ -91,19 +94,28 @@ public class IntakeIOTalonFX implements IntakeIO {
   @Override
   public void setBrakeMode(boolean enable) {
     intakeMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    pivotMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
+  // Minimum Value of speedValue: -512.0
+  // Maximum Value of speedValkue: 511.998046875
+  // Unit of output: RPS
   @Override
-  public void setIntakeSpeed(double voltage) {
-    intakeMotor.setVoltage(MathUtil.clamp(voltage, -12.0, 12.0));
+  public void setIntakeSpeed(double speed) {
+    final VelocityVoltage intakeVelocityVoltage = new VelocityVoltage(0.0);
+    intakeMotor.setControl(intakeVelocityVoltage.withVelocity(MathUtil.clamp(speed, Constants.intakeConstants.INTAKE_MIN_SPEED, Constants.intakeConstants.INTAKE_MAX_SPEED)).withSlot(1));
   }
 
   @Override
   public void setIntakePosition(double position) {
     
-    final PositionVoltage pivotPositionControl = new PositionVoltage(0.0);
+    final double clampedPosition = MathUtil.clamp(
+      position,
+      Constants.intakeConstants.INTAKE_MIN_POS,
+      Constants.intakeConstants.INTAKE_MAX_POS
+    );
 
-    pivotMotor.setControl(pivotPositionControl.withPosition(position).withFeedForward(kFeedForward)); 
+    pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition).withSlot(0));
   } 
 
   public double getPosition() {

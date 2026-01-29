@@ -8,7 +8,9 @@
 package frc.robot;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 import edu.wpi.first.wpilibj.RobotBase;
@@ -40,7 +42,7 @@ public final class Constants {
   }
 
   public static class intakeConstants {
-  public static final Slot0Configs intakeSlotConfigs = 
+  public static final Slot0Configs intakeSlotPositionConfigs = 
    new Slot0Configs()
             .withKP(2)
             .withKI(0)
@@ -50,11 +52,29 @@ public final class Constants {
             .withKS(0)
             .withKV(0);
 
+public static final Slot1Configs intakeSlotVelocityConfigs = 
+   new Slot1Configs()
+            .withKP(2)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+  public static final MotionMagicConfigs GROUND_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
   public static final FeedbackConfigs GROUND_FEEDBACK_CONFIGS =
         new FeedbackConfigs()
         .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
+    public static final double INTAKE_MAX_POS = 300.0;
+    public static final double INTAKE_MIN_POS = 0.0;
+    public static final double INTAKE_MAX_SPEED = 512.0;
+    public static final double INTAKE_MIN_SPEED = -511.0;
+
     public static final double INTAKE_DEPLOYED_POSITION = 100.0;
-    public static final double INTAKE_STOWED_POSITION = 0.0;
+    public static final double INTAKE_STOWED_POSITION = 10.0;
   }
 }
