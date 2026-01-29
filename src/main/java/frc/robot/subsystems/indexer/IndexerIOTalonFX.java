@@ -63,13 +63,14 @@ public class IndexerIOTalonFX implements IndexerIO {
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     // Refresh signals
-    StatusCode encoderStatus = BaseStatusSignal.refreshAll(rpmSignal, appliedVoltsSignal, currentSignal);
+    StatusCode encoderStatus =
+        BaseStatusSignal.refreshAll(rpmSignal, appliedVoltsSignal, currentSignal);
 
     // Update inputs
-    inputs.IndexerEncoderConnected = encoderConnectedDebounce.calculate(encoderStatus.isOK());
-    inputs.IndexerRPM = rpmSignal.getValueAsDouble();
-    inputs.IndexerAppliedVolts = appliedVoltsSignal.getValueAsDouble();
-    inputs.IndexerCurrentAmps = currentSignal.getValueAsDouble();
+    inputs.indexerEncoderConnected = encoderConnectedDebounce.calculate(encoderStatus.isOK());
+    inputs.indexerRPM = rpmSignal.getValueAsDouble();
+    inputs.indexerAppliedVolts = appliedVoltsSignal.getValueAsDouble();
+    inputs.indexerCurrentAmps = currentSignal.getValueAsDouble();
   }
 
   @Override

@@ -39,9 +39,9 @@ public interface IndexerIO {
   default void setBrakeMode(boolean enable) {}
 
   /**
-   * Sets the RPM of the indexer motor.
+   * Sets the voltage of the indexer motor.
    *
-   * @param rpm The desired RPM.
+   * @param voltage The desired voltage.
    */
-  default void setVoltage(double rpm) {}
+  default void setVoltage(double voltage) {}
 }
