@@ -63,6 +63,27 @@ public class Intake extends SubsystemBase {
     return this.run(() -> roller.stop());
   }
 
+  public void setIntakeReverseSpeed(double speedValue) {
+    intakePIDController.setSetpoint(-speedValue);
+    double currentValue = intakePIDController.calculate(io.getVelocity());
+    io.setIntakeSpeed(-currentValue);
+
+  }
+
+  public Command runIntakeAtSpeed(double speed) {
+    Logger.recordOutput("Intake/Speed", speed);
+    return this.startEnd(() -> this.setIntakeSpeed(speed), () -> this.setIntakeSpeed(idleSpeed));
+  }
+
+  public Command runIntakeAtReverseSpeed(double speed) {
+    Logger.recordOutput("Intake/Speed", speed);
+    return this.startEnd(() -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
+  }
+
+  public Command stopIntake () {
+    return this.run(() -> io.stop());
+  }
+
   @Override
   public void periodic() {
     roller.updateInputs(rollerInputs);
