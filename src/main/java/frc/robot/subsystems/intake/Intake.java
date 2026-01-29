@@ -67,7 +67,6 @@ public class Intake extends SubsystemBase {
     intakePIDController.setSetpoint(-speedValue);
     double currentValue = intakePIDController.calculate(io.getVelocity());
     io.setIntakeSpeed(-currentValue);
-
   }
 
   public Command runIntakeAtSpeed(double speed) {
@@ -77,10 +76,11 @@ public class Intake extends SubsystemBase {
 
   public Command runIntakeAtReverseSpeed(double speed) {
     Logger.recordOutput("Intake/Speed", speed);
-    return this.startEnd(() -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
+    return this.startEnd(
+        () -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
   }
 
-  public Command stopIntake () {
+  public Command stopIntake() {
     return this.run(() -> io.stop());
   }
 
@@ -93,5 +93,3 @@ public class Intake extends SubsystemBase {
     Logger.processInputs("Intake/Pivot", pivotInputs);
   }
 }
-
-

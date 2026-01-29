@@ -2,6 +2,7 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -115,6 +116,14 @@ public class IntakeIOTalonFX implements IntakeIO {
 
     pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }
+
+  @Override
+  public void setIntakePosition(double position) {
+    
+    final PositionVoltage pivotPositionControl = new PositionVoltage(0.0);
+
+    pivotMotor.setControl(pivotPositionControl.withPosition(position).withFeedForward(kFeedForward)); 
+  } 
 
   public double getPosition() {
     return intakeMotor.getPosition().getValueAsDouble();
