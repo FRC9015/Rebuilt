@@ -22,6 +22,7 @@ public class Intake extends SubsystemBase {
   private double kI = 0.0;
   private double kD = 0.0;
   private double toleranceMeters = 0.0;
+  private double idleSpeed = 0.0;
 
   public Intake(IntakeIO io) {
     this.io = io;
@@ -38,6 +39,27 @@ public class Intake extends SubsystemBase {
     double currentValue = intakePIDController.calculate(io.getVelocity());
     io.setIntakeSpeed(currentValue);
 
+  }
+
+  public void setIntakeReverseSpeed(double speedValue) {
+    intakePIDController.setSetpoint(-speedValue);
+    double currentValue = intakePIDController.calculate(io.getVelocity());
+    io.setIntakeSpeed(-currentValue);
+
+  }
+
+  public Command runIntakeAtSpeed(double speed) {
+    Logger.recordOutput("Intake/Speed", speed);
+    return this.startEnd(() -> this.setIntakeSpeed(speed), () -> this.setIntakeSpeed(idleSpeed));
+  }
+
+  public Command runIntakeAtReverseSpeed(double speed) {
+    Logger.recordOutput("Intake/Speed", speed);
+    return this.startEnd(() -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
+  }
+
+  public Command stopIntake () {
+    return this.run(() -> io.stop());
   }
 
   @Override
