@@ -24,7 +24,7 @@ public class Indexer extends SubsystemBase {
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
   private final Alert encoderDisconnectedAlert;
-  private final Alert JamAlert;
+  private final Alert jamAlert;
 
   /**
    * Constructs an Indexer subsystem.
