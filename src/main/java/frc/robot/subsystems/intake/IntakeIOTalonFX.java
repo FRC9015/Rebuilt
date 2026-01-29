@@ -102,8 +102,8 @@ public class IntakeIOTalonFX implements IntakeIO {
   // Unit of output: RPS
   @Override
   public void setIntakeSpeed(double speed) {
-    final VelocityVoltage intakeVelocityVoltage = new VelocityVoltage(0.0);
-    intakeMotor.setControl(intakeVelocityVoltage.withVelocity(MathUtil.clamp(speed, Constants.intakeConstants.INTAKE_MIN_SPEED, Constants.intakeConstants.INTAKE_MAX_SPEED)).withSlot(1));
+    final VelocityVoltage intakeVelocityVoltage = new VelocityVoltage(0.0).withSlot(1);
+    intakeMotor.setControl(intakeVelocityVoltage.withVelocity(MathUtil.clamp(speed, Constants.intakeConstants.INTAKE_MIN_SPEED, Constants.intakeConstants.INTAKE_MAX_SPEED)));
   }
 
   @Override
@@ -115,7 +115,7 @@ public class IntakeIOTalonFX implements IntakeIO {
       Constants.intakeConstants.INTAKE_MAX_POS
     );
 
-    pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition).withSlot(0));
+    pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition));
   } 
 
   public double getPosition() {
