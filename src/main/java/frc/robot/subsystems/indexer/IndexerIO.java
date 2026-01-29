@@ -22,11 +22,11 @@ public interface IndexerIO {
   public static class IndexerIOInputs {
 
     // Fields representing the end effector state and inputs
-    public double IndexerAppliedVolts = 0.0;
-    public double IndexerCurrentAmps = 0.0;
-    public double IndexerRPM = 0.0;
-    public boolean IndexerEncoderConnected = false;
-    public boolean JamDetected = false;
+    public double indexerAppliedVolts = 0.0;
+    public double indexerCurrentAmps = 0.0;
+    public double indexerRPM = 0.0;
+    public boolean indexerEncoderConnected = false;
+    public boolean jamDetected = false;
   }
 
   /** Updates the set of loggable inputs. */
