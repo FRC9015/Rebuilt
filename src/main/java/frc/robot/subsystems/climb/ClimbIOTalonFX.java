@@ -14,6 +14,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ClimbIOTalonFX implements ClimbIO {
@@ -33,7 +34,11 @@ public class ClimbIOTalonFX implements ClimbIO {
     climbMotor1 = new TalonFX(climbID1);
 
     // Configure motor
-    TalonFXConfiguration motorConfig = new TalonFXConfiguration();
+    TalonFXConfiguration motorConfig =
+        new TalonFXConfiguration()
+            .withSlot0(Constants.climbConstants.climbSlot0Configs)
+            .withFeedback(Constants.climbConstants.CLIMB_FEEDBACK_CONFIGS)
+            .withMotionMagic(Constants.climbConstants.CLIMB_MAGIC_CONFIGS);
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -77,7 +82,15 @@ public class ClimbIOTalonFX implements ClimbIO {
 
   @Override
   public void setClimbPosition(double position) {
-    climbMotor1.setControl(positionVoltage.withPosition(position));
+
+    final double clampedPosition =
+        MathUtil.clamp(
+            position,
+            Constants.climbConstants.CLIMB_MIN_POS,
+            Constants.climbConstants.CLIMB_MAX_POS);
+
+    climbMotor1.setControl(positionVoltage.withPosition(clampedPosition));
+
   }
 
   public double getPosition() {

@@ -68,4 +68,25 @@ public final class Constants {
     public static final double INTAKE_DEPLOYED_POSITION = 100.0;
     public static final double INTAKE_STOWED_POSITION = 10.0;
   }
+
+  public static class climbConstants {
+    public static final Slot0Configs climbSlot0Configs =
+        new Slot0Configs()
+            .withKP(0.1)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final FeedbackConfigs CLIMB_FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final MotionMagicConfigs CLIMB_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final double CLIMB_MAX_POS = 300.0;
+    public static final double CLIMB_MIN_POS = 0.0;
+  }
 }
