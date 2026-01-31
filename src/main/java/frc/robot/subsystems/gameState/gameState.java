@@ -64,6 +64,7 @@ public class gameState {
  * finds the games current state
  * @return the game's state, A for auto, T for transition, B for blue, R for red, and E for endgame.
  */
+    @AutoLogOutput
     public static String getGameState (){
         double time = DriverStation.getMatchTime();
         if(time > 130){
@@ -105,8 +106,12 @@ public class gameState {
         }
 
     }
-
-    public static boolean getCanShoot(){
+    /**
+     * checks if the robot can score
+     * @return true if tower enabled, false if tower disabled
+     */
+    @AutoLogOutput
+    public static boolean getCanScore(){
         String state = getGameState();
         Optional<Alliance> alli = DriverStation.getAlliance();
         String alliance = alli.toString();
