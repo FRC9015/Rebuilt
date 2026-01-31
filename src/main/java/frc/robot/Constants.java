@@ -29,6 +29,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -306,4 +308,27 @@ public final class Constants {
     public static final double CLIMB_MAX_POS = 300.0;
     public static final double CLIMB_MIN_POS = 0.0;
   }
+
+  public static class turretConstants {
+    public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
+    public static final Slot0Configs SLOT0_CONFIGS =
+        new Slot0Configs()
+            .withKP(14)
+            .withKI(0)
+            .withKD(0.6)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+    public static final FeedbackConfigs FEEDBACK_CONFIGS =
+        new FeedbackConfigs()
+            .withFeedbackRemoteSensorID(motorIDConstants.TURRET_MOTOR_ID)
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
+
+    //placeholders
+    public static final double maxRotation = 0.0;
+    public static final double minRoation = 0.0;
+  }
+}
 }
