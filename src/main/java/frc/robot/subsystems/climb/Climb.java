@@ -23,12 +23,11 @@ public class Climb extends SubsystemBase {
   }
 
   public void setPresetPosition(ClimbIOInputs.ClimbPositions position) {
-    pidController.setSetpoint(position.getClimbEncoderPositions());
-    double output = pidController.calculate(inputs.climberPosition);
-    io.setClimbRPM(output);
+  
+    io.setClimbPosition(position.getClimbEncoderPositions());
+    io.updateInputs(inputs);
 
     Logger.recordOutput("Climber/Setpoint", position.getClimbEncoderPositions());
-    Logger.recordOutput("Climber/Output", output);
     Logger.recordOutput("Climber/PositionInput", inputs.climberPosition);
   }
 }
