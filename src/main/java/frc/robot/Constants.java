@@ -12,6 +12,8 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -38,6 +40,7 @@ public final class Constants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+    public static final int TURRET_MOTOR_ID = 0;
   }
 
   public static class intakeConstants {
@@ -67,5 +70,27 @@ public final class Constants {
 
     public static final double INTAKE_DEPLOYED_POSITION = 100.0;
     public static final double INTAKE_STOWED_POSITION = 10.0;
+  }
+
+  public static class turretConstants {
+    public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
+    public static final Slot0Configs SLOT0_CONFIGS =
+        new Slot0Configs()
+            .withKP(14)
+            .withKI(0)
+            .withKD(0.6)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+    public static final FeedbackConfigs FEEDBACK_CONFIGS =
+        new FeedbackConfigs()
+            .withFeedbackRemoteSensorID(motorIDConstants.TURRET_MOTOR_ID)
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
+
+    //placeholders
+    public static final double maxRotation = 0.0;
+    public static final double minRoation = 0.0;
   }
 }
