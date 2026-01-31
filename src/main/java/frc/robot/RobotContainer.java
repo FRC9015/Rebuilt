@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
@@ -45,11 +47,13 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Shooter shooter;
   private final Intake intake;
   private final Indexer indexer;
 
   // Controller
-  private final CommandXboxController driverController = new CommandXboxController(0);
+  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driverController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -76,7 +80,13 @@ public class RobotContainer {
                 new IntakeIOSparkFlex(
                     Constants.IntakeConstants.INTAKE_MOTOR_ID,
                     Constants.IntakeConstants.INTAKE2_MOTOR_ID));
-        indexer = new Indexer(new IndexerIOSparkFlex(13));
+        indexer = new Indexer(new IndexerIOSparkFlex(13));        
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.shooterConstants.FlywheelLeftID,
+                    Constants.shooterConstants.FlywheelRightID,
+                    Constants.shooterConstants.HoodID));
         break;
 
       case SIM:
@@ -95,6 +105,12 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
         intake = new Intake(new IntakeIOSim());
         indexer = new Indexer(new IndexerIOSparkFlex(13));
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.shooterConstants.FlywheelLeftID,
+                    Constants.shooterConstants.FlywheelRightID,
+                    Constants.shooterConstants.HoodID));
         break;
 
       case REPLAY:
@@ -108,6 +124,12 @@ public class RobotContainer {
                 new ModuleIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.shooterConstants.FlywheelLeftID,
+                    Constants.shooterConstants.FlywheelRightID,
+                    Constants.shooterConstants.HoodID));        
         break;
 
       default:
