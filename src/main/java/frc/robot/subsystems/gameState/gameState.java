@@ -47,6 +47,8 @@ import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.PhoenixUtil;
+
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
@@ -102,6 +104,20 @@ public class gameState {
             return "A";
         }
 
+    }
+
+    public static boolean getCanShoot(){
+        String state = getGameState();
+        Optional<Alliance> alli = DriverStation.getAlliance();
+        String alliance = alli.toString();
+        if (state == "A"|| state == "T"|| state == "E") {
+            return true;
+        }
+        if (state.charAt(0) == alliance.charAt(0)) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
 }
