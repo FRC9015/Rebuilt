@@ -11,6 +11,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
+/*This file has all the inputs that are saved in from the cameras.
+ * Each input is updated in the vision.java file
+ * it also has the default commands that are defined in VisionIOPhotonVision
+ */
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Pose3d;
