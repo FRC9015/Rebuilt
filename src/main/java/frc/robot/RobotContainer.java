@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
@@ -40,14 +42,12 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Shooter shooter;
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private final CommandXboxController driverController = new CommandXboxController(1);
-
-  private double topShooterPowerScale = 0.5;
-  private double bottomShooterPowerScale = 0.5;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -66,7 +66,12 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.shooterConstants.FlywheelLeftID,
+                    Constants.shooterConstants.FlywheelRightID,
+                    Constants.shooterConstants.HoodID));
         break;
 
       case SIM:
@@ -82,6 +87,12 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.shooterConstants.FlywheelLeftID,
+                    Constants.shooterConstants.FlywheelRightID,
+                    Constants.shooterConstants.HoodID));
         break;
 
       default:
@@ -93,6 +104,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.shooterConstants.FlywheelLeftID,
+                    Constants.shooterConstants.FlywheelRightID,
+                    Constants.shooterConstants.HoodID));        
         break;
     }
 
@@ -158,20 +175,16 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.povDown().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.1));
-    driverController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
-    driverController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
-    driverController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
-    driverController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
-    driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
-    driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale += 0.01));
-    driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -= 0.01));
+    // driverController.povDown().onTrue(Commands.
+    // driverController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
+    // driverController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
+    // driverController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
+    // driverController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
+    // driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
+    // driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale += 0.01));
+    // driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -= 0.01));
   }
 
-  public Command checkShooterUpdate() {
-
-    return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
-  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

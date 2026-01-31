@@ -27,12 +27,12 @@ public class Shooter extends SubsystemBase {
   // Maximum Value of speedValkue: 511.998046875
 
   public void setShooterSpeed(double speedValue) {
-    io.setShooterSpeed(speedValue);
+    io.setFlyWheelSpeed(speedValue);
   }
 
   public void setShooterReverseSpeed(double speedValue) {
 
-    io.setShooterSpeed(-speedValue);
+    io.setFlyWheelSpeed(-speedValue);
   }
 
   public Command runShooterAtSpeed(double speed) {
@@ -46,8 +46,12 @@ public class Shooter extends SubsystemBase {
         () -> this.setShooterReverseSpeed(speed), () -> this.setShooterSpeed(idleSpeed));
   }
 
-  public Command stopShooter() {
-    return this.run(() -> io.stop());
+  public Command stopFlywheels() {
+    return this.run(() -> io.stopFlywheels());
+  }
+
+  public Command stopHood() {
+    return this.run(() -> io.stopHood());
   }
 
   @Override

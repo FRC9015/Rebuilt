@@ -68,4 +68,36 @@ public final class Constants {
     public static final double INTAKE_DEPLOYED_POSITION = 100.0;
     public static final double INTAKE_STOWED_POSITION = 10.0;
   }
+
+  public static class shooterConstants {
+    public static final int FlywheelLeftID = 5;
+    public static final int FlywheelRightID = 6;
+    public static final int HoodID = 7;
+    public static final Slot0Configs flyWheelSlotVelocityConfigs =
+        new Slot0Configs().withKP(2).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+
+    public static final Slot1Configs hoodSlotPositionConfigs =
+        new Slot1Configs()
+            .withKP(2)
+            .withKI(0)
+            .withKD(0.05)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final MotionMagicConfigs HOOD_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final FeedbackConfigs HOOD_FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final double HOOD_MAX_POS = 300.0;
+    public static final double HOOD_MIN_POS = 0.0;
+    public static final double HOOD_MAX_SPEED = 512.0;
+    public static final double HOOD_MIN_SPEED = -511.0;
+
+    public static final double HOOD_DEPLOYED_POSITION = 100.0;
+    public static final double HOOD_STOWED_POSITION = 10.0;
+  }
 }

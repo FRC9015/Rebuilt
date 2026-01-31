@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -20,82 +20,106 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class ShooterIOTalonFX implements ShooterIO {
 
-  public final TalonFX intakeMotor;
-  public final TalonFX pivotMotor;
+  public final TalonFX flywheelMotorLeft;
+  public final TalonFX flywheelMotorRight;
+  public final TalonFX hoodMotor;
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;
   public StatusSignal<AngularVelocity> motorRPM;
   public StatusSignal<Angle> motorPosition;
-  private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tunning/minPosition", 0.0);
-  private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tunning/maxPOsition", 1.0);
+  private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
+  private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private final VoltageOut voltageOut = new VoltageOut(0.0);
   private final MotionMagicVoltage intakeMagicVoltage = new MotionMagicVoltage(0.0);
 
-  private final double kFeedForward = 0.5; // Feedforward value for position control (in volts)
-
-  public ShooterIOTalonFX(int intakeID1, int pivotID1) {
-    intakeMotor = new TalonFX(intakeID1);
-    pivotMotor = new TalonFX(pivotID1);
+  public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int hoodID) {
+    flywheelMotorLeft = new TalonFX(flywheelID1);
+    flywheelMotorRight = new TalonFX(flywheelID2);
+    hoodMotor = new TalonFX(hoodID);
 
     // Configure motor
-    TalonFXConfiguration motorConfig =
+    TalonFXConfiguration flyWheelConfigLeft =
         new TalonFXConfiguration()
-            .withSlot0(Constants.intakeConstants.intakeSlotPositionConfigs)
-            .withSlot1(Constants.intakeConstants.intakeSlotVelocityConfigs)
-            .withFeedback(Constants.intakeConstants.GROUND_FEEDBACK_CONFIGS)
-            .withMotionMagic(Constants.intakeConstants.GROUND_MAGIC_CONFIGS);
+            .withSlot0(Constants.shooterConstants.flyWheelSlotVelocityConfigs);
 
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    TalonFXConfiguration hoodConfig =
+        new TalonFXConfiguration()
+            .withSlot1(Constants.shooterConstants.hoodSlotPositionConfigs)
+            .withFeedback(Constants.shooterConstants.HOOD_FEEDBACK_CONFIGS)
+            .withMotionMagic(Constants.shooterConstants.HOOD_MAGIC_CONFIGS);
 
-    intakeMotor.getConfigurator().apply(motorConfig);
-    pivotMotor.getConfigurator().apply(motorConfig);
+    flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition.get();
+    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    motorVolts = intakeMotor.getMotorVoltage();
-    motorAmps = intakeMotor.getStatorCurrent();
-    motorRPM = intakeMotor.getVelocity();
-    motorPosition = intakeMotor.getPosition();
+    TalonFXConfiguration flyWheelConfigRight = flyWheelConfigLeft;
+    flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM);
+    flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
+    flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
+    hoodMotor.getConfigurator().apply(hoodConfig);
 
-    ParentDevice.optimizeBusUtilizationForAll(intakeMotor, pivotMotor);
+    motorVolts = flywheelMotorLeft.getMotorVoltage();
+    motorAmps = flywheelMotorLeft.getStatorCurrent();
+    motorRPM = flywheelMotorLeft.getVelocity();
+    motorPosition = hoodMotor.getPosition();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM, motorPosition);
+
+    ParentDevice.optimizeBusUtilizationForAll(flywheelMotorLeft, flywheelMotorRight, hoodMotor);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-
     BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM, motorPosition);
-    inputs.IntakeAppliedVolts = motorVolts.getValueAsDouble();
-    inputs.IntakeEncoderPosition = pivotMotor.getPosition().getValueAsDouble();
-    inputs.IntakeCurrentSpeed = intakeMotor.getVelocity().getValueAsDouble();
-    inputs.IntakeRPM = motorRPM.getValueAsDouble();
-    inputs.IntakeAppliedVolts = motorVolts.getValueAsDouble();
-    inputs.IntakeCurrentAmps = intakeMotor.getStatorCurrent().getValueAsDouble();
-    inputs.IntakeEncoderConnected = false;
+    inputs.flywheelAppliedVolts = motorVolts.getValueAsDouble();
+    inputs.hoodEncoderPosition = hoodMotor.getPosition().getValueAsDouble();
+    inputs.flywheelCurrentSpeed = flywheelMotorLeft.getVelocity().getValueAsDouble();
+    inputs.flywheelRPM = motorRPM.getValueAsDouble();
+    inputs.flywheelAppliedVolts = motorVolts.getValueAsDouble();
+    inputs.flywheelCurrentAmps = flywheelMotorLeft.getStatorCurrent().getValueAsDouble();
+    inputs.hoodEncoderConnected = false;
   }
 
   @Override
-  public void stop() {
-    intakeMotor.stopMotor();
+  public void stopFlywheels() {
+    flywheelMotorLeft.stopMotor();
+    flywheelMotorRight.stopMotor();
+  }
+
+  @Override
+  public void stopHood() {
+    hoodMotor.stopMotor();
+  }
+
+  @Override
+  public void stopShooter() {
+    stopFlywheels();
+    stopHood();
   }
 
   @Override
   public void setBrakeMode(boolean enable) {
-    intakeMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-    pivotMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    flywheelMotorLeft.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    flywheelMotorRight.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    hoodMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
   // Minimum Value of speedValue: -512.0
   // Maximum Value of speedValkue: 511.998046875
   // Unit of output: RPS
   @Override
-  public void setIntakeSpeed(double speed) {
-    final VelocityVoltage intakeVelocityVoltage = new VelocityVoltage(0.0);
-    intakeMotor.setControl(
-        intakeVelocityVoltage
+  public void setFlyWheelSpeed(double speed) {
+    final VelocityVoltage flyWheelVelocityVoltage = new VelocityVoltage(0.0);
+    flywheelMotorLeft.setControl(
+        flyWheelVelocityVoltage
             .withVelocity(
                 MathUtil.clamp(
                     speed,
@@ -105,7 +129,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   }
 
   @Override
-  public void setIntakePosition(double position) {
+  public void setHoodPosition(double position) {
 
     final double clampedPosition =
         MathUtil.clamp(
@@ -113,15 +137,19 @@ public class ShooterIOTalonFX implements ShooterIO {
             Constants.intakeConstants.INTAKE_MIN_POS,
             Constants.intakeConstants.INTAKE_MAX_POS);
 
-    pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition).withSlot(0));
+    hoodMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }
 
   public double getPosition() {
-    return intakeMotor.getPosition().getValueAsDouble();
+    return hoodMotor.getPosition().getValueAsDouble();
   }
 
   @Override
-  public double getVelocity() {
-    return intakeMotor.getVelocity().getValueAsDouble();
+  public double getFlyWheelSpeed() {
+    double averageVelocity =
+        (flywheelMotorLeft.getVelocity().getValueAsDouble()
+                + flywheelMotorRight.getVelocity().getValueAsDouble())
+            / 2;
+    return averageVelocity;
   }
 }
