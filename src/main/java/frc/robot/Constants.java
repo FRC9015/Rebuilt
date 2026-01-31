@@ -40,14 +40,14 @@ public final class Constants {
   }
 
   public static class CameraConstants {
-    public static AprilTagFieldLayout aprilTagLayout =
-        AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+    public static final AprilTagFieldLayout aprilTagLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     public static final Transform3d placeHolderCamera =
         new Transform3d(
             new Translation3d(
                 Units.inchesToMeters(13.5), Units.inchesToMeters(0), Units.inchesToMeters(7)),
             new Rotation3d(0, -Units.degreesToRadians(15), Units.degreesToRadians(0)));
-            
+
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
   }
