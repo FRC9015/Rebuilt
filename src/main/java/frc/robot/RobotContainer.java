@@ -21,6 +21,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -71,7 +72,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.shooterConstants.FlywheelLeftID,
                     Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID));
+                    Constants.shooterConstants.HoodID,
+                    Constants.shooterConstants.HoodEncoderID));
         break;
 
       case SIM:
@@ -89,10 +91,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
         shooter =
             new Shooter(
-                new ShooterIOTalonFX(
-                    Constants.shooterConstants.FlywheelLeftID,
-                    Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID));
+                new ShooterIOSim());
         break;
 
       default:
@@ -109,7 +108,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.shooterConstants.FlywheelLeftID,
                     Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID));        
+                    Constants.shooterConstants.HoodID,
+                    Constants.shooterConstants.HoodEncoderID));        
         break;
     }
 
@@ -174,15 +174,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-
-    // driverController.povDown().onTrue(Commands.
-    // driverController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
-    // driverController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
-    // driverController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
-    // driverController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
-    // driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
-    // driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale += 0.01));
-    // driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -= 0.01));
   }
 
 
