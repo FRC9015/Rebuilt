@@ -20,6 +20,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -86,7 +87,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.shooterConstants.FlywheelLeftID,
                     Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID));
+                    Constants.shooterConstants.HoodID,
+                    Constants.shooterConstants.HoodEncoderID));
         break;
 
       case SIM:
@@ -107,10 +109,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSparkFlex(13));
         shooter =
             new Shooter(
-                new ShooterIOTalonFX(
-                    Constants.shooterConstants.FlywheelLeftID,
-                    Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID));
+                new ShooterIOSim());
         break;
 
       case REPLAY:
@@ -129,7 +128,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.shooterConstants.FlywheelLeftID,
                     Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID));        
+                    Constants.shooterConstants.HoodID,
+                    Constants.shooterConstants.HoodEncoderID));        
         break;
 
       default:
@@ -173,7 +173,33 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
+            
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
+ 
+
+    // Lock to 0° when A button is held
+    controller
+        .a()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> Rotation2d.kZero));
+
+    // Switch to X pattern when X button is pressed
+    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+
+    // Reset gyro to 0° when B button is pressed
+    controller
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        drive.setPose(
+                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                    drive)
+                .ignoringDisable(true));
   }
 
   /**

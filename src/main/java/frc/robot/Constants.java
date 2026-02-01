@@ -78,15 +78,24 @@ public final class Constants {
     public static final int FlywheelLeftID = 5;
     public static final int FlywheelRightID = 6;
     public static final int HoodID = 7;
+    public static final int HoodEncoderID = 8;
+
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
-        new Slot0Configs().withKP(2).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+        new Slot0Configs()
+            .withKP(0.01)
+            .withKI(0)
+            .withKD(0.0025)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
 
     public static final Slot1Configs hoodSlotPositionConfigs =
         new Slot1Configs()
-            .withKP(2)
+            .withKP(0.02)
             .withKI(0)
-            .withKD(0.05)
-            .withKG(0.01)
+            .withKD(0.005)
+            .withKG(0.001)
             .withKA(0)
             .withKS(0)
             .withKV(0);
@@ -97,12 +106,15 @@ public final class Constants {
     public static final FeedbackConfigs HOOD_FEEDBACK_CONFIGS =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
-    public static final double HOOD_MAX_POS = 300.0;
-    public static final double HOOD_MIN_POS = 0.0;
-    public static final double HOOD_MAX_SPEED = 512.0;
-    public static final double HOOD_MIN_SPEED = -511.0;
+    //TODO tune these values
 
-    public static final double HOOD_DEPLOYED_POSITION = 100.0;
-    public static final double HOOD_STOWED_POSITION = 10.0;
+    public static final double SHOOTER_MAX_SPEED = 100;
+    public static final double SHOOTER_MIN_SPEED = 0.0;
+    public static final double FLYWHEEL_ACCELERATION = 100;
+    public static final double FEEDFORWARD_VOLTAGE = 12.0;
+    public static final double HOOD_MAX_POS = 0.0;
+    public static final double HOOD_MIN_POS = 0.0;
+    public static final double HOOD_DEPLOYED_POSITION = 0.0;
+    public static final double HOOD_STOWED_POSITION = 0.0;
   }
 }
