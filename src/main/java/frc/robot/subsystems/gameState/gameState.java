@@ -1,4 +1,4 @@
-package frc.robot.subsystems.gameState;
+package frc.robot.subsystems.gamestate;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -55,74 +55,73 @@ import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class gameState {
+public class GameState extends SubsystemBase{
     /** gamestate: will be A for auto, T for transition, B for blue, R for red, and E for endgame */
-    String state;
-    String gameData = DriverStation.getGameSpecificMessage();
+    public StateEnum state;
+    public boolean ishubactive;
+
+    @Override
+    public void periodic(){
+        this.state = getGameState();
+        this.ishubactive = getCanScore();
+    }
 
 /**
  * finds the games current state
  * @return the game's state, A for auto, T for transition, B for blue, R for red, and E for endgame.
  */
     @AutoLogOutput
-    public static String getGameState (){
+    private StateEnum getGameState (){
         double time = DriverStation.getMatchTime();
+        if (DriverStation.isAutonomous()){
+            return StateEnum.Auto;
+        }
         if(time > 130){
-        return"T";
+        return StateEnum.Transition;
         } else if (time > 30) {
         String gameData = DriverStation.getGameSpecificMessage();
-        switch (gameData) {
-            case "B":
+        if (gameData == "B") {
             if (time > 105){
-                return "R";
+                return StateEnum.Red_team;
             } else if (time>80) {
-                return "B";
+                return StateEnum.Blue_team;
             } else if (time > 55){
-                return "R";
+                return StateEnum.Red_team;
             } else if(time > 30){
-                return "B";
+                return StateEnum.Blue_team;
             }
-                break;
-            case "R":
+        }
+            if(gameData == "R"){
             if (time > 105){
-                return "B";
+                return StateEnum.Blue_team;
             } else if (time>80) {
-                return "R";
+                return StateEnum.Red_team;
             } else if (time > 55){
-                return "B";
+                return StateEnum.Blue_team;
             } else if(time > 30){
-                return "R";
-            }
-                break;
-            default:
-            // corrupt data 
-                break;
+                return StateEnum.Red_team;
         }
         }
-        if(DriverStation.isAutonomous()){
-            return "E";
-        } else {
-            return "A";
-        }
+    }
+        return StateEnum.Endgame;
 
     }
     /**
      * checks if the robot can score
      * @return true if tower enabled, false if tower disabled
      */
-    @AutoLogOutput
-    public static boolean getCanScore(){
-        String state = getGameState();
+    private boolean getCanScore(){
+        StateEnum statevar = getGameState();
         Optional<Alliance> alli = DriverStation.getAlliance();
         String alliance = alli.toString();
-        if (state == "A"|| state == "T"|| state == "E") {
+        if (statevar == StateEnum.Auto|| statevar == StateEnum.Transition|| statevar == StateEnum.Endgame) {
             return true;
         }
-        if (state.charAt(0) == alliance.charAt(0)) {
+        if (statevar.toString().charAt(0) == alliance.charAt(0)) {
             return true;
         } else {
             return false;
         }
     }
     
-}
+    }
