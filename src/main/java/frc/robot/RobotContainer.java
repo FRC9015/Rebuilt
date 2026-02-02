@@ -44,10 +44,6 @@ public class RobotContainer {
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController driverController = new CommandXboxController(1);
-
-  private double topShooterPowerScale = 0.5;
-  private double bottomShooterPowerScale = 0.5;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -157,20 +153,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-
-    driverController.povDown().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.1));
-    driverController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
-    driverController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
-    driverController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
-    driverController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
-    driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
-    driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale += 0.01));
-    driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -= 0.01));
-  }
-
-  public Command checkShooterUpdate() {
-
-    return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
   }
 
   /**

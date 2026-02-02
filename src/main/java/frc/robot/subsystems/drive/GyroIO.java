@@ -16,7 +16,9 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
+/** Hardware abstraction for the robot's gyroscope. */
 public interface GyroIO {
+  /** Container for gyro inputs used for logging and odometry updates. */
   @AutoLog
   public static class GyroIOInputs {
     public boolean connected = false;

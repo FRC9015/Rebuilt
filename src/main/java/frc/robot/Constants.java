@@ -23,6 +23,7 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  /** The runtime mode for the robot (real, simulation, or replay). */
   public static enum Mode {
     /** Running on a real robot. */
     REAL,
@@ -34,13 +35,15 @@ public final class Constants {
     REPLAY
   }
 
-  public static class motorIDConstants {
+  /** IDs for motors used by the robot (placeholders — replace with real IDs). */
+  public static class MotorIDConstants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
   }
 
-  public static class intakeConstants {
+  /** Configuration and tuning constants for the intake mechanism. */
+  public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
             .withKP(2)

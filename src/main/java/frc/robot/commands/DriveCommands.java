@@ -44,7 +44,6 @@ public class DriveCommands {
   public static final int NUM_MODULES = 4;
   public static final double NUM_MODULES_DOUBLE = (double) NUM_MODULES;
 
-
   private DriveCommands() {}
 
   private static Translation2d getLinearVelocityFromJoysticks(double x, double y) {
@@ -266,7 +265,8 @@ public class DriveCommands {
                       double[] positions = drive.getWheelRadiusCharacterizationPositions();
                       double wheelDelta = 0.0;
                       for (int i = 0; i < NUM_MODULES; i++) {
-                        wheelDelta += Math.abs(positions[i] - state.positions[i]) / NUM_MODULES_DOUBLE;
+                        wheelDelta +=
+                            Math.abs(positions[i] - state.positions[i]) / NUM_MODULES_DOUBLE;
                       }
                       double wheelRadius = (state.gyroDelta * Drive.DRIVE_BASE_RADIUS) / wheelDelta;
 
