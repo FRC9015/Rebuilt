@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+/** Collection of static commands for controlling the robot drive subsystem. */
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
   private static final double ANGLE_KP = 5.0;
@@ -40,6 +41,9 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+  public static final int NUM_MODULES = 4;
+  public static final double NUM_MODULES_DOUBLE = (double) NUM_MODULES;
+
 
   private DriveCommands() {}
 
@@ -261,8 +265,8 @@ public class DriveCommands {
                     () -> {
                       double[] positions = drive.getWheelRadiusCharacterizationPositions();
                       double wheelDelta = 0.0;
-                      for (int i = 0; i < 4; i++) {
-                        wheelDelta += Math.abs(positions[i] - state.positions[i]) / 4.0;
+                      for (int i = 0; i < NUM_MODULES; i++) {
+                        wheelDelta += Math.abs(positions[i] - state.positions[i]) / NUM_MODULES_DOUBLE;
                       }
                       double wheelRadius = (state.gyroDelta * Drive.DRIVE_BASE_RADIUS) / wheelDelta;
 
@@ -283,7 +287,7 @@ public class DriveCommands {
   }
 
   private static class WheelRadiusCharacterizationState {
-    double[] positions = new double[4];
+    double[] positions = new double[NUM_MODULES];
     Rotation2d lastAngle = Rotation2d.kZero;
     double gyroDelta = 0.0;
   }
