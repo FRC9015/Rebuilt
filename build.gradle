@@ -1,5 +1,6 @@
 plugins {
     id "java"
+    id 'checkstyle'
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.peterabeles.gversion" version "1.10"
     id "com.diffplug.spotless" version "6.12.0"
@@ -96,6 +97,8 @@ dependencies {
 
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json").text)
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+
+    checkstyle 'com.puppycrawl.tools:checkstyle:10.21.1'
 }
 
 test {
@@ -215,4 +218,8 @@ spotless {
         indentWithSpaces(2)
         endWithNewline()
     }
+}
+
+checkstyle {
+    toolVersion = "10.21.1"
 }
