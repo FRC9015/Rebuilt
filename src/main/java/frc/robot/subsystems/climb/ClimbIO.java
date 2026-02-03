@@ -2,11 +2,14 @@ package frc.robot.subsystems.climb;
 
 import org.littletonrobotics.junction.AutoLog;
 
+/** I/O interface for the climb subsystem. */
 public interface ClimbIO {
 
   @AutoLog
+  /** Inputs produced by the climb hardware layer (auto-logged). */
   public static class ClimbIOInputs {
 
+    /** Preset climb positions with associated encoder setpoints. */
     public static enum ClimbPositions {
       ReadyToLatch(0),
       ReadyToClimbL1(0.1),

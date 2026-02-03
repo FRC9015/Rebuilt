@@ -15,13 +15,17 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
+/**
+ * Small wrapper around the pathfinding LocalADStar implementation that adapts it to PathPlanner's
+ * Pathfinder interface.
+ */
 public class LocalADStarAK implements Pathfinder {
   private final ADStarIO io = new ADStarIO();
 
   /**
-   * Get if a new path has been calculated since the last time a path was retrieved
+   * Get if a new path has been calculated since the last time a path was retrieved.
    *
-   * @return True if a new path is available
+   * @return True if a new path is available.
    */
   @Override
   public boolean isNewPathAvailable() {
@@ -35,11 +39,11 @@ public class LocalADStarAK implements Pathfinder {
   }
 
   /**
-   * Get the most recently calculated path
+   * Get the most recently calculated path.
    *
-   * @param constraints The path constraints to use when creating the path
-   * @param goalEndState The goal end state to use when creating the path
-   * @return The PathPlannerPath created from the points calculated by the pathfinder
+   * @param constraints The path constraints to use when creating the path.
+   * @param goalEndState The goal end state to use when creating the path.
+   * @return The PathPlannerPath created from the points calculated by the pathfinder.
    */
   @Override
   public PathPlannerPath getCurrentPath(PathConstraints constraints, GoalEndState goalEndState) {
@@ -57,7 +61,7 @@ public class LocalADStarAK implements Pathfinder {
   }
 
   /**
-   * Set the start position to pathfind from
+   * Set the start position to pathfind from.
    *
    * @param startPosition Start position on the field. If this is within an obstacle it will be
    *     moved to the nearest non-obstacle node.
@@ -70,9 +74,9 @@ public class LocalADStarAK implements Pathfinder {
   }
 
   /**
-   * Set the goal position to pathfind to
+   * Set the goal position to pathfind to.
    *
-   * @param goalPosition Goal position on the field. f this is within an obstacle it will be moved
+   * @param goalPosition Goal position on the field. If this is within an obstacle it will be moved
    *     to the nearest non-obstacle node.
    */
   @Override

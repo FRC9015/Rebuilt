@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.motorIDConstants;
+import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.turretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.TurretAngleAim;
@@ -74,7 +74,7 @@ public class RobotContainer {
         turret =
             new Turret(
                 new TurretIOTalonFX(
-                    motorIDConstants.TURRET_MOTOR_ID,
+                    MotorIDConstants.TURRET_MOTOR_ID,
                     turretConstants.ENCODER_13_TOOTH,
                     turretConstants.ENCODER_15_TOOTH));
         break;
@@ -96,7 +96,7 @@ public class RobotContainer {
         turret =
             new Turret(
                 new TurretIOTalonFX(
-                    motorIDConstants.TURRET_MOTOR_ID,
+                    MotorIDConstants.TURRET_MOTOR_ID,
                     turretConstants.ENCODER_13_TOOTH,
                     turretConstants.ENCODER_15_TOOTH));
         break;

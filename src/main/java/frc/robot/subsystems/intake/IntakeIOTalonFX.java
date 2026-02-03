@@ -18,7 +18,11 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+/** IO implementation for the Intake subsystem using TalonFX motor controllers. */
 public class IntakeIOTalonFX implements IntakeIO {
+
+  // Frequency for status updates (Hz)
+  private static final double STATUS_UPDATE_FREQUENCY = 50.0;
 
   public final TalonFX intakeMotor;
   public final TalonFX pivotMotor;
@@ -40,10 +44,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     // Configure motor
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
-            .withSlot0(Constants.intakeConstants.intakeSlotPositionConfigs)
-            .withSlot1(Constants.intakeConstants.intakeSlotVelocityConfigs)
-            .withFeedback(Constants.intakeConstants.GROUND_FEEDBACK_CONFIGS)
-            .withMotionMagic(Constants.intakeConstants.GROUND_MAGIC_CONFIGS);
+            .withSlot0(Constants.IntakeConstants.intakeSlotPositionConfigs)
+            .withSlot1(Constants.IntakeConstants.intakeSlotVelocityConfigs)
+            .withFeedback(Constants.IntakeConstants.GROUND_FEEDBACK_CONFIGS)
+            .withMotionMagic(Constants.IntakeConstants.GROUND_MAGIC_CONFIGS);
 
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -59,7 +63,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     motorRPM = intakeMotor.getVelocity();
     motorPosition = intakeMotor.getPosition();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        STATUS_UPDATE_FREQUENCY, motorVolts, motorAmps, motorRPM);
 
     ParentDevice.optimizeBusUtilizationForAll(intakeMotor, pivotMotor);
   }
@@ -68,13 +73,13 @@ public class IntakeIOTalonFX implements IntakeIO {
   public void updateInputs(IntakeIOInputs inputs) {
 
     BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM, motorPosition);
-    inputs.IntakeAppliedVolts = motorVolts.getValueAsDouble();
-    inputs.IntakeEncoderPosition = pivotMotor.getPosition().getValueAsDouble();
-    inputs.IntakeCurrentSpeed = intakeMotor.getVelocity().getValueAsDouble();
-    inputs.IntakeRPM = motorRPM.getValueAsDouble();
-    inputs.IntakeAppliedVolts = motorVolts.getValueAsDouble();
-    inputs.IntakeCurrentAmps = intakeMotor.getStatorCurrent().getValueAsDouble();
-    inputs.IntakeEncoderConnected = false;
+    inputs.intakeAppliedVolts = motorVolts.getValueAsDouble();
+    inputs.intakeEncoderPosition = pivotMotor.getPosition().getValueAsDouble();
+    inputs.intakeCurrentSpeed = intakeMotor.getVelocity().getValueAsDouble();
+    inputs.intakeRPM = motorRPM.getValueAsDouble();
+    inputs.intakeAppliedVolts = motorVolts.getValueAsDouble();
+    inputs.intakeCurrentAmps = intakeMotor.getStatorCurrent().getValueAsDouble();
+    inputs.intakeEncoderConnected = false;
   }
 
   @Override
@@ -99,8 +104,8 @@ public class IntakeIOTalonFX implements IntakeIO {
             .withVelocity(
                 MathUtil.clamp(
                     speed,
-                    Constants.intakeConstants.INTAKE_MIN_SPEED,
-                    Constants.intakeConstants.INTAKE_MAX_SPEED))
+                    Constants.IntakeConstants.INTAKE_MIN_SPEED,
+                    Constants.IntakeConstants.INTAKE_MAX_SPEED))
             .withSlot(1));
   }
 
@@ -110,8 +115,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     final double clampedPosition =
         MathUtil.clamp(
             position,
-            Constants.intakeConstants.INTAKE_MIN_POS,
-            Constants.intakeConstants.INTAKE_MAX_POS);
+            Constants.IntakeConstants.INTAKE_MIN_POS,
+            Constants.IntakeConstants.INTAKE_MAX_POS);
 
     pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }

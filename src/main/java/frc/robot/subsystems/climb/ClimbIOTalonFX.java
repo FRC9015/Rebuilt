@@ -16,9 +16,11 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+/** TalonFX-based I/O implementation for the climb subsystem. */
 public class ClimbIOTalonFX implements ClimbIO {
 
-  public final TalonFX topMotor, climbMotor1;
+  public final TalonFX topMotor;
+  public final TalonFX climbMotor1;
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;
   public StatusSignal<AngularVelocity> motorRPM;
@@ -27,6 +29,10 @@ public class ClimbIOTalonFX implements ClimbIO {
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private final VoltageOut voltageOut = new VoltageOut(0.0);
   private final MotionMagicVoltage positionVoltage = new MotionMagicVoltage(0.0);
+
+  // Constants extracted to avoid magic numbers
+  private static final double STATUS_UPDATE_FREQUENCY = 50.0;
+  private static final double MAX_OUTPUT_VOLTAGE = 12.0;
 
   public ClimbIOTalonFX(int topMotorID, int climbID1, int climbID2) {
     topMotor = new TalonFX(topMotorID);
@@ -46,7 +52,8 @@ public class ClimbIOTalonFX implements ClimbIO {
     motorAmps = topMotor.getStatorCurrent();
     motorRPM = topMotor.getVelocity();
     motorPosition = climbMotor1.getPosition();
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        STATUS_UPDATE_FREQUENCY, motorVolts, motorAmps, motorRPM);
     ParentDevice.optimizeBusUtilizationForAll(topMotor);
   }
 
@@ -67,12 +74,12 @@ public class ClimbIOTalonFX implements ClimbIO {
 
   @Override
   public void setTopRPM(double voltage) {
-    topMotor.setVoltage(MathUtil.clamp(voltage, -12.0, 12.0));
+    topMotor.setVoltage(MathUtil.clamp(voltage, -MAX_OUTPUT_VOLTAGE, MAX_OUTPUT_VOLTAGE));
   }
 
   @Override
   public void setClimbRPM(double voltage) {
-    climbMotor1.setVoltage(MathUtil.clamp(voltage, -12, 12));
+    climbMotor1.setVoltage(MathUtil.clamp(voltage, -MAX_OUTPUT_VOLTAGE, MAX_OUTPUT_VOLTAGE));
   }
 
   @Override
