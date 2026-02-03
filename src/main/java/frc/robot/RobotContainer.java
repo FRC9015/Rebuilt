@@ -24,6 +24,9 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIOSparkFlex;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -35,13 +38,17 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Intake intake;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController driverController = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private double intakeRollerValue = 0.5;
+  private double intakePivotValue = 0.5;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -56,6 +63,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        intake = new Intake(new IntakeIOSparkFlex(11, 12));
 
         break;
 
@@ -68,6 +76,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        intake = new Intake(new IntakeIOSim());
         break;
 
       default:
@@ -79,6 +88,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        intake = new Intake(new IntakeIOSparkFlex(0, 0));
         break;
     }
 
@@ -143,6 +153,16 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    driverController.a().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, intakePivotValue));
+    driverController.povDown().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.1));
+    driverController.povUp().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.1));
+    driverController.povLeft().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.05));
+    driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
+    driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
+    driverController.y().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.01));
+    driverController.leftBumper().onTrue(Commands.runOnce(() -> intakePivotValue += 0.01));
+    driverController.rightBumper().onTrue(Commands.runOnce(() -> intakePivotValue -= 0.01));
   }
 
   /**
