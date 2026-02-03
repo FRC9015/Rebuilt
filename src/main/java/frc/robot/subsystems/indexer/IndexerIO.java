@@ -15,18 +15,18 @@ package frc.robot.subsystems.indexer;
 
 import org.littletonrobotics.junction.AutoLog;
 
-/** Interface for the End Effector Input/Output operations. */
+/** Interface for the Indexer Input/Output operations. */
 public interface IndexerIO {
-  /** Class representing the inputs for the End Effector. */
+  /** Class representing the inputs for the Indexer. */
   @AutoLog
   public static class IndexerIOInputs {
 
     // Fields representing the end effector state and inputs
-    public double IndexerAppliedVolts = 0.0;
-    public double IndexerCurrentAmps = 0.0;
-    public double IndexerRPM = 0.0;
-    public boolean IndexerEncoderConnected = false;
-    public boolean JamDetected = false;
+    public double indexerAppliedVolts = 0.0;
+    public double indexerCurrentAmps = 0.0;
+    public double indexerRPM = 0.0;
+    public boolean indexerEncoderConnected = false;
+    public boolean jamDetected = false;
   }
 
   /** Updates the set of loggable inputs. */
@@ -39,9 +39,9 @@ public interface IndexerIO {
   default void setBrakeMode(boolean enable) {}
 
   /**
-   * Sets the RPM of the indexer motor.
+   * Sets the voltage of the indexer motor.
    *
-   * @param rpm The desired RPM.
+   * @param voltage The desired voltage.
    */
-  default void setRPM(double rpm) {}
+  default void setVoltage(double voltage) {}
 }

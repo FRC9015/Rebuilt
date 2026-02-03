@@ -26,7 +26,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
-/** the. */
+/** IO implementation for the Indexer subsystem using a TalonFX motor controller. */
 public class IndexerIOTalonFX implements IndexerIO {
 
   private final TalonFX motor1;
@@ -63,13 +63,14 @@ public class IndexerIOTalonFX implements IndexerIO {
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     // Refresh signals
-    StatusCode encoderStatus = BaseStatusSignal.refreshAll(rpmSignal);
+    StatusCode encoderStatus =
+        BaseStatusSignal.refreshAll(rpmSignal, appliedVoltsSignal, currentSignal);
 
     // Update inputs
-    inputs.IndexerEncoderConnected = encoderConnectedDebounce.calculate(encoderStatus.isOK());
-    inputs.IndexerRPM = rpmSignal.getValueAsDouble();
-    inputs.IndexerAppliedVolts = appliedVoltsSignal.getValueAsDouble();
-    inputs.IndexerCurrentAmps = currentSignal.getValueAsDouble();
+    inputs.indexerEncoderConnected = encoderConnectedDebounce.calculate(encoderStatus.isOK());
+    inputs.indexerRPM = rpmSignal.getValueAsDouble();
+    inputs.indexerAppliedVolts = appliedVoltsSignal.getValueAsDouble();
+    inputs.indexerCurrentAmps = currentSignal.getValueAsDouble();
   }
 
   @Override
@@ -83,7 +84,7 @@ public class IndexerIOTalonFX implements IndexerIO {
   }
 
   @Override
-  public void setRPM(double voltage) {
+  public void setVoltage(double voltage) {
     motor1.setVoltage(MathUtil.clamp(voltage, -12.0, 12.0));
   }
 }
