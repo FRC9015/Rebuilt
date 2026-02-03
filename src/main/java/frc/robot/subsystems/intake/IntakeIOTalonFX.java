@@ -2,7 +2,6 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -84,6 +83,11 @@ public class IntakeIOTalonFX implements IntakeIO {
   }
 
   @Override
+  public void updatePIDFromDashboard() {
+    // Implement PID update logic if needed
+  }
+
+  @Override
   public void setBrakeMode(boolean enable) {
     intakeMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     pivotMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
@@ -122,15 +126,15 @@ public class IntakeIOTalonFX implements IntakeIO {
 
   @Override
   public void setIntakePosition(double position) {
-    
-    final double clampedPosition = MathUtil.clamp(
-      position,
-      Constants.intakeConstants.INTAKE_MIN_POS,
-      Constants.intakeConstants.INTAKE_MAX_POS
-    );
+
+    final double clampedPosition =
+        MathUtil.clamp(
+            position,
+            Constants.intakeConstants.INTAKE_MIN_POS,
+            Constants.intakeConstants.INTAKE_MAX_POS);
 
     pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition));
-  } 
+  }
 
   public double getPosition() {
     return intakeMotor.getPosition().getValueAsDouble();

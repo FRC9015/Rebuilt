@@ -3,11 +3,6 @@ package frc.robot.subsystems.intake;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.AutoLog;
 
-import com.ctre.phoenix6.StatusSignal;
-
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-
 public interface IntakeIO {
 
   /** Class representing the inputs for the Intake. */
@@ -30,13 +25,13 @@ public interface IntakeIO {
     }
 
     // Fields representing the intake state and inputs
-    public double IntakeAppliedVolts = 0.0;
-    public double IntakeCurrentAmps = 0.0;
-    public StatusSignal<AngularVelocity> IntakeCurrentSpeed = null;
-    public boolean IntakeEncoderConnected = false;
-    public double IntakeEncoderPosition = 0.0;
-    public double IntakeTargetPosition = 0.0;
-    public double IntakeRPM = 0.0;
+    public double intakeAppliedVolts = 0.0;
+    public double intakeCurrentAmps = 0.0;
+    public double intakeCurrentSpeed = 0.0;
+    public boolean intakeEncoderConnected = false;
+    public double intakeEncoderPosition = 0.0;
+    public double intakeTargetPosition = 0.0;
+    public double intakeRPM = 0.0;
   }
 
   /** Method to update the inputs of the Intake subsystem. */
@@ -45,6 +40,8 @@ public interface IntakeIO {
   public default void setIntakeSpeed(double speed) {}
 
   public default void setIntakePosition(double position) {}
+
+  public default void updatePIDFromDashboard() {}
 
   public default double getVelocity() {
     return 0.0;

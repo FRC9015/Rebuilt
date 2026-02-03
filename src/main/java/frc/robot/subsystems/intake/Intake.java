@@ -3,9 +3,6 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import java.io.ObjectInputFilter.Status;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -71,9 +68,23 @@ public class Intake extends SubsystemBase {
     io.setIntakeSpeed(-speedValue);
   }
 
-  public Command runIntakeAtSpeed(double speed) {
-    Logger.recordOutput("Intake/Speed", speed);
-    return this.startEnd(() -> this.setIntakeSpeed(speed), () -> this.setIntakeSpeed(idleSpeed));
+  public void setPivotSpeed(double speedValue) {
+    io.setIntakePosition(speedValue);
+  }
+
+  public Command runIntakeAtSpeed(double intakeSpeed, double pivotSpeed) {
+    Logger.recordOutput("Intake/Speed", intakeSpeed);
+    Logger.recordOutput("Intake2/Speed", pivotSpeed);
+
+    return this.startEnd(
+        () -> {
+          this.setIntakeSpeed(intakeSpeed);
+          this.setPivotSpeed(pivotSpeed);
+        },
+        () -> {
+          this.setIntakeSpeed(idleSpeed);
+          this.setPivotSpeed(idleSpeed);
+        });
   }
 
   public Command runIntakeAtReverseSpeed(double speed) {

@@ -230,6 +230,21 @@ public class RobotContainer {
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
 
+  public Command checkShooterUpdate() {
+
+    return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
+
+    driverController.a().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, intakePivotValue));
+    driverController.povDown().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.1));
+    driverController.povUp().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.1));
+    driverController.povLeft().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.05));
+    driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
+    driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
+    driverController.y().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.01));
+    driverController.leftBumper().onTrue(Commands.runOnce(() -> intakePivotValue += 0.01));
+    driverController.rightBumper().onTrue(Commands.runOnce(() -> intakePivotValue -= 0.01));
+  }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
