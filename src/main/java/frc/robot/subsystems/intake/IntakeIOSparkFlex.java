@@ -31,16 +31,16 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
   // ---------------- PID CONSTANTS ----------------
   // Intake velocity (RPM)
-  private LoggedNetworkNumber INTAKE_kP = new LoggedNetworkNumber("/Intake/P", 1.0);
-  private LoggedNetworkNumber INTAKE_kI = new LoggedNetworkNumber("/Intake/I", 0.0);
-  private LoggedNetworkNumber INTAKE_kD = new LoggedNetworkNumber("/Intake/D", 0.0);
+  private LoggedNetworkNumber intakeKp = new LoggedNetworkNumber("/Intake/P", 1.0);
+  private LoggedNetworkNumber intakeKi = new LoggedNetworkNumber("/Intake/I", 0.0);
+  private LoggedNetworkNumber intakeKd = new LoggedNetworkNumber("/Intake/D", 0.0);
   private LoggedNetworkBoolean updatePIDs = new LoggedNetworkBoolean("/Intake/UpdatePIDs", false);
-  private double INTAKE_kFF = 0.0;
+  private double intakeKff = 0.0;
 
   // Pivot position (rotations)
-  private LoggedNetworkNumber PIVOT_kP = new LoggedNetworkNumber("/Pivot/P", 1.0);
-  private LoggedNetworkNumber PIVOT_kI = new LoggedNetworkNumber("/Pivot/I", 0.0);
-  private LoggedNetworkNumber PIVOT_kD = new LoggedNetworkNumber("/Pivot/D", 0.0);
+  private LoggedNetworkNumber pivotKp = new LoggedNetworkNumber("/Pivot/P", 1.0);
+  private LoggedNetworkNumber pivotKi = new LoggedNetworkNumber("/Pivot/I", 0.0);
+  private LoggedNetworkNumber pivotKd = new LoggedNetworkNumber("/Pivot/D", 0.0);
 
   public IntakeIOSparkFlex(int intakeID, int pivotID) {
 
@@ -67,8 +67,8 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
     intakeConfig
         .closedLoop
-        .pid(INTAKE_kP.getAsDouble(), INTAKE_kI.getAsDouble(), INTAKE_kD.getAsDouble())
-        .velocityFF(INTAKE_kFF)
+        .pid(intakeKp.getAsDouble(), intakeKi.getAsDouble(), intakeKd.getAsDouble())
+        .velocityFF(intakeKff)
         .outputRange(-1.0, 1.0);
 
     // ---------------- PIVOT CONFIG ----------------
@@ -81,7 +81,7 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
     pivotConfig
         .closedLoop
-        .pid(PIVOT_kP.getAsDouble(), PIVOT_kI.getAsDouble(), PIVOT_kD.getAsDouble())
+        .pid(pivotKp.getAsDouble(), pivotKi.getAsDouble(), pivotKd.getAsDouble())
         .outputRange(-1.0, 1.0);
 
     // ---------------- APPLY CONFIG ----------------
@@ -120,13 +120,13 @@ public class IntakeIOSparkFlex implements IntakeIO {
   // --------- CONTROL ----------------
   @Override
   public void updatePIDFromDashboard() {
-    double intakeP = INTAKE_kP.getAsDouble();
-    double intakeI = INTAKE_kI.getAsDouble();
-    double intakeD = INTAKE_kD.getAsDouble();
+    double intakeP = intakeKp.getAsDouble();
+    double intakeI = intakeKi.getAsDouble();
+    double intakeD = intakeKd.getAsDouble();
 
-    double pivotP = PIVOT_kP.getAsDouble();
-    double pivotI = PIVOT_kI.getAsDouble();
-    double pivotD = PIVOT_kD.getAsDouble();
+    double pivotP = pivotKp.getAsDouble();
+    double pivotI = pivotKi.getAsDouble();
+    double pivotD = pivotKd.getAsDouble();
 
     // Update configs
     intakeConfig.closedLoop.pid(intakeP, intakeI, intakeD).outputRange(-1.0, 1.0);

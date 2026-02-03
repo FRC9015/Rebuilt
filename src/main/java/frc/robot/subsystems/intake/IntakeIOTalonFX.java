@@ -44,10 +44,10 @@ public class IntakeIOTalonFX implements IntakeIO {
     // Configure motor
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
-            .withSlot0(Constants.intakeConstants.intakeSlotPositionConfigs)
-            .withSlot1(Constants.intakeConstants.intakeSlotVelocityConfigs)
-            .withFeedback(Constants.intakeConstants.GROUND_FEEDBACK_CONFIGS)
-            .withMotionMagic(Constants.intakeConstants.GROUND_MAGIC_CONFIGS);
+            .withSlot0(Constants.IntakeConstants.intakeSlotPositionConfigs)
+            .withSlot1(Constants.IntakeConstants.intakeSlotVelocityConfigs)
+            .withFeedback(Constants.IntakeConstants.GROUND_FEEDBACK_CONFIGS)
+            .withMotionMagic(Constants.IntakeConstants.GROUND_MAGIC_CONFIGS);
 
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -109,8 +109,8 @@ public class IntakeIOTalonFX implements IntakeIO {
         intakeVelocityVoltage.withVelocity(
             MathUtil.clamp(
                 speed,
-                Constants.intakeConstants.INTAKE_MIN_SPEED,
-                Constants.intakeConstants.INTAKE_MAX_SPEED)));
+                Constants.IntakeConstants.INTAKE_MIN_SPEED,
+                Constants.IntakeConstants.INTAKE_MAX_SPEED)));
   }
 
   @Override
@@ -119,8 +119,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     final double clampedPosition =
         MathUtil.clamp(
             position,
-            Constants.intakeConstants.INTAKE_MIN_POS,
-            Constants.intakeConstants.INTAKE_MAX_POS);
+            Constants.IntakeConstants.INTAKE_MIN_POS,
+            Constants.IntakeConstants.INTAKE_MAX_POS);
 
     pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition));
   }

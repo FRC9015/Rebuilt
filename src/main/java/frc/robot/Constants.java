@@ -42,7 +42,7 @@ public final class Constants {
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
   }
 
-  public static class intakeConstants {
+  public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
             .withKP(2)
