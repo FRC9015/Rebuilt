@@ -3,7 +3,6 @@ package frc.robot.subsystems.intake;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.AutoLog;
 
-/** Hardware abstraction for the intake subsystem and its IO. */
 public interface IntakeIO {
 
   /** Container for intake inputs used for logging and control. */
@@ -25,7 +24,7 @@ public interface IntakeIO {
       }
     }
 
-    // Fields representing the intake state and inputs (use lowerCamelCase to satisfy Checkstyle)
+    // Fields representing the intake state and inputs
     public double intakeAppliedVolts = 0.0;
     public double intakeCurrentAmps = 0.0;
     public double intakeCurrentSpeed = 0.0;
@@ -41,6 +40,8 @@ public interface IntakeIO {
   public default void setIntakeSpeed(double speed) {}
 
   public default void setIntakePosition(double position) {}
+
+  public default void updatePIDFromDashboard() {}
 
   public default double getVelocity() {
     return 0.0;

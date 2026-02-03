@@ -36,9 +36,23 @@ public class Intake extends SubsystemBase {
     io.setIntakeSpeed(-speedValue);
   }
 
-  public Command runIntakeAtSpeed(double speed) {
-    Logger.recordOutput("Intake/Speed", speed);
-    return this.startEnd(() -> this.setIntakeSpeed(speed), () -> this.setIntakeSpeed(idleSpeed));
+  public void setPivotSpeed(double speedValue) {
+    io.setIntakePosition(speedValue);
+  }
+
+  public Command runIntakeAtSpeed(double intakeSpeed, double pivotSpeed) {
+    Logger.recordOutput("Intake/Speed", intakeSpeed);
+    Logger.recordOutput("Intake2/Speed", pivotSpeed);
+
+    return this.startEnd(
+        () -> {
+          this.setIntakeSpeed(intakeSpeed);
+          this.setPivotSpeed(pivotSpeed);
+        },
+        () -> {
+          this.setIntakeSpeed(idleSpeed);
+          this.setPivotSpeed(idleSpeed);
+        });
   }
 
   public Command runIntakeAtReverseSpeed(double speed) {
@@ -54,6 +68,7 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    io.updatePIDFromDashboard();
     Logger.processInputs("Intake", inputs);
   }
 }
