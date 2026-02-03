@@ -68,8 +68,8 @@ public class IndexerIOSparkMax implements IndexerIO {
   }
 
   @Override
-  public void setRPM(double voltage) {
+  public void setRPM(double rpm) {
     // Same as your CTRE code: this is open-loop voltage, name is legacy
-    motor1.setVoltage(MathUtil.clamp(voltage, -12.0, 12.0));
+    motor1.setVoltage(MathUtil.clamp(rpm, -12.0, 12.0));
   }
 }
