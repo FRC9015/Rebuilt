@@ -25,6 +25,7 @@ public class IntakeIOSim implements IntakeIO {
             IntakeSimulation.IntakeSide.FRONT,
             // The intake can hold up to 50 Fuel
             50);
+    intakeSimulation.getGamePieceContactListener();
   }
 
   @Override
