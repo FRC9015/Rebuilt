@@ -42,6 +42,8 @@ public final class Constants {
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
   }
 
+
+
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
@@ -71,4 +73,9 @@ public final class Constants {
     public static final double INTAKE_DEPLOYED_POSITION = 100.0;
     public static final double INTAKE_STOWED_POSITION = 10.0;
   }
+
+  /** CAN IDs for the CANdle LED controllers. */
+  public static class CANdleIDConstants {
+    public static final int candleID1 = 19; //TODO Configure This;
+  } 
 }
