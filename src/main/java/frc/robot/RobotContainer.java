@@ -141,7 +141,7 @@ public class RobotContainer {
             () -> -driverController.getRightX()));
     driverController
         .leftBumper()
-        .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, intakeRollerValue));
+        .whileTrue(Commands.startEnd(()->intake.runIntakeAtSpeed(intakeRollerValue, intakeRollerValue), ()->intake.stopIntake()));
     driverController.povDown().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.1));
     driverController.povUp().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.1));
     driverController.povLeft().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.05));
