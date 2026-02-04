@@ -64,7 +64,7 @@ public class TurretIOTalonFX implements TurretIO {
    * @param followMotorID The ID of the second motor.
    * @param encoderId The ID of the encoder.
    */
-  public TurretIOTalonFX(int motorID,int encoderId1,int encoderID2) {
+  public TurretIOTalonFX(int motorID, int encoderId1, int encoderID2) {
     elevatorMotor = new TalonFX(motorID);
     turretEncoderNoRatio = new CANcoder(encoderId1);
     turretEncoderFinalRatio = new CANcoder(encoderID2);
@@ -83,7 +83,7 @@ public class TurretIOTalonFX implements TurretIO {
     elevatorMotor.getConfigurator().apply(motorConfig);
     // Configure the encoder
 
-    //MIGHT NEED TO CHANGE LATER NOT 100% ON DIRECTION
+    // MIGHT NEED TO CHANGE LATER NOT 100% ON DIRECTION
     CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
     encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     turretEncoderNoRatio.getConfigurator().apply(encoderConfig);
@@ -95,10 +95,14 @@ public class TurretIOTalonFX implements TurretIO {
     motorAppliedVoltsSignal = elevatorMotor.getMotorVoltage();
     motorCurrentSignal = elevatorMotor.getStatorCurrent();
     motorPosition = elevatorMotor.getPosition();
-    
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, encoderNoRatioPositionSignal, encoderFinalRatioPositionSignal,motorAppliedVoltsSignal, motorCurrentSignal, motorPosition);
+        50.0,
+        encoderNoRatioPositionSignal,
+        encoderFinalRatioPositionSignal,
+        motorAppliedVoltsSignal,
+        motorCurrentSignal,
+        motorPosition);
     turretEncoderNoRatio.optimizeBusUtilization();
     elevatorMotor.optimizeBusUtilization();
   }
@@ -108,7 +112,11 @@ public class TurretIOTalonFX implements TurretIO {
     // Refresh signals
     StatusCode encoderStatus =
         BaseStatusSignal.refreshAll(
-            encoderNoRatioPositionSignal, motorAppliedVoltsSignal, motorCurrentSignal, motorPosition,encoderFinalRatioPositionSignal);
+            encoderNoRatioPositionSignal,
+            motorAppliedVoltsSignal,
+            motorCurrentSignal,
+            motorPosition,
+            encoderFinalRatioPositionSignal);
 
     // Update elevator inputs
     inputs.turretEncoderNoRatioConnected = encoderConnectedDebounce.calculate(encoderStatus.isOK());

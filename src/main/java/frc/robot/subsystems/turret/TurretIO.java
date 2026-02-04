@@ -11,14 +11,12 @@ public interface TurretIO {
     public double turretAppliedVolts = 0.0;
     public double turretCurrentAmps = 0.0;
     public double turretPosition = 0.0;
-    public double turretMotorPosition =0.0;
+    public double turretMotorPosition = 0.0;
     public double turretEncoderNoRatioPosition = 0.0;
     public double turretEncoderFinalRatioPosition = 0.0;
     public boolean turretEncoderNoRatioConnected = false;
     public boolean turretEncoderFinalRatioConnected = false;
     public boolean turretAtSetpoint = false;
-
-
   }
 
   /** Updates the set of loggable inputs. */
