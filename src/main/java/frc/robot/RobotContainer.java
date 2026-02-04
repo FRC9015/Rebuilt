@@ -51,6 +51,9 @@ import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.TurretIO;
+import frc.robot.subsystems.turret.TurretIOTalonFX;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -72,6 +75,8 @@ public class RobotContainer {
   private final GameState gamestate;
   private final Indexer indexer;
   private final Intake intake;
+  private final Turret turret; // Added Turret Subsystem
+
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
@@ -130,6 +135,16 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID));
+        // --- TURRET SETUP ---
+        // Instantiating the Turret here ensures the code starts running immediately on boot.
+        // CHECK THESE IDs: Motor ID, Encoder 13T ID, Encoder 15T ID
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID,
+                    13, // ID of the CANCoder on the 13 Tooth Gear
+                    15 // ID of the CANCoder on the 15 Tooth Gear
+                    ));
         break;
 
       case SIM:
@@ -164,6 +179,9 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
         intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
+
+        // Use a blank IO for Turret Sim for now (unless you have a Turret Sim implementation)
+        turret = new Turret(new TurretIO() {});
         break;
 
       case REPLAY:
@@ -187,6 +205,8 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID));
+
+        turret = new Turret(new TurretIO() {});
         break;
 
       default:

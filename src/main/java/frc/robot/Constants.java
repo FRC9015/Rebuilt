@@ -83,6 +83,9 @@ public final class Constants {
     public static final int INTAKE_PIVOT_RIGHT_ID = 0;
     public static final int INTAKE_ENCODER_ID = 0;
     public static final int INDEXER_MOTOR_ID = 13;
+    public static final int UPPER_INTAKE_MOTOR_ID = 0;
+    public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+    public static final int TURRET_MOTOR_ID = 0;
   }
 
   public static class VisionConstants {
@@ -310,6 +313,30 @@ public final class Constants {
   }
 
   public static class turretConstants {
+    // --- GEAR TEETH ---
+    public static final double t_teeth = 90.0;
+    public static final double e1_teeth = 13.0; // Gear on Encoder 1
+    public static final double e2_teeth = 15.0; // Gear on Encoder 2
+
+    // --- MATH CONSTANTS ---
+    /** The error allowance (in turret rotations) when comparing encoder predictions. */
+    public static final double CRT_TOLERANCE = 0.01;
+
+    /**
+     * The difference threshold between calculated and internal motor position to trigger a re-seed.
+     */
+    public static final double SYNC_THRESHOLD = 0.05;
+
+    /** Search limit for Encoder 1 (should be equal to e2_teeth). */
+    public static final int E1_SEARCH_LIMIT = (int) e2_teeth;
+    /** Search limit for Encoder 2 (should be equal to e1_teeth). */
+    public static final int E2_SEARCH_LIMIT = (int) e1_teeth;
+
+    // --- MOVEMENT LIMITS ---
+    public static final double maxRotation = 2.0;
+    public static final double minRoation = 0.0;
+
+    // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
@@ -322,17 +349,7 @@ public final class Constants {
             .withKS(0)
             .withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
-        new FeedbackConfigs()
-            .withFeedbackRemoteSensorID(motorIDConstants.TURRET_MOTOR_ID)
-            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
-
-    // placeholders
-    public static final double maxRotation = 0.0;
-    public static final double minRoation = 0.0;
-
-    public static final double e1_teeth = 0.0;
-    public static final double e2_teeth = 0.0;
-    public static final double t_teeth = 90.0;
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
   }
-}
+
 }
