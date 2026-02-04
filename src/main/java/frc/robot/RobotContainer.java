@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -51,8 +50,8 @@ public class RobotContainer {
   private final Drive drive;
   private final GameState gamestate;
   private final Indexer indexer;
-  private SwerveDriveSimulation simDrive = null;
   private final Intake intake;
+  private SwerveDriveSimulation simDrive = null;
 
   // Controller
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -60,6 +59,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private SwerveDriveSimulation simDrive;
   private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
   private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -91,7 +91,6 @@ public class RobotContainer {
         simDrive =
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
-
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
         drive =
             new Drive(
@@ -100,10 +99,10 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
-        intake = new Intake(new IntakeIOSim(simDrive));
-        indexer = new Indexer(new IndexerIO(){});
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
+        intake = new Intake(new IntakeIOSim(simDrive));
+        indexer = new Indexer(new IndexerIO(){});
         break;
 
       case REPLAY:
