@@ -88,40 +88,40 @@ public class GameState extends SubsystemBase{
     private StateEnum getGameState (){
         double time = DriverStation.getMatchTime();
         if (DriverStation.isAutonomous()){
-            return StateEnum.Auto;
+            return StateEnum.AUTO;
         }
         if(time > 130){
-        return StateEnum.Transition;
+        return StateEnum.TRANSITION;
         } else if (time > 30) {
         String gameData = DriverStation.getGameSpecificMessage();
         if (gameData == "B") {
             if (time > 105){
-                return StateEnum.Red_team;
+                return StateEnum.RED_TEAM;
             } else if (time>80) {
-                return StateEnum.Blue_team;
+                return StateEnum.BLUE_TEAM;
             } else if (time > 55){
-                return StateEnum.Red_team;
+                return StateEnum.RED_TEAM;
             } else if(time > 30){
-                return StateEnum.Blue_team;
+                return StateEnum.BLUE_TEAM;
             }
         }
             if(gameData == "R"){
             if (time > 105){
-                return StateEnum.Blue_team;
+                return StateEnum.BLUE_TEAM;
             } else if (time>80) {
-                return StateEnum.Red_team;
+                return StateEnum.RED_TEAM;
             } else if (time > 55){
-                return StateEnum.Blue_team;
+                return StateEnum.BLUE_TEAM;
             } else if(time > 30){
-                return StateEnum.Red_team;
+                return StateEnum.RED_TEAM;
         }
         }
     }
         if(time == -1){
-            return StateEnum.Practice; 
+            return StateEnum.PRACTICE; 
         }
 
-        return StateEnum.Endgame;
+        return StateEnum.ENDGAME;
 
     }
     /**
@@ -132,7 +132,10 @@ public class GameState extends SubsystemBase{
         StateEnum statevar = getGameState();
         Optional<Alliance> alli = DriverStation.getAlliance();
         String alliance = alli.toString();
-        if (statevar == StateEnum.Auto|| statevar == StateEnum.Transition|| statevar == StateEnum.Endgame) {
+        if (statevar == StateEnum.AUTO|| 
+        statevar == StateEnum.TRANSITION|| 
+        statevar == StateEnum.ENDGAME|| 
+        statevar == StateEnum.PRACTICE) {
             return true;
         }
         if (statevar.toString().charAt(0) == alliance.charAt(0)) {
