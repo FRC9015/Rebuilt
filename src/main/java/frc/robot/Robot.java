@@ -70,6 +70,7 @@ public class Robot extends LoggedRobot {
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
+    // THIS is where Turret gets created, and its Periodic loop starts immediately.
     robotContainer = new RobotContainer();
   }
 

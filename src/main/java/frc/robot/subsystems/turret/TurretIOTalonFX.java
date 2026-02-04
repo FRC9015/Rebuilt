@@ -1,20 +1,6 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package frc.robot.subsystems.turret;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
@@ -27,52 +13,42 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.turretConstants;
 
-/** the. */
 public class TurretIOTalonFX implements TurretIO {
 
-  private final TalonFX elevatorMotor;
-  private final CANcoder turretEncoderNoRatio;
-  private final CANcoder turretEncoderFinalRatio;
+  private final TalonFX turretMotor;
+  private final CANcoder encoder13;
+  private final CANcoder encoder15;
 
-  private final StatusSignal<Angle> encoderNoRatioPositionSignal;
-  private final StatusSignal<Angle> encoderFinalRatioPositionSignal;
+  private final StatusSignal<Angle> encoder13PosSignal;
+  private final StatusSignal<Angle> encoder15PosSignal;
   private final StatusSignal<Voltage> motorAppliedVoltsSignal;
   private final StatusSignal<Current> motorCurrentSignal;
-  private final StatusSignal<Angle> motorPosition;
+  private final StatusSignal<Angle> motorPositionSignal;
 
   private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
   private final NeutralOut neutralOut = new NeutralOut();
-  private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0.5);
+  private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
-  SoftwareLimitSwitchConfigs softwareLimitSwitchConfigs =
-      new SoftwareLimitSwitchConfigs()
-          .withForwardSoftLimitEnable(true)
-          .withForwardSoftLimitThreshold(turretConstants.maxRotation)
-          .withReverseSoftLimitEnable(true)
-          .withReverseSoftLimitThreshold(turretConstants.minRoation);
+  public TurretIOTalonFX(int motorID, int encoderId13, int encoderId15) {
+    turretMotor = new TalonFX(motorID);
+    encoder13 = new CANcoder(encoderId13);
+    encoder15 = new CANcoder(encoderId15);
 
-  /**
-   * Constructs an TurretIOTalonFX.
-   *
-   * @param motorID The ID of the motor.
-   * @param followMotorID The ID of the second motor.
-   * @param encoderId The ID of the encoder.
-   */
-  public TurretIOTalonFX(int motorID, int encoderId1, int encoderID2) {
-    elevatorMotor = new TalonFX(motorID);
-    turretEncoderNoRatio = new CANcoder(encoderId1);
-    turretEncoderFinalRatio = new CANcoder(encoderID2);
-
-    // Configure the motor
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
-            .withSoftwareLimitSwitch(softwareLimitSwitchConfigs)
+            .withSoftwareLimitSwitch(
+                new SoftwareLimitSwitchConfigs()
+                    .withForwardSoftLimitEnable(true)
+                    .withForwardSoftLimitThreshold(turretConstants.maxRotation)
+                    .withReverseSoftLimitEnable(true)
+                    .withReverseSoftLimitThreshold(turretConstants.minRoation))
             .withMotionMagic(turretConstants.MOTION_MAGIC_CONFIGS)
             .withSlot0(turretConstants.SLOT0_CONFIGS)
             .withFeedback(turretConstants.FEEDBACK_CONFIGS)
@@ -80,77 +56,124 @@ public class TurretIOTalonFX implements TurretIO {
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    elevatorMotor.getConfigurator().apply(motorConfig);
-    // Configure the encoder
+    turretMotor.getConfigurator().apply(motorConfig);
 
-    // MIGHT NEED TO CHANGE LATER NOT 100% ON DIRECTION
     CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
     encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    turretEncoderNoRatio.getConfigurator().apply(encoderConfig);
-    turretEncoderFinalRatio.getConfigurator().apply(encoderConfig);
+    encoder13.getConfigurator().apply(encoderConfig);
+    encoder15.getConfigurator().apply(encoderConfig);
 
-    // Signals
-    encoderNoRatioPositionSignal = turretEncoderNoRatio.getPosition();
-    encoderFinalRatioPositionSignal = turretEncoderFinalRatio.getPosition();
-    motorAppliedVoltsSignal = elevatorMotor.getMotorVoltage();
-    motorCurrentSignal = elevatorMotor.getStatorCurrent();
-    motorPosition = elevatorMotor.getPosition();
+    encoder13PosSignal = encoder13.getAbsolutePosition();
+    encoder15PosSignal = encoder15.getAbsolutePosition();
+    motorAppliedVoltsSignal = turretMotor.getMotorVoltage();
+    motorCurrentSignal = turretMotor.getStatorCurrent();
+    motorPositionSignal = turretMotor.getPosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
-        encoderNoRatioPositionSignal,
-        encoderFinalRatioPositionSignal,
+        encoder13PosSignal,
+        encoder15PosSignal,
         motorAppliedVoltsSignal,
         motorCurrentSignal,
-        motorPosition);
-    turretEncoderNoRatio.optimizeBusUtilization();
-    elevatorMotor.optimizeBusUtilization();
+        motorPositionSignal);
   }
 
   @Override
   public void updateInputs(TurretIOInputs inputs) {
-    // Refresh signals
-    StatusCode encoderStatus =
-        BaseStatusSignal.refreshAll(
-            encoderNoRatioPositionSignal,
-            motorAppliedVoltsSignal,
-            motorCurrentSignal,
-            motorPosition,
-            encoderFinalRatioPositionSignal);
+    BaseStatusSignal.refreshAll(
+        encoder13PosSignal,
+        encoder15PosSignal,
+        motorAppliedVoltsSignal,
+        motorCurrentSignal,
+        motorPositionSignal);
 
-    // Update elevator inputs
-    inputs.turretEncoderNoRatioConnected = encoderConnectedDebounce.calculate(encoderStatus.isOK());
-    inputs.turretEncoderNoRatioPosition = encoderNoRatioPositionSignal.getValueAsDouble();
-    inputs.turretEncoderFinalRatioPosition = encoderFinalRatioPositionSignal.getValueAsDouble();
+    inputs.encoder13Connected =
+        encoderConnectedDebounce.calculate(encoder13PosSignal.getStatus().isOK());
+    inputs.encoder15Connected =
+        encoderConnectedDebounce.calculate(encoder15PosSignal.getStatus().isOK());
+    inputs.encoder13PositionRot = encoder13PosSignal.getValueAsDouble();
+    inputs.encoder15PositionRot = encoder15PosSignal.getValueAsDouble();
     inputs.turretAppliedVolts = motorAppliedVoltsSignal.getValueAsDouble();
     inputs.turretCurrentAmps = motorCurrentSignal.getValueAsDouble();
-    inputs.turretMotorPosition = motorPosition.getValueAsDouble();
+    inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
+
+    Double resolvedPos =
+        calculateTrueAngle(inputs.encoder13PositionRot, inputs.encoder15PositionRot);
+    if (resolvedPos != null) {
+      inputs.turretResolvedValid = true;
+      inputs.turretResolvedPosition = resolvedPos;
+    } else {
+      inputs.turretResolvedValid = false;
+    }
+  }
+
+  /**
+   *
+   *
+   * <h3>Chinese Remainder Theorem (CRT) Resolver</h3>
+   *
+   * <p>This function determines the absolute position of the turret gear by comparing the readings
+   * of two different-sized encoder gears. Because absolute single-turn encoders wrap around every
+   * 360 degrees, a single encoder on a small gear does not know which "lap" the turret is on.
+   * <b>The Logic:</b>
+   *
+   * <ol>
+   *   <li>We normalize the encoder readings to a 0.0 - 1.0 range (representing 0-360 degrees).
+   *   <li>An encoder on a small gear spins faster than the turret. Predicted Turret Rotation =
+   *       (Laps + Reading) * (Encoder_Teeth / Turret_Teeth).
+   *   <li>Because we don't know the "Laps" (n and k), we test every mathematically possible lap
+   *       count for both encoders.
+   *   <li>For each combination of laps, we calculate where Encoder 1 thinks the turret is, and
+   *       where Encoder 2 thinks the turret is.
+   *   <li>When both predictions align within {@link turretConstants#CRT_TOLERANCE}, we have found
+   *       the unique absolute position of the turret.
+   * </ol>
+   *
+   * @param raw13 The 0-1 absolute rotation reading from the 13-tooth gear encoder.
+   * @param raw15 The 0-1 absolute rotation reading from the 15-tooth gear encoder.
+   * @return The absolute rotation of the turret (e.g., 1.5 rotations), or null if no match is
+   *     found.
+   */
+  private Double calculateTrueAngle(double raw13, double raw15) {
+    double val13 = MathUtil.inputModulus(raw13, 0, 1.0);
+    double val15 = MathUtil.inputModulus(raw15, 0, 1.0);
+
+    for (int n = 0; n < turretConstants.E1_SEARCH_LIMIT; n++) {
+      double attemptA = (n + val13) * (turretConstants.e1_teeth / turretConstants.t_teeth);
+
+      for (int k = 0; k < turretConstants.E2_SEARCH_LIMIT; k++) {
+        double attemptB = (k + val15) * (turretConstants.e2_teeth / turretConstants.t_teeth);
+
+        if (Math.abs(attemptA - attemptB) < turretConstants.CRT_TOLERANCE) {
+          return attemptA;
+        }
+      }
+    }
+    return null;
   }
 
   @Override
   public void setturretPosition(double value) {
-    // elevatorMotor.setControl(voltageOut.withOutput(MathUtil.clamp(value, -12, 12)));
-    if (value > turretConstants.maxRotation) {
-      value = turretConstants.maxRotation;
-    }
-    if (value < turretConstants.minRoation) {
-      value = turretConstants.minRoation;
-    }
-    elevatorMotor.setControl(motionMagicVoltage.withPosition(value));
+    turretMotor.setControl(motionMagicVoltage.withPosition(value));
+  }
+
+  @Override
+  public void seedMotorPosition(double positionRotations) {
+    turretMotor.setPosition(positionRotations);
   }
 
   @Override
   public void stop() {
-    elevatorMotor.setControl(neutralOut);
+    turretMotor.setControl(neutralOut);
   }
 
   @Override
   public void setBrakeMode() {
-    elevatorMotor.setNeutralMode(NeutralModeValue.Brake);
+    turretMotor.setNeutralMode(NeutralModeValue.Brake);
   }
 
   @Override
   public void setCoastMode() {
-    elevatorMotor.setNeutralMode(NeutralModeValue.Coast);
+    turretMotor.setNeutralMode(NeutralModeValue.Coast);
   }
 }
