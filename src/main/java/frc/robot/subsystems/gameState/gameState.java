@@ -111,6 +111,10 @@ public class GameState extends SubsystemBase{
         }
         }
     }
+        if(time == -1){
+            return StateEnum.Practice; 
+        }
+
         return StateEnum.Endgame;
 
     }
