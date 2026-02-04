@@ -47,6 +47,10 @@ public class Intake extends SubsystemBase {
         () -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
   }
 
+  public Command runIntake() {
+    return this.startEnd(() -> io.setRunning(true), () -> io.setRunning(false));
+  }
+
   public Command stopIntake() {
     return this.run(() -> io.stop());
   }
