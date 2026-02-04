@@ -326,9 +326,13 @@ public final class Constants {
             .withFeedbackRemoteSensorID(motorIDConstants.TURRET_MOTOR_ID)
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder);
 
-    //placeholders
+    // placeholders
     public static final double maxRotation = 0.0;
     public static final double minRoation = 0.0;
+
+    public static final double e1_teeth = 0.0;
+    public static final double e2_teeth = 0.0;
+    public static final double t_teeth = 90.0;
   }
 }
 }
