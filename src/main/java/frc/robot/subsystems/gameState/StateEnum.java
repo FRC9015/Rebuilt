@@ -5,6 +5,7 @@ package frc.robot.subsystems.gamestate;
         Transition,
         Blue_team,
         Red_team,
-        Endgame
+        Endgame,
+        Practice
     }
 
