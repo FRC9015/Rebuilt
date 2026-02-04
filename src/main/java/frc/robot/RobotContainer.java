@@ -45,8 +45,7 @@ public class RobotContainer {
   private final Intake intake;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController driverController = new CommandXboxController(1);
+  private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -137,43 +136,21 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-
-    // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
-
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
-    // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
-
-    driverController.a().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, intakePivotValue));
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
+    driverController
+        .leftBumper()
+        .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, intakeRollerValue));
     driverController.povDown().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.1));
     driverController.povUp().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.1));
     driverController.povLeft().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.05));
     driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
     driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
     driverController.y().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.01));
-    driverController.leftBumper().onTrue(Commands.runOnce(() -> intakePivotValue += 0.01));
-    driverController.rightBumper().onTrue(Commands.runOnce(() -> intakePivotValue -= 0.01));
+    driverController
+        .rightBumper()
+        .whileTrue(intake.runIntakeAtSpeed(-intakeRollerValue, -intakeRollerValue));
   }
 
   /**

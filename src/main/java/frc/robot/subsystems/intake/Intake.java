@@ -49,10 +49,7 @@ public class Intake extends SubsystemBase {
           this.setIntakeSpeed(intakeSpeed);
           this.setPivotSpeed(pivotSpeed);
         },
-        () -> {
-          this.setIntakeSpeed(idleSpeed);
-          this.setPivotSpeed(idleSpeed);
-        });
+        this::stopIntake);
   }
 
   public Command runIntakeAtReverseSpeed(double speed) {
