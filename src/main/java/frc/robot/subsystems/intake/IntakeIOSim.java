@@ -14,7 +14,7 @@ public class IntakeIOSim implements IntakeIO {
     this.intakeSimulation =
         IntakeSimulation.OverTheBumperIntake(
             // Specify the type of game pieces that the intake can collect
-            "Note",
+            "Fuel",
             // Specify the drivetrain to which this intake is attached
             driveTrainSimulation,
             // Width of the intake
@@ -22,14 +22,14 @@ public class IntakeIOSim implements IntakeIO {
             // The extension length of the intake beyond the robot's frame (when activated)
             Meters.of(0.2),
             // The intake is mounted on the back side of the chassis
-            IntakeSimulation.IntakeSide.BACK,
-            // The intake can hold up to 1 note
+            IntakeSimulation.IntakeSide.FRONT,
+            // The intake can hold up to 50 Fuel
             50);
+    intakeSimulation.getGamePieceContactListener();
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    // Update simulation inputs
     inputs.fuelInside = intakeSimulation.getGamePiecesAmount();
   }
 
