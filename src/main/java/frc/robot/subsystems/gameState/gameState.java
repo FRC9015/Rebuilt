@@ -59,11 +59,13 @@ public class GameState extends SubsystemBase{
     /** gamestate: will be A for auto, T for transition, B for blue, R for red, and E for endgame */
     public StateEnum state;
     public boolean ishubactive;
+    public boolean willflash;
 
     @Override
     public void periodic(){
         this.state = getGameState();
         this.ishubactive = getCanScore();
+        this.willflash = getFlashy();
     }
 
     public StateEnum getstate(){
@@ -72,6 +74,10 @@ public class GameState extends SubsystemBase{
 
     public boolean getishubactive(){
         return this.ishubactive;
+    }
+
+    public boolean getwillflash(){
+        return this.willflash;
     }
 
 /**
@@ -132,6 +138,20 @@ public class GameState extends SubsystemBase{
         if (statevar.toString().charAt(0) == alliance.charAt(0)) {
             return true;
         } else {
+            return false;
+        }
+    }
+    private boolean getFlashy(){
+        double time = DriverStation.getMatchTime();
+        double epsilon = 0.2; 
+        if (Math.abs(time - 133) < epsilon ||
+        Math.abs(time - 108) < epsilon ||
+        Math.abs(time - 83) < epsilon ||
+        Math.abs(time - 58) < epsilon ||
+        Math.abs(time - 33) < epsilon ||
+        Math.abs(time - 3) < epsilon){
+            return true;
+        }else{
             return false;
         }
     }
