@@ -66,6 +66,14 @@ public class GameState extends SubsystemBase{
         this.ishubactive = getCanScore();
     }
 
+    public StateEnum getstate(){
+        return this.state;
+    }
+
+    public boolean getishubactive(){
+        return this.ishubactive;
+    }
+
 /**
  * finds the games current state
  * @return the game's state, A for auto, T for transition, B for blue, R for red, and E for endgame.
