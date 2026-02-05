@@ -57,9 +57,9 @@ import org.littletonrobotics.junction.Logger;
 
 public class GameState extends SubsystemBase{
     /** gamestate: will be A for auto, T for transition, B for blue, R for red, and E for endgame */
-    public StateEnum state;
-    public boolean ishubactive;
-    public boolean willflash;
+    private StateEnum state;
+    private boolean ishubactive;
+    private boolean willflash;
 
     @Override
     public void periodic(){
@@ -94,7 +94,7 @@ public class GameState extends SubsystemBase{
         return StateEnum.TRANSITION;
         } else if (time > 30) {
         String gameData = DriverStation.getGameSpecificMessage();
-        if (gameData == "B") {
+        if ("B".equals(gameData)) {
             if (time > 105){
                 return StateEnum.RED_TEAM;
             } else if (time>80) {
@@ -105,7 +105,7 @@ public class GameState extends SubsystemBase{
                 return StateEnum.BLUE_TEAM;
             }
         }
-            if(gameData == "R"){
+            if("R".equals(gameData)){
             if (time > 105){
                 return StateEnum.BLUE_TEAM;
             } else if (time>80) {
@@ -130,8 +130,12 @@ public class GameState extends SubsystemBase{
      */
     private boolean getCanScore(){
         StateEnum statevar = getGameState();
-        Optional<Alliance> alli = DriverStation.getAlliance();
-        String alliance = alli.toString();
+        try{
+            Optional<Alliance> alli = DriverStation.getAlliance();
+            String alliance = alli.get().toString();
+        } catch (Exception NoSuchElementException) {
+            throw NoSuchElementException;
+        }
         if (statevar == StateEnum.AUTO|| 
         statevar == StateEnum.TRANSITION|| 
         statevar == StateEnum.ENDGAME|| 
