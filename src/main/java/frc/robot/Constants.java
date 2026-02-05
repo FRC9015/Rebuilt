@@ -76,6 +76,6 @@ public final class Constants {
 
   /** CAN IDs for the CANdle LED controllers. */
   public static class CANdleIDConstants {
-    public static final int candleID1 = 19; //TODO Configure This;
+    public static final int CANDLE_ID_1 = 19; //TODO Configure This;
   } 
 }
