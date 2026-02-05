@@ -1,6 +1,8 @@
 package frc.robot.subsystems.intake;
 
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -16,7 +18,7 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
   // ---------------- MOTORS ----------------
   private final SparkFlex intakeMotor;
-  private final SparkFlex pivotMotor;
+  private final SparkFlex intakeMotor2;
 
   private final RelativeEncoder intakeEncoder;
   private final RelativeEncoder pivotEncoder;
@@ -26,19 +28,22 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
   private final SparkMaxConfig intakeConfig;
   private final SparkMaxConfig pivotConfig;
+  private final SparkMaxConfig motorConfig;
 
-  private static final double maxFreeSpeed = 6784.0; // RPM
+  private final SparkClosedLoopController closedLoopController1,closedLoopController2;
+
+  private static final double maxFreeSpeed = 3000.0; // RPM
 
   // ---------------- PID CONSTANTS ----------------
   // Intake velocity (RPM)
-  private LoggedNetworkNumber intakeKp = new LoggedNetworkNumber("/Intake/P", 1.0);
-  private LoggedNetworkNumber intakeKi = new LoggedNetworkNumber("/Intake/I", 0.0);
-  private LoggedNetworkNumber intakeKd = new LoggedNetworkNumber("/Intake/D", 0.0);
+  private double intakeKp = 0.001;
+  private double intakeKi = 0.0;
+  private double intakeKd = 0.0;
   private LoggedNetworkBoolean updatePIDs = new LoggedNetworkBoolean("/Intake/UpdatePIDs", false);
   private double intakeKff = 0.0;
 
   // Pivot position (rotations)
-  private LoggedNetworkNumber pivotKp = new LoggedNetworkNumber("/Pivot/P", 1.0);
+  private LoggedNetworkNumber pivotKp = new LoggedNetworkNumber("/Pivot/P", 0.1);
   private LoggedNetworkNumber pivotKi = new LoggedNetworkNumber("/Pivot/I", 0.0);
   private LoggedNetworkNumber pivotKd = new LoggedNetworkNumber("/Pivot/D", 0.0);
 
@@ -46,19 +51,36 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
     // ---------------- MOTOR INIT ----------------
     intakeMotor = new SparkFlex(intakeID, SparkFlex.MotorType.kBrushless);
-    pivotMotor = new SparkFlex(pivotID, SparkFlex.MotorType.kBrushless);
+    intakeMotor2 = new SparkFlex(pivotID, SparkFlex.MotorType.kBrushless);
 
     intakeEncoder = intakeMotor.getEncoder();
-    pivotEncoder = pivotMotor.getEncoder();
+    pivotEncoder = intakeMotor2.getEncoder();
+    motorConfig = new SparkMaxConfig();
+    motorConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        // Set PID values for position control. We don't need to pass a closed loop
+        // slot, as it will default to slot 0.
+        .p(0.1)
+        .i(0)
+        .d(0)
+        .outputRange(-1, 1)
+        // Set PID values for velocity control in slot 1
+        .p(0.0001, ClosedLoopSlot.kSlot1)
+        .i(0, ClosedLoopSlot.kSlot1)
+        .d(0, ClosedLoopSlot.kSlot1)
+        .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
+        .feedForward
+          // kV is now in Volts, so we multiply by the nominal voltage (12V)
+          .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
 
     intakePID = intakeMotor.getClosedLoopController();
-    pivotPID = pivotMotor.getClosedLoopController();
+    pivotPID = intakeMotor2.getClosedLoopController();
 
     intakeConfig = new SparkMaxConfig();
     pivotConfig = new SparkMaxConfig();
 
     // ---------------- INTAKE CONFIG ----------------
-    intakeConfig.inverted(false).idleMode(IdleMode.kBrake);
+    intakeConfig.inverted(true).idleMode(IdleMode.kBrake);
 
     intakeConfig
         .encoder
@@ -67,12 +89,12 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
     intakeConfig
         .closedLoop
-        .pid(intakeKp.getAsDouble(), intakeKi.getAsDouble(), intakeKd.getAsDouble())
+        .pid(intakeKp, intakeKi, intakeKd)
         .velocityFF(intakeKff)
         .outputRange(-1.0, 1.0);
 
     // ---------------- PIVOT CONFIG ----------------
-    pivotConfig.inverted(true).idleMode(IdleMode.kBrake);
+    pivotConfig.inverted(false).idleMode(IdleMode.kBrake);
 
     pivotConfig
         .encoder
@@ -86,10 +108,13 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
     // ---------------- APPLY CONFIG ----------------
     intakeMotor.configure(
-        intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    pivotMotor.configure(
-        pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    intakeMotor2.configure(
+        motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    closedLoopController1 = intakeMotor.getClosedLoopController();
+    closedLoopController2 = intakeMotor2.getClosedLoopController();
   }
 
   // ------------------------------------------------
@@ -109,7 +134,7 @@ public class IntakeIOSparkFlex implements IntakeIO {
   @Override
   public void stop() {
     intakeMotor.stopMotor();
-    pivotMotor.stopMotor();
+    intakeMotor2.stopMotor();
   }
 
   public boolean updatePIDsIfNeeded() {
@@ -120,9 +145,9 @@ public class IntakeIOSparkFlex implements IntakeIO {
   // --------- CONTROL ----------------
   @Override
   public void updatePIDFromDashboard() {
-    double intakeP = intakeKp.getAsDouble();
-    double intakeI = intakeKi.getAsDouble();
-    double intakeD = intakeKd.getAsDouble();
+    double intakeP = intakeKp;
+    double intakeI = intakeKi;
+    double intakeD = intakeKd;
 
     double pivotP = pivotKp.getAsDouble();
     double pivotI = pivotKi.getAsDouble();
@@ -135,17 +160,17 @@ public class IntakeIOSparkFlex implements IntakeIO {
     // Apply without resetting other parameters
     intakeMotor.configure(
         intakeConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-    pivotMotor.configure(
-        pivotConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    intakeMotor2.configure(
+        intakeConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   @Override
   public void setIntakeSpeed(double speed) {
 
-    double clamped = MathUtil.clamp(speed, 0.01, 1.0);
-
     // Velocity control (RPM)
-    intakePID.setSetpoint(clamped * maxFreeSpeed, ControlType.kVelocity);
+  closedLoopController1.setSetpoint(speed, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
+  closedLoopController2.setSetpoint(speed, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
+
   }
 
   @Override

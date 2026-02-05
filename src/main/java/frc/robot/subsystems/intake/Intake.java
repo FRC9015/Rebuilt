@@ -35,7 +35,7 @@ public class Intake extends SubsystemBase {
 
     io.setIntakeSpeed(-speedValue);
   }
-
+                                                                 
   public void setPivotSpeed(double speedValue) {
     io.setIntakePosition(speedValue);
   }
@@ -47,9 +47,9 @@ public class Intake extends SubsystemBase {
     return this.startEnd(
         () -> {
           this.setIntakeSpeed(intakeSpeed);
-          this.setPivotSpeed(intakeSpeed);
+          // this.setPivotSpeed(intakeSpeed);
         },
-        this::stopIntake);
+        () -> io.stop());
   }
 
   public Command runIntakeAtReverseSpeed(double speed) {
