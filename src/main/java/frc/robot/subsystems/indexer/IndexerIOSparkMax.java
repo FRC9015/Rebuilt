@@ -5,7 +5,9 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
@@ -16,6 +18,10 @@ public class IndexerIOSparkMax implements IndexerIO {
 
   private final SparkMax motor1;
   private final RelativeEncoder encoder;
+
+  private final double maxSpeed = 6784.0;
+
+  private final SparkClosedLoopController indexerPIDController;
 
   private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
 
@@ -30,11 +36,13 @@ public class IndexerIOSparkMax implements IndexerIO {
     cfg.inverted(false); // flip to true if your indexer spins backwards
     cfg.smartCurrentLimit(45); // amps
     cfg.voltageCompensation(12.0); // consistent voltage behavior
+    cfg.closedLoop.pid(6, 7, 21);
 
     // Apply config:
     // - Reset safe params first (gets you to a known baseline)
     // - Don't persist to flash every boot (saves flash wear + avoids config delays)
     motor1.configure(cfg, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    indexerPIDController = motor1.getClosedLoopController();
   }
 
   @Override
@@ -67,9 +75,8 @@ public class IndexerIOSparkMax implements IndexerIO {
     motor1.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
-  @Override
-  public void setRPM(double rpm) {
+  public void setPercentage(double rpm) {
     // Same as your CTRE code: this is open-loop voltage, name is legacy
-    motor1.setVoltage(MathUtil.clamp(rpm, -12.0, 12.0));
+    indexerPIDController.setSetpoint(rpm*maxSpeed, ControlType.kVelocity);
   }
 }
