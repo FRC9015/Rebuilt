@@ -5,7 +5,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -16,7 +15,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -32,7 +30,8 @@ public class ShooterIOTalonFX implements ShooterIO {
   public StatusSignal<Angle> motorPosition;
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
-  private final MotionMagicVoltage hoodMagicVoltage = new MotionMagicVoltage(Constants.shooterConstants.HOOD_MAX_POS);
+  private final MotionMagicVoltage hoodMagicVoltage =
+      new MotionMagicVoltage(Constants.shooterConstants.HOOD_MAX_POS);
 
   public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int hoodID, int hoodEncoderID) {
     flywheelMotorLeft = new TalonFX(flywheelID1);

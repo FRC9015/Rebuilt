@@ -101,7 +101,7 @@ public final class Constants {
     public static final FeedbackConfigs HOOD_FEEDBACK_CONFIGS =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
-    //TODO tune these values
+    // TODO tune these values
 
     public static final double SHOOTER_MAX_SPEED = 100;
     public static final double SHOOTER_MIN_SPEED = 0.0;

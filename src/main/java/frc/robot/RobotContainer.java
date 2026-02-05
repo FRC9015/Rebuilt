@@ -20,15 +20,15 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIOSim;
-import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -89,9 +89,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
-        shooter =
-            new Shooter(
-                new ShooterIOSim());
+        shooter = new Shooter(new ShooterIOSim());
         break;
 
       default:
@@ -109,7 +107,7 @@ public class RobotContainer {
                     Constants.shooterConstants.FlywheelLeftID,
                     Constants.shooterConstants.FlywheelRightID,
                     Constants.shooterConstants.HoodID,
-                    Constants.shooterConstants.HoodEncoderID));        
+                    Constants.shooterConstants.HoodEncoderID));
         break;
     }
 
@@ -175,7 +173,6 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
   }
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
