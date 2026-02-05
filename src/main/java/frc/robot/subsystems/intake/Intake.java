@@ -40,14 +40,14 @@ public class Intake extends SubsystemBase {
     io.setIntakePosition(speedValue);
   }
 
-  public Command runIntakeAtSpeed(double intakeSpeed, double pivotSpeed) {
+  public Command runIntakeAtSpeed(double intakeSpeed) {
     Logger.recordOutput("Intake/Speed", intakeSpeed);
-    Logger.recordOutput("Intake2/Speed", pivotSpeed);
+    // Logger.recordOutput("Intake2/Speed", pivotSpeed);
 
     return this.startEnd(
         () -> {
           this.setIntakeSpeed(intakeSpeed);
-          this.setPivotSpeed(pivotSpeed);
+          this.setPivotSpeed(intakeSpeed);
         },
         this::stopIntake);
   }
@@ -65,7 +65,7 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    io.updatePIDFromDashboard();
+    // io.updatePIDFromDashboard(); ts mad slow fuck od omkaar
     Logger.processInputs("Intake", inputs);
   }
 }

@@ -139,18 +139,14 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
-    driverController
-        .leftBumper()
-        .whileTrue(Commands.startEnd(()->intake.runIntakeAtSpeed(intakeRollerValue, intakeRollerValue), ()->intake.stopIntake()));
+    driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
     driverController.povDown().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.1));
     driverController.povUp().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.1));
     driverController.povLeft().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.05));
     driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
     driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
     driverController.y().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.01));
-    driverController
-        .rightBumper()
-        .whileTrue(intake.runIntakeAtSpeed(-intakeRollerValue, -intakeRollerValue));
+    driverController.rightBumper().whileTrue(intake.runIntakeAtSpeed(-intakeRollerValue));
   }
 
   /**
