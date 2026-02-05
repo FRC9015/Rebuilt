@@ -30,7 +30,7 @@ public class IntakeIOSparkFlex implements IntakeIO {
   private final SparkMaxConfig pivotConfig;
   private final SparkMaxConfig motorConfig;
 
-  private final SparkClosedLoopController closedLoopController1,closedLoopController2;
+  private final SparkClosedLoopController closedLoopController1, closedLoopController2;
 
   private static final double maxFreeSpeed = 3000.0; // RPM
 
@@ -56,22 +56,23 @@ public class IntakeIOSparkFlex implements IntakeIO {
     intakeEncoder = intakeMotor.getEncoder();
     pivotEncoder = intakeMotor2.getEncoder();
     motorConfig = new SparkMaxConfig();
-    motorConfig.closedLoop
+    motorConfig
+        .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop
         // slot, as it will default to slot 0.
         .p(0.1)
         .i(0)
         .d(0)
-        .outputRange(-1, 1)
+        .outputRange(-12, 12)
         // Set PID values for velocity control in slot 1
         .p(0.0001, ClosedLoopSlot.kSlot1)
         .i(0, ClosedLoopSlot.kSlot1)
         .d(0, ClosedLoopSlot.kSlot1)
         .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
         .feedForward
-          // kV is now in Volts, so we multiply by the nominal voltage (12V)
-          .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
+        // kV is now in Volts, so we multiply by the nominal voltage (12V)
+        .kV(12.0 / 6784, ClosedLoopSlot.kSlot1);
 
     intakePID = intakeMotor.getClosedLoopController();
     pivotPID = intakeMotor2.getClosedLoopController();
@@ -80,7 +81,7 @@ public class IntakeIOSparkFlex implements IntakeIO {
     pivotConfig = new SparkMaxConfig();
 
     // ---------------- INTAKE CONFIG ----------------
-    intakeConfig.inverted(true).idleMode(IdleMode.kBrake);
+    intakeConfig.inverted(false).idleMode(IdleMode.kBrake);
 
     intakeConfig
         .encoder
@@ -167,10 +168,9 @@ public class IntakeIOSparkFlex implements IntakeIO {
   @Override
   public void setIntakeSpeed(double speed) {
 
-    // Velocity control (RPM)
-  closedLoopController1.setSetpoint(speed, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
-  closedLoopController2.setSetpoint(speed, ControlType.kVelocity, ClosedLoopSlot.kSlot1);
-
+    // Velocity control (Percentage)
+    closedLoopController1.setSetpoint(-speed, ControlType.kVoltage, ClosedLoopSlot.kSlot0);
+    closedLoopController2.setSetpoint(speed, ControlType.kVoltage, ClosedLoopSlot.kSlot0);
   }
 
   @Override

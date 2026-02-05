@@ -25,6 +25,8 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkFlex;
@@ -43,6 +45,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Intake intake;
+  private final Indexer indexer;
 
   // Controller
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -52,8 +55,7 @@ public class RobotContainer {
 
   private SwerveDriveSimulation simDrive;
 
-  private double intakeRollerValue = 0.5;
-  private double intakePivotValue = 0.5;
+  private double intakeRollerValue = 2;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -69,7 +71,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         intake = new Intake(new IntakeIOSparkFlex(27, 28));
-
+        indexer = new Indexer(new IndexerIOSparkFlex(13));
         break;
 
       case SIM:
@@ -87,6 +89,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
         intake = new Intake(new IntakeIOSim());
+        indexer = new Indexer(new IndexerIOSparkFlex(13));
         break;
 
       default:
@@ -99,6 +102,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
         intake = new Intake(new IntakeIOSparkFlex(0, 0));
+        indexer = new Indexer(new IndexerIOSparkFlex(13));
         break;
     }
 
@@ -146,7 +150,7 @@ public class RobotContainer {
     driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
     driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
     driverController.y().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.01));
-    driverController.rightBumper().whileTrue(intake.runIntakeAtSpeed(-intakeRollerValue));
+    driverController.rightBumper().whileTrue(indexer.runIndexer(6));
   }
 
   /**

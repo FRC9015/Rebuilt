@@ -35,7 +35,7 @@ public class Intake extends SubsystemBase {
 
     io.setIntakeSpeed(-speedValue);
   }
-                                                                 
+
   public void setPivotSpeed(double speedValue) {
     io.setIntakePosition(speedValue);
   }
