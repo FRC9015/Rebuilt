@@ -87,10 +87,10 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
-                    Constants.shooterConstants.FlywheelLeftID,
-                    Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID,
-                    Constants.shooterConstants.HoodEncoderID));
+                    Constants.ShooterConstants.FlywheelLeftID,
+                    Constants.ShooterConstants.FlywheelRightID,
+                    Constants.ShooterConstants.HoodID,
+                    Constants.ShooterConstants.HoodEncoderID));
         break;
 
       case SIM:
@@ -127,10 +127,10 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
-                    Constants.shooterConstants.FlywheelLeftID,
-                    Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID,
-                    Constants.shooterConstants.HoodEncoderID));
+                    Constants.ShooterConstants.FlywheelLeftID,
+                    Constants.ShooterConstants.FlywheelRightID,
+                    Constants.ShooterConstants.HoodID,
+                    Constants.ShooterConstants.HoodEncoderID));
         break;
 
       default:
