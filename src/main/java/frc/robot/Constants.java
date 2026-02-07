@@ -68,4 +68,11 @@ public final class Constants {
     public static final double INTAKE_DEPLOYED_POSITION = 100.0;
     public static final double INTAKE_STOWED_POSITION = 10.0;
   }
+
+  public static class IndexerConstants {
+    public static final int INDEXER_MOTOR_ID = 13;
+    public static final double INDEXER_P = 0.001;
+    public static final double INDEXER_I = 0;
+    public static final double INDEXER_D = 0.0001;
+  }
 }

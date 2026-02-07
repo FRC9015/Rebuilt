@@ -43,8 +43,8 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
 
     // Update alerts
-    encoderDisconnectedAlert.set(!inputs.indexerEncoderConnected);
-    jamAlert.set(inputs.jamDetected);
+   // TODO: Implement encoder connection status and jam detection logic to update these alerts
+
   }
 
   /**
@@ -75,7 +75,7 @@ public class Indexer extends SubsystemBase {
    * @return True if jam is detected, false otherwise.
    */
   public boolean isJamDetected() {
-    return inputs.jamDetected;
+    return false; // TODO implement jam detection logic based on current spikes or encoder feedback
   }
 
   /**
@@ -84,7 +84,7 @@ public class Indexer extends SubsystemBase {
    * @return The RPM of the indexer.
    */
   public double getRPM() {
-    return inputs.indexerRPM;
+    return inputs.indexerVelocity;
   }
 
   /**
