@@ -14,33 +14,25 @@
 package frc.robot.subsystems.indexer;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 
-/** the. */
+/** IO implementation for the Indexer subsystem using a TalonFX motor controller. */
 public class IndexerIOTalonFX implements IndexerIO {
 
   private final TalonFX motor1;
-  private final StatusSignal<AngularVelocity> rpmSignal;
   private final StatusSignal<Voltage> appliedVoltsSignal;
   private final StatusSignal<Current> currentSignal;
 
-  private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
+  private final double defaultCurrentLimit = 45.0;
+  private final double maxVoltage = 12.0;
 
-  /**
-   * Constructs an IndexerIOTalonFX.
-   *
-   * @param motorId1 The ID of the motor.
-   */
   public IndexerIOTalonFX(int motorId1) { // , int canRangeID1, int canRangeID2, int canRangeID3
     motor1 = new TalonFX(motorId1);
 
@@ -48,14 +40,13 @@ public class IndexerIOTalonFX implements IndexerIO {
     TalonFXConfiguration motorConfig = new TalonFXConfiguration();
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    motorConfig.CurrentLimits.StatorCurrentLimit = 45.0;
+    motorConfig.CurrentLimits.StatorCurrentLimit = defaultCurrentLimit;
     motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     // Configure the integrated encoder (default settings should work)
     motor1.getConfigurator().apply(motorConfig);
 
     // Use the built-in relative encoder of the TalonFX
-    rpmSignal = motor1.getVelocity();
     appliedVoltsSignal = motor1.getMotorVoltage();
     currentSignal = motor1.getStatorCurrent();
   }
@@ -63,13 +54,10 @@ public class IndexerIOTalonFX implements IndexerIO {
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     // Refresh signals
-    StatusCode encoderStatus = BaseStatusSignal.refreshAll(rpmSignal, appliedVoltsSignal, currentSignal);
-
+    BaseStatusSignal.refreshAll(appliedVoltsSignal, currentSignal);
     // Update inputs
-    inputs.IndexerEncoderConnected = encoderConnectedDebounce.calculate(encoderStatus.isOK());
-    inputs.IndexerRPM = rpmSignal.getValueAsDouble();
-    inputs.IndexerAppliedVolts = appliedVoltsSignal.getValueAsDouble();
-    inputs.IndexerCurrentAmps = currentSignal.getValueAsDouble();
+    inputs.indexerAppliedVolts = appliedVoltsSignal.getValueAsDouble();
+    inputs.indexerCurrentAmps = currentSignal.getValueAsDouble();
   }
 
   @Override
@@ -84,6 +72,6 @@ public class IndexerIOTalonFX implements IndexerIO {
 
   @Override
   public void setVoltage(double voltage) {
-    motor1.setVoltage(MathUtil.clamp(voltage, -12.0, 12.0));
+    motor1.setVoltage(MathUtil.clamp(voltage, -maxVoltage, maxVoltage));
   }
 }

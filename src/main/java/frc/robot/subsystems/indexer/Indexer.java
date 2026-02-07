@@ -24,7 +24,7 @@ public class Indexer extends SubsystemBase {
   private final IndexerIO io;
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
   private final Alert encoderDisconnectedAlert;
-  private final Alert JamAlert;
+  private final Alert jamAlert;
 
   /**
    * Constructs an Indexer subsystem.
@@ -34,7 +34,7 @@ public class Indexer extends SubsystemBase {
   public Indexer(IndexerIO io) {
     this.io = io;
     encoderDisconnectedAlert = new Alert("Indexer encoder disconnected!", AlertType.kError);
-    JamAlert = new Alert("Jam detected!", AlertType.kInfo);
+    jamAlert = new Alert("Jam detected!", AlertType.kInfo);
   }
 
   /** Periodically updates the indexer's state and logs inputs. */
@@ -43,14 +43,14 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
 
     // Update alerts
-    encoderDisconnectedAlert.set(!inputs.IndexerEncoderConnected);
-    JamAlert.set(inputs.JamDetected);
+    // TODO: Implement encoder connection status and jam detection logic to update these alerts
+
   }
 
   /**
-   * Sets the indexer's RPM.
+   * Sets the indexer's applied voltage.
    *
-   * @param voltage The desired RPM for the indexer.
+   * @param voltage The desired voltage for the indexer.
    */
   public void setVoltage(double voltage) {
     io.setVoltage(voltage);
@@ -79,7 +79,7 @@ public class Indexer extends SubsystemBase {
    * @return True if jam is detected, false otherwise.
    */
   public boolean isJamDetected() {
-    return inputs.JamDetected;
+    return false; // TODO implement jam detection logic based on current spikes or encoder feedback
   }
 
   /**
@@ -88,7 +88,7 @@ public class Indexer extends SubsystemBase {
    * @return The RPM of the indexer.
    */
   public double getRPM() {
-    return inputs.IndexerRPM;
+    return inputs.indexerVelocity;
   }
 
   /**
@@ -97,7 +97,7 @@ public class Indexer extends SubsystemBase {
    * @return The applied voltage.
    */
   public double getAppliedVolts() {
-    return inputs.IndexerAppliedVolts;
+    return inputs.indexerAppliedVolts;
   }
 
   /**
@@ -106,40 +106,16 @@ public class Indexer extends SubsystemBase {
    * @return The current in amps.
    */
   public double getCurrentAmps() {
-    return inputs.IndexerCurrentAmps;
+    return inputs.indexerCurrentAmps;
   }
 
   /**
-   * Runs the indexer at the specified RPM.
+   * Runs the indexer at the specified voltage.
    *
    * @param voltage Voltage provided to the motor.
    * @return A command that runs the indexer.
    */
   public Command runIndexer(double voltage) {
-    return this.startEnd(() -> setVoltage(-voltage), () -> stop());
-  }
-
-  /**
-   * idk auto stuff copy pasted from reefscape end effector public Command runIndexerAuto(double
-   * voltage) { return this.run(() -> setVoltage(-voltage)); }
-   *
-   * <p>public Command runIndexerAutoCommand() { return new SequentialCommandGroup( new
-   * InstantCommand(this::autoIndexerVoltage), new WaitCommand(0.25), new
-   * InstantCommand(this::stop)); }
-   *
-   * <p>public Command runIndexerAutoCommandL1() { return new SequentialCommandGroup( new
-   * InstantCommand(this::autoIndexerVoltageL1), new WaitCommand(0.4), new
-   * InstantCommand(this::stop)); }
-   *
-   * <p>private void autoIndexerVoltage() { io.setRPM(-4); }
-   *
-   * <p>private void autoIndexerVoltageL1() { io.setRPM(-4); } /** Runs the indexer in reverse at
-   * the specified RPM.
-   *
-   * @param voltage Voltage provided to the motor.
-   * @return A command that runs the indexer in reverse.
-   */
-  public Command runIndexerReverse(double voltage) {
-    return this.startEnd(() -> setVoltage(voltage), () -> stop());
+    return this.startEnd(() -> io.setVoltage(voltage), () -> stop());
   }
 }
