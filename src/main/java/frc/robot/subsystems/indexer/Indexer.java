@@ -26,6 +26,12 @@ public class Indexer extends SubsystemBase {
   private final Alert encoderDisconnectedAlert;
   private final Alert jamAlert;
 
+  private static final double jamCurrentAmps = 30.0;
+  private static final double jamRPMThreshold = 50.0;
+  private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
+  private int jamCycles = 0;
+
+
   /**
    * Constructs an Indexer subsystem.
    *
@@ -42,10 +48,13 @@ public class Indexer extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
 
+    jamAlert.set(isJamDetected());
+
     // Update alerts
     // TODO: Implement encoder connection status and jam detection logic to update these alerts
 
   }
+
 
   /**
    * Sets the indexer's applied voltage.
@@ -79,8 +88,19 @@ public class Indexer extends SubsystemBase {
    * @return True if jam is detected, false otherwise.
    */
   public boolean isJamDetected() {
-    return false; // TODO implement jam detection logic based on current spikes or encoder feedback
+    boolean highCurrent = inputs.indexerCurrentAmps >= jamCurrentAmps;
+    boolean lowSpeed = Math.abs(inputs.indexerVelocity) <= jamRPMThreshold;
+
+    if (highCurrent && lowSpeed) {
+      jamCycles++;
+    } else {
+      jamCycles = 0;
+    }
+
+    return jamCycles >= jamCyclesThreshold;
   }
+
+
 
   /**
    * Returns the current RPM of the indexer.
