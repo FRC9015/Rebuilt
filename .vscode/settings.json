@@ -70,5 +70,6 @@
   "[java]": {
     "editor.defaultFormatter": "richardwillis.vscode-spotless-gradle"
   },
-  "java.checkstyle.configuration": "${workspaceFolder}\\config\\checkstyle\\checkstyle.xml"
+  "java.checkstyle.configuration": "${workspaceFolder}\\config\\checkstyle\\checkstyle.xml",
+  "java.checkstyle.version": "10.21.1"
 }

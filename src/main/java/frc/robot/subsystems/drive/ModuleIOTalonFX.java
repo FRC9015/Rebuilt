@@ -55,10 +55,19 @@ public class ModuleIOTalonFX implements ModuleIO {
           TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
       constants;
 
+  // Local constants to avoid magic numbers in configuration
+  private static final int CONFIG_RETRY_COUNT = 5;
+  private static final double CONFIG_TIMEOUT = 0.25;
+  private static final double TURN_CRUISE_BASE = 100.0;
+  private static final double TURN_ACCEL_DIV_DIVISOR = 0.100;
+  private static final double TURN_EXPO_KV = 0.12;
+  private static final double TURN_EXPO_KA = 0.1;
+  private static final double CONNECTION_DEBOUNCE_SECONDS = 0.5;
+
   // Hardware objects
-  private final TalonFX driveTalon;
-  private final TalonFX turnTalon;
-  private final CANcoder cancoder;
+  public final TalonFX driveTalon;
+  public final TalonFX turnTalon;
+  public final CANcoder cancoder;
 
   // Voltage control requests
   private final VoltageOut voltageRequest = new VoltageOut(0);
@@ -91,9 +100,9 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final StatusSignal<Current> turnCurrent;
 
   // Connection debouncers
-  private final Debouncer driveConnectedDebounce = new Debouncer(0.5);
-  private final Debouncer turnConnectedDebounce = new Debouncer(0.5);
-  private final Debouncer turnEncoderConnectedDebounce = new Debouncer(0.5);
+  private final Debouncer driveConnectedDebounce = new Debouncer(CONNECTION_DEBOUNCE_SECONDS);
+  private final Debouncer turnConnectedDebounce = new Debouncer(CONNECTION_DEBOUNCE_SECONDS);
+  private final Debouncer turnEncoderConnectedDebounce = new Debouncer(CONNECTION_DEBOUNCE_SECONDS);
 
   public ModuleIOTalonFX(
       SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
@@ -119,8 +128,9 @@ public class ModuleIOTalonFX implements ModuleIO {
         constants.DriveMotorInverted
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
-    tryUntilOk(5, () -> driveTalon.getConfigurator().apply(driveConfig, 0.25));
-    tryUntilOk(5, () -> driveTalon.setPosition(0.0, 0.25));
+    tryUntilOk(
+        CONFIG_RETRY_COUNT, () -> driveTalon.getConfigurator().apply(driveConfig, CONFIG_TIMEOUT));
+    tryUntilOk(CONFIG_RETRY_COUNT, () -> driveTalon.setPosition(0.0, CONFIG_TIMEOUT));
 
     // Configure turn motor
     TalonFXConfiguration turnConfig = new TalonFXConfiguration();
@@ -135,17 +145,19 @@ public class ModuleIOTalonFX implements ModuleIO {
           default -> FeedbackSensorSourceValue.FusedCANcoder;
         };
     turnConfig.Feedback.RotorToSensorRatio = constants.SteerMotorGearRatio;
-    turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / constants.SteerMotorGearRatio;
+    turnConfig.MotionMagic.MotionMagicCruiseVelocity =
+        TURN_CRUISE_BASE / constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicAcceleration =
-        turnConfig.MotionMagic.MotionMagicCruiseVelocity / 0.100;
-    turnConfig.MotionMagic.MotionMagicExpo_kV = 0.12 * constants.SteerMotorGearRatio;
-    turnConfig.MotionMagic.MotionMagicExpo_kA = 0.1;
+        turnConfig.MotionMagic.MotionMagicCruiseVelocity / TURN_ACCEL_DIV_DIVISOR;
+    turnConfig.MotionMagic.MotionMagicExpo_kV = TURN_EXPO_KV * constants.SteerMotorGearRatio;
+    turnConfig.MotionMagic.MotionMagicExpo_kA = TURN_EXPO_KA;
     turnConfig.ClosedLoopGeneral.ContinuousWrap = true;
     turnConfig.MotorOutput.Inverted =
         constants.SteerMotorInverted
             ? InvertedValue.Clockwise_Positive
             : InvertedValue.CounterClockwise_Positive;
-    tryUntilOk(5, () -> turnTalon.getConfigurator().apply(turnConfig, 0.25));
+    tryUntilOk(
+        CONFIG_RETRY_COUNT, () -> turnTalon.getConfigurator().apply(turnConfig, CONFIG_TIMEOUT));
 
     // Configure CANCoder
     CANcoderConfiguration cancoderConfig = constants.EncoderInitialConfigs;
@@ -179,7 +191,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     BaseStatusSignal.setUpdateFrequencyForAll(
         Drive.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0,
+        Drive.ODOMETRY_FREQUENCY,
         driveVelocity,
         driveAppliedVolts,
         driveCurrent,

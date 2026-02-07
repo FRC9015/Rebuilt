@@ -17,6 +17,11 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -28,6 +33,7 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  /** The runtime mode for the robot (real, simulation, or replay). */
   public static enum Mode {
     /** Running on a real robot. */
     REAL,
@@ -58,5 +64,40 @@ public final class Constants {
     public static final double MAX_AMBIGUITY = 0.1;
     public static final int MAX_AVERAGE_DISTANCE = 3;
     public static final int STD_DEV_RANGE = 30;
+  /** IDs for motors used by the robot (placeholders — replace with real IDs). */
+  public static class MotorIDConstants {
+    // placeholders
+    public static final int UPPER_INTAKE_MOTOR_ID = 0;
+    public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+  }
+
+  /** Configuration and tuning constants for the intake mechanism. */
+  public static class IntakeConstants {
+    public static final Slot0Configs intakeSlotPositionConfigs =
+        new Slot0Configs()
+            .withKP(2)
+            .withKI(0)
+            .withKD(0.05)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final Slot1Configs intakeSlotVelocityConfigs =
+        new Slot1Configs().withKP(2).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+
+    public static final MotionMagicConfigs GROUND_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final FeedbackConfigs GROUND_FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final double INTAKE_MAX_POS = 300.0;
+    public static final double INTAKE_MIN_POS = 0.0;
+    public static final double INTAKE_MAX_SPEED = 512.0;
+    public static final double INTAKE_MIN_SPEED = -511.0;
+
+    public static final double INTAKE_DEPLOYED_POSITION = 100.0;
+    public static final double INTAKE_STOWED_POSITION = 10.0;
   }
 }
