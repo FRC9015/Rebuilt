@@ -23,6 +23,7 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  /** The runtime mode for the robot (real, simulation, or replay). */
   public static enum Mode {
     /** Running on a real robot. */
     REAL,
@@ -34,22 +35,26 @@ public final class Constants {
     REPLAY
   }
 
-  public static class motorIDConstants {
+  /** IDs for motors used by the robot (placeholders — replace with real IDs). */
+  public static class MotorIDConstants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
   }
 
-  public static class intakeConstants {
+  public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
-            .withKP(2)
+            .withKP(0.001)
             .withKI(0)
-            .withKD(0.05)
+            .withKD(0.02)
             .withKG(0.01)
             .withKA(0)
             .withKS(0)
             .withKV(0);
+
+    public static final int INTAKE_MOTOR_ID = 27;
+    public static final int INTAKE2_MOTOR_ID = 28;
 
     public static final Slot1Configs intakeSlotVelocityConfigs =
         new Slot1Configs().withKP(2).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
@@ -60,13 +65,13 @@ public final class Constants {
     public static final FeedbackConfigs GROUND_FEEDBACK_CONFIGS =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
-    public static final double INTAKE_MAX_POS = 300.0;
-    public static final double INTAKE_MIN_POS = 0.0;
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double INTAKE_DEPLOYED_POSITION = 100.0;
-    public static final double INTAKE_STOWED_POSITION = 10.0;
+    public static final double PIVOT_MAX_POS = 300.0;
+    public static final double PIVOT_MIN_POS = 0.0;
+    public static final double PIVOT_DEPLOYED_POSITION = 100.0;
+    public static final double PIVOT_STOWED_POSITION = 10.0;
   }
 
   public static class IndexerConstants {

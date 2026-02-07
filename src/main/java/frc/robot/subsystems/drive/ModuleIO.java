@@ -16,7 +16,9 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
+/** Hardware abstraction for a swerve module's IO. */
 public interface ModuleIO {
+  /** Container for module IO inputs used for logging and control. */
   @AutoLog
   public static class ModuleIOInputs {
     public boolean driveConnected = false;

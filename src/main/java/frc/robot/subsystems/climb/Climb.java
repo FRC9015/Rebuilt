@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs;
 import org.littletonrobotics.junction.Logger;
 
+/** Subsystem for controlling the robot climb mechanism. */
 public class Climb extends SubsystemBase {
   private final ClimbIO io;
   private final ClimbIOInputsAutoLogged inputs = new ClimbIOInputsAutoLogged();
