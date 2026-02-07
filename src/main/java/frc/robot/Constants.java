@@ -97,7 +97,7 @@ public final class Constants {
     public static final double MAXROTATION = 2.0;
     public static final double MINROTATION = 0.0;
 
-    public static final double MOTOR_TO_TURRET_GEAR_RATIO = 50.0;
+    public static final double MOTOR_TO_TURRET_GEAR_RATIO = 37.5;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
