@@ -55,6 +55,8 @@ public class RobotContainer {
   private final Turret turret;
 
   private SwerveDriveSimulation simDrive = null;
+  private final Indexer indexer;
+  private final Intake intake;
 
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -62,15 +64,12 @@ public class RobotContainer {
 
   private double topShooterPowerScale = 0.5;
   private double bottomShooterPowerScale = 0.5;
-  private final Intake intake;
-  private final Indexer indexer;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private SwerveDriveSimulation simDrive;
-
-  private double intakeRollerValue = 0;
+  private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
+  private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -91,12 +90,12 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     turretConstants.ENCODER_13_TOOTH,
                     turretConstants.ENCODER_15_TOOTH));
+        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
                 new IntakeIOSparkFlex(
                     Constants.IntakeConstants.INTAKE_MOTOR_ID,
                     Constants.IntakeConstants.INTAKE2_MOTOR_ID));
-        indexer = new Indexer(new IndexerIOSparkFlex(13));
         break;
 
       case SIM:
@@ -127,8 +126,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        indexer = new Indexer(new IndexerIO() {});
         intake = new Intake(new IntakeIOSim());
-        indexer = new Indexer(new IndexerIOSparkFlex(13));
         break;
 
       case REPLAY:
@@ -217,6 +216,7 @@ public class RobotContainer {
 
     return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
+    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
 
   /**
