@@ -38,6 +38,9 @@ public class IndexerIOSparkFlex implements IndexerIO {
         .voltageCompensation(voltageComp); // consistent voltage behavior
     motorConfig = new SparkFlexConfig();
     motorConfig
+        .inverted(false)
+        .smartCurrentLimit(stallLimit)
+        .voltageCompensation(voltageComp)
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop

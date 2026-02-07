@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.indexer;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -52,6 +53,8 @@ public class IndexerIOTalonFX implements IndexerIO {
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
+    // Refresh signals
+    BaseStatusSignal.refreshAll(appliedVoltsSignal, currentSignal);
     // Update inputs
     inputs.indexerAppliedVolts = appliedVoltsSignal.getValueAsDouble();
     inputs.indexerCurrentAmps = currentSignal.getValueAsDouble();
