@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.MotorIDConstants;
@@ -29,6 +28,16 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
+import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIOSparkFlex;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -53,10 +62,15 @@ public class RobotContainer {
 
   private double topShooterPowerScale = 0.5;
   private double bottomShooterPowerScale = 0.5;
+  private final Intake intake;
+  private final Indexer indexer;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private SwerveDriveSimulation simDrive;
+
+  private double intakeRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -77,6 +91,12 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     turretConstants.ENCODER_13_TOOTH,
                     turretConstants.ENCODER_15_TOOTH));
+        intake =
+            new Intake(
+                new IntakeIOSparkFlex(
+                    Constants.IntakeConstants.INTAKE_MOTOR_ID,
+                    Constants.IntakeConstants.INTAKE2_MOTOR_ID));
+        indexer = new Indexer(new IndexerIOSparkFlex(13));
         break;
 
       case SIM:
@@ -84,6 +104,7 @@ public class RobotContainer {
         simDrive =
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
+
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
         drive =
             new Drive(
@@ -99,6 +120,28 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     turretConstants.ENCODER_13_TOOTH,
                     turretConstants.ENCODER_15_TOOTH));
+        break;
+
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
+        intake = new Intake(new IntakeIOSim());
+        indexer = new Indexer(new IndexerIOSparkFlex(13));
+        break;
+
+      case REPLAY:
+        // Replayed robot, disable IO implementations
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
+        intake = new Intake(new IntakeIO() {});
+        indexer = new Indexer(new IndexerIO() {});
         break;
 
       default:
@@ -173,6 +216,7 @@ public class RobotContainer {
   public Command checkShooterUpdate() {
 
     return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
+    driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
   }
 
   /**
