@@ -43,7 +43,7 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
 
     // Update alerts
-   // TODO: Implement encoder connection status and jam detection logic to update these alerts
+    // TODO: Implement encoder connection status and jam detection logic to update these alerts
 
   }
 
