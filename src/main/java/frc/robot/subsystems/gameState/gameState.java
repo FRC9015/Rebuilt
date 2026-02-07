@@ -48,6 +48,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.PhoenixUtil;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -60,6 +61,13 @@ public class GameState extends SubsystemBase{
     private StateEnum state;
     private boolean ishubactive;
     private boolean willflash;
+    private StateEnum alliance;
+
+    public GameState(){
+        this.state = getGameState();
+        this.ishubactive = getCanScore();
+        this.alliance = findAlliance();
+    }
 
     @Override
     public void periodic(){
@@ -130,21 +138,15 @@ public class GameState extends SubsystemBase{
      */
     private boolean getCanScore(){
         StateEnum statevar = getGameState();
-        try{
-            Optional<Alliance> alli = DriverStation.getAlliance();
-            String alliance = alli.get().toString();
-        } catch (Exception NoSuchElementException) {
-            throw NoSuchElementException;
-        }
         if (statevar == StateEnum.AUTO|| 
         statevar == StateEnum.TRANSITION|| 
         statevar == StateEnum.ENDGAME|| 
-        statevar == StateEnum.PRACTICE) {
+        statevar == StateEnum.PRACTICE||
+        this.alliance == StateEnum.PRACTICE||
+        statevar == this.alliance
+        ) {
             return true;
-        }
-        if (statevar.toString().charAt(0) == alliance.charAt(0)) {
-            return true;
-        } else {
+        }else {
             return false;
         }
     }
@@ -161,6 +163,18 @@ public class GameState extends SubsystemBase{
         }else{
             return false;
         }
+
     }
     
+    private StateEnum findAlliance() throws NoSuchElementException {
+        Optional<Alliance> alli = DriverStation.getAlliance();
+        Alliance allia = Alliance.Blue;
+        try {
+            allia = alli.orElseThrow();
+        } catch (Exception NoSuchElementException) {
+            return StateEnum.PRACTICE;
+        }
+        if (allia == Alliance.Blue){ return StateEnum.BLUE_TEAM;}
+        else {return StateEnum.RED_TEAM;}
+    }
     }
