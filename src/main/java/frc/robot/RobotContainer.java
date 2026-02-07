@@ -26,8 +26,10 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkFlex;
 import org.ironmaple.simulation.SimulatedArena;
@@ -55,7 +57,7 @@ public class RobotContainer {
 
   private SwerveDriveSimulation simDrive;
 
-  private double intakeRollerValue = 2;
+  private double intakeRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -92,7 +94,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIOSparkFlex(13));
         break;
 
-      default:
+      case REPLAY:
         // Replayed robot, disable IO implementations
         drive =
             new Drive(
@@ -101,9 +103,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        intake = new Intake(new IntakeIOSparkFlex(0, 0));
-        indexer = new Indexer(new IndexerIOSparkFlex(13));
+        intake = new Intake(new IntakeIO() {});
+        indexer = new Indexer(new IndexerIO() {});
         break;
+
+      default:
+        throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
 
     // Set up auto routines

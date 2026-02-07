@@ -45,13 +45,16 @@ public final class Constants {
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
-            .withKP(2)
+            .withKP(0.001)
             .withKI(0)
-            .withKD(0.05)
+            .withKD(0.02)
             .withKG(0.01)
             .withKA(0)
             .withKS(0)
             .withKV(0);
+
+    public static final int INTAKE_MOTOR_ID = 27;
+    public static final int PIVOT_MOTOR_ID = 28;
 
     public static final Slot1Configs intakeSlotVelocityConfigs =
         new Slot1Configs().withKP(2).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
