@@ -21,6 +21,7 @@ import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.turretConstants;
 import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.MotorIDConstants;
+import frc.robot.Constants.turretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
@@ -142,8 +143,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
-                    13, // ID of the CANCoder on the 13 Tooth Gear
-                    15 // ID of the CANCoder on the 15 Tooth Gear
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
                     ));
         break;
 
@@ -181,7 +182,13 @@ public class RobotContainer {
         intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
 
         // Use a blank IO for Turret Sim for now (unless you have a Turret Sim implementation)
-        turret = new Turret(new TurretIO() {});
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID,
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
+                    ));
         break;
 
       case REPLAY:
@@ -206,7 +213,13 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID));
 
-        turret = new Turret(new TurretIO() {});
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID,
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
+                    ));
         break;
 
       default:
