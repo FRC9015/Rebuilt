@@ -130,7 +130,11 @@ public class GameState extends SubsystemBase{
     }
     private boolean getFlashy(){
         double time = 0.0;
-        time = DriverStation.getMatchTime();
+        try {
+            time = OptionalDouble.of(DriverStation.getMatchTime()).getAsDouble();
+        } catch (Exception noSuchElementException) {
+            return false;
+        }
         double epsilon = 0.21; 
         return 
         Math.abs(time - 133) < epsilon ||
