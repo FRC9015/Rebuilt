@@ -120,8 +120,8 @@ public class IntakeIOTalonFX implements IntakeIO {
     final double clampedPosition =
         MathUtil.clamp(
             position,
-            Constants.IntakeConstants.INTAKE_MIN_POS,
-            Constants.IntakeConstants.INTAKE_MAX_POS);
+            Constants.IntakeConstants.PIVOT_MIN_POS,
+            Constants.IntakeConstants.PIVOT_MAX_POS);
 
     pivotMotor.setControl(intakeMagicVoltage.withPosition(clampedPosition));
   }

@@ -10,8 +10,8 @@ public interface IntakeIO {
   public static class IntakeIOInputs {
 
     public enum IntakePositions {
-      STOWED(Constants.IntakeConstants.INTAKE_STOWED_POSITION),
-      DEPLOYED(Constants.IntakeConstants.INTAKE_DEPLOYED_POSITION);
+      STOWED(Constants.IntakeConstants.PIVOT_STOWED_POSITION),
+      DEPLOYED(Constants.IntakeConstants.PIVOT_DEPLOYED_POSITION);
 
       private final double position;
 

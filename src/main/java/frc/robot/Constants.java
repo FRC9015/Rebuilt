@@ -65,12 +65,12 @@ public final class Constants {
     public static final FeedbackConfigs GROUND_FEEDBACK_CONFIGS =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
-    public static final double INTAKE_MAX_POS = 300.0;
-    public static final double INTAKE_MIN_POS = 0.0;
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double INTAKE_DEPLOYED_POSITION = 100.0;
-    public static final double INTAKE_STOWED_POSITION = 10.0;
+    public static final double PIVOT_MAX_POS = 300.0;
+    public static final double PIVOT_MIN_POS = 0.0;
+    public static final double PIVOT_DEPLOYED_POSITION = 100.0;
+    public static final double PIVOT_STOWED_POSITION = 10.0;
   }
 }
