@@ -5,7 +5,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -16,7 +15,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
-import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** IO implementation for the Intake subsystem using TalonFX motor controllers. */
 public class IntakeIOTalonFX implements IntakeIO {
@@ -30,12 +28,7 @@ public class IntakeIOTalonFX implements IntakeIO {
   public StatusSignal<Current> motorAmps;
   public StatusSignal<AngularVelocity> motorRPM;
   public StatusSignal<Angle> motorPosition;
-  private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tunning/minPosition", 0.0);
-  private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tunning/maxPOsition", 1.0);
-  private final VoltageOut voltageOut = new VoltageOut(0.0);
   private final MotionMagicVoltage intakeMagicVoltage = new MotionMagicVoltage(0.0);
-
-  private final double kFeedForward = 0.5; // Feedforward value for position control (in volts)
 
   public IntakeIOTalonFX(int intakeID1, int pivotID1) {
     intakeMotor = new TalonFX(intakeID1);
@@ -77,9 +70,7 @@ public class IntakeIOTalonFX implements IntakeIO {
     inputs.intakeEncoderPosition = pivotMotor.getPosition().getValueAsDouble();
     inputs.intakeCurrentSpeed = intakeMotor.getVelocity().getValueAsDouble();
     inputs.intakeRPM = motorRPM.getValueAsDouble();
-    inputs.intakeAppliedVolts = motorVolts.getValueAsDouble();
     inputs.intakeCurrentAmps = intakeMotor.getStatorCurrent().getValueAsDouble();
-    inputs.intakeEncoderPosition = motorPosition.getValueAsDouble();
     inputs.intakeEncoderConnected = false;
   }
 
@@ -87,11 +78,6 @@ public class IntakeIOTalonFX implements IntakeIO {
   public void stop() {
     intakeMotor.stopMotor();
     pivotMotor.stopMotor();
-  }
-
-  @Override
-  public void updatePIDFromDashboard() {
-    // Implement PID update logic if needed
   }
 
   @Override
