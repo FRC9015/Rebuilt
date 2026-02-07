@@ -76,6 +76,9 @@ public final class Constants {
     public static final double E1_TEETH = 13.0; // Gear on Encoder 1
     public static final double E2_TEETH = 15.0; // Gear on Encoder 2
 
+    public static final int ENCODER_13_TOOTH = 0;
+    public static final int ENCODER_15_TOOTH = 0;
+
     // --- MATH CONSTANTS ---
     /** The error allowance (in turret rotations) when comparing encoder predictions. */
     public static final double CRT_TOLERANCE = 0.01;

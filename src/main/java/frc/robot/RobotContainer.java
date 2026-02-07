@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.motorIDConstants;
+import frc.robot.Constants.turretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -79,8 +80,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     motorIDConstants.TURRET_MOTOR_ID,
-                    13, // ID of the CANCoder on the 13 Tooth Gear
-                    15 // ID of the CANCoder on the 15 Tooth Gear
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
                     ));
         break;
 
@@ -99,7 +100,13 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
 
         // Use a blank IO for Turret Sim for now (unless you have a Turret Sim implementation)
-        turret = new Turret(new TurretIO() {});
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    motorIDConstants.TURRET_MOTOR_ID,
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
+                    ));
         break;
 
       default:
@@ -112,7 +119,13 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
 
-        turret = new Turret(new TurretIO() {});
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    motorIDConstants.TURRET_MOTOR_ID,
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
+                    ));
         break;
     }
 
@@ -186,6 +199,7 @@ public class RobotContainer {
     driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
     driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale += 0.01));
     driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -= 0.01));
+
   }
 
   public Command checkShooterUpdate() {
