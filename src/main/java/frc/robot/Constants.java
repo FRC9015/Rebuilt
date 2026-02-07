@@ -42,13 +42,21 @@ public final class Constants {
   public static class CameraConstants {
     public static final AprilTagFieldLayout aprilTagLayout =
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+    public static final double cameraHeight = Units.inchesToMeters(7);
+    public static final double cameraPitch = Units.degreesToRadians(15);
+    public static final double cameraXOffset = Units.inchesToMeters(13.5);
     public static final Transform3d placeHolderCamera =
         new Transform3d(
-            new Translation3d(
-                Units.inchesToMeters(13.5), Units.inchesToMeters(0), Units.inchesToMeters(7)),
-            new Rotation3d(0, -Units.degreesToRadians(15), Units.degreesToRadians(0)));
-
+            new Translation3d(cameraXOffset, Units.inchesToMeters(0), cameraHeight),
+            new Rotation3d(0, cameraPitch, Units.degreesToRadians(0)));
+    
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+  }
+
+  public static class VisionConstants {
+    public static final double MAX_AMBIGUITY = 0.1;
+    public static final int MAX_AVERAGE_DISTANCE = 3;
+    public static final int STD_DEV_RANGE = 30;
   }
 }

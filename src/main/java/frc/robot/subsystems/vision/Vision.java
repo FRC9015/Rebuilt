@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CameraConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class Vision extends SubsystemBase {
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
-  public Matrix<N3, N1> curStdDevs;
+  public Matrix<N3, N1> curStdDevs = CameraConstants.kSingleTagStdDevs;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -111,17 +112,13 @@ public class Vision extends SubsystemBase {
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
-                    && observation.ambiguity() > 0.1) // Cannot be high ambiguity
+                    && observation.ambiguity() > VisionConstants.MAX_AMBIGUITY) // Cannot be high ambiguity
 
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > CameraConstants.aprilTagLayout.getFieldLength()
                 || observation.pose().getY() < 0.0
-                || observation.pose().getY() > CameraConstants.aprilTagLayout.getFieldWidth()
-                || observation.tagId().contains((short) 4)
-                || observation.tagId().contains((short) 5)
-                || observation.tagId().contains((short) 14)
-                || observation.tagId().contains((short) 15);
+                || observation.pose().getY() > CameraConstants.aprilTagLayout.getFieldWidth();
 
         // Add pose to log
         robotPoses.add(observation.pose());
@@ -160,9 +157,9 @@ public class Vision extends SubsystemBase {
           // Decrease std devs if multiple targets are visible
           if (numTags > 1) estStdDevs = CameraConstants.kMultiTagStdDevs;
           // Increase std devs based on (average) distance
-          if (numTags == 1 && avgDist > 3)
+          if (numTags == 1 && avgDist > VisionConstants.MAX_AVERAGE_DISTANCE)
             estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-          else estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+          else estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / VisionConstants.STD_DEV_RANGE));
           curStdDevs = estStdDevs;
         }
 
