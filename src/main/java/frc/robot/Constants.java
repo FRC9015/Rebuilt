@@ -40,6 +40,7 @@ public final class Constants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+    public static final int INDEXER_MOTOR_ID = 13;
   }
 
   public static class IntakeConstants {
