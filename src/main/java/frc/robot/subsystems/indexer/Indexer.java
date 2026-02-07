@@ -118,14 +118,4 @@ public class Indexer extends SubsystemBase {
   public Command runIndexer(double voltage) {
     return this.startEnd(() -> io.setVoltage(voltage), () -> stop());
   }
-
-  /**
-   * Runs the indexer in reverse at the specified voltage.
-   *
-   * @param voltage Voltage provided to the motor.
-   * @return A command that runs the indexer in reverse.
-   */
-  public Command runIndexerReverse(double voltage) {
-    return this.startEnd(() -> io.setVoltage(-voltage), () -> stop());
-  }
 }
