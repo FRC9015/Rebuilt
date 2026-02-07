@@ -38,7 +38,7 @@ public class AutoDrive extends Command {
         rotationController.setTolerance(Units.degreesToRadians(1));
         yController.setTolerance(Units.inchesToMeters(0.4));
         xController.setTolerance(Units.inchesToMeters(0.4));
-        Logger.recordOutput("AutoDrive/alliance?", allaince.get());
+        Logger.recordOutput("AutoDrive/alliance?", alliance.get());
 
         timer.reset(); 
         timer.start(); 
