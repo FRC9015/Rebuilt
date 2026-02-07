@@ -13,9 +13,18 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoDrive extends Command {
-    private PIDController rotationController = new PIDController(4, 0, 0.02);
-    private PIDController xController = new PIDController(3, 0.0, 0.02);
-    private PIDController yController = new PIDController(3, 0.0, 0.02);
+    private final double rotationP = 4;
+    private final double rotationI = 0;
+    private final double rotationD = 0.02;
+    private final double xyControllerP = 3;
+    private final double xyControllerI = 0.0;
+    private final double xyControllerD = 0.02;
+    private final double timeLimit = 3;
+    private final double minimumVelocity = 0.3;
+    private final double minimumDistance = 0.04;
+    private PIDController rotationController = new PIDController(rotationP, rotationI, rotationD);
+    private PIDController xController = new PIDController(xyControllerP, xyControllerI, xyControllerD);
+    private PIDController yController = new PIDController(xyControllerP, xyControllerI, xyControllerD);
     private Supplier<Pose2d> targetPose;
     private Pose2d flippedPose, targetPose2d;
     private Drive drive;
@@ -40,8 +49,8 @@ public class AutoDrive extends Command {
         xController.setTolerance(Units.inchesToMeters(0.4));
         Logger.recordOutput("AutoDrive/alliance?", alliance.get());
 
-        timer.reset(); 
-        timer.start(); 
+        timer.reset();
+        timer.start();
     }
     @Override
     public void execute() {
@@ -60,28 +69,27 @@ public class AutoDrive extends Command {
         robotRelativeSpeeds.omegaRadiansPerSecond = rotationalVelocity;
 
         ChassisSpeeds field =
-            new ChassisSpeeds().fromFieldRelativeSpeeds(robotRelativeSpeeds, currentPose.getRotation());
+            ChassisSpeeds.fromFieldRelativeSpeeds(robotRelativeSpeeds, currentPose.getRotation());
         drive.runVelocity(field);
 
         Logger.recordOutput("AutoDrive/targetPose", targetPose.get());
         Logger.recordOutput("AutoDrive/robotrelativespeeds", field);
         Logger.recordOutput("AutoDrive/flippedPose", flippedPose);
-        Logger.recordOutput("AutoDrive/state", state);
     }
     @Override
     public void end(boolean interrupted) {
-        timer.stop(); 
+        timer.stop();
     }
 
     @Override
-        public boolean isFinished() {
+    public boolean isFinished() {
         double distance =
             Math.hypot(
                 drive.getPredictedPose().getX() - targetPose2d.getX(),
                 drive.getPredictedPose().getY() - targetPose2d.getY());
         return
         (rotationController.atSetpoint() && yController.atSetpoint() && xController.atSetpoint())
-            || timer.hasElapsed(3)
-            || drive.getVelocityMetersPerSec() < .3 && distance < 0.04;
+            || timer.hasElapsed(timeLimit)
+            || drive.getVelocityMetersPerSec() < minimumVelocity && distance < minimumDistance;
     }
 }
