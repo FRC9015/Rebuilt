@@ -13,7 +13,6 @@ public interface IntakeIO {
     public enum IntakePositions {
       STOWED(Constants.IntakeConstants.INTAKE_STOWED_POSITION),
       DEPLOYED(Constants.IntakeConstants.INTAKE_DEPLOYED_POSITION);
-
       private final double position;
 
       private IntakePositions(double position) {

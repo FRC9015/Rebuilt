@@ -112,7 +112,8 @@ public class Vision extends SubsystemBase {
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
-                    && observation.ambiguity() > VisionConstants.MAX_AMBIGUITY) // Cannot be high ambiguity
+                    && observation.ambiguity()
+                        > VisionConstants.MAX_AMBIGUITY) // Cannot be high ambiguity
 
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
@@ -159,7 +160,8 @@ public class Vision extends SubsystemBase {
           // Increase std devs based on (average) distance
           if (numTags == 1 && avgDist > VisionConstants.MAX_AVERAGE_DISTANCE)
             estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-          else estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / VisionConstants.STD_DEV_RANGE));
+          else
+            estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / VisionConstants.STD_DEV_RANGE));
           curStdDevs = estStdDevs;
         }
 

@@ -7,6 +7,11 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -17,11 +22,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.Slot1Configs;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -55,7 +55,7 @@ public final class Constants {
         new Transform3d(
             new Translation3d(cameraXOffset, Units.inchesToMeters(0), cameraHeight),
             new Rotation3d(0, cameraPitch, Units.degreesToRadians(0)));
-    
+
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
   }
@@ -64,13 +64,13 @@ public final class Constants {
     public static final double MAX_AMBIGUITY = 0.1;
     public static final int MAX_AVERAGE_DISTANCE = 3;
     public static final int STD_DEV_RANGE = 30;
-  /** IDs for motors used by the robot (placeholders — replace with real IDs). */
-  public static class MotorIDConstants {
-    // placeholders
-    public static final int UPPER_INTAKE_MOTOR_ID = 0;
-    public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+    /** IDs for motors used by the robot (placeholders — replace with real IDs). */
+    public static class MotorIDConstants {
+      // placeholders
+      public static final int UPPER_INTAKE_MOTOR_ID = 0;
+      public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+    }
   }
-
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
@@ -99,6 +99,5 @@ public final class Constants {
 
     public static final double INTAKE_DEPLOYED_POSITION = 100.0;
     public static final double INTAKE_STOWED_POSITION = 10.0;
-  }
   }
 }
