@@ -15,14 +15,8 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
   private final SparkFlex intakeMotor;
   private final RelativeEncoder intakeEncoder;
-
   private final SparkFlex intakeMotor2;
-  private final RelativeEncoder intakeEncoder2;
-
   private final SparkFlexConfig intakeConfig;
-  private final SparkClosedLoopController intakePID;
-  private final SparkClosedLoopController intakePID2;
-
   private final SparkClosedLoopController closedLoopController1, closedLoopController2;
 
   // ---------------- PID CONSTANTS ----------------
@@ -38,7 +32,6 @@ public class IntakeIOSparkFlex implements IntakeIO {
     intakeMotor2 = new SparkFlex(intakeID2, SparkFlex.MotorType.kBrushless);
 
     intakeEncoder = intakeMotor.getEncoder();
-    intakeEncoder2 = intakeMotor2.getEncoder();
     intakeConfig = new SparkFlexConfig();
     intakeConfig
         .closedLoop
@@ -49,9 +42,6 @@ public class IntakeIOSparkFlex implements IntakeIO {
         .i(intakeKi)
         .d(intakeKd)
         .outputRange(-1, 1);
-
-    intakePID = intakeMotor.getClosedLoopController();
-    intakePID2 = intakeMotor2.getClosedLoopController();
 
     // ---------------- INTAKE CONFIG ----------------
     intakeConfig.inverted(false).idleMode(IdleMode.kBrake);
