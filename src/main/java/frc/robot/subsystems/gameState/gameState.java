@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.PS4Controller.Button;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -36,11 +37,13 @@ public class GameState extends SubsystemBase{
     private boolean willflash;
     @AutoLogOutput /**what team the robot is on, vscode sim returns PRACTICE, which will also be returned if connection to DS is instable */
     private StateEnum alliance;
+    private String gamedat
 
     public GameState(){
         this.state = getGameState();
         this.ishubactive = getCanScore();
         this.alliance = findAlliance();
+        this.gamedat = null;
     }
 
     @Override
@@ -66,6 +69,18 @@ public class GameState extends SubsystemBase{
         return this.alliance;
     }
 
+    private void setGD(int button){
+        if (button == 1) {
+            this.gamedat = "B";
+        } else {
+            this.gamedat = "r";
+        }
+    }
+
+
+    public Command setGameData(int button){
+        return this.run(() -> this.setGD(button));
+    }
 /**
  * finds the games current state
  * @return the game's state, A for auto, T for transition, B for blue, R for red, and E for endgame.
@@ -73,7 +88,8 @@ public class GameState extends SubsystemBase{
     private StateEnum getGameState() throws NoSuchElementException{
         double time = -1;
         Boolean auto = DriverStation.isAutonomous();
-        String gameData = DriverStation.getGameSpecificMessage();
+        String gameData = this.gamedat;
+        if (gamedat == null) DriverStation.getGameSpecificMessage();
         try {
             time = OptionalDouble.of(DriverStation.getMatchTime()).getAsDouble();
             if (auto == null) return StateEnum.ERROR;
