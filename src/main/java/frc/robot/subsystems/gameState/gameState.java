@@ -88,6 +88,10 @@ public class GameState extends SubsystemBase{
         return this.willflash;
     }
 
+    public StateEnum getalliance(){
+        return this.alliance;
+    }
+
 /**
  * finds the games current state
  * @return the game's state, A for auto, T for transition, B for blue, R for red, and E for endgame.
