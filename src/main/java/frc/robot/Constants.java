@@ -76,8 +76,8 @@ public final class Constants {
 
   public static class ShooterConstants {
     public static final int FlywheelLeftID = 5;
-    public static final int FlywheelRightID = 6;
-    public static final int HoodID = 7;
+    public static final int FlywheelRightID = 31;
+    public static final int HoodID = 3;
     public static final int HoodEncoderID = 8;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
@@ -116,5 +116,5 @@ public final class Constants {
     public static final double HOOD_MIN_POS = 0.0;
     public static final double HOOD_DEPLOYED_POSITION = 0.0;
     public static final double HOOD_STOWED_POSITION = 0.0;
-  } 
+  }
 }

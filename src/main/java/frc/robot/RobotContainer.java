@@ -89,8 +89,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FlywheelLeftID,
                     Constants.ShooterConstants.FlywheelRightID,
-                    Constants.ShooterConstants.HoodID,
-                    Constants.ShooterConstants.HoodEncoderID));
+                    Constants.ShooterConstants.HoodID
+               ));
         break;
 
       case SIM:
@@ -129,8 +129,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FlywheelLeftID,
                     Constants.ShooterConstants.FlywheelRightID,
-                    Constants.ShooterConstants.HoodID,
-                    Constants.ShooterConstants.HoodEncoderID));
+                    Constants.ShooterConstants.HoodID
+                   ));
         break;
 
       default:
