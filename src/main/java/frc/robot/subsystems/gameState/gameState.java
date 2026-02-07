@@ -26,10 +26,13 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class GameState extends SubsystemBase{
-    /** gamestate: will be A for auto, T for transition, B for blue, R for red, and E for endgame */
+    @AutoLogOutput/** gamestate: will be A for auto, T for transition, B for blue, R for red, and E for endgame */
     private StateEnum state;
+    @AutoLogOutput
     private boolean ishubactive;
+    @AutoLogOutput
     private boolean willflash;
+    @AutoLogOutput
     private StateEnum alliance;
 
     public GameState(){
