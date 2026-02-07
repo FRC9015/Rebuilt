@@ -19,6 +19,7 @@ import frc.robot.Constants.Mode;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
@@ -26,13 +27,14 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class GameState extends SubsystemBase{
-    @AutoLogOutput/** gamestate: will be A for auto, T for transition, B for blue, R for red, and E for endgame */
+    /** gamestate: will be A for auto, T for transition, B for blue, R for red, and E for endgame */
+    @AutoLogOutput
     private StateEnum state;
     @AutoLogOutput
     private boolean ishubactive;
     @AutoLogOutput
     private boolean willflash;
-    @AutoLogOutput
+    @AutoLogOutput /**what team the robot is on, vscode sim returns PRACTICE, which will also be returned if connection to DS is instable */
     private StateEnum alliance;
 
     public GameState(){
@@ -68,16 +70,23 @@ public class GameState extends SubsystemBase{
  * finds the games current state
  * @return the game's state, A for auto, T for transition, B for blue, R for red, and E for endgame.
  */
-    @AutoLogOutput
-    private StateEnum getGameState (){
-        double time = DriverStation.getMatchTime();
-        if (DriverStation.isAutonomous()){
+    private StateEnum getGameState() throws NoSuchElementException{
+        double time = -1;
+        Boolean auto = DriverStation.isAutonomous();
+        String gameData = DriverStation.getGameSpecificMessage();
+        try {
+            time = OptionalDouble.of(DriverStation.getMatchTime()).getAsDouble();
+            if (auto == null) return StateEnum.ERROR;
+            if (gameData == null) return StateEnum.ERROR;
+        } catch (Exception noSuchElementException) {
+            return StateEnum.ERROR;
+        }
+        if (auto){
             return StateEnum.AUTO;
         }
         if(time > 130){
         return StateEnum.TRANSITION;
         } else if (time > 30) {
-        String gameData = DriverStation.getGameSpecificMessage();
         if ("B".equals(gameData)) {
             if (time > 105){
                 return StateEnum.RED_TEAM;
@@ -111,20 +120,17 @@ public class GameState extends SubsystemBase{
      * @return true if tower enabled, false if tower disabled
      */
     private boolean getCanScore(){
-        if (this.state == StateEnum.AUTO|| 
-        this.state == StateEnum.TRANSITION|| 
-        this.state == StateEnum.ENDGAME|| 
-        this.state == StateEnum.PRACTICE||
-        this.alliance == StateEnum.PRACTICE||
-        this.state == this.alliance
+        if ((this.state == StateEnum.BLUE_TEAM || this.state == StateEnum.RED_TEAM)&&
+        this.state != this.alliance
         ) {
-            return true;
+            return false;
         }else {
             return false;
         }
     }
     private boolean getFlashy(){
-        double time = DriverStation.getMatchTime();
+        double time = 0.0;
+        time = DriverStation.getMatchTime();
         double epsilon = 0.21; 
         return 
         Math.abs(time - 133) < epsilon ||
