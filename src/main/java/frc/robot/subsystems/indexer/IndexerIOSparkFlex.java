@@ -11,6 +11,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
+
 /** Indexer IO implementation using REV SPARK MAX + NEO (REVLib 2026 style). */
 public class IndexerIOSparkFlex implements IndexerIO {
   public static final double indexerP = 0.001;
@@ -23,19 +25,22 @@ public class IndexerIOSparkFlex implements IndexerIO {
   private final RelativeEncoder encoder;
 
   private final SparkClosedLoopController closedLoop;
+  
   private SparkFlexConfig motorConfig;
+  private SparkFlexConfig cfgGlobal;
 
   public IndexerIOSparkFlex(int motorId1) {
     motor1 = new SparkFlex(motorId1, MotorType.kBrushless);
     encoder = motor1.getEncoder();
 
     // Build a declarative config (REVLib 2026)
-    SparkFlexConfig cfg = new SparkFlexConfig();
+    cfgGlobal = new SparkFlexConfig();
 
-    cfg.idleMode(SparkBaseConfig.IdleMode.kBrake)
+    cfgGlobal.idleMode(SparkBaseConfig.IdleMode.kBrake)
         .inverted(false) // flip to true if your indexer spins backwards
         .smartCurrentLimit(stallLimit) // amps
         .voltageCompensation(voltageComp); // consistent voltage behavior
+
     motorConfig = new SparkFlexConfig();
     motorConfig
         .inverted(false)
@@ -71,9 +76,9 @@ public class IndexerIOSparkFlex implements IndexerIO {
 
   @Override
   public void setBrakeMode(boolean enable) {
-    SparkFlexConfig cfg = new SparkFlexConfig();
-    cfg.idleMode(enable ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
-    motor1.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    cfgGlobal.idleMode(
+        enable ? SparkBaseConfig.IdleMode.kBrake : SparkBaseConfig.IdleMode.kCoast);
+    motor1.configure(cfgGlobal, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   @Override
