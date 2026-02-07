@@ -163,7 +163,7 @@ public class TurretIOTalonFX implements TurretIO {
 
   @Override
   public void stop() {
-    turretMotor.setControl(neutralOut);
+    turretMotor.stopMotor();;
   }
 
   @Override

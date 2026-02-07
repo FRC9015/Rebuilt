@@ -28,19 +28,10 @@ public interface TurretIO {
   /** Updates the set of loggable inputs. */
   public default void updateInputs(TurretIOInputs inputs) {}
 
-  /** Sets the pivot position based on the desired state. */
-  public default void setPivotPosition(double value) {}
-
-  /** Moves the Pivot Up. */
-  public default void rotate(double speed) {}
-
-  /** Run slam pivot at amps. */
-  default void runCurrent(double amps) {}
-
-  /** Stop slam pivot. */
+  /** Stops motor. */
   default void stop() {}
 
-  /** Enable or disable brake mode on the pivot motor(s). */
+  /** Enable or disable brake mode on the motor(s). */
   default void setBrakeMode() {}
 
   default void setCoastMode() {}
