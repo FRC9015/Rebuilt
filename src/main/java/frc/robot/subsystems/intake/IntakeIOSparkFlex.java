@@ -21,9 +21,9 @@ public class IntakeIOSparkFlex implements IntakeIO {
 
   // ---------------- PID CONSTANTS ----------------
   // Intake velocity (RPM)
-  private final double intakeKp = 0.001;
-  private final double intakeKi = 0.0;
-  private final double intakeKd = 0.02;
+  private final double intakeP = 0.001;
+  private final double intakeI = 0.0;
+  private final double intakeD = 0.02;
 
   public IntakeIOSparkFlex(int intakeID, int intakeID2) {
 
@@ -38,9 +38,9 @@ public class IntakeIOSparkFlex implements IntakeIO {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop
         // slot, as it will default to slot 0.
-        .p(intakeKp)
-        .i(intakeKi)
-        .d(intakeKd)
+        .p(intakeP)
+        .i(intakeI)
+        .d(intakeD)
         .outputRange(-1, 1);
 
     // ---------------- INTAKE CONFIG ----------------
