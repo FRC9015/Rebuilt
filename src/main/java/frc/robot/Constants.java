@@ -74,7 +74,6 @@ public final class Constants {
     public static final double PIVOT_STOWED_POSITION = 10.0;
   }
 
-
   public static class ShooterConstants {
     public static final int FlywheelLeftID = 5;
     public static final int FlywheelRightID = 6;
@@ -117,5 +116,5 @@ public final class Constants {
     public static final double HOOD_MIN_POS = 0.0;
     public static final double HOOD_DEPLOYED_POSITION = 0.0;
     public static final double HOOD_STOWED_POSITION = 0.0;
-  }
+  } 
 }
