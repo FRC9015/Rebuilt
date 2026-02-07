@@ -53,6 +53,7 @@ public class RobotContainer {
   private final Shooter shooter;
   private final Intake intake;
   private final Indexer indexer;
+  private SwerveDriveSimulation simDrive = null;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -61,9 +62,8 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private SwerveDriveSimulation simDrive;
-
-  private double intakeRollerValue = 0;
+  private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
+  private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -78,6 +78,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
                 new IntakeIOSparkFlex(
@@ -109,8 +110,13 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
 
         intake = new Intake(new IntakeIOSim());
-        indexer = new Indexer(new IndexerIOSparkFlex(13));
         shooter = new Shooter(new ShooterIOSim());
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
+        indexer = new Indexer(new IndexerIO() {});
         break;
 
       case REPLAY:
@@ -200,6 +206,7 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
 
   /**
