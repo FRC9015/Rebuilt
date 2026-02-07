@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
@@ -23,8 +24,8 @@ import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
@@ -32,7 +33,6 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkFlex;
-import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -83,7 +83,7 @@ public class RobotContainer {
                 new IntakeIOSparkFlex(
                     Constants.IntakeConstants.INTAKE_MOTOR_ID,
                     Constants.IntakeConstants.INTAKE2_MOTOR_ID));
-        indexer = new Indexer(new IndexerIOSparkFlex(13));        
+        indexer = new Indexer(new IndexerIOSparkFlex(13));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -176,7 +176,6 @@ public class RobotContainer {
             () -> -driverController.getRightX()));
 
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
- 
 
     // Lock to 0° when A button is held
     controller
