@@ -44,4 +44,6 @@ public interface IndexerIO {
    * @param voltage The desired voltage.
    */
   default void setVoltage(double voltage) {}
+
+  default void setSpeed(double speed) {}
 }

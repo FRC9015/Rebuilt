@@ -32,6 +32,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkFlex;
+import frc.robot.subsystems.shooter.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -48,6 +49,8 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
   private final Indexer indexer;
+  private final Indexer kicker;
+  private final Shooter shooter;
 
   // Controller
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -57,7 +60,8 @@ public class RobotContainer {
 
   private SwerveDriveSimulation simDrive;
 
-  private double intakeRollerValue = 0;
+  private double intakeRollerValue = 2000;
+  private double indexerRollerValue = 12;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -74,6 +78,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         intake = new Intake(new IntakeIOSparkFlex(27, 28));
         indexer = new Indexer(new IndexerIOSparkFlex(13));
+        kicker = new Indexer(new IndexerIOSparkFlex(25));
+        shooter = new Shooter(new ShooterIOTalonFX(5, 31, 3));
         break;
 
       case SIM:
@@ -92,6 +98,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
         intake = new Intake(new IntakeIOSim());
         indexer = new Indexer(new IndexerIOSparkFlex(13));
+        kicker = new Indexer(new IndexerIOSparkFlex(14));
+        shooter = new Shooter(new ShooterIOTalonFX(5, 31, 3));
         break;
 
       case REPLAY:
@@ -105,6 +113,8 @@ public class RobotContainer {
                 new ModuleIO() {});
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
+        kicker = new Indexer(new IndexerIO() {});
+        shooter = new Shooter(new ShooterIO() {});
         break;
 
       default:
@@ -155,7 +165,14 @@ public class RobotContainer {
     driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
     driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
     driverController.y().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.01));
-    driverController.rightBumper().whileTrue(indexer.runIndexer(6));
+    driverController
+        .rightBumper()
+        .whileTrue(
+            indexer
+                .runIndexer(indexerRollerValue)
+                .alongWith(kicker.runIndexer(indexerRollerValue))
+                .alongWith(intake.runIntakeAtSpeed(intakeRollerValue))
+                .alongWith(shooter.runShooterAtSpeed(100)));
   }
 
   /**

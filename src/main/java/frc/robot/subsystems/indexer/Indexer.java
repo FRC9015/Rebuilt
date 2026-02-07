@@ -115,8 +115,8 @@ public class Indexer extends SubsystemBase {
    * @param voltage Voltage provided to the motor.
    * @return A command that runs the indexer.
    */
-  public Command runIndexer(double voltage) {
-    return this.startEnd(() -> io.setVoltage(voltage), () -> stop());
+  public Command runIndexer(double speed) {
+    return this.startEnd(() -> io.setSpeed(speed), () -> stop());
   }
 
   /**
