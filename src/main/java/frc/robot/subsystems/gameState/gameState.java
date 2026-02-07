@@ -50,19 +50,19 @@ public class GameState extends SubsystemBase{
         this.willflash = getFlashy();
     }
 
-    public StateEnum getstate(){
+    public StateEnum getState(){
         return this.state;
     }
 
-    public boolean getishubactive(){
+    public boolean getIsHubActive(){
         return this.ishubactive;
     }
 
-    public boolean getwillflash(){
+    public boolean getWillFlash(){
         return this.willflash;
     }
 
-    public StateEnum getalliance(){
+    public StateEnum getAlliance(){
         return this.alliance;
     }
 

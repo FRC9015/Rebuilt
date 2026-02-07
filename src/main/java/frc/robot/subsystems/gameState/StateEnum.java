@@ -6,6 +6,7 @@ package frc.robot.subsystems.gamestate;
         BLUE_TEAM,
         RED_TEAM,
         ENDGAME,
-        PRACTICE
+        PRACTICE,
+        ERROR
     }
 
