@@ -13,18 +13,18 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoDrive extends Command {
-    private final double rotationP = 4;
-    private final double rotationI = 0;
-    private final double rotationD = 0.02;
-    private final double xyControllerP = 3;
-    private final double xyControllerI = 0.0;
-    private final double xyControllerD = 0.02;
-    private final double timeLimit = 3;
-    private final double minimumVelocity = 0.3;
-    private final double minimumDistance = 0.04;
-    private PIDController rotationController = new PIDController(rotationP, rotationI, rotationD);
-    private PIDController xController = new PIDController(xyControllerP, xyControllerI, xyControllerD);
-    private PIDController yController = new PIDController(xyControllerP, xyControllerI, xyControllerD);
+    private final double ROTATION_P = 4;
+    private final double ROTATION_I = 0;
+    private final double ROTATION_D = 0.02;
+    private final double XYCONTROLLERP = 3;
+    private final double XYCONTROLLERI = 0.0;
+    private final double XYCONTROLLERD = 0.02;
+    private final double TIME_LIMIT = 3;
+    private final double MINIMUM_VELOCITY = 0.3;
+    private final double MINIMUM_DISTANCE = 0.04;
+    private PIDController rotationController = new PIDController(ROTATION_P, ROTATION_I, ROTATION_D);
+    private PIDController xController = new PIDController(XYCONTROLLERP, XYCONTROLLERI, XYCONTROLLERD);
+    private PIDController yController = new PIDController(XYCONTROLLERP, XYCONTROLLERI, XYCONTROLLERD);
     private Supplier<Pose2d> targetPose;
     private Pose2d flippedPose, targetPose2d;
     private Drive drive;
@@ -89,7 +89,7 @@ public class AutoDrive extends Command {
                 drive.getPredictedPose().getY() - targetPose2d.getY());
         return
         (rotationController.atSetpoint() && yController.atSetpoint() && xController.atSetpoint())
-            || timer.hasElapsed(timeLimit)
-            || drive.getVelocityMetersPerSec() < minimumVelocity && distance < minimumDistance;
+            || timer.hasElapsed(TIME_LIMIT)
+            || drive.getVelocityMetersPerSec() < MINIMUM_VELOCITY && distance < MINIMUM_DISTANCE;
     }
 }
