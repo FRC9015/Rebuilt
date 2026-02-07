@@ -71,7 +71,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        indexer = new Indexer(new IndexerIOSparkFlex(Constants.IndexerConstants.INDEXER_MOTOR_ID));
+        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
                 new IntakeIOSparkFlex(
@@ -93,7 +93,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        indexer = new Indexer(new IndexerIOSparkFlex(Constants.IndexerConstants.INDEXER_MOTOR_ID));
+        indexer = new Indexer(new IndexerIO() {});
         intake = new Intake(new IntakeIOSim());
         break;
 

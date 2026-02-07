@@ -10,10 +10,14 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import frc.robot.Constants;
 
 /** Indexer IO implementation using REV SPARK MAX + NEO (REVLib 2026 style). */
 public class IndexerIOSparkFlex implements IndexerIO {
+  public static final double indexerP = 0.001;
+  public static final double indexerI = 0;
+  public static final double indexerD = 0.0001;
+  private final int stallLimit = 45; // amps
+  private final double voltageComp = 12.0; // volts
 
   private final SparkFlex motor1;
   private final RelativeEncoder encoder;
@@ -30,17 +34,17 @@ public class IndexerIOSparkFlex implements IndexerIO {
 
     cfg.idleMode(SparkBaseConfig.IdleMode.kBrake)
         .inverted(false) // flip to true if your indexer spins backwards
-        .smartCurrentLimit(45) // amps
-        .voltageCompensation(12.0); // consistent voltage behavior
+        .smartCurrentLimit(stallLimit) // amps
+        .voltageCompensation(voltageComp); // consistent voltage behavior
     motorConfig = new SparkFlexConfig();
     motorConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         // Set PID values for position control. We don't need to pass a closed loop
         // slot, as it will default to slot 0.
-        .p(Constants.IndexerConstants.INDEXER_P)
-        .i(Constants.IndexerConstants.INDEXER_I)
-        .d(Constants.IndexerConstants.INDEXER_D);
+        .p(indexerP)
+        .i(indexerI)
+        .d(indexerD);
     motor1.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     closedLoop = motor1.getClosedLoopController();
   }
