@@ -34,10 +34,10 @@ public class AutoDrive extends Command {
 
     public AutoDrive(
         Supplier<Pose2d> desiredPose, Drive drive, Supplier<DriverStation.Alliance> alliance) {
-            this.drive = drive;
-            this.targetPose = desiredPose;
-            this.alliance = alliance;
-        }
+        this.drive = drive;
+        this.targetPose = desiredPose;
+        this.alliance = alliance;
+    }
     @Override
     public void initialize() {
         flippedPose = FlippingUtil.flipFieldPose(targetPose.get());
