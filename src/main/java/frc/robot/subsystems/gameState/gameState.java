@@ -132,22 +132,19 @@ public class GameState extends SubsystemBase{
         if(time == -1){
             return StateEnum.PRACTICE; 
         }
-
         return StateEnum.ENDGAME;
-
     }
     /**
      * checks if the robot can score
      * @return true if tower enabled, false if tower disabled
      */
     private boolean getCanScore(){
-        StateEnum statevar = getGameState();
-        if (statevar == StateEnum.AUTO|| 
-        statevar == StateEnum.TRANSITION|| 
-        statevar == StateEnum.ENDGAME|| 
-        statevar == StateEnum.PRACTICE||
+        if (this.state == StateEnum.AUTO|| 
+        this.state == StateEnum.TRANSITION|| 
+        this.state == StateEnum.ENDGAME|| 
+        this.state == StateEnum.PRACTICE||
         this.alliance == StateEnum.PRACTICE||
-        statevar == this.alliance
+        this.state == this.alliance
         ) {
             return true;
         }else {
@@ -156,21 +153,17 @@ public class GameState extends SubsystemBase{
     }
     private boolean getFlashy(){
         double time = DriverStation.getMatchTime();
-        double epsilon = 0.2; 
-        if (Math.abs(time - 133) < epsilon ||
+        double epsilon = 0.21; 
+        return 
+        Math.abs(time - 133) < epsilon ||
         Math.abs(time - 108) < epsilon ||
         Math.abs(time - 83) < epsilon ||
         Math.abs(time - 58) < epsilon ||
         Math.abs(time - 33) < epsilon ||
-        Math.abs(time - 3) < epsilon){
-            return true;
-        }else{
-            return false;
-        }
-
+        Math.abs(time - 3) < epsilon;
     }
     
-    private StateEnum findAlliance() throws NoSuchElementException {
+    private StateEnum findAlliance(){
         Optional<Alliance> alli = DriverStation.getAlliance();
         Alliance allia = Alliance.Blue;
         try {
