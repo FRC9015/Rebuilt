@@ -41,14 +41,18 @@ public class TurretIOTalonFX implements TurretIO {
     encoder13 = new CANcoder(encoderId13);
     encoder15 = new CANcoder(encoderId15);
 
+    // SAFETY LAYER 1: Hardware-Level Software Limits
+    // These are sent to the TalonFX memory. If the motor reaches these positions, 
+    // it will physically cut power to the motor in that direction, even if the 
+    // RoboRIO code crashes.
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
                     .withForwardSoftLimitEnable(true)
-                    .withForwardSoftLimitThreshold(turretConstants.maxRotation)
+                    .withForwardSoftLimitThreshold(turretConstants.MAXROTATION) // Stop at 2.0
                     .withReverseSoftLimitEnable(true)
-                    .withReverseSoftLimitThreshold(turretConstants.minRoation))
+                    .withReverseSoftLimitThreshold(turretConstants.MINROTATION)) // Stop at 0.0
             .withMotionMagic(turretConstants.MOTION_MAGIC_CONFIGS)
             .withSlot0(turretConstants.SLOT0_CONFIGS)
             .withFeedback(turretConstants.FEEDBACK_CONFIGS)
@@ -107,7 +111,7 @@ public class TurretIOTalonFX implements TurretIO {
     }
   }
 
-  /**
+    /**
    *
    *
    * <h3>Chinese Remainder Theorem (CRT) Resolver</h3>
@@ -139,10 +143,10 @@ public class TurretIOTalonFX implements TurretIO {
     double val15 = MathUtil.inputModulus(raw15, 0, 1.0);
 
     for (int n = 0; n < turretConstants.E1_SEARCH_LIMIT; n++) {
-      double attemptA = (n + val13) * (turretConstants.e1_teeth / turretConstants.t_teeth);
+      double attemptA = (n + val13) * (turretConstants.E1_TEETH / turretConstants.T_TEETH);
 
       for (int k = 0; k < turretConstants.E2_SEARCH_LIMIT; k++) {
-        double attemptB = (k + val15) * (turretConstants.e2_teeth / turretConstants.t_teeth);
+        double attemptB = (k + val15) * (turretConstants.E2_TEETH / turretConstants.T_TEETH);
 
         if (Math.abs(attemptA - attemptB) < turretConstants.CRT_TOLERANCE) {
           return attemptA;
@@ -150,11 +154,6 @@ public class TurretIOTalonFX implements TurretIO {
       }
     }
     return null;
-  }
-
-  @Override
-  public void setturretPosition(double value) {
-    turretMotor.setControl(motionMagicVoltage.withPosition(value));
   }
 
   @Override
@@ -175,5 +174,20 @@ public class TurretIOTalonFX implements TurretIO {
   @Override
   public void setCoastMode() {
     turretMotor.setNeutralMode(NeutralModeValue.Coast);
+  }
+
+  @Override
+  public void setTurretPosition(double positionRotations){
+    // SAFETY LAYER 2: Command Clamping
+    // If a command is given outside 0.0-2.0, this forces it back into the safe range.
+    // Because software limits are enabled, if you are at 2.0 and command 0.5, 
+    // the motor will move BACKWARDS because moving forward is blocked by the limit.
+    double safePosition = MathUtil.clamp(
+        positionRotations, 
+        turretConstants.MINROTATION, 
+        turretConstants.MAXROTATION
+    );
+
+    turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
   }
 }

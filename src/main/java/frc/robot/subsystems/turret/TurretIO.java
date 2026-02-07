@@ -45,7 +45,7 @@ public interface TurretIO {
 
   default void setCoastMode() {}
 
-  default void setturretPosition(double value) {}
+  default void setTurretPosition(double value) {}
 
   /**
    * Force the motor to believe it is at a specific position. Used to sync the motor to the Chinese

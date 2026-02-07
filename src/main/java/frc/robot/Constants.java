@@ -72,9 +72,9 @@ public final class Constants {
 
   public static class turretConstants {
     // --- GEAR TEETH ---
-    public static final double t_teeth = 90.0;
-    public static final double e1_teeth = 13.0; // Gear on Encoder 1
-    public static final double e2_teeth = 15.0; // Gear on Encoder 2
+    public static final double T_TEETH = 90.0;
+    public static final double E1_TEETH = 13.0; // Gear on Encoder 1
+    public static final double E2_TEETH = 15.0; // Gear on Encoder 2
 
     // --- MATH CONSTANTS ---
     /** The error allowance (in turret rotations) when comparing encoder predictions. */
@@ -86,27 +86,29 @@ public final class Constants {
     public static final double SYNC_THRESHOLD = 0.05;
 
     /** Search limit for Encoder 1 (should be equal to e2_teeth). */
-    public static final int E1_SEARCH_LIMIT = (int) e2_teeth;
+    public static final int E1_SEARCH_LIMIT = (int) E2_TEETH;
     /** Search limit for Encoder 2 (should be equal to e1_teeth). */
-    public static final int E2_SEARCH_LIMIT = (int) e1_teeth;
+    public static final int E2_SEARCH_LIMIT = (int) E1_TEETH;
 
     // --- MOVEMENT LIMITS ---
-    public static final double maxRotation = 2.0;
-    public static final double minRoation = 0.0;
+    public static final double MAXROTATION = 2.0;
+    public static final double MINROTATION = 0.0;
 
+    public static final double MOTOR_TO_TURRET_GEAR_RATIO = 50.0;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(14)
+            .withKP(1)
             .withKI(0)
-            .withKD(0.6)
-            .withKG(0.01)
+            .withKD(0)
+            .withKG(0)
             .withKA(0)
             .withKS(0)
             .withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
-        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+        .withSensorToMechanismRatio(MOTOR_TO_TURRET_GEAR_RATIO);
   }
 }
