@@ -24,6 +24,7 @@ import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.indexer.Indexer;
@@ -52,7 +53,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Shooter shooter;
   private final Intake intake;
-  private final Indexer indexer;
+  private Indexer indexer;
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
@@ -90,8 +91,7 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FlywheelLeftID,
                     Constants.ShooterConstants.FlywheelRightID,
-                    Constants.ShooterConstants.HoodID
-               ));
+                    Constants.ShooterConstants.HoodID));
         break;
 
       case SIM:
@@ -111,11 +111,11 @@ public class RobotContainer {
 
         intake = new Intake(new IntakeIOSim());
         shooter = new Shooter(new ShooterIOSim());
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+        new GyroIO() {};
+        new ModuleIOSim(TunerConstants.FrontLeft);
+        new ModuleIOSim(TunerConstants.FrontRight);
+        new ModuleIOSim(TunerConstants.BackLeft);
+        new ModuleIOSim(TunerConstants.BackRight);
         indexer = new Indexer(new IndexerIO() {});
         break;
 
@@ -135,8 +135,7 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FlywheelLeftID,
                     Constants.ShooterConstants.FlywheelRightID,
-                    Constants.ShooterConstants.HoodID
-                   ));
+                    Constants.ShooterConstants.HoodID));
         break;
 
       default:
