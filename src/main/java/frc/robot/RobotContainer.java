@@ -96,7 +96,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
         intake = new Intake(new IntakeIOSim(simDrive));
-        indexer = new Indexer(new IndexerIO(){});
+        indexer = new Indexer(new IndexerIO() {});
         break;
 
       case REPLAY:

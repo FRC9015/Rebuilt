@@ -73,4 +73,12 @@ public final class Constants {
     public static final double PIVOT_DEPLOYED_POSITION = 100.0;
     public static final double PIVOT_STOWED_POSITION = 10.0;
   }
+
+  public static class SimConstants {
+    // Simulation constants (e.g., physics parameters) can be added here
+    public static final double INTAKE_LENGTH = 0.2;
+    public static final double INTAKE_WIDTH = 0.7;
+    public static final int HOPPER_CAPACITY = 50;
+    public static final String GAMEPIECE = "Fuel";
+  }
 }
