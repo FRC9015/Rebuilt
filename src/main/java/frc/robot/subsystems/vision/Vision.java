@@ -136,34 +136,22 @@ public class Vision extends SubsystemBase {
 
         // Pose present. Start running Heuristic
         var estStdDevs = CameraConstants.kSingleTagStdDevs;
-        int numTags = 0;
-        double avgDist = 0;
+        int numTags = observation.tagCount();
+        double avgDist = observation.averageTagDistance();
 
-        // Precalculation - see how many tags we found, and calculate an average-distance metric
-        for (var target : tagPoses) {
-          numTags++;
-          avgDist +=
-              target
-                  .toPose2d()
-                  .getTranslation()
-                  .getDistance(observation.pose().toPose2d().getTranslation());
+        // One or more tags visible, run the full heuristic.
+        // Decrease std devs if multiple targets are visible
+        if (numTags > 1) {
+          estStdDevs = CameraConstants.kMultiTagStdDevs;
         }
 
-        if (numTags == 0) {
-          // No tags visible. Default to single-tag std devs
-          curStdDevs = CameraConstants.kSingleTagStdDevs;
+        // Increase std devs based on (average) distance
+        if (numTags == 1 && avgDist > VisionConstants.MAX_AVERAGE_DISTANCE) {
+          estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
         } else {
-          // One or more tags visible, run the full heuristic.
-          avgDist /= numTags;
-          // Decrease std devs if multiple targets are visible
-          if (numTags > 1) estStdDevs = CameraConstants.kMultiTagStdDevs;
-          // Increase std devs based on (average) distance
-          if (numTags == 1 && avgDist > VisionConstants.MAX_AVERAGE_DISTANCE)
-            estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-          else
-            estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / VisionConstants.STD_DEV_RANGE));
-          curStdDevs = estStdDevs;
+          estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / VisionConstants.STD_DEV_RANGE));
         }
+        curStdDevs = estStdDevs;
 
         // Send vision observation
         consumer.accept(observation.pose().toPose2d(), observation.timestamp(), curStdDevs);
