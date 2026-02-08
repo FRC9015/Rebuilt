@@ -6,8 +6,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-public class Object extends SubsystemBase {
-
+public class ObjectDetection extends SubsystemBase {
   private final PhotonCamera camera = new PhotonCamera("FrontCamera");
 
   @Override
@@ -25,11 +24,11 @@ public class Object extends SubsystemBase {
     Transform3d camToTarget = target.getBestCameraToTarget();
 
     System.out.printf(
-        "[VISION] Target ID: %d | X: %.2f m | Y: %.2f m | Z: %.2f m | Yaw: %.1f°\n",
-        classId,
-        camToTarget.getX(),
-        camToTarget.getY(),
-        camToTarget.getZ(),
-        Math.toDegrees(camToTarget.getRotation().getZ()));
+      "[VISION] Target ID: %d | X: %.2f m | Y: %.2f m | Z: %.2f m | Yaw: %.1f°\n",
+      classId,
+      camToTarget.getX(),
+      camToTarget.getY(),
+      camToTarget.getZ(),
+      Math.toDegrees(camToTarget.getRotation().getZ()));
   }
 }

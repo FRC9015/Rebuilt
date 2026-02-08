@@ -117,9 +117,9 @@ public class Vision extends SubsystemBase {
 
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
-                || observation.pose().getX() > CameraConstants.aprilTagLayout.getFieldLength()
+                || observation.pose().getX() > CameraConstants.FIELD_LENGTH
                 || observation.pose().getY() < 0.0
-                || observation.pose().getY() > CameraConstants.aprilTagLayout.getFieldWidth();
+                || observation.pose().getY() > CameraConstants.FIELD_WIDTH;
 
         // Add pose to log
         robotPoses.add(observation.pose());

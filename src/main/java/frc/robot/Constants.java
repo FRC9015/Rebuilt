@@ -48,6 +48,8 @@ public final class Constants {
   public static class CameraConstants {
     public static final AprilTagFieldLayout aprilTagLayout =
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+    public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
+    public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
     public static final double cameraHeight = Units.inchesToMeters(7);
     public static final double cameraPitch = Units.degreesToRadians(15);
     public static final double cameraXOffset = Units.inchesToMeters(13.5);
