@@ -12,6 +12,16 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -35,7 +45,23 @@ public final class Constants {
     REPLAY
   }
 
-  /** IDs for motors used by the robot (placeholders — replace with real IDs). */
+  public static class CameraConstants {
+    public static final AprilTagFieldLayout aprilTagLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+    public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
+    public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
+    public static final double cameraHeight = Units.inchesToMeters(7);
+    public static final double cameraPitch = Units.degreesToRadians(15);
+    public static final double cameraXOffset = Units.inchesToMeters(13.5);
+    public static final Transform3d placeHolderCamera =
+        new Transform3d(
+            new Translation3d(cameraXOffset, Units.inchesToMeters(0), cameraHeight),
+            new Rotation3d(0, cameraPitch, Units.degreesToRadians(0)));
+
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+  }
+
   public static class MotorIDConstants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
@@ -43,6 +69,13 @@ public final class Constants {
     public static final int INDEXER_MOTOR_ID = 13;
   }
 
+  public static class VisionConstants {
+    public static final double MAX_AMBIGUITY = 0.1;
+    public static final int MAX_AVERAGE_DISTANCE = 3;
+    public static final int STD_DEV_RANGE = 30;
+    /** IDs for motors used by the robot (placeholders — replace with real IDs). */
+  }
+  /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
