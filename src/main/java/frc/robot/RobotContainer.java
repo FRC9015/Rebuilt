@@ -30,7 +30,6 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
-import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -47,7 +46,6 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
   private SwerveDriveSimulation simDrive = null;
-  private IntakeSimulation simIntake = null;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
