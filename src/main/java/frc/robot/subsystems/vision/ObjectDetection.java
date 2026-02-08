@@ -11,7 +11,14 @@ public class ObjectDetection extends SubsystemBase {
 
   @Override
   public void periodic() {
-    PhotonPipelineResult result = camera.getAllUnreadResults().get(0);
+    // PhotonPipelineResult result = camera.getAllUnreadResults().get(0);
+
+    var results = camera.getAllUnreadResults();
+    if (results.isEmpty()) {
+      return;
+    }
+    
+    PhotonPipelineResult result = results.get(0);
 
     if (!result.hasTargets()) {
       System.out.println("[VISION] No targets detected");
