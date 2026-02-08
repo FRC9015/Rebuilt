@@ -35,7 +35,7 @@ public class Vision extends SubsystemBase {
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
-  public Matrix<N3, N1> curStdDevs = CameraConstants.kSingleTagStdDevs;
+  private Matrix<N3, N1> curStdDevs = CameraConstants.kSingleTagStdDevs;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
