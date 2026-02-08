@@ -53,7 +53,6 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Intake intake;
   private SwerveDriveSimulation simDrive = null;
-  private IntakeSimulation simIntake = null;
 
   // Controller
   private final CommandXboxController driverController = new CommandXboxController(0);
