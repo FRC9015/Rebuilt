@@ -54,19 +54,19 @@ public class VisionIOPhotonVision implements VisionIO {
         var corners = result.getBestTarget().getDetectedCorners();
         double width = 0;
         double height = 0;
-        
+
         if (corners.size() >= 4) {
-            width = corners.get(2).x - corners.get(3).x;
-            height = corners.get(3).y - corners.get(0).y;
+          width = corners.get(2).x - corners.get(3).x;
+          height = corners.get(3).y - corners.get(0).y;
         }
 
         inputs.latestTargetObservation =
-        new TargetObservation(
-            Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
-            Rotation2d.fromDegrees(result.getBestTarget().getPitch()),
-            width,
-            height,
-            result.getTimestampSeconds());
+            new TargetObservation(
+                Rotation2d.fromDegrees(result.getBestTarget().getYaw()),
+                Rotation2d.fromDegrees(result.getBestTarget().getPitch()),
+                width,
+                height,
+                result.getTimestampSeconds());
       }
 
       // Add pose observation

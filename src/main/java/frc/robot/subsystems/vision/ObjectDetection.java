@@ -17,7 +17,7 @@ public class ObjectDetection extends SubsystemBase {
     if (results.isEmpty()) {
       return;
     }
-    
+
     PhotonPipelineResult result = results.get(0);
 
     if (!result.hasTargets()) {
@@ -31,11 +31,11 @@ public class ObjectDetection extends SubsystemBase {
     Transform3d camToTarget = target.getBestCameraToTarget();
 
     System.out.printf(
-      "[VISION] Target ID: %d | X: %.2f m | Y: %.2f m | Z: %.2f m | Yaw: %.1f°\n",
-      classId,
-      camToTarget.getX(),
-      camToTarget.getY(),
-      camToTarget.getZ(),
-      Math.toDegrees(camToTarget.getRotation().getZ()));
+        "[VISION] Target ID: %d | X: %.2f m | Y: %.2f m | Z: %.2f m | Yaw: %.1f°\n",
+        classId,
+        camToTarget.getX(),
+        camToTarget.getY(),
+        camToTarget.getZ(),
+        Math.toDegrees(camToTarget.getRotation().getZ()));
   }
 }

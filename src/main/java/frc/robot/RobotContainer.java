@@ -27,8 +27,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
@@ -36,6 +34,8 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkFlex;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -107,11 +107,11 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-                new GyroIO() {};
-                new ModuleIOSim(TunerConstants.FrontLeft);
-                new ModuleIOSim(TunerConstants.FrontRight);
-                new ModuleIOSim(TunerConstants.BackLeft);
-                new ModuleIOSim(TunerConstants.BackRight);
+        new GyroIO() {};
+        new ModuleIOSim(TunerConstants.FrontLeft);
+        new ModuleIOSim(TunerConstants.FrontRight);
+        new ModuleIOSim(TunerConstants.BackLeft);
+        new ModuleIOSim(TunerConstants.BackRight);
         indexer = new Indexer(new IndexerIO() {});
         intake = new Intake(new IntakeIOSim());
         break;

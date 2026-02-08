@@ -73,7 +73,7 @@ public final class Constants {
     public static final double MAX_AMBIGUITY = 0.1;
     public static final int MAX_AVERAGE_DISTANCE = 3;
     public static final int STD_DEV_RANGE = 30;
-    /** IDs for motors used by the robot (placeholders — replace with real IDs). */ 
+    /** IDs for motors used by the robot (placeholders — replace with real IDs). */
   }
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
