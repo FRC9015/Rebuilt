@@ -103,7 +103,7 @@ public class RobotContainer {
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         intake = new Intake(new IntakeIOSim(simDrive));
-        indexer = new Indexer(new IndexerIO(){});
+        indexer = new Indexer(new IndexerIO() {});
         break;
 
       case REPLAY:
