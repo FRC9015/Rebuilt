@@ -23,7 +23,7 @@ import org.littletonrobotics.junction.Logger;
  * inputs we then actaully set up the filters that the seen tags run through we check for ambiguity
  * and distance as well as to see if the seen tag ID is blacklisted based on these factors we add
  * the estimated pose from that observation to a list of either accepted or rejected poses we then
- * change the STD devs (standerd deveation) based on the number of tags that are seen and the
+ * change the STD devs (standard deviation) based on the number of tags that are seen and the
  * distance. after that we send the accepted poses to the consumer which is the
  * addVisionMeasurements function in drive.
  */

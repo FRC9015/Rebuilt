@@ -62,16 +62,17 @@ public final class Constants {
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
   }
 
+  public static class MotorIDConstants {
+    // placeholders
+    public static final int UPPER_INTAKE_MOTOR_ID = 0;
+    public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+  }
+
   public static class VisionConstants {
     public static final double MAX_AMBIGUITY = 0.1;
     public static final int MAX_AVERAGE_DISTANCE = 3;
     public static final int STD_DEV_RANGE = 30;
-    /** IDs for motors used by the robot (placeholders — replace with real IDs). */
-    public static class MotorIDConstants {
-      // placeholders
-      public static final int UPPER_INTAKE_MOTOR_ID = 0;
-      public static final int EXTEND_INTAKE_MOTOR_ID = 0;
-    }
+    /** IDs for motors used by the robot (placeholders — replace with real IDs). */ 
   }
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
