@@ -22,6 +22,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
@@ -106,11 +107,11 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new GyroIO() {};
+                new ModuleIOSim(TunerConstants.FrontLeft);
+                new ModuleIOSim(TunerConstants.FrontRight);
+                new ModuleIOSim(TunerConstants.BackLeft);
+                new ModuleIOSim(TunerConstants.BackRight);
         indexer = new Indexer(new IndexerIO() {});
         intake = new Intake(new IntakeIOSim());
         break;
