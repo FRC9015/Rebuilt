@@ -24,8 +24,16 @@ import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
+import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOSim;
+import frc.robot.subsystems.intake.IntakeIOSparkFlex;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -44,6 +52,8 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Shooter shooter;
+  private final Intake intake;
+  private Indexer indexer;
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
@@ -53,6 +63,8 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
+  private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -67,13 +79,19 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
+        intake =
+            new Intake(
+                new IntakeIOSparkFlex(
+                    Constants.IntakeConstants.INTAKE_MOTOR_ID,
+                    Constants.IntakeConstants.INTAKE2_MOTOR_ID));
+        indexer = new Indexer(new IndexerIOSparkFlex(13));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
-                    Constants.shooterConstants.FlywheelLeftID,
-                    Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID,
-                    Constants.shooterConstants.HoodEncoderID));
+                    Constants.ShooterConstants.FlywheelLeftID,
+                    Constants.ShooterConstants.FlywheelRightID,
+                    Constants.ShooterConstants.HoodID));
         break;
 
       case SIM:
@@ -81,6 +99,7 @@ public class RobotContainer {
         simDrive =
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
+
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
         drive =
             new Drive(
@@ -89,10 +108,18 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
+
+        intake = new Intake(new IntakeIOSim());
         shooter = new Shooter(new ShooterIOSim());
+        new GyroIO() {};
+        new ModuleIOSim(TunerConstants.FrontLeft);
+        new ModuleIOSim(TunerConstants.FrontRight);
+        new ModuleIOSim(TunerConstants.BackLeft);
+        new ModuleIOSim(TunerConstants.BackRight);
+        indexer = new Indexer(new IndexerIO() {});
         break;
 
-      default:
+      case REPLAY:
         // Replayed robot, disable IO implementations
         drive =
             new Drive(
@@ -101,14 +128,18 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        intake = new Intake(new IntakeIO() {});
+        indexer = new Indexer(new IndexerIO() {});
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
-                    Constants.shooterConstants.FlywheelLeftID,
-                    Constants.shooterConstants.FlywheelRightID,
-                    Constants.shooterConstants.HoodID,
-                    Constants.shooterConstants.HoodEncoderID));
+                    Constants.ShooterConstants.FlywheelLeftID,
+                    Constants.ShooterConstants.FlywheelRightID,
+                    Constants.ShooterConstants.HoodID));
         break;
+
+      default:
+        throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
 
     // Set up auto routines
@@ -145,9 +176,11 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
+
+    driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
 
     // Lock to 0° when A button is held
     controller
@@ -172,6 +205,7 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
 
   /**

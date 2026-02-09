@@ -43,17 +43,21 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
 
     // Update alerts
-    encoderDisconnectedAlert.set(!inputs.indexerEncoderConnected);
-    jamAlert.set(inputs.jamDetected);
+    // TODO: Implement encoder connection status and jam detection logic to update these alerts
+
   }
 
   /**
-   * Sets the indexer's RPM. Sets the indexer's voltage.
+   * Sets the indexer's applied voltage.
    *
-   * @param voltage The desired voltage for the indexer. public void setVoltage(double voltage) {
-   *     io.setVoltage(voltage); Logger.recordOutput("Indexer/setVoltage", voltage); }
-   *     <p>/** Stops the indexer.
+   * @param voltage The desired voltage for the indexer.
    */
+  public void setVoltage(double voltage) {
+    io.setVoltage(voltage);
+    Logger.recordOutput("Indexer/setVoltage", voltage);
+  }
+
+  /** Stops the indexer. */
   public void stop() {
     io.stop();
     Logger.recordOutput("Indexer/Stopped", true);
@@ -75,7 +79,7 @@ public class Indexer extends SubsystemBase {
    * @return True if jam is detected, false otherwise.
    */
   public boolean isJamDetected() {
-    return inputs.jamDetected;
+    return false; // TODO implement jam detection logic based on current spikes or encoder feedback
   }
 
   /**
@@ -84,7 +88,7 @@ public class Indexer extends SubsystemBase {
    * @return The RPM of the indexer.
    */
   public double getRPM() {
-    return inputs.indexerRPM;
+    return inputs.indexerVelocity;
   }
 
   /**
@@ -113,15 +117,5 @@ public class Indexer extends SubsystemBase {
    */
   public Command runIndexer(double voltage) {
     return this.startEnd(() -> io.setVoltage(voltage), () -> stop());
-  }
-
-  /**
-   * Runs the indexer in reverse at the specified voltage.
-   *
-   * @param voltage Voltage provided to the motor.
-   * @return A command that runs the indexer in reverse.
-   */
-  public Command runIndexerReverse(double voltage) {
-    return this.startEnd(() -> io.setVoltage(-voltage), () -> stop());
   }
 }
