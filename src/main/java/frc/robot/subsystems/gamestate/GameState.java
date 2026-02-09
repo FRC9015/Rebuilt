@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class GameState extends SubsystemBase {
@@ -16,15 +15,16 @@ public class GameState extends SubsystemBase {
 
   @AutoLogOutput private boolean isHubActive = true;
   @AutoLogOutput private boolean isThreeSeconds = false;
-    private Supplier <Alliance> allianceRaw;
+  private Supplier<Alliance> allianceRaw;
   @AutoLogOutput private StateEnum alliance = StateEnum.UNKNOWN;
 
   @AutoLogOutput private String gameDataManual = "";
   @AutoLogOutput private Timer mTimer;
 
-  public GameState() {
+  public GameState(Supplier<Alliance> alliance) {
     mTimer.reset();
     mTimer.start();
+    this.allianceRaw = alliance;
   }
 
   @Override
@@ -54,7 +54,7 @@ public class GameState extends SubsystemBase {
     return this.alliance;
   }
 
-  private void setGameDataManualy(int button) {
+  public void setGameDataManualy(int button) {
     if (button == 1) {
       this.gameDataManual = "B";
     } else {
@@ -62,9 +62,6 @@ public class GameState extends SubsystemBase {
     }
   }
 
-  public Command setGameDataManual (int button) {
-    return this.run(() -> this.setGameDataManualy(button));
-  }
   /**
    * finds the games current state
    *
@@ -87,7 +84,7 @@ public class GameState extends SubsystemBase {
     if (time > 130) {
       return StateEnum.TRANSITION;
     } else if (time > 30) {
-        if (gameDataManuala == null) return StateEnum.UNKNOWN;
+      if (gameDataManuala == null) return StateEnum.UNKNOWN;
       if ("B".equals(gameDataManuala)) {
         if (time > 105) {
           return StateEnum.RED_TEAM;
@@ -153,7 +150,8 @@ public class GameState extends SubsystemBase {
       return StateEnum.BLUE_TEAM;
     } else if (allia == Alliance.Red) {
       return StateEnum.RED_TEAM;
-    }else {return StateEnum.PRACTICE;}
-
+    } else {
+      return StateEnum.PRACTICE;
+    }
   }
 }

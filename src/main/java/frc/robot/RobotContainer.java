@@ -12,6 +12,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -58,7 +60,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        gamestate = new GameState();
+        gamestate = new GameState(() ->DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         break;
 
       case SIM:
@@ -70,7 +72,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        gamestate = new GameState();
+        gamestate = new GameState(() ->DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         break;
 
       default:
@@ -82,7 +84,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        gamestate = new GameState();
+        gamestate = new GameState(() ->DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         break;
     }
 
@@ -147,6 +149,16 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+    controller
+        .leftBumper()
+            .onTrue(
+                Commands.runOnce (() -> gamestate.setGameDataManualy(1),
+            gamestate));
+      controller
+        .rightBumper()
+            .onTrue(
+                Commands.runOnce (() -> gamestate.setGameDataManualy(2),
+            gamestate));
   }
 
   /**
