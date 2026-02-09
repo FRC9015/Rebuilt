@@ -19,7 +19,7 @@ public class GameState extends SubsystemBase {
     private Supplier <Alliance> allianceRaw;
   @AutoLogOutput private StateEnum alliance = StateEnum.UNKNOWN;
 
-  @AutoLogOutput private String gameDat = "";
+  @AutoLogOutput private String gameDataManual = "";
   @AutoLogOutput private Timer mTimer;
 
   public GameState() {
@@ -54,16 +54,16 @@ public class GameState extends SubsystemBase {
     return this.alliance;
   }
 
-  private void setGD(int button) {
+  private void setGameDataManualy(int button) {
     if (button == 1) {
-      this.gameDat = "B";
+      this.gameDataManual = "B";
     } else {
-      this.gameDat = "R";
+      this.gameDataManual = "R";
     }
   }
 
-  public Command setGameData(int button) {
-    return this.run(() -> this.setGD(button));
+  public Command setGameDataManual (int button) {
+    return this.run(() -> this.setGameDataManualy(button));
   }
   /**
    * finds the games current state
@@ -74,8 +74,8 @@ public class GameState extends SubsystemBase {
   private StateEnum getGameState() throws NoSuchElementException {
     double time = -1;
     boolean auto = DriverStation.isAutonomous();
-    String gameData = this.gameDat;
-    if (this.gameDat == "") gameData = DriverStation.getGameSpecificMessage();
+    String gameDataManuala = this.gameDataManual;
+    if (this.gameDataManual == "") gameDataManuala = DriverStation.getGameSpecificMessage();
     try {
       time = OptionalDouble.of(DriverStation.getMatchTime()).getAsDouble();
     } catch (Exception noSuchElementException) {
@@ -87,8 +87,8 @@ public class GameState extends SubsystemBase {
     if (time > 130) {
       return StateEnum.TRANSITION;
     } else if (time > 30) {
-        if (gameData == null) return StateEnum.UNKNOWN;
-      if ("B".equals(gameData)) {
+        if (gameDataManuala == null) return StateEnum.UNKNOWN;
+      if ("B".equals(gameDataManuala)) {
         if (time > 105) {
           return StateEnum.RED_TEAM;
         } else if (time > 80) {
@@ -99,7 +99,7 @@ public class GameState extends SubsystemBase {
           return StateEnum.BLUE_TEAM;
         }
       }
-      if ("R".equals(gameData)) {
+      if ("R".equals(gameDataManuala)) {
         if (time > 105) {
           return StateEnum.BLUE_TEAM;
         } else if (time > 80) {
