@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -11,31 +12,33 @@ public class ObjectDetection extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // PhotonPipelineResult result = camera.getAllUnreadResults().get(0);
-
     var results = camera.getAllUnreadResults();
     if (results.isEmpty()) {
+      Logger.recordOutput("Vision/ObjectDetection/HasResult", false);
       return;
     }
+
+    Logger.recordOutput("Vision/ObjectDetection/HasResult", true);
 
     PhotonPipelineResult result = results.get(0);
 
     if (!result.hasTargets()) {
-      System.out.println("[VISION] No targets detected");
+      Logger.recordOutput("Vision/ObjectDetection/HasTargets", false);
       return;
     }
+
+    Logger.recordOutput("Vision/ObjectDetection/HasTargets", true);
 
     PhotonTrackedTarget target = result.getBestTarget();
 
     int classId = target.getFiducialId();
     Transform3d camToTarget = target.getBestCameraToTarget();
 
-    System.out.printf(
-        "[VISION] Target ID: %d | X: %.2f m | Y: %.2f m | Z: %.2f m | Yaw: %.1f°\n",
-        classId,
-        camToTarget.getX(),
-        camToTarget.getY(),
-        camToTarget.getZ(),
-        Math.toDegrees(camToTarget.getRotation().getZ()));
+    Logger.recordOutput("Vision/ObjectDetection/TargetID", classId);
+    Logger.recordOutput("Vision/ObjectDetection/X", camToTarget.getX());
+    Logger.recordOutput("Vision/ObjectDetection/Y", camToTarget.getY());
+    Logger.recordOutput("Vision/ObjectDetection/Z", camToTarget.getZ());
+    Logger.recordOutput(
+        "Vision/ObjectDetection/YawDegrees", Math.toDegrees(camToTarget.getRotation().getZ()));
   }
 }
