@@ -3,12 +3,14 @@ package frc.robot.subsystems.shooter;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
@@ -66,6 +68,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
     hoodMotor.getConfigurator().apply(hoodConfig);
+
+
 
     motorVolts = flywheelMotorLeft.getMotorVoltage();
     motorAmps = flywheelMotorLeft.getStatorCurrent();
@@ -129,6 +133,9 @@ public class ShooterIOTalonFX implements ShooterIO {
             .withAcceleration(Constants.shooterConstants.FLYWHEEL_ACCELERATION)
             .withFeedForward(Constants.shooterConstants.FEEDFORWARD_VOLTAGE)
             .withSlot(0));
+
+    flywheelMotorRight.setControl(
+        new Follower(flywheelMotorLeft.getDeviceID(), MotorAlignmentValue.Aligned));
   }
 
   @Override
@@ -137,7 +144,7 @@ public class ShooterIOTalonFX implements ShooterIO {
         MathUtil.clamp(
             position,
             Constants.shooterConstants.HOOD_MIN_POS,
-            Constants.shooterConstants.HOOD_MAX_POS);
+           Constants.shooterConstants.HOOD_MAX_POS);
 
     hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }
