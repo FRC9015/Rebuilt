@@ -57,7 +57,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
     hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition.get();
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
