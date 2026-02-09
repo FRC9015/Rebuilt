@@ -90,8 +90,9 @@ public class Indexer extends SubsystemBase {
   public boolean isJamDetected() {
     boolean highCurrent = inputs.indexerCurrentAmps >= jamCurrentAmps;
     boolean lowSpeed = Math.abs(inputs.indexerVelocity) <= jamRPMThreshold;
+    boolean isRunning = Math.abs(inputs.indexerAppliedVolts) > 0.1;
 
-    if (highCurrent && lowSpeed) {
+    if (highCurrent && lowSpeed && isRunning) {
       jamCycles++;
     } else {
       jamCycles = 0;
@@ -137,5 +138,24 @@ public class Indexer extends SubsystemBase {
    */
   public Command runIndexer(double voltage) {
     return this.startEnd(() -> io.setVoltage(voltage), () -> stop());
+  }
+
+   /**
+   * Unjams the indexer by running it in reverse for 0.5 seconds.
+   * 
+   * @return A command that unjams the indexer.
+   */
+  public Command unjam() {
+    return this.runEnd(() -> io.setVoltage(-4.0), () -> stop()).withTimeout(0.5);
+  }
+
+    /**
+   * Runs the indexer at the specified voltage but automatically unjams.
+   *
+   * @param voltage Voltage provided to the motor.
+   * @return A command that runs the indexer with auto unjam functionality.
+   */
+  public Command runIndexerWithAutoUnjam(double voltage) {
+    return runIndexer(voltage).until(this::isJamDetected).andThen(unjam()).repeatedly();
   }
 }
