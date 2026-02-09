@@ -67,8 +67,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
     hoodMotor.getConfigurator().apply(hoodConfig);
 
-
-
     motorVolts = flywheelMotorLeft.getMotorVoltage();
     motorAmps = flywheelMotorLeft.getStatorCurrent();
     motorRPM = flywheelMotorLeft.getVelocity();
