@@ -19,13 +19,15 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
 /**
- * The file that actually runs In this file we log everything and run the IO files and update the
- * inputs we then actaully set up the filters that the seen tags run through we check for ambiguity
- * and distance as well as to see if the seen tag ID is blacklisted based on these factors we add
- * the estimated pose from that observation to a list of either accepted or rejected poses we then
- * change the STD devs (standard deviation) based on the number of tags that are seen and the
- * distance. after that we send the accepted poses to the consumer which is the
- * addVisionMeasurements function in drive.
+ * Main vision processing subsystem.
+ *
+ * <p>This class updates all VisionIO implementations, logs their inputs, and processes detected
+ * AprilTag observations. Each pose observation is filtered based on tag count, ambiguity, field
+ * bounds, distance, and blacklist criteria. Observations are classified as either accepted or
+ * rejected and logged accordingly.
+ *
+ * <p>For accepted observations, measurement standard deviations are dynamically adjusted based on
+ * the number of visible tags and their average distance from the robot.
  */
 public class Vision extends SubsystemBase {
 
