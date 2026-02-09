@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class GameState extends SubsystemBase {
-  @AutoLogOutput private StateEnum state;
+  @AutoLogOutput private StateEnum state = StateEnum.UNKNOWN;
 
   @AutoLogOutput private boolean isHubActive;
   @AutoLogOutput private boolean isThreeSeconds;
@@ -61,7 +61,7 @@ public class GameState extends SubsystemBase {
     if (button == 1) {
       this.gameDat = "B";
     } else {
-      this.gameDat = "r";
+      this.gameDat = "R";
     }
   }
 
@@ -90,6 +90,7 @@ public class GameState extends SubsystemBase {
     if (time > 130) {
       return StateEnum.TRANSITION;
     } else if (time > 30) {
+        if (gameData == null) return StateEnum.UNKNOWN;
       if ("B".equals(gameData)) {
         if (time > 105) {
           return StateEnum.RED_TEAM;
