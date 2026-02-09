@@ -14,26 +14,23 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class GameState extends SubsystemBase {
   @AutoLogOutput private StateEnum state = StateEnum.UNKNOWN;
 
-  @AutoLogOutput private boolean isHubActive;
-  @AutoLogOutput private boolean isThreeSeconds;
+  @AutoLogOutput private boolean isHubActive = true;
+  @AutoLogOutput private boolean isThreeSeconds = false;
     private Supplier <Alliance> allianceRaw;
-  @AutoLogOutput private StateEnum alliance;
+  @AutoLogOutput private StateEnum alliance = StateEnum.UNKNOWN;
 
-  @AutoLogOutput private String gameDat;
+  @AutoLogOutput private String gameDat = "";
   @AutoLogOutput private Timer mTimer;
 
   public GameState() {
     mTimer.reset();
     mTimer.start();
-    this.state = getGameState();
-    this.isHubActive = canWeScore();
-    this.alliance = findAlliance();
-    this.isThreeSeconds = threeSecondTime();
   }
 
   @Override
   public void periodic() {
     this.state = getGameState();
+    if (this.alliance == StateEnum.UNKNOWN) this.alliance = findAlliance();
     this.isHubActive = canWeScore();
     this.isThreeSeconds = threeSecondTime();
     System.out.println("state" + state);
@@ -78,7 +75,7 @@ public class GameState extends SubsystemBase {
     double time = -1;
     boolean auto = DriverStation.isAutonomous();
     String gameData = this.gameDat;
-    if (this.gameDat == null) gameData = DriverStation.getGameSpecificMessage();
+    if (this.gameDat == "") gameData = DriverStation.getGameSpecificMessage();
     try {
       time = OptionalDouble.of(DriverStation.getMatchTime()).getAsDouble();
     } catch (Exception noSuchElementException) {
