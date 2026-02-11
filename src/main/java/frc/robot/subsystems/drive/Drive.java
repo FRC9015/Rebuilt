@@ -63,9 +63,13 @@ import frc.robot.util.PhoenixUtil;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+/** Subsystem for swerve drivetrain control and odometry. */
 public class Drive extends SubsystemBase {
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY =
@@ -79,6 +83,10 @@ public class Drive extends SubsystemBase {
               Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
               Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
   private static final double slipRatio = 5.0;
+  // Drive constants
+  private static final int MODULE_COUNT = 4;
+  private static final double TIME_STEP = 0.02;
+  private static final double MAX_VOLTAGE = 12.0;
   // PathPlanner config constants
   private static final double ROBOT_MASS_KG = 59.90;
   private static final double ROBOT_MOI = 6.554;
@@ -97,11 +105,27 @@ public class Drive extends SubsystemBase {
           getModuleTranslations());
   private static final PathConstraints PP_CONSTRAINTS =
       new PathConstraints(3.0, 3.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+  public static final DriveTrainSimulationConfig mapleSimConfig =
+      DriveTrainSimulationConfig.Default()
+          .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
+          .withCustomModuleTranslations(getModuleTranslations())
+          .withGyro(COTS.ofPigeon2())
+          .withSwerveModule(
+              new SwerveModuleSimulationConfig(
+                  DCMotor.getKrakenX60(1),
+                  DCMotor.getKrakenX60(1),
+                  TunerConstants.FrontLeft.DriveMotorGearRatio,
+                  TunerConstants.FrontLeft.SteerMotorGearRatio,
+                  Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage),
+                  Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage),
+                  Meters.of(TunerConstants.FrontLeft.WheelRadius),
+                  KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia),
+                  WHEEL_COF));
 
   static final Lock odometryLock = new ReentrantLock();
   private final GyroIO gyroIO;
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
-  private final Module[] modules = new Module[4]; // FL, FR, BL, BR
+  private final Module[] modules = new Module[MODULE_COUNT]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert =
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
@@ -109,12 +133,15 @@ public class Drive extends SubsystemBase {
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private Rotation2d rawGyroRotation = new Rotation2d();
   private SwerveModulePosition[] lastModulePositions = // For delta tracking
-      new SwerveModulePosition[] {
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition(),
-        new SwerveModulePosition()
-      };
+      new SwerveModulePosition[MODULE_COUNT];
+
+  // Initialize lastModulePositions before poseEstimator usage
+  {
+    for (int i = 0; i < MODULE_COUNT; i++) {
+      lastModulePositions[i] = new SwerveModulePosition();
+    }
+  }
+
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(
           kinematics,
@@ -180,7 +207,8 @@ public class Drive extends SubsystemBase {
         });
     setpointGenerator = new SwerveSetpointGenerator(PP_CONFIG, Units.degreesToRadians(720));
     prevSetpoint =
-        new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+        new SwerveSetpoint(
+            getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(MODULE_COUNT));
     // Configure SysId
     sysId =
         new SysIdRoutine(
@@ -193,7 +221,8 @@ public class Drive extends SubsystemBase {
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
     prevSetpoint =
-        new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+        new SwerveSetpoint(
+            getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(MODULE_COUNT));
   }
 
   @Override
@@ -226,9 +255,9 @@ public class Drive extends SubsystemBase {
     int sampleCount = sampleTimestamps.length;
     for (int i = 0; i < sampleCount; i++) {
       // Read wheel positions and deltas from each module
-      SwerveModulePosition[] modulePositions = new SwerveModulePosition[4];
-      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[4];
-      for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
+      SwerveModulePosition[] modulePositions = new SwerveModulePosition[MODULE_COUNT];
+      SwerveModulePosition[] moduleDeltas = new SwerveModulePosition[MODULE_COUNT];
+      for (int moduleIndex = 0; moduleIndex < MODULE_COUNT; moduleIndex++) {
         if (isSlipping()) {
           modulePositions[moduleIndex] = lastModulePositions[moduleIndex];
         } else {
@@ -269,19 +298,20 @@ public class Drive extends SubsystemBase {
    */
   public void runVelocity(ChassisSpeeds speeds) {
 
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, TIME_STEP);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
     // Calculate module setpoints
     prevSetpoint =
-        setpointGenerator.generateSetpoint(prevSetpoint, speeds, PP_CONSTRAINTS, 0.02, 12.0);
+        setpointGenerator.generateSetpoint(
+            prevSetpoint, speeds, PP_CONSTRAINTS, TIME_STEP, MAX_VOLTAGE);
     // Log unoptimized setpoints and setpoint speeds
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
     Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
     Logger.recordOutput("SwerveStates/SetpointGenerated", prevSetpoint.moduleStates());
 
     // Send setpoints to modules
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < MODULE_COUNT; i++) {
       modules[i].runSetpoint(setpointStates[i]);
     }
 
@@ -291,17 +321,18 @@ public class Drive extends SubsystemBase {
 
   public void runVelocityAuto(ChassisSpeeds speeds) {
     // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, TIME_STEP);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
     prevSetpoint =
-        setpointGenerator.generateSetpoint(prevSetpoint, speeds, PP_CONSTRAINTS, 0.02, 12.0);
+        setpointGenerator.generateSetpoint(
+            prevSetpoint, speeds, PP_CONSTRAINTS, TIME_STEP, MAX_VOLTAGE);
     // Log unoptimized setpoints and setpoint speeds
     Logger.recordOutput("AutoDrive/Setpoints", setpointStates);
     Logger.recordOutput("AutoDrive/Setpoints", discreteSpeeds);
 
     // Send setpoints to modules
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < MODULE_COUNT; i++) {
       modules[i].runSetpoint(prevSetpoint.moduleStates()[i]);
     }
 
@@ -311,7 +342,7 @@ public class Drive extends SubsystemBase {
 
   /** Runs the drive in a straight line with the specified drive output. */
   public void runCharacterization(double output) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < MODULE_COUNT; i++) {
       modules[i].runCharacterization(output);
     }
   }
@@ -326,8 +357,8 @@ public class Drive extends SubsystemBase {
    * return to their normal orientations the next time a nonzero velocity is requested.
    */
   public void stopWithX() {
-    Rotation2d[] headings = new Rotation2d[4];
-    for (int i = 0; i < 4; i++) {
+    Rotation2d[] headings = new Rotation2d[MODULE_COUNT];
+    for (int i = 0; i < MODULE_COUNT; i++) {
       headings[i] = getModuleTranslations()[i].getAngle();
     }
     kinematics.resetHeadings(headings);
@@ -358,8 +389,8 @@ public class Drive extends SubsystemBase {
   /** Returns the module states (turn angles and drive velocities) for all of the modules. */
   @AutoLogOutput(key = "SwerveStates/Measured")
   private SwerveModuleState[] getModuleStates() {
-    SwerveModuleState[] states = new SwerveModuleState[4];
-    for (int i = 0; i < 4; i++) {
+    SwerveModuleState[] states = new SwerveModuleState[MODULE_COUNT];
+    for (int i = 0; i < MODULE_COUNT; i++) {
       states[i] = modules[i].getState();
     }
     return states;
@@ -367,8 +398,8 @@ public class Drive extends SubsystemBase {
 
   /** Returns the module positions (turn angles and drive positions) for all of the modules. */
   private SwerveModulePosition[] getModulePositions() {
-    SwerveModulePosition[] states = new SwerveModulePosition[4];
-    for (int i = 0; i < 4; i++) {
+    SwerveModulePosition[] states = new SwerveModulePosition[MODULE_COUNT];
+    for (int i = 0; i < MODULE_COUNT; i++) {
       states[i] = modules[i].getPosition();
     }
     return states;
@@ -382,8 +413,8 @@ public class Drive extends SubsystemBase {
 
   /** Returns the position of each module in radians. */
   public double[] getWheelRadiusCharacterizationPositions() {
-    double[] values = new double[4];
-    for (int i = 0; i < 4; i++) {
+    double[] values = new double[MODULE_COUNT];
+    for (int i = 0; i < MODULE_COUNT; i++) {
       values[i] = modules[i].getWheelRadiusCharacterizationPosition();
     }
     return values;
@@ -392,16 +423,16 @@ public class Drive extends SubsystemBase {
   /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
   public double getFFCharacterizationVelocity() {
     double output = 0.0;
-    for (int i = 0; i < 4; i++) {
-      output += modules[i].getFFCharacterizationVelocity() / 4.0;
+    for (int i = 0; i < MODULE_COUNT; i++) {
+      output += modules[i].getFFCharacterizationVelocity() / (double) MODULE_COUNT;
     }
     return output;
   }
 
   public double getVelocityMetersPerSec() {
     double output = 0.0;
-    for (int i = 0; i < 4; i++) {
-      output += modules[i].getVelocityMetersPerSec() / 4.0;
+    for (int i = 0; i < MODULE_COUNT; i++) {
+      output += modules[i].getVelocityMetersPerSec() / (double) MODULE_COUNT;
     }
     return output;
   }
@@ -414,7 +445,7 @@ public class Drive extends SubsystemBase {
 
   @AutoLogOutput
   public Pose2d getPredictedPose() {
-    return this.getPose().exp(this.getChassisSpeeds().toTwist2d(0.02));
+    return this.getPose().exp(this.getChassisSpeeds().toTwist2d(TIME_STEP));
   }
 
   /** Returns the current odometry rotation. */
