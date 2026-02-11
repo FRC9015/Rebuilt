@@ -3,7 +3,6 @@ package frc.robot.subsystems.gamestate;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
@@ -22,6 +21,7 @@ public class GameState extends SubsystemBase {
   @AutoLogOutput private Timer mTimer;
 
   public GameState(Supplier<Alliance> alliance) {
+    mTimer = new Timer();
     mTimer.reset();
     mTimer.start();
     this.allianceRaw = alliance;
@@ -34,7 +34,6 @@ public class GameState extends SubsystemBase {
     this.isHubActive = canWeScore();
     this.isThreeSeconds = threeSecondTime();
     System.out.println("state" + state);
-    System.out.println("hub" + isHubActive);
     System.out.println("Alliance" + this.alliance);
   }
 
@@ -71,8 +70,8 @@ public class GameState extends SubsystemBase {
   private StateEnum getGameState() throws NoSuchElementException {
     double time = -1;
     boolean auto = DriverStation.isAutonomous();
-    String gameDataManuala = this.gameDataManual;
-    if (this.gameDataManual == "") gameDataManuala = DriverStation.getGameSpecificMessage();
+    String gameData = this.gameDataManual;
+    if (this.gameDataManual == "") gameData = DriverStation.getGameSpecificMessage();
     try {
       time = OptionalDouble.of(DriverStation.getMatchTime()).getAsDouble();
     } catch (Exception noSuchElementException) {
@@ -84,8 +83,8 @@ public class GameState extends SubsystemBase {
     if (time > 130) {
       return StateEnum.TRANSITION;
     } else if (time > 30) {
-      if (gameDataManuala == null) return StateEnum.UNKNOWN;
-      if ("B".equals(gameDataManuala)) {
+      if (gameData == null) return StateEnum.UNKNOWN;
+      if ("B".equals(gameData)) {
         if (time > 105) {
           return StateEnum.RED_TEAM;
         } else if (time > 80) {
@@ -96,7 +95,7 @@ public class GameState extends SubsystemBase {
           return StateEnum.BLUE_TEAM;
         }
       }
-      if ("R".equals(gameDataManuala)) {
+      if ("R".equals(gameData)) {
         if (time > 105) {
           return StateEnum.BLUE_TEAM;
         } else if (time > 80) {
