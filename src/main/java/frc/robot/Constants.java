@@ -82,13 +82,13 @@ public final class Constants {
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
         new Slot0Configs()
-            .withKP(0.005)
+            .withKP(0.12)
             .withKI(0)
             .withKD(0.0025)
             .withKG(0)
             .withKA(0)
-            .withKS(0)
-            .withKV(0);
+            .withKS(0.25)
+            .withKV(0.12);
 
     public static final Slot1Configs hoodSlotPositionConfigs =
         new Slot1Configs()

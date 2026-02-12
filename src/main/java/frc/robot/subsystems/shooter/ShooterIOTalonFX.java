@@ -29,7 +29,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   public StatusSignal<Angle> motorPosition;
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
-  private final MotionMagicVoltage hoodMagicVoltage = new MotionMagicVoltage(122);
+  private final MotionMagicVoltage hoodMagicVoltage = new MotionMagicVoltage(12);
 
   public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int hoodID) {
     flywheelMotorLeft = new TalonFX(flywheelID1);
@@ -117,12 +117,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setFlyWheelSpeed(double speed) {
     final VelocityVoltage flyWheelVelocityVoltage = new VelocityVoltage(0.0);
-    flywheelMotorLeft.setControl(
-        flyWheelVelocityVoltage
-            .withVelocity(speed)
-            .withAcceleration(Constants.ShooterConstants.FLYWHEEL_ACCELERATION)
-            .withFeedForward(Constants.ShooterConstants.FEEDFORWARD_VOLTAGE)
-            .withSlot(0));
+    flywheelMotorLeft.setControl(flyWheelVelocityVoltage.withVelocity(speed));
   }
 
   @Override
