@@ -126,7 +126,8 @@ public class ShooterIOTalonFX implements ShooterIO {
             .withFeedForward(Constants.ShooterConstants.FEEDFORWARD_VOLTAGE)
             .withSlot(0));
 
-    flywheelMotorRight.setControl(new Follower(flywheelMotorLeft.getDeviceID(), MotorAlignmentValue.Opposed));
+    flywheelMotorRight.setControl(
+        new Follower(flywheelMotorLeft.getDeviceID(), MotorAlignmentValue.Opposed));
   }
 
   @Override
