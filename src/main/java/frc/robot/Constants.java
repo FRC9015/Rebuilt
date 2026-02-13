@@ -76,10 +76,10 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
-    public static final int FlywheelLeftID = 5;
-    public static final int FlywheelRightID = 31;
-    public static final int HoodID = 3;
-    public static final int HoodEncoderID = 8;
+    public static final int FLY_WHEEL_LEFT_ID = 5;
+    public static final int FLYWHEEL_RIGHT_ID = 31;
+    public static final int HOOD_ID = 3;
+    public static final int HOOD_ENCODER_ID = 8;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
         new Slot0Configs()
@@ -101,10 +101,10 @@ public final class Constants {
             .withKS(0)
             .withKV(0);
 
-    public static final MotionMagicConfigs HOOD_MAGIC_CONFIGS =
+    public static final MotionMagicConfigs hoodMagicConfigs =
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
 
-    public static final FeedbackConfigs HOOD_FEEDBACK_CONFIGS =
+    public static final FeedbackConfigs hoodFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     // TODO tune these values

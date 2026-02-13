@@ -10,18 +10,10 @@ public class Shooter extends SubsystemBase {
 
   private final ShooterIO io;
 
-  private PIDController shooterPIDController;
-
-  private double kP = 0.0;
-  private double kI = 0.0;
-  private double kD = 0.0;
-  private double toleranceMeters = 0.0;
   private double idleSpeed = 0.0;
 
   public Shooter(ShooterIO io) {
     this.io = io;
-    shooterPIDController = new PIDController(kP, kI, kD);
-    shooterPIDController.setTolerance(toleranceMeters);
   }
 
   // Minimum Value of speedValue: -512.0

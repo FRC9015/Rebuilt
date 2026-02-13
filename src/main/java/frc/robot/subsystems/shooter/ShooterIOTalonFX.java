@@ -38,7 +38,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     flywheelMotorLeft = new TalonFX(flywheelID1);
     flywheelMotorRight = new TalonFX(flywheelID2);
     hoodMotor = new TalonFX(hoodID);
-    // hoodEncoder = new CANcoder(hoodEncoderID);
     // Configure motor
     TalonFXConfiguration flyWheelConfigLeft =
         new TalonFXConfiguration()
@@ -47,8 +46,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
             .withSlot1(Constants.ShooterConstants.hoodSlotPositionConfigs)
-            .withFeedback(Constants.ShooterConstants.HOOD_FEEDBACK_CONFIGS)
-            .withMotionMagic(Constants.ShooterConstants.HOOD_MAGIC_CONFIGS);
+            .withFeedback(Constants.ShooterConstants.hoodFeedbackConfigs)
+            .withMotionMagic(Constants.ShooterConstants.hoodMagicConfigs);
 
     flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;

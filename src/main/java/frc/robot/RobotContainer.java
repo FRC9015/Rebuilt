@@ -57,8 +57,8 @@ public class RobotContainer {
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController driverController = new CommandXboxController(1);
+  private final CommandXboxController controller = new CommandXboxController(1);
+  private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -89,9 +89,9 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
-                    Constants.ShooterConstants.FlywheelLeftID,
-                    Constants.ShooterConstants.FlywheelRightID,
-                    Constants.ShooterConstants.HoodID));
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLYWHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         break;
 
       case SIM:
@@ -133,9 +133,9 @@ public class RobotContainer {
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
-                    Constants.ShooterConstants.FlywheelLeftID,
-                    Constants.ShooterConstants.FlywheelRightID,
-                    Constants.ShooterConstants.HoodID));
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLYWHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         break;
 
       default:
@@ -182,30 +182,6 @@ public class RobotContainer {
 
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
 
-    // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
-
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
-    // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
-    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
 
   /**
