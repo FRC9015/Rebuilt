@@ -85,7 +85,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.hoodEncoderPosition = hoodMotor.getPosition().getValueAsDouble();
     inputs.flywheelCurrentSpeed = flywheelMotorLeft.getVelocity().getValueAsDouble();
     inputs.flywheelRPM = motorRPM.getValueAsDouble();
-    inputs.flywheelAppliedVolts = motorVolts.getValueAsDouble();
     inputs.flywheelCurrentAmps = flywheelMotorLeft.getStatorCurrent().getValueAsDouble();
     inputs.hoodEncoderConnected = false;
   }
