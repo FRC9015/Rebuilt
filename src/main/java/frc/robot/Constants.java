@@ -90,8 +90,8 @@ public final class Constants {
             .withKS(0)
             .withKV(0);
 
-    public static final Slot1Configs hoodSlotPositionConfigs =
-        new Slot1Configs()
+    public static final Slot0Configs hoodSlotPositionConfigs =
+        new Slot0Configs()
             .withKP(0.02)
             .withKI(0)
             .withKD(0.005)

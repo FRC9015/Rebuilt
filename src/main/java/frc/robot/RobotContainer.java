@@ -173,6 +173,7 @@ public class RobotContainer {
                 .alongWith(kicker.runIndexer(indexerRollerValue))
                 .alongWith(intake.runIntakeAtSpeed(intakeRollerValue))
                 .alongWith(shooter.runShooterAtSpeed(100)));
+    driverController.a().whileTrue(shooter.runShooterAtSpeed(100));
   }
 
   /**
