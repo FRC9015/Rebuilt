@@ -43,6 +43,10 @@ public class ShooterIOTalonFX implements ShooterIO {
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs);
 
+    TalonFXConfiguration flyWheelConfigRight =
+        new TalonFXConfiguration()
+            .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs);
+
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.hoodSlotPositionConfigs)
@@ -51,7 +55,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    TalonFXConfiguration flyWheelConfigRight = flyWheelConfigLeft;
     flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
