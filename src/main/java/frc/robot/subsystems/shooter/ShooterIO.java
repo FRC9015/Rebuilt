@@ -31,6 +31,8 @@ public interface ShooterIO {
     return 0.0;
   }
 
+  public default void setFlyWheelVoltage(double volts) {}
+
   public default void setHoodPosition(double position) {}
 
   public default double getHoodPosition() {

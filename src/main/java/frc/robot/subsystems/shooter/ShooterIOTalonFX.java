@@ -3,15 +3,13 @@ package frc.robot.subsystems.shooter;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -31,7 +29,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   public StatusSignal<Angle> motorPosition;
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
-  private final MotionMagicVoltage hoodMagicVoltage = new MotionMagicVoltage(122);
+  private final MotionMagicVoltage hoodMagicVoltage = new MotionMagicVoltage(0);
 
   public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int hoodID) {
     flywheelMotorLeft = new TalonFX(flywheelID1);
@@ -50,7 +48,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.hoodSlotPositionConfigs)
-            .withFeedback(Constants.ShooterConstants.HOOD_FEEDBACK_CONFIGS)
+            // .withFeedback(Constants.ShooterConstants.HOOD_FEEDBACK_CONFIGS)
             .withMotionMagic(Constants.ShooterConstants.HOOD_MAGIC_CONFIGS);
 
     flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -58,13 +56,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition.get();
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
@@ -130,18 +122,29 @@ public class ShooterIOTalonFX implements ShooterIO {
             .withSlot(0));
 
     flywheelMotorRight.setControl(
-        new Follower(flywheelMotorLeft.getDeviceID(), MotorAlignmentValue.Opposed));
+        flyWheelVelocityVoltage
+            .withVelocity(speed)
+            .withAcceleration(Constants.ShooterConstants.FLYWHEEL_ACCELERATION)
+            .withFeedForward(Constants.ShooterConstants.FEEDFORWARD_VOLTAGE)
+            .withSlot(0));
+  }
+
+  @Override
+  public void setFlyWheelVoltage(double volts) {
+    final VoltageOut flyWheelVelocityVoltage = new VoltageOut(0.0);
+    flywheelMotorLeft.setControl(flyWheelVelocityVoltage.withOutput(volts));
+    flywheelMotorRight.setControl(flyWheelVelocityVoltage.withOutput(volts));
   }
 
   @Override
   public void setHoodPosition(double position) {
-    final double clampedPosition =
-        MathUtil.clamp(
-            position,
-            Constants.ShooterConstants.HOOD_MIN_POS,
-            Constants.ShooterConstants.HOOD_MAX_POS);
+    // final double clampedPosition =
+    //     MathUtil.clamp(
+    //         position,
+    //         Constants.ShooterConstants.HOOD_MIN_POS,
+    //         Constants.ShooterConstants.HOOD_MAX_POS);
 
-    hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
+    hoodMotor.setControl(hoodMagicVoltage.withPosition(position));
   }
 
   public double getPosition() {

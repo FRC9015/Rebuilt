@@ -76,8 +76,8 @@ public final class Constants {
 
   public static class ShooterConstants {
     public static final int FlywheelLeftID = 5;
-    public static final int FlywheelRightID = 6;
-    public static final int HoodID = 7;
+    public static final int FlywheelRightID = 31;
+    public static final int HoodID = 3;
     public static final int HoodEncoderID = 8;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
@@ -91,14 +91,7 @@ public final class Constants {
             .withKV(0);
 
     public static final Slot0Configs hoodSlotPositionConfigs =
-        new Slot0Configs()
-            .withKP(0.02)
-            .withKI(0)
-            .withKD(0.005)
-            .withKG(0.001)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
+        new Slot0Configs().withKP(2).withKI(0).withKD(0).withKG(0.01).withKA(0).withKS(0).withKV(0);
 
     public static final MotionMagicConfigs HOOD_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
@@ -112,9 +105,9 @@ public final class Constants {
     public static final double SHOOTER_MIN_SPEED = 0.0;
     public static final double FLYWHEEL_ACCELERATION = 100;
     public static final double FEEDFORWARD_VOLTAGE = 12.0;
-    public static final double HOOD_MAX_POS = 0.0;
-    public static final double HOOD_MIN_POS = 0.0;
-    public static final double HOOD_DEPLOYED_POSITION = 0.0;
-    public static final double HOOD_STOWED_POSITION = 0.0;
+    public static final double HOOD_MAX_POS = 15.5;
+    public static final double HOOD_MIN_POS = -0.3;
+    public static final double HOOD_DEPLOYED_POSITION = 15.5;
+    public static final double HOOD_STOWED_POSITION = -0.3;
   }
 }

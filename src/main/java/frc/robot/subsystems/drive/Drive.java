@@ -109,8 +109,6 @@ public class Drive extends SubsystemBase {
       DriveTrainSimulationConfig.Default()
           .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
           .withCustomModuleTranslations(getModuleTranslations())
-
-          
           .withGyro(COTS.ofPigeon2())
           .withSwerveModule(
               new SwerveModuleSimulationConfig(

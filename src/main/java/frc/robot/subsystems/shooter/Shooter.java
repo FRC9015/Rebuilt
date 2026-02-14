@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.Logger;
 public class Shooter extends SubsystemBase {
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
   private final ShooterIO io;
+  private final double defaultHoodPosition = 4.4765;
 
   private PIDController shooterPIDController;
 
@@ -21,6 +22,7 @@ public class Shooter extends SubsystemBase {
     this.io = io;
     shooterPIDController = new PIDController(kP, kI, kD);
     shooterPIDController.setTolerance(toleranceMeters);
+    this.setDefaultCommand(setHoodPosition(defaultHoodPosition));
   }
 
   // Minimum Value of speedValue: -512.0
@@ -35,6 +37,15 @@ public class Shooter extends SubsystemBase {
     io.setFlyWheelSpeed(-speedValue);
   }
 
+  public void setShooterVoltage(double volts) {
+    io.setFlyWheelVoltage(volts);
+  }
+
+  public Command runShooterAtVoltage(double volts) {
+    Logger.recordOutput("Shooter/Voltage", volts);
+    return this.startEnd(() -> this.setShooterVoltage(volts), () -> io.stopFlywheels());
+  }
+
   public Command runShooterAtSpeed(double speed) {
     Logger.recordOutput("Shooter/Speed", speed);
     return this.startEnd(() -> this.setShooterSpeed(speed), () -> io.stopFlywheels());
@@ -42,8 +53,7 @@ public class Shooter extends SubsystemBase {
 
   public Command runShooterAtReverseSpeed(double speed) {
     Logger.recordOutput("Shooter/Speed", speed);
-    return this.startEnd(
-        () -> this.setShooterReverseSpeed(speed), () -> this.setShooterSpeed(idleSpeed));
+    return this.startEnd(() -> this.setShooterReverseSpeed(speed), () -> io.stopFlywheels());
   }
 
   public Command stopFlywheels() {

@@ -60,7 +60,7 @@ public class RobotContainer {
 
   private SwerveDriveSimulation simDrive;
 
-  private double intakeRollerValue = 2000;
+  private double intakeRollerValue = 2373;
   private double indexerRollerValue = 12;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -159,8 +159,7 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
-    driverController.povDown().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.1));
-    driverController.povUp().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.1));
+
     driverController.povLeft().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.05));
     driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
     driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
@@ -172,8 +171,9 @@ public class RobotContainer {
                 .runIndexer(indexerRollerValue)
                 .alongWith(kicker.runIndexer(indexerRollerValue))
                 .alongWith(intake.runIntakeAtSpeed(intakeRollerValue))
-                .alongWith(shooter.runShooterAtSpeed(100)));
-    driverController.a().whileTrue(shooter.runShooterAtSpeed(100));
+                .alongWith(shooter.runShooterAtVoltage(-12)));
+
+    driverController.a().whileTrue(shooter.setHoodPosition(10));
   }
 
   /**
