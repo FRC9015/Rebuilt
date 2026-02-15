@@ -94,8 +94,8 @@ public final class Constants {
     public static final int E2_SEARCH_LIMIT = (int) E1_TEETH;
 
     // --- MOVEMENT LIMITS ---
-    public static final double MAXROTATION = 2.0;
-    public static final double MINROTATION = 0.0;
+    public static final double MAXROTATION = 1.0;
+    public static final double MINROTATION = -1.0;
 
     public static final double MOTOR_TO_TURRET_GEAR_RATIO = 37.5;
     // --- MOTOR CONFIGS ---

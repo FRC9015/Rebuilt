@@ -177,7 +177,8 @@ public class TurretIOTalonFX implements TurretIO {
   public void setTurretPosition(double positionRotations) {
     // Clamp to valid range before commanding motor
     double safePosition =
-        MathUtil.clamp(positionRotations, turretConstants.MINROTATION, turretConstants.MAXROTATION);
+        MathUtil.clamp(
+            positionRotations / 360, turretConstants.MINROTATION, turretConstants.MAXROTATION);
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
   }
 

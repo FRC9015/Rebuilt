@@ -19,7 +19,7 @@ public class Turret extends SubsystemBase {
    * @param targetAngle0to360 The angle you want (e.g., 90 degrees).
    */
   public Command setTurretAngleFastestPath(double targetAngle0to360) {
-    return this.run(
+    return this.startEnd(
         () -> {
           // 1. Get current position in degrees
           double currentPosDegrees = inputs.turretResolvedPosition * 360.0;
@@ -44,7 +44,8 @@ public class Turret extends SubsystemBase {
 
           // 5. Send the chosen position (converted back to rotations) to the IO layer
           io.setTurretPosition(chosenAngle / 360.0);
-        });
+        },
+        () -> io.stop());
   }
 
   @Override

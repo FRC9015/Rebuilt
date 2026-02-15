@@ -190,14 +190,17 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.povDown().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.1));
-    driverController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
-    driverController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
-    driverController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
-    driverController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
-    driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
-    driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale += 0.01));
-    driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -= 0.01));
+    // driverController.povDown().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.1));
+    // driverController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
+    // driverController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
+    // driverController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
+    // driverController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
+    // driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
+    // driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale +=
+    // 0.01));
+    // driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -=
+    // 0.01));
+    driverController.a().whileTrue(turret.setTurretAngleFastestPath(45));
   }
 
   public Command checkShooterUpdate() {
