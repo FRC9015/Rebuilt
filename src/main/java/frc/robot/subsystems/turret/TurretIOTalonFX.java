@@ -42,8 +42,8 @@ public class TurretIOTalonFX implements TurretIO {
     encoder15 = new CANcoder(encoderId15);
 
     // SAFETY LAYER 1: Hardware-Level Software Limits
-    // These are sent to the TalonFX memory. If the motor reaches these positions, 
-    // it will physically cut power to the motor in that direction, even if the 
+    // These are sent to the TalonFX memory. If the motor reaches these positions,
+    // it will physically cut power to the motor in that direction, even if the
     // RoboRIO code crashes.
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
@@ -111,7 +111,7 @@ public class TurretIOTalonFX implements TurretIO {
     }
   }
 
-    /**
+  /**
    *
    *
    * <h3>Chinese Remainder Theorem (CRT) Resolver</h3>
@@ -163,7 +163,8 @@ public class TurretIOTalonFX implements TurretIO {
 
   @Override
   public void stop() {
-    turretMotor.stopMotor();;
+    turretMotor.stopMotor();
+    ;
   }
 
   @Override
@@ -177,16 +178,13 @@ public class TurretIOTalonFX implements TurretIO {
   }
 
   @Override
-  public void setTurretPosition(double positionRotations){
+  public void setTurretPosition(double positionRotations) {
     // SAFETY LAYER 2: Command Clamping
     // If a command is given outside 0.0-2.0, this forces it back into the safe range.
-    // Because software limits are enabled, if you are at 2.0 and command 0.5, 
+    // Because software limits are enabled, if you are at 2.0 and command 0.5,
     // the motor will move BACKWARDS because moving forward is blocked by the limit.
-    double safePosition = MathUtil.clamp(
-        positionRotations, 
-        turretConstants.MINROTATION, 
-        turretConstants.MAXROTATION
-    );
+    double safePosition =
+        MathUtil.clamp(positionRotations, turretConstants.MINROTATION, turretConstants.MAXROTATION);
 
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
   }

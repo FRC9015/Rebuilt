@@ -102,16 +102,10 @@ public final class Constants {
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
-        new Slot0Configs()
-            .withKP(1)
-            .withKI(0)
-            .withKD(0)
-            .withKG(0)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
+        new Slot0Configs().withKP(1).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
-        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
-        .withSensorToMechanismRatio(MOTOR_TO_TURRET_GEAR_RATIO);
+        new FeedbackConfigs()
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+            .withSensorToMechanismRatio(MOTOR_TO_TURRET_GEAR_RATIO);
   }
 }
