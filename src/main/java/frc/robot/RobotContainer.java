@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.motorIDConstants;
+import frc.robot.Constants.turretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -26,6 +28,9 @@ import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
+import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.TurretIO;
+import frc.robot.subsystems.turret.TurretIOTalonFX;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -40,6 +45,8 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Turret turret; // Added Turret Subsystem
+
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
@@ -57,8 +64,7 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
-        // a CANcoder
+
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -67,6 +73,16 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
+        // --- TURRET SETUP ---
+        // Instantiating the Turret here ensures the code starts running immediately on boot.
+        // CHECK THESE IDs: Motor ID, Encoder 13T ID, Encoder 15T ID
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    motorIDConstants.TURRET_MOTOR_ID,
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
+                    ));
         break;
 
       case SIM:
@@ -82,6 +98,15 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
+
+        // Use a blank IO for Turret Sim for now (unless you have a Turret Sim implementation)
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    motorIDConstants.TURRET_MOTOR_ID,
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
+                    ));
         break;
 
       default:
@@ -93,6 +118,14 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    motorIDConstants.TURRET_MOTOR_ID,
+                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
+                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
+                    ));
         break;
     }
 
@@ -166,6 +199,7 @@ public class RobotContainer {
     driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
     driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale += 0.01));
     driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -= 0.01));
+
   }
 
   public Command checkShooterUpdate() {
