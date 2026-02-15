@@ -38,7 +38,7 @@ public final class Constants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
-    public static final int TURRET_MOTOR_ID = 0;
+    public static final int TURRET_MOTOR_ID = 1;
   }
 
   public static class intakeConstants {
@@ -81,7 +81,7 @@ public final class Constants {
 
     // --- MATH CONSTANTS ---
     /** The error allowance (in turret rotations) when comparing encoder predictions. */
-    public static final double CRT_TOLERANCE = 0.01;
+    public static final double CRT_TOLERANCE = 0.034;
 
     /**
      * The difference threshold between calculated and internal motor position to trigger a re-seed.

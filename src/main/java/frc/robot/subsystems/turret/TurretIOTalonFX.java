@@ -89,8 +89,8 @@ public class TurretIOTalonFX implements TurretIO {
     // Configure EasyCRT to resolve turret angle from two encoders using Chinese Remainder Theorem
     EasyCRTConfig easyCRTConfig =
         new EasyCRTConfig(
-                () -> Rotations.of(encoder13.getAbsolutePosition().getValueAsDouble()),
-                () -> Rotations.of(encoder15.getAbsolutePosition().getValueAsDouble()))
+                () -> encoder13.getAbsolutePosition().getValue(),
+                () -> encoder15.getAbsolutePosition().getValue())
             .withAbsoluteEncoder1Gearing(turretConstants.T_TEETH, turretConstants.E1_TEETH)
             .withAbsoluteEncoder2Gearing(turretConstants.T_TEETH, turretConstants.E2_TEETH)
             .withMechanismRange(
@@ -107,15 +107,15 @@ public class TurretIOTalonFX implements TurretIO {
         .getAngleOptional()
         .ifPresentOrElse(
             angle -> {
-              // this.seedMotorPosition(angle.in(Rotations));
+              this.seedMotorPosition(angle.in(Rotations));
               System.out.println(
                   "✓ Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
             },
             () -> {
-              System.err.println("✗ CRT failed to resolve turret angle!");
-              System.err.println("  Status: " + easyCRT.getLastStatus());
-              System.err.println("  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
-              System.err.println("  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
+              System.out.println("✗ CRT failed to resolve turret angle!");
+              System.out.println("  Status: " + easyCRT.getLastStatus());
+              System.out.println("  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
+              System.out.println("  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
             });
   }
 
@@ -147,7 +147,10 @@ public class TurretIOTalonFX implements TurretIO {
               inputs.turretResolvedPosition = angle.in(Rotations);
               System.out.println("✓ Turret CRT at " + (angle.in(Rotations) * 360.0) + " degrees");
             },
-            () -> inputs.turretResolvedValid = false);
+            () -> {
+              inputs.turretResolvedValid = false;
+              System.out.println("  Best guess: " + easyCRT.getLastErrorRotations() * 360);
+            });
   }
 
   @Override
