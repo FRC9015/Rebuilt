@@ -8,7 +8,7 @@ import org.littletonrobotics.junction.Logger;
 public class Shooter extends SubsystemBase {
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
   private final ShooterIO io;
-  private final double defaultHoodPosition = 4.4765;
+  private final double defaultHoodPosition = 0.0;
 
   private PIDController shooterPIDController;
 
@@ -22,7 +22,7 @@ public class Shooter extends SubsystemBase {
     this.io = io;
     shooterPIDController = new PIDController(kP, kI, kD);
     shooterPIDController.setTolerance(toleranceMeters);
-    this.setDefaultCommand(setHoodPosition(defaultHoodPosition));
+    // this.setDefaultCommand(setHoodPosition(defaultHoodPosition));
   }
 
   // Minimum Value of speedValue: -512.0
@@ -66,6 +66,14 @@ public class Shooter extends SubsystemBase {
 
   public Command setHoodPosition(double position) {
     return this.run(() -> io.setHoodPosition(position));
+  }
+
+  public Command setHoodZero() {
+    return this.startEnd(() -> io.setHoodZero(), () -> io.stopHood());
+  }
+
+  public Command setHoodZeroReverse() {
+    return this.startEnd(() -> io.setHoodZeroReverse(), () -> io.stopHood());
   }
 
   @Override

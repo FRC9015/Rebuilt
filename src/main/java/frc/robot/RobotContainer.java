@@ -171,9 +171,13 @@ public class RobotContainer {
                 .runIndexer(indexerRollerValue)
                 .alongWith(kicker.runIndexer(indexerRollerValue))
                 .alongWith(intake.runIntakeAtSpeed(intakeRollerValue))
-                .alongWith(shooter.runShooterAtVoltage(-12)));
+                // .alongWith(shooter.runShooterAtVoltage(-12)));
+                .alongWith(shooter.runShooterAtSpeed(6784.0)));
 
-    driverController.a().whileTrue(shooter.setHoodPosition(10));
+    driverController.a().whileTrue(shooter.setHoodZero());
+    driverController.b().whileTrue(shooter.setHoodZeroReverse());
+    driverController.povUp().onTrue(Commands.runOnce(() -> shooter.setHoodPosition(0.5)));
+    driverController.povDown().onTrue(Commands.runOnce(() -> shooter.setHoodPosition(-0.5)));
   }
 
   /**

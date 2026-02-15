@@ -46,4 +46,8 @@ public interface ShooterIO {
   default void stopShooter() {}
 
   default void setBrakeMode(boolean enable) {}
+
+  default void setHoodZero() {}
+
+  default void setHoodZeroReverse() {}
 }

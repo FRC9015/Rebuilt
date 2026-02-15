@@ -101,7 +101,7 @@ public final class Constants {
 
     // TODO tune these values
 
-    public static final double SHOOTER_MAX_SPEED = 100;
+    public static final double SHOOTER_MAX_SPEED = 6784.0;
     public static final double SHOOTER_MIN_SPEED = 0.0;
     public static final double FLYWHEEL_ACCELERATION = 100;
     public static final double FEEDFORWARD_VOLTAGE = 12.0;
