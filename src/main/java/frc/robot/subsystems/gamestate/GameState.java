@@ -116,13 +116,8 @@ public class GameState extends SubsystemBase {
    * @return true if tower enabled, false if tower disabled
    */
   private boolean canWeScore() {
-    if ((this.state == StateEnum.BLUE_TEAM || this.state == StateEnum.RED_TEAM)
-        && this.alliance != StateEnum.PRACTICE
-        && this.state != this.alliance) {
-      return false;
-    } else {
-      return true;
-    }
+    return !((this.state == StateEnum.BLUE_TEAM || this.state == StateEnum.RED_TEAM)
+        && this.state != this.alliance);
   }
 
   private boolean threeSecondTime() {
