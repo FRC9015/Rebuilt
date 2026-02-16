@@ -83,9 +83,6 @@ public final class Constants {
     public static final int INTAKE_PIVOT_RIGHT_ID = 0;
     public static final int INTAKE_ENCODER_ID = 0;
     public static final int INDEXER_MOTOR_ID = 13;
-    public static final int UPPER_INTAKE_MOTOR_ID = 0;
-    public static final int EXTEND_INTAKE_MOTOR_ID = 0;
-    public static final int TURRET_MOTOR_ID = 0;
   }
 
   public static class VisionConstants {
@@ -312,18 +309,27 @@ public final class Constants {
     public static final double CLIMB_MIN_POS = 0.0;
   }
 
+  //     public static final int ENCODER_13_TOOTH = 35;
+  // public static final int ENCODER_15_TOOTH = 36;
   public static class turretConstants {
-    // --- GEAR TEETH ---
-    public static final double t_teeth = 90.0;
-    public static final double e1_teeth = 13.0; // Gear on Encoder 1
-    public static final double e2_teeth = 15.0; // Gear on Encoder 2
+    public static final int ENCODER_13_TOOTH = 35;
+    public static final int ENCODER_15_TOOTH = 36;
 
-    public static final int ENCODER_13_TOOTH = 0;
-    public static final int ENCODER_15_TOOTH = 0;
+    // --- GEAR TEETH ---
+    public static final double T_TEETH = 90.0;
+    public static final double E1_TEETH = 13.0;
+    public static final double E2_TEETH = 15.0;
+    public static final int TOTAL_TEETH_LIMIT = 195;
+
+    // --- DIRECTION ---
+    /**
+     * If the turret jumps between 0 and 2.15, try flipping this boolean. This ensures the encoders
+     * count UP when the turret moves POSITIVE.
+     */
+    public static final boolean INVERT_ENCODERS = true;
 
     // --- MATH CONSTANTS ---
-    /** The error allowance (in turret rotations) when comparing encoder predictions. */
-    public static final double CRT_TOLERANCE = 0.01;
+    public static final double CRT_TOOTH_TOLERANCE = 0.05;
 
     /**
      * The difference threshold between calculated and internal motor position to trigger a re-seed.
@@ -340,19 +346,15 @@ public final class Constants {
     public static final double minRoation = 0.0;
 
     // --- MOTOR CONFIGS ---
+
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
-        new Slot0Configs()
-            .withKP(14)
-            .withKI(0)
-            .withKD(0.6)
-            .withKG(0.01)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
+        new Slot0Configs().withKP(7).withKI(0.1).withKD(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
-        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+        new FeedbackConfigs()
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+            .withSensorToMechanismRatio(MOTOR_TO_TURRET_GEAR_RATIO);
   }
 
 }

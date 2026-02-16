@@ -7,18 +7,16 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
@@ -37,15 +35,17 @@ public class TurretIOTalonFX implements TurretIO {
   private final CANcoder encoder15;
   private final EasyCRT easyCRT;
 
-  private final StatusSignal<Angle> encoder13PosSignal;
-  private final StatusSignal<Angle> encoder15PosSignal;
-  private final StatusSignal<Voltage> motorAppliedVoltsSignal;
-  private final StatusSignal<Current> motorCurrentSignal;
-  private final StatusSignal<Angle> motorPositionSignal;
+  private final StatusSignal<Angle> encoder13Pos;
+  private final StatusSignal<Angle> encoder15Pos;
+  private final StatusSignal<Voltage> motorVolts;
+  private final StatusSignal<Current> motorAmps;
+  private final StatusSignal<Angle> motorPos;
+  private int count = 0;
+  ;
 
-  private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
-  private final NeutralOut neutralOut = new NeutralOut();
-  private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
+  // Filters to stop the jumping by smoothing the raw encoder data
+  private final MedianFilter filter13 = new MedianFilter(5);
+  private final MedianFilter filter15 = new MedianFilter(5);
 
   private Alert outofSyncAlert =
       new Alert("⚠️ CRT-Motor desync detected! Resyncing motor.", AlertType.kWarning);
@@ -87,11 +87,11 @@ public class TurretIOTalonFX implements TurretIO {
     encoder13.getConfigurator().apply(encoderConfig13);
     encoder15.getConfigurator().apply(encoderConfig15);
 
-    encoder13PosSignal = encoder13.getAbsolutePosition();
-    encoder15PosSignal = encoder15.getAbsolutePosition();
-    motorAppliedVoltsSignal = turretMotor.getMotorVoltage();
-    motorCurrentSignal = turretMotor.getStatorCurrent();
-    motorPositionSignal = turretMotor.getPosition();
+    encoder13Pos = encoder13.getAbsolutePosition();
+    encoder15Pos = encoder15.getAbsolutePosition();
+    motorVolts = turretMotor.getMotorVoltage();
+    motorAmps = turretMotor.getStatorCurrent();
+    motorPos = turretMotor.getPosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
@@ -135,22 +135,12 @@ public class TurretIOTalonFX implements TurretIO {
 
   @Override
   public void updateInputs(TurretIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        encoder13PosSignal,
-        encoder15PosSignal,
-        motorAppliedVoltsSignal,
-        motorCurrentSignal,
-        motorPositionSignal);
+    // Wait for signals to be synced in time
+    BaseStatusSignal.waitForAll(0.02, encoder13Pos, encoder15Pos, motorVolts, motorAmps, motorPos);
 
-    inputs.encoder13Connected =
-        encoderConnectedDebounce.calculate(encoder13PosSignal.getStatus().isOK());
-    inputs.encoder15Connected =
-        encoderConnectedDebounce.calculate(encoder15PosSignal.getStatus().isOK());
-    inputs.encoder13PositionRot = encoder13PosSignal.getValueAsDouble();
-    inputs.encoder15PositionRot = encoder15PosSignal.getValueAsDouble();
-    inputs.turretAppliedVolts = motorAppliedVoltsSignal.getValueAsDouble();
-    inputs.turretCurrentAmps = motorCurrentSignal.getValueAsDouble();
-    inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
+    // Apply Median Filters to raw data to remove spikes/noise
+    double r13 = filter13.calculate(encoder13Pos.getValueAsDouble());
+    double r15 = filter15.calculate(encoder15Pos.getValueAsDouble());
 
     // Resolve turret angle using CRT from two encoder readings
     easyCRT
@@ -177,8 +167,8 @@ public class TurretIOTalonFX implements TurretIO {
   }
 
   @Override
-  public void seedMotorPosition(double positionRotations) {
-    turretMotor.setPosition(positionRotations);
+  public void seedMotorPosition(double pos) {
+    turretMotor.setPosition(pos);
   }
 
   @Override
