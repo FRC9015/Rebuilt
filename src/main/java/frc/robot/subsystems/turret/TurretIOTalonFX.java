@@ -54,10 +54,10 @@ public class TurretIOTalonFX implements TurretIO {
                 new SoftwareLimitSwitchConfigs()
                     .withForwardSoftLimitEnable(true)
                     .withForwardSoftLimitThreshold(
-                        turretConstants.MAXROTATION) // Stop at 2 rotations
+                        turretConstants.MAXROTATION) // Stop at 1 rotations
                     .withReverseSoftLimitEnable(true)
                     .withReverseSoftLimitThreshold(
-                        turretConstants.MINROTATION)) // Stop at 0 rotations
+                        turretConstants.MINROTATION)) // Stop at -1 rotations
             .withMotionMagic(turretConstants.MOTION_MAGIC_CONFIGS)
             .withSlot0(turretConstants.SLOT0_CONFIGS)
             .withFeedback(turretConstants.FEEDBACK_CONFIGS)
