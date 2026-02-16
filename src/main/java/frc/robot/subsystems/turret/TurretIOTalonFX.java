@@ -20,6 +20,7 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.Constants.turretConstants;
 import yams.units.EasyCRT;
 import yams.units.EasyCRT.CRTStatus;
@@ -145,6 +146,10 @@ public class TurretIOTalonFX implements TurretIO {
             angle -> {
               inputs.turretResolvedValid = true;
               inputs.turretResolvedPosition = angle.in(Rotations);
+              if(Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition) > Constants.turretConstants.SYNC_THRESHOLD) {
+                System.out.println("⚠️ CRT-Motor desync detected! Resyncing motor to " + (angle.in(Rotations) * 360.0) + " degrees");
+                this.seedMotorPosition(angle.in(Rotations));
+              }
               System.out.println("✓ Turret CRT at " + (angle.in(Rotations) * 360.0) + " degrees");
             },
             () -> {
