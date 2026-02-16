@@ -33,8 +33,6 @@ public class GameState extends SubsystemBase {
     if (this.alliance == StateEnum.UNKNOWN) this.alliance = findAlliance();
     this.isHubActive = canWeScore();
     this.isThreeSeconds = threeSecondTime();
-    System.out.println("state" + state);
-    System.out.println("Alliance" + this.alliance);
   }
 
   public StateEnum getState() {
