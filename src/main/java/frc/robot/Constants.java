@@ -38,7 +38,7 @@ public final class Constants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
-    public static final int TURRET_MOTOR_ID = 0;
+    public static final int TURRET_MOTOR_ID = 1;
   }
 
   public static class intakeConstants {
@@ -70,48 +70,44 @@ public final class Constants {
     public static final double INTAKE_STOWED_POSITION = 10.0;
   }
 
+  //     public static final int ENCODER_13_TOOTH = 35;
+  // public static final int ENCODER_15_TOOTH = 36;
   public static class turretConstants {
+    public static final int ENCODER_13_TOOTH = 35;
+    public static final int ENCODER_15_TOOTH = 36;
+
     // --- GEAR TEETH ---
     public static final double T_TEETH = 90.0;
-    public static final double E1_TEETH = 13.0; // Gear on Encoder 1
-    public static final double E2_TEETH = 15.0; // Gear on Encoder 2
+    public static final double E1_TEETH = 13.0;
+    public static final double E2_TEETH = 15.0;
+    public static final int TOTAL_TEETH_LIMIT = 195;
 
-    public static final int ENCODER_13_TOOTH = 0;
-    public static final int ENCODER_15_TOOTH = 0;
+    // --- DIRECTION ---
+    /**
+     * If the turret jumps between 0 and 2.15, try flipping this boolean. This ensures the encoders
+     * count UP when the turret moves POSITIVE.
+     */
+    public static final boolean INVERT_ENCODERS = true;
 
     // --- MATH CONSTANTS ---
-    /** The error allowance (in turret rotations) when comparing encoder predictions. */
-    public static final double CRT_TOLERANCE = 0.01;
+    public static final double CRT_TOOTH_TOLERANCE = 0.05;
 
-    /**
-     * The difference threshold between calculated and internal motor position to trigger a re-seed.
-     */
-    public static final double SYNC_THRESHOLD = 0.05;
-
-    /** Search limit for Encoder 1 (should be equal to e2_teeth). */
-    public static final int E1_SEARCH_LIMIT = (int) E2_TEETH;
-    /** Search limit for Encoder 2 (should be equal to e1_teeth). */
-    public static final int E2_SEARCH_LIMIT = (int) E1_TEETH;
+    /** How many stable frames we need before we "Lock" the position. */
+    public static final int BOOT_CALIBRATION_FRAMES = 50;
 
     // --- MOVEMENT LIMITS ---
     public static final double MAXROTATION = 2.0;
     public static final double MINROTATION = 0.0;
 
-    public static final double MOTOR_TO_TURRET_GEAR_RATIO = 50.0;
-    // --- MOTOR CONFIGS ---
+    public static final double MOTOR_TO_TURRET_GEAR_RATIO = 37.5;
+
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
-        new Slot0Configs()
-            .withKP(1)
-            .withKI(0)
-            .withKD(0)
-            .withKG(0)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
+        new Slot0Configs().withKP(7).withKI(0.1).withKD(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
-        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
-        .withSensorToMechanismRatio(MOTOR_TO_TURRET_GEAR_RATIO);
+        new FeedbackConfigs()
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+            .withSensorToMechanismRatio(MOTOR_TO_TURRET_GEAR_RATIO);
   }
 }
