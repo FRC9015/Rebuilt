@@ -20,6 +20,8 @@ public interface TurretIO {
     public double turretResolvedPosition = 0.0;
     public boolean turretResolvedValid = false;
     public double turretMotorVelocity = 0.0;
+
+    public double driveEncoderPositionRot = 0.0;
   }
 
   public default void updateInputs(TurretIOInputs inputs) {}
@@ -31,6 +33,4 @@ public interface TurretIO {
   public default void setCoastMode() {}
 
   public default void setTurretPosition(double value) {}
-
-  public default void seedMotorPosition(double positionRotations) {}
 }
