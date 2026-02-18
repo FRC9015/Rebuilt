@@ -11,6 +11,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +27,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
+import frc.robot.subsystems.gamestate.GameState;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
@@ -51,6 +53,9 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Shooter shooter;
+  private final GameState gamestate;
+  private final Indexer indexer;
+  private SwerveDriveSimulation simDrive = null;
   private final Intake intake;
   private Indexer indexer;
   private SwerveDriveSimulation simDrive = null;
@@ -78,6 +83,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        gamestate =
+            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
@@ -108,6 +115,14 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
 
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
+        gamestate =
+            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
+        indexer = new Indexer(new IndexerIO() {});
         intake = new Intake(new IntakeIOSim());
         shooter = new Shooter(new ShooterIOSim());
         new GyroIO() {};
@@ -127,6 +142,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        gamestate =
+            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
