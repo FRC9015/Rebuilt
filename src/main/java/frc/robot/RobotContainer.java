@@ -57,8 +57,6 @@ public class RobotContainer {
   private final Indexer indexer;
   private SwerveDriveSimulation simDrive = null;
   private final Intake intake;
-  private Indexer indexer;
-  private SwerveDriveSimulation simDrive = null;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(1);
@@ -91,7 +89,6 @@ public class RobotContainer {
                 new IntakeIOSparkFlex(
                     Constants.IntakeConstants.INTAKE_MOTOR_ID,
                     Constants.IntakeConstants.INTAKE2_MOTOR_ID));
-        indexer = new Indexer(new IndexerIOSparkFlex(13));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -115,11 +112,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
 
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+             
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIO() {});
@@ -130,7 +123,6 @@ public class RobotContainer {
         new ModuleIOSim(TunerConstants.FrontRight);
         new ModuleIOSim(TunerConstants.BackLeft);
         new ModuleIOSim(TunerConstants.BackRight);
-        indexer = new Indexer(new IndexerIO() {});
         break;
 
       case REPLAY:
