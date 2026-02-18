@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class GameState extends SubsystemBase {
@@ -14,23 +13,22 @@ public class GameState extends SubsystemBase {
 
   @AutoLogOutput private boolean isHubActive = true;
   @AutoLogOutput private boolean isThreeSeconds = false;
-  private Supplier<Alliance> allianceRaw;
   @AutoLogOutput private StateEnum alliance = StateEnum.UNKNOWN;
 
   @AutoLogOutput private String gameDataManual = "";
-  @AutoLogOutput private Timer mTimer;
+  private Timer mTimer;
 
-  public GameState(Supplier<Alliance> alliance) {
+  public GameState() {
     mTimer = new Timer();
     mTimer.reset();
     mTimer.start();
-    this.allianceRaw = alliance;
   }
 
   @Override
   public void periodic() {
     this.state = getGameState();
-    if (this.alliance == StateEnum.UNKNOWN) this.alliance = findAlliance();
+    if (this.alliance == StateEnum.UNKNOWN)
+      this.alliance = findAlliance();
     this.isHubActive = canWeScore();
     this.isThreeSeconds = threeSecondTime();
   }
@@ -137,13 +135,11 @@ public class GameState extends SubsystemBase {
   }
 
   private StateEnum findAlliance() {
-    Alliance allia = this.allianceRaw.get();
+    Alliance allia = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
     if (allia == Alliance.Blue) {
       return StateEnum.BLUE_TEAM;
-    } else if (allia == Alliance.Red) {
-      return StateEnum.RED_TEAM;
     } else {
-      return StateEnum.PRACTICE;
+      return StateEnum.RED_TEAM;
     }
   }
 }

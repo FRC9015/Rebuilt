@@ -63,7 +63,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate =
-      new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
+      new GameState();
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
