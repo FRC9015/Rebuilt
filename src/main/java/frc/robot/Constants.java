@@ -74,8 +74,7 @@ public final class Constants {
     public static final double INTAKE_STOWED_POSITION = 10.0;
   }
 
-  /** CAN IDs for the CANdle LED controllers. */
-  public static class CANdleIDConstants {
-    public static final int CANDLE_ID_1 = 19; //TODO Configure This;
-  } 
+  public static class LedConstants {
+    public static final int candleID1 = 0; // TODO: replace with actual CAN ID
+  }
 }
