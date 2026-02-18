@@ -31,10 +31,6 @@ public class Intake extends SubsystemBase {
     return this.startEnd(() -> io.setRunning(true), () -> io.setRunning(false));
   }
 
-  public Command runIntake() {
-    return this.startEnd(() -> io.setRunning(true), () -> io.setRunning(false));
-  }
-
   public Command stopIntake() {
     return this.run(() -> io.stop());
   }
