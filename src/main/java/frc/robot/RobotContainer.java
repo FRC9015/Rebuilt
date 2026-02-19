@@ -35,6 +35,9 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkFlex;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -49,12 +52,14 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Shooter shooter;
   private final GameState gamestate;
   private final Indexer indexer;
   private final Intake intake;
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
+  private final CommandXboxController controller = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
@@ -84,6 +89,12 @@ public class RobotContainer {
                 new IntakeIOSparkFlex(
                     Constants.IntakeConstants.INTAKE_MOTOR_ID,
                     Constants.IntakeConstants.INTAKE2_MOTOR_ID));
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         break;
 
       case SIM:
@@ -92,6 +103,7 @@ public class RobotContainer {
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
+
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
@@ -118,6 +130,12 @@ public class RobotContainer {
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         break;
 
       default:
@@ -161,6 +179,7 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
+
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
 
     // Lock to 0° when A button is held
