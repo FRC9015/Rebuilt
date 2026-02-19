@@ -113,13 +113,13 @@ public class RobotContainer {
 
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
 
-        drive =
+      drive =
             new Drive(
-                new GyroIOSim(simDrive.getGyroSimulation()),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontLeft, simDrive.getModules()[0]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
         vision =
             new Vision(
                 drive::addVisionMeasurement,
