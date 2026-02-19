@@ -27,7 +27,7 @@ public class Intake extends SubsystemBase {
     return this.startEnd(() -> this.setIntakeSpeed(intakeSpeed), () -> io.stop());
   }
 
-  public Command runIntake() {
+  public Command runIntakeSim() {
     return this.startEnd(() -> io.setRunning(true), () -> io.setRunning(false));
   }
 
