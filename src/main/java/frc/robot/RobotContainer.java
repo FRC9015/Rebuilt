@@ -129,11 +129,6 @@ public class RobotContainer {
         new ModuleIOSim(TunerConstants.FrontRight);
         new ModuleIOSim(TunerConstants.BackLeft);
         new ModuleIOSim(TunerConstants.BackRight);
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
 
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
