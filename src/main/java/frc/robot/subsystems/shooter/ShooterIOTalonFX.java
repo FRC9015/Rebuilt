@@ -24,7 +24,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   public final TalonFX flywheelMotorLeft;
   public final TalonFX flywheelMotorRight;
   public final TalonFX hoodMotor;
-  
+
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;
   public StatusSignal<AngularVelocity> motorRPM;
@@ -54,7 +54,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     TalonFXConfiguration flyWheelConfigRight =
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs);
-            
+
     flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     flyWheelConfigRight.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
@@ -145,7 +145,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }
-
 
   @Override
   public double getFlyWheelSpeed() {

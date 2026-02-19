@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CameraConstants;
@@ -25,7 +26,6 @@ import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.gamestate.GameState;
@@ -59,8 +59,8 @@ public class RobotContainer {
   private final Shooter shooter;
   private final GameState gamestate;
   private final Indexer indexer;
-  private SwerveDriveSimulation simDrive = null;
   private final Intake intake;
+  private SwerveDriveSimulation simDrive = null;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(1);
@@ -110,7 +110,6 @@ public class RobotContainer {
         simDrive =
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
-
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
 
       drive =
@@ -132,10 +131,9 @@ public class RobotContainer {
 
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
+        intake = new Intake(new IntakeIOSim(simDrive));
         indexer = new Indexer(new IndexerIO() {});
-        intake = new Intake(new IntakeIOSim());
         shooter = new Shooter(new ShooterIOSim());
-
         break;
 
       case REPLAY:
@@ -206,6 +204,30 @@ public class RobotContainer {
             () -> -driverController.getRightX()));
 
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
+
+    // Lock to 0° when A button is held
+    driverController
+        .a()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> Rotation2d.kZero));
+
+    // Switch to X pattern when X button is pressed
+    driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // Reset gyro to 0° when B button is pressed
+    driverController
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        drive.setPose(
+                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                    drive)
+                .ignoringDisable(true));
+    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
 
