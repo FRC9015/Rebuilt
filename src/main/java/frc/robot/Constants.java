@@ -50,13 +50,13 @@ public final class Constants {
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
     public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
-    public static final double cameraHeight = Units.inchesToMeters(7);
-    public static final double cameraPitch = Units.degreesToRadians(15);
-    public static final double cameraXOffset = Units.inchesToMeters(13.5);
+    public static final double CAMERA_HEIGHT = Units.inchesToMeters(7);
+    public static final double CAMERA_PITCH = Units.degreesToRadians(15);
+    public static final double CAMERA_X_OFFSET = Units.inchesToMeters(13.5);
     public static final Transform3d placeHolderCamera =
         new Transform3d(
-            new Translation3d(cameraXOffset, Units.inchesToMeters(0), cameraHeight),
-            new Rotation3d(0, cameraPitch, Units.degreesToRadians(0)));
+            new Translation3d(CAMERA_X_OFFSET, Units.inchesToMeters(0), CAMERA_HEIGHT),
+            new Rotation3d(0, CAMERA_PITCH, Units.degreesToRadians(0)));
 
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
