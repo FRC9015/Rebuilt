@@ -98,21 +98,14 @@ public class RobotContainer {
         break;
 
       case SIM:
-        // Sim robot, instantiate physics sim IO implementations
-        simDrive =
-            new SwerveDriveSimulation(
-                Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
 
-        SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontLeft, simDrive.getModules()[0]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
-
-             
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIO() {});
