@@ -91,7 +91,7 @@ public class RobotContainer {
             new Shooter(
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
-                    Constants.ShooterConstants.FLYWHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID));
         break;
 
@@ -136,7 +136,7 @@ public class RobotContainer {
             new Shooter(
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
-                    Constants.ShooterConstants.FLYWHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID));
         break;
 

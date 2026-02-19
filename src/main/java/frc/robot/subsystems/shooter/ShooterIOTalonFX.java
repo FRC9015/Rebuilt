@@ -24,7 +24,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   public final TalonFX flywheelMotorLeft;
   public final TalonFX flywheelMotorRight;
   public final TalonFX hoodMotor;
-  // public final CANcoder hoodEncoder;
+  
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;
   public StatusSignal<AngularVelocity> motorRPM;
@@ -87,7 +87,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.flywheelCurrentSpeed = flywheelMotorLeft.getVelocity().getValueAsDouble();
     inputs.flywheelRPM = motorRPM.getValueAsDouble();
     inputs.flywheelCurrentAmps = flywheelMotorLeft.getStatorCurrent().getValueAsDouble();
-    inputs.hoodEncoderConnected = false;
+    inputs.hoodEncoderConnected = hoodMotor.getPosition().isAllGood();
   }
 
   @Override
