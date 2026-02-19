@@ -29,11 +29,15 @@ import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+
+import choreo.auto.AutoFactory;
+import choreo.trajectory.SwerveSample;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -51,12 +55,14 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import frc.robot.util.PhoenixUtil;
@@ -86,6 +92,13 @@ public class Drive extends SubsystemBase {
   private static final double ROBOT_MASS_KG = 59.90;
   private static final double ROBOT_MOI = 6.554;
   private static final double WHEEL_COF = 1.19;
+
+  private final PIDController choreoXController = new PIDController(7, 0, 0);
+  private final PIDController choreoYController = new PIDController(7, 0, 0);
+  private final PIDController choreoThetaController = new PIDController(7, 0, 0);
+
+  private static final PathConstraints PP_CONSTRAINTS =
+      new PathConstraints(3.0, 3.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
           ROBOT_MASS_KG,
@@ -98,8 +111,7 @@ public class Drive extends SubsystemBase {
               TunerConstants.FrontLeft.SlipCurrent,
               1),
           getModuleTranslations());
-  private static final PathConstraints PP_CONSTRAINTS =
-      new PathConstraints(3.0, 3.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+  
   public static final DriveTrainSimulationConfig mapleSimConfig =
       DriveTrainSimulationConfig.Default()
           .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
@@ -174,30 +186,6 @@ public class Drive extends SubsystemBase {
     PhoenixOdometryThread.getInstance().start();
 
     // Configure AutoBuilder for PathPlanner
-    AutoBuilder.configure(
-        this::getPose,
-        this::setPose,
-        this::getChassisSpeeds,
-        this::runVelocity,
-        //  new PPHolonomicDriveController(new PIDConstants(5, 0.0, 0), new PIDConstants(5.0, 0.0,
-        // 0)),
-        //     new PIDConstants(4.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.02)),
-        new PPHolonomicDriveController(
-            new PIDConstants(2, 0.0, 0.12), new PIDConstants(5.0, 0.0, 0.02)),
-        PP_CONFIG,
-        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-        this);
-    Pathfinding.setPathfinder(new LocalADStarAK());
-    PathPlannerLogging.setLogActivePathCallback(
-        (activePath) -> {
-          Logger.recordOutput(
-              "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-        });
-    PathPlannerLogging.setLogTargetPoseCallback(
-        (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
-    setpointGenerator = new SwerveSetpointGenerator(PP_CONFIG, Units.degreesToRadians(720));
     prevSetpoint =
         new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
     // Configure SysId
@@ -211,8 +199,7 @@ public class Drive extends SubsystemBase {
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
-    prevSetpoint =
-        new SwerveSetpoint(getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(4));
+
   }
 
   @Override
@@ -294,7 +281,8 @@ public class Drive extends SubsystemBase {
     // Calculate module setpoints
     prevSetpoint =
         setpointGenerator.generateSetpoint(prevSetpoint, speeds, PP_CONSTRAINTS, 0.02, 12.0);
-    // Log unoptimized setpoints and setpoint speeds
+    // Log unoptimized setpoints an        setpointGenerator.generateSetpoint(prevSetpoint, speeds, PP_CONSTRAINTS, 0.02, 12.0);
+
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
     Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
     Logger.recordOutput("SwerveStates/SetpointGenerated", prevSetpoint.moduleStates());
@@ -308,25 +296,7 @@ public class Drive extends SubsystemBase {
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
   }
 
-  public void runVelocityAuto(ChassisSpeeds speeds) {
-    // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-    SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
-    prevSetpoint =
-        setpointGenerator.generateSetpoint(prevSetpoint, speeds, PP_CONSTRAINTS, 0.02, 12.0);
-    // Log unoptimized setpoints and setpoint speeds
-    Logger.recordOutput("AutoDrive/Setpoints", setpointStates);
-    Logger.recordOutput("AutoDrive/Setpoints", discreteSpeeds);
 
-    // Send setpoints to modules
-    for (int i = 0; i < 4; i++) {
-      modules[i].runSetpoint(prevSetpoint.moduleStates()[i]);
-    }
-
-    // Log optimized setpoints (runSetpoint mutates each state)
-    Logger.recordOutput("AutoDrive/SetpointsOptimized", setpointStates);
-  }
 
   /** Runs the drive in a straight line with the specified drive output. */
   public void runCharacterization(double output) {
@@ -479,25 +449,6 @@ public class Drive extends SubsystemBase {
     return getPose().getTranslation().getDistance(targetpose);
   }
 
-  // change this to whatever color we are playing for ther match flipled is for red
-  public Command pathfindToPose(
-      Pose2d targetpose, double endVelocity, DriverStation.Alliance alliance) {
-    Logger.recordOutput("isRed?", PhoenixUtil.isRed());
-    // if (alliance == DriverStation.Alliance.Red) {
-    return this.pathfindToPoseFlipped(targetpose, endVelocity);
-    // } else {
-    //   return this.pfToPose(targetpose, endVelocity);
-    // }
-  }
-
-  public Command pfToPose(Pose2d targetpose, double endVelocity) {
-    return AutoBuilder.pathfindToPose(targetpose, PP_CONSTRAINTS, endVelocity);
-  }
-
-  public Command pathfindToPoseFlipped(Pose2d targetPose, double endVelocity) {
-    Pose2d tp = FlippingUtil.flipFieldPose(targetPose);
-    return AutoBuilder.pathfindToPose(tp, PP_CONSTRAINTS, endVelocity);
-  }
 
   public static double getSkiddingRatio(
       SwerveModuleState[] swerveStatesMeasured, SwerveDriveKinematics swerveDriveKinematics) {
@@ -568,5 +519,28 @@ public class Drive extends SubsystemBase {
 
   public Command orbitSafeFalse() {
     return runOnce(this::setOrbitSafeFalse);
+  }
+
+  public void choreoDrive(SwerveSample sample) {
+    Pose2d pose = this.getPose();
+    double xFF = sample.vx;
+    double yFF = sample.vy;
+    double rotationFF = sample.omega;
+
+    double xFeedback = choreoXController.calculate(pose.getX(), sample.x);
+    double yFeedback = choreoYController.calculate(pose.getY(), sample.y);
+    double rotationFeedback =
+        choreoThetaController
+            .calculate(pose.getRotation().getRadians(), sample.heading);
+
+    ChassisSpeeds velocity =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            xFF + xFeedback,
+            yFF + yFeedback,
+            rotationFF + rotationFeedback,
+            Rotation2d.fromRadians(sample.heading));
+
+    runVelocity(velocity);
+    Logger.recordOutput("Auto/Setpoint", sample.getPose());
   }
 }

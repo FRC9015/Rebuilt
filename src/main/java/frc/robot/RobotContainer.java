@@ -8,6 +8,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -52,6 +55,9 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  //Auto Factory
+  private final AutoFactory autoFactory;
+  private final AutoChooser autoChooser2;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -97,7 +103,15 @@ public class RobotContainer {
     }
 
     // Set up auto routines
+    autoFactory =
+        new AutoFactory(
+          drive::getPose, 
+          drive::setPose, 
+          drive::choreoDrive, 
+          true, 
+          drive);
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autoChooser2 = new AutoChooser();
 
     // Set up SysId routines
     autoChooser.addOption(
