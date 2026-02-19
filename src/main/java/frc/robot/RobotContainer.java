@@ -11,6 +11,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,6 +28,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
+import frc.robot.subsystems.gamestate.GameState;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
@@ -36,6 +38,9 @@ import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkFlex;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -51,11 +56,14 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vision;
+  private final Shooter shooter;
+  private final GameState gamestate;
   private final Indexer indexer;
   private SwerveDriveSimulation simDrive = null;
   private final Intake intake;
 
   // Controller
+  private final CommandXboxController controller = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
@@ -81,12 +89,20 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+        gamestate =
+            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
                 new IntakeIOSparkFlex(
                     Constants.IntakeConstants.INTAKE_MOTOR_ID,
                     Constants.IntakeConstants.INTAKE2_MOTOR_ID));
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         break;
 
       case SIM:
@@ -96,6 +112,7 @@ public class RobotContainer {
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
 
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
+
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
@@ -112,8 +129,18 @@ public class RobotContainer {
         new ModuleIOSim(TunerConstants.FrontRight);
         new ModuleIOSim(TunerConstants.BackLeft);
         new ModuleIOSim(TunerConstants.BackRight);
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
+
+        gamestate =
+            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIO() {});
         intake = new Intake(new IntakeIOSim());
+        shooter = new Shooter(new ShooterIOSim());
+
         break;
 
       case REPLAY:
@@ -129,8 +156,16 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+        gamestate =
+            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         break;
 
       default:
@@ -174,6 +209,7 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
+
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
