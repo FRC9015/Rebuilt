@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
 import com.ctre.phoenix6.signals.StripTypeValue;
 import com.ctre.phoenix6.signals.VBatOutputModeValue;
 import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class RobotLed extends SubsystemBase{
   private static final int NUM_LEDS = 110; // The number of LEDs on the strip
