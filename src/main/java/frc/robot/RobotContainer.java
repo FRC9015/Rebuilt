@@ -22,11 +22,9 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.gamestate.GameState;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
@@ -98,7 +96,7 @@ public class RobotContainer {
         break;
 
       case SIM:
-      // Sim robot, instantiate physics sim IO implementations
+        // Sim robot, instantiate physics sim IO implementations
         simDrive =
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
@@ -118,7 +116,7 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         intake = new Intake(new IntakeIOSim());
         shooter = new Shooter(new ShooterIOSim());
-        
+
         break;
 
       case REPLAY:
@@ -186,7 +184,6 @@ public class RobotContainer {
 
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
-  
   }
 
   /**
