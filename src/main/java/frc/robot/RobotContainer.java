@@ -60,7 +60,6 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private SwerveDriveSimulation simDrive;
   private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
   private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
