@@ -49,12 +49,14 @@ public class ShooterIOTalonFX implements ShooterIO {
             .withFeedback(Constants.ShooterConstants.hoodFeedbackConfigs)
             .withMotionMagic(Constants.ShooterConstants.hoodMagicConfigs);
 
-    flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     TalonFXConfiguration flyWheelConfigRight =
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs);
+            
     flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    flyWheelConfigRight.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -144,9 +146,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }
 
-  public double getPosition() {
-    return hoodMotor.getPosition().getValueAsDouble();
-  }
 
   @Override
   public double getFlyWheelSpeed() {
