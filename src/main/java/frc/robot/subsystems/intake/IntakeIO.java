@@ -55,8 +55,6 @@ public interface IntakeIO {
   public default boolean isFuelInsideIntake() {
     return false;
   }
-  // Sim Methods
-  public default void launchFuel() {}
-
+  
   public default void setRunning(boolean runIntake) {}
 }

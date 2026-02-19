@@ -205,7 +205,7 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    driverController.leftTrigger().whileTrue(intake.runIntake());
+    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
 
