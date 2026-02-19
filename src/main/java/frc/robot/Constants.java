@@ -77,7 +77,7 @@ public final class Constants {
 
   public static class ShooterConstants {
     public static final int FLY_WHEEL_LEFT_ID = 5;
-    public static final int FLYWHEEL_RIGHT_ID = 29;
+    public static final int FLY_WHEEL_RIGHT_ID = 29;
     public static final int HOOD_ID = 3;
     public static final int HOOD_ENCODER_ID = 11;
 
