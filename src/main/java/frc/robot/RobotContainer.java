@@ -10,7 +10,6 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -24,23 +23,19 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.gamestate.GameState;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkFlex;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIOSim;
-import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -105,36 +100,37 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ID));
         break;
 
-      case SIM:
-        // Sim robot, instantiate physics sim IO implementations
-        simDrive =
-            new SwerveDriveSimulation(
-                Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
-        SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
+        // case SIM:
+        //   // Sim robot, instantiate physics sim IO implementations
+        //   simDrive =
+        //       new SwerveDriveSimulation(
+        //           Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
+        //   SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
 
-      drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-        new GyroIO() {};
-        new ModuleIOSim(TunerConstants.FrontLeft);
-        new ModuleIOSim(TunerConstants.FrontRight);
-        new ModuleIOSim(TunerConstants.BackLeft);
-        new ModuleIOSim(TunerConstants.BackRight);
+        //   drive =
+        //       new Drive(
+        //           new GyroIO() {},
+        //           new ModuleIOTalonFXMapleSim(TunerConstants.FrontLeft),
+        //           new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight),
+        //           new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft),
+        //           new ModuleIOTalonFXMapleSim(TunerConstants.BackRight));
+        //   vision =
+        //       new Vision(
+        //           drive::addVisionMeasurement,
+        //           new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+        //   new GyroIO() {};
+        //   new ModuleIOSim(TunerConstants.FrontLeft);
+        //   new ModuleIOSim(TunerConstants.FrontRight);
+        //   new ModuleIOSim(TunerConstants.BackLeft);
+        //   new ModuleIOSim(TunerConstants.BackRight);
 
-        gamestate =
-            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
-        intake = new Intake(new IntakeIOSim(simDrive));
-        indexer = new Indexer(new IndexerIO() {});
-        shooter = new Shooter(new ShooterIOSim());
-        break;
+        //   gamestate =
+        //       new GameState(() ->
+        // DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
+        //   intake = new Intake(new IntakeIOSim(simDrive));
+        //   indexer = new Indexer(new IndexerIO() {});
+        //   shooter = new Shooter(new ShooterIOSim());
+        //   break;
 
       case REPLAY:
         // Replayed robot, disable IO implementations
