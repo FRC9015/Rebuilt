@@ -49,7 +49,7 @@ public interface VisionIO {
       double ambiguity,
       int tagCount,
       double averageTagDistance,
-      List<Short> tagId) {}
+      List<Short> tagIds) {}
 
   public default void updateInputs(VisionIOInputs inputs) {}
 }
