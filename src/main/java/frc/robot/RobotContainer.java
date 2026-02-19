@@ -101,21 +101,18 @@ public class RobotContainer {
 
         drive =
             new Drive(
-                new GyroIOSim(simDrive.getGyroSimulation()),
-                new ModuleIOSim(TunerConstants.FrontLeft),
-                new ModuleIOSim(TunerConstants.FrontRight),
-                new ModuleIOSim(TunerConstants.BackLeft),
-                new ModuleIOSim(TunerConstants.BackRight));
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
+                
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIO() {});
         intake = new Intake(new IntakeIOSim());
         shooter = new Shooter(new ShooterIOSim());
-        new GyroIO() {};
-        new ModuleIOSim(TunerConstants.FrontLeft);
-        new ModuleIOSim(TunerConstants.FrontRight);
-        new ModuleIOSim(TunerConstants.BackLeft);
-        new ModuleIOSim(TunerConstants.BackRight);
+        
         break;
 
       case REPLAY:
