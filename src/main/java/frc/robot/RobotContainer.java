@@ -106,7 +106,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-                
+
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIO() {});
@@ -179,6 +179,8 @@ public class RobotContainer {
             () -> -driverController.getRightX()));
 
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
+    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
+  
   }
 
   /**
