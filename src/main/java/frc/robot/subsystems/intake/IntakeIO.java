@@ -32,6 +32,7 @@ public interface IntakeIO {
     public double intakeEncoderPosition = 0.0;
     public double intakeTargetPosition = 0.0;
     public double intakeRPM = 0.0;
+    public int fuelInside = 0;
   }
 
   /** Method to update the inputs of the Intake subsystem. */
@@ -47,7 +48,13 @@ public interface IntakeIO {
     return 0.0;
   }
 
-  default void stop() {}
+  public default void stop() {}
 
-  default void setBrakeMode(boolean enable) {}
+  public default void setBrakeMode(boolean enable) {}
+
+  public default boolean isFuelInsideIntake() {
+    return false;
+  }
+
+  public default void setRunning(boolean runIntake) {}
 }

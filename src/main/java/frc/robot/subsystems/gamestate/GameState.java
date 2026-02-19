@@ -18,7 +18,7 @@ public class GameState extends SubsystemBase {
   @AutoLogOutput private StateEnum alliance = StateEnum.UNKNOWN;
 
   @AutoLogOutput private String gameDataManual = "";
-  @AutoLogOutput private Timer mTimer;
+  private Timer mTimer;
 
   public GameState(Supplier<Alliance> alliance) {
     mTimer = new Timer();
