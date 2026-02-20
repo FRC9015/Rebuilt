@@ -48,12 +48,7 @@ public class Indexer extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
-
     jamAlert.set(isJamDetected());
-
-    // Update alerts
-    // TODO: Implement encoder connection status and jam detection logic to update these alerts
-
   }
 
 
