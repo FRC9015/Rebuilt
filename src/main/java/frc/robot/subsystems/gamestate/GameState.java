@@ -27,8 +27,7 @@ public class GameState extends SubsystemBase {
   @Override
   public void periodic() {
     this.state = getGameState();
-    if (this.alliance == StateEnum.UNKNOWN)
-      this.alliance = findAlliance();
+    if (this.alliance == StateEnum.UNKNOWN) this.alliance = findAlliance();
     this.isHubActive = canWeScore();
     this.isThreeSeconds = threeSecondTime();
   }
