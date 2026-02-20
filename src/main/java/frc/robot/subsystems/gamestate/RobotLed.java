@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class RobotLed extends SubsystemBase{
   private static final int NUM_LEDS = 110; // The number of LEDs on the strip
-  private final CANdle candle = new CANdle(Constants.LedConstants.candleID1); // CANdle is the CTRE hardware we use to configure our LEDs
+  private final CANdle candle = new CANdle(Constants.LedConstants.CANDLE_ID1); // CANdle is the CTRE hardware we use to configure our LEDs
   private final StrobeAnimation bufferedAnimation = new StrobeAnimation(0, NUM_LEDS);
 
   // The constructor just configures the CANdle
@@ -40,9 +40,9 @@ public class RobotLed extends SubsystemBase{
   public void setColor(RGBWColor color) {
     bufferedAnimation.withColor(color).withFrameRate(0);
   }
-/** Sets color and speed */
+/** Sets color and framerate */
   public void strobeAnimation(RGBWColor color) {
-    bufferedAnimation.withColor(color).withFrameRate(50);
+    bufferedAnimation.withColor(color).withFrameRate(Constants.LedConstants.DEFAULT_STROBE_FRAME_RATE);
   }
 /** Sets color to CANdle */
   public void updateLEDs() {
