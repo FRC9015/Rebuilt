@@ -74,4 +74,55 @@ public final class Constants {
     public static final double PIVOT_DEPLOYED_POSITION = 100.0;
     public static final double PIVOT_STOWED_POSITION = 10.0;
   }
+
+  public static class SimConstants {
+    // Simulation constants (e.g., physics parameters) can be added here
+    public static final double INTAKE_LENGTH = 0.2;
+    public static final double INTAKE_WIDTH = 0.7;
+    public static final int HOPPER_CAPACITY = 50;
+    public static final String GAMEPIECE = "Fuel";
+  }
+
+  public static class ShooterConstants {
+    public static final int FLY_WHEEL_LEFT_ID = 5;
+    public static final int FLY_WHEEL_RIGHT_ID = 29;
+    public static final int HOOD_ID = 3;
+    public static final int HOOD_ENCODER_ID = 11;
+
+    public static final Slot0Configs flyWheelSlotVelocityConfigs =
+        new Slot0Configs()
+            .withKP(0.01)
+            .withKI(0)
+            .withKD(0.0025)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final Slot1Configs hoodSlotPositionConfigs =
+        new Slot1Configs()
+            .withKP(0.02)
+            .withKI(0)
+            .withKD(0.005)
+            .withKG(0.001)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final MotionMagicConfigs hoodMagicConfigs =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final FeedbackConfigs hoodFeedbackConfigs =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    // TODO tune these values
+    public static final double SHOOTER_MAX_SPEED = 100;
+    public static final double SHOOTER_MIN_SPEED = 0.0;
+    public static final double FLYWHEEL_ACCELERATION = 100;
+    public static final double FEEDFORWARD_VOLTAGE = 12.0;
+    public static final double HOOD_MAX_POS = 0.0;
+    public static final double HOOD_MIN_POS = 0.0;
+    public static final double HOOD_DEPLOYED_POSITION = 0.0;
+    public static final double HOOD_STOWED_POSITION = 0.0;
+  }
 }
