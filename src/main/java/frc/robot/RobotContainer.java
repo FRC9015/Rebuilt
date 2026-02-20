@@ -11,7 +11,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,7 +25,6 @@ import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.gamestate.GameState;
@@ -74,8 +72,7 @@ public class RobotContainer {
   private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    gamestate =
-      new GameState();
+    gamestate = new GameState();
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -92,8 +89,6 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-        gamestate =
-            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
@@ -108,8 +103,8 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ID));
         break;
 
-        case SIM:
-          // Sim robot, instantiate physics sim IO implementations
+      case SIM:
+        // Sim robot, instantiate physics sim IO implementations
         simDrive =
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
@@ -122,24 +117,12 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
-          vision =
-              new Vision(
-                  drive::addVisionMeasurement,
-                  new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-          new GyroIO() {};
-          new ModuleIOSim(TunerConstants.FrontLeft);
-          new ModuleIOSim(TunerConstants.FrontRight);
-          new ModuleIOSim(TunerConstants.BackLeft);
-          new ModuleIOSim(TunerConstants.BackRight);
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
 
-          gamestate =
-              new GameState(() ->
-        DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
-          intake = new Intake(new IntakeIOSim(simDrive));
-          indexer = new Indexer(new IndexerIO() {});
-          shooter = new Shooter(new ShooterIOSim());
-          break;
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
+        new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
         intake = new Intake(new IntakeIOSim(simDrive));
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
@@ -158,8 +141,6 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-        gamestate =
-            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
