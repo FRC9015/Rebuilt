@@ -69,6 +69,8 @@ public class RobotContainer {
   private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    gamestate =
+      new GameState();
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -81,8 +83,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        gamestate =
-            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
@@ -110,9 +110,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontLeft, simDrive.getModules()[0]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
-        gamestate =
-            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
+                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
         intake = new Intake(new IntakeIOSim(simDrive));
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
@@ -127,8 +125,6 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        gamestate =
-            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
