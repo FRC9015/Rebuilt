@@ -70,12 +70,15 @@ public class TurretIOTalonFX implements TurretIO {
 
     CANcoderConfiguration encoderConfig13 = new CANcoderConfiguration();
     encoderConfig13.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig13.MagnetSensor.MagnetOffset = -0.06079;
+
     CANcoderConfiguration encoderConfig15 = new CANcoderConfiguration();
     encoderConfig15.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    encoderConfig13.MagnetSensor.MagnetOffset= -0.22;
-    
+    encoderConfig15.MagnetSensor.MagnetOffset = 0.10799;
+
     encoder13.getConfigurator().apply(encoderConfig13);
     encoder15.getConfigurator().apply(encoderConfig15);
+
     encoder13PosSignal = encoder13.getAbsolutePosition();
     encoder15PosSignal = encoder15.getAbsolutePosition();
     motorAppliedVoltsSignal = turretMotor.getMotorVoltage();
@@ -149,8 +152,12 @@ public class TurretIOTalonFX implements TurretIO {
             angle -> {
               inputs.turretResolvedValid = true;
               inputs.turretResolvedPosition = angle.in(Rotations);
-              if(Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition) > Constants.turretConstants.SYNC_THRESHOLD) {
-                System.out.println("⚠️ CRT-Motor desync detected! Resyncing motor to " + (angle.in(Rotations) * 360.0) + " degrees");
+              if (Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
+                  > Constants.turretConstants.SYNC_THRESHOLD) {
+                System.out.println(
+                    "⚠️ CRT-Motor desync detected! Resyncing motor to "
+                        + (angle.in(Rotations) * 360.0)
+                        + " degrees");
                 this.seedMotorPosition(angle.in(Rotations));
               }
               System.out.println("✓ Turret CRT at " + (angle.in(Rotations) * 360.0) + " degrees");
