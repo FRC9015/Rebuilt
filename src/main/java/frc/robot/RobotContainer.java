@@ -9,6 +9,9 @@ package frc.robot;
 
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -51,8 +54,23 @@ import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.Constants.turretConstants;
+import frc.robot.commands.DriveCommands;
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -82,7 +100,7 @@ public class RobotContainer {
   private double bottomShooterPowerScale = 0.5;
 
   // Dashboard inputs
-  // private final LoggedDashboardChooser<Command> autoChooser;
+  private final LoggedDashboardChooser<Command> autoChooser;
 
   private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
   private double indexerRollerValue = 0;
@@ -175,7 +193,7 @@ public class RobotContainer {
         shooter = new Shooter(new ShooterIOSim());
         intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
 
-        // Use a blank IO for Turret Sim for now (unless you have a Turret Sim implementation)
+      
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -221,23 +239,23 @@ public class RobotContainer {
     }
 
     // Set up auto routines
-    // autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     // Set up SysId routines
-    // autoChooser.addOption(
-    //     "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
-    // autoChooser.addOption(
-    //     "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Forward)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Quasistatic Reverse)",
-    //     drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    // autoChooser.addOption(
-    //     "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    autoChooser.addOption(
+        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    autoChooser.addOption(
+        "Drive SysId (Quasistatic Forward)",
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Drive SysId (Quasistatic Reverse)",
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -328,11 +346,11 @@ public class RobotContainer {
   //   return autoChooser.get();
   // }
 
-  // public void displaySimFieldToAdvantageScope() {
-  //   if (Constants.currentMode != Constants.Mode.SIM) return;
+  public void displaySimFieldToAdvantageScope() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
 
-  //   Logger.recordOutput("FieldSimulation/RobotPosition", simDrive.getSimulatedDriveTrainPose());
-  //   Logger.recordOutput(
-  //       "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
-  // }
+    Logger.recordOutput("FieldSimulation/RobotPosition", simDrive.getSimulatedDriveTrainPose());
+    Logger.recordOutput(
+        "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
+  }
 }
