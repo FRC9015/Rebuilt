@@ -29,7 +29,7 @@ public class Indexer extends SubsystemBase {
   private static final double jamCurrentAmps = 30.0;
   private static final double jamRPMThreshold = 50.0;
   private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
-  @AutoLogInputs
+  @AutoLogOutputs
   private int jamCycles = 0;
 
 
