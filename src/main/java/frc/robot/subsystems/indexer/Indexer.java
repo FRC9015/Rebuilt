@@ -31,8 +31,7 @@ public class Indexer extends SubsystemBase {
   private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
   @AutoLogOutputs
   private int jamCycles = 0;
-
-
+  
   /**
    * Constructs an Indexer subsystem.
    *
@@ -50,8 +49,7 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
     jamAlert.set(isJamDetected());
   }
-
-
+  
   /**
    * Sets the indexer's applied voltage.
    *
@@ -93,11 +91,8 @@ public class Indexer extends SubsystemBase {
     } else {
       jamCycles = 0;
     }
-
     return jamCycles >= jamCyclesThreshold;
   }
-
-
 
   /**
    * Returns the current RPM of the indexer.
