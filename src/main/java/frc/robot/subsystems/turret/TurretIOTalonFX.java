@@ -7,7 +7,6 @@ import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -110,7 +109,7 @@ public class TurretIOTalonFX implements TurretIO {
     inputs.turretAppliedVolts = motorAppliedVoltsSignal.getValueAsDouble();
     inputs.turretCurrentAmps = motorCurrentSignal.getValueAsDouble();
     inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
-    inputs.driveEncoderPositionRot =
+    inputs.encoderPositionRot =
         driveEncoderPos.getValueAsDouble() * Constants.turretConstants.ENCODER_GEAR;
   }
 

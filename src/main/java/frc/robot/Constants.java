@@ -12,6 +12,10 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.pathplanner.lib.util.FlippingUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -72,13 +76,13 @@ public final class Constants {
 
   public static class turretConstants {
     // --- GEAR TEETH ---
-    public static final int T_TEETH = 90;
+    public static final int T_TEETH = 90; //Gear count on final turret gear
     public static final int E1_TEETH = 13; // Gear on Encoder 1
     public static final int E2_TEETH = 15; // Gear on Encoder 2
 
     public static final int ENCODER_13_TOOTH = 35; // Encoder 13 motor id
     public static final int ENCODER_15_TOOTH = 36; // Encoder 15 motor id
-    public static final int ENCODER_DRIVE_GEAR = 5;
+    public static final int ENCODER_DRIVE_GEAR = 5; // Absolute Encoder id
 
     // --- MATH CONSTANTS ---
     /** The error allowance (in turret rotations) when comparing encoder predictions. */
@@ -98,7 +102,9 @@ public final class Constants {
     public static final double MAXROTATION = 1.0;
     public static final double MINROTATION = -1.0;
 
+    // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
+    //gear ratio at the absolute encoder
     public static final double ENCODER_GEAR = 10.0 / 90.0;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
@@ -111,5 +117,11 @@ public final class Constants {
             .withFeedbackRemoteSensorID(ENCODER_DRIVE_GEAR) // ID of Drive Gear Encoder
             .withFeedbackSensorSource(
                 FeedbackSensorSourceValue.RemoteCANcoder); // USE REMOTE SENSOR
+  }
+
+  public static class FieldConstants {
+    public static final Pose2d HUB_POSE_BLUE =
+        new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), new Rotation2d());
+    public static final Pose2d HUB_POSE_RED = FlippingUtil.flipFieldPose(HUB_POSE_BLUE);
   }
 }

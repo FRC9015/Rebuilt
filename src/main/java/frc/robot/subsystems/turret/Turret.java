@@ -4,7 +4,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.turretConstants;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Turret extends SubsystemBase {
@@ -15,9 +14,9 @@ public class Turret extends SubsystemBase {
     this.io = io;
   }
 
-/**
-   * Moves the turret to the fastest version of the target angle (0-360) 
-   * while strictly staying within the MINROTATION and MAXROTATION bounds.
+  /**
+   * Moves the turret to the fastest version of the target angle (0-360) while strictly staying
+   * within the MINROTATION and MAXROTATION bounds.
    *
    * @param targetAngleDegrees The target angle in a 0-360 circle.
    */
@@ -27,14 +26,14 @@ public class Turret extends SubsystemBase {
           // 1. Get bounds and current position in degrees
           double minDegrees = turretConstants.MINROTATION * 360.0;
           double maxDegrees = turretConstants.MAXROTATION * 360.0;
-          double currentPosDegrees = inputs.driveEncoderPositionRot * 360.0;
+          double currentPosDegrees = inputs.encoderPositionRot * 360.0;
 
           // 2. Normalize user input to [0, 360)
           double target = targetAngleDegrees % 360.0;
           if (target < 0) target += 360.0;
 
           // 3. Generate the two possible absolute destinations
-          double option1 = target;        // e.g. 90
+          double option1 = target; // e.g. 90
           double option2 = target - 360.0; // e.g. -270
 
           // 4. Check which options are physically reachable

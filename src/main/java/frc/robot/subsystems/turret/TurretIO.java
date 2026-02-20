@@ -21,7 +21,7 @@ public interface TurretIO {
     public boolean turretResolvedValid = false;
     public double turretMotorVelocity = 0.0;
 
-    public double driveEncoderPositionRot = 0.0;
+    public double encoderPositionRot = 0.0;
   }
 
   public default void updateInputs(TurretIOInputs inputs) {}
