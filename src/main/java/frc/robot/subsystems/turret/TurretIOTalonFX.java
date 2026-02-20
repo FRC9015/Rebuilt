@@ -70,11 +70,11 @@ public class TurretIOTalonFX implements TurretIO {
 
     CANcoderConfiguration encoderConfig13 = new CANcoderConfiguration();
     encoderConfig13.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    encoderConfig13.MagnetSensor.MagnetOffset = -0.06079;
+    encoderConfig13.MagnetSensor.MagnetOffset = -0.352783;
 
     CANcoderConfiguration encoderConfig15 = new CANcoderConfiguration();
     encoderConfig15.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    encoderConfig15.MagnetSensor.MagnetOffset = 0.10799;
+    encoderConfig15.MagnetSensor.MagnetOffset = -0.4035644;
 
     encoder13.getConfigurator().apply(encoderConfig13);
     encoder15.getConfigurator().apply(encoderConfig15);
@@ -160,7 +160,7 @@ public class TurretIOTalonFX implements TurretIO {
                         + " degrees");
                 this.seedMotorPosition(angle.in(Rotations));
               }
-              System.out.println("✓ Turret CRT at " + (angle.in(Rotations) * 360.0) + " degrees");
+              System.out.println("Turret CRT at " + (angle.in(Rotations) * 360.0) + " degrees");
             },
             () -> {
               inputs.turretResolvedValid = false;
