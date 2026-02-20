@@ -76,7 +76,7 @@ public final class Constants {
 
   public static class turretConstants {
     // --- GEAR TEETH ---
-    public static final int T_TEETH = 90; //Gear count on final turret gear
+    public static final int T_TEETH = 90; // Gear count on final turret gear
     public static final int E1_TEETH = 13; // Gear on Encoder 1
     public static final int E2_TEETH = 15; // Gear on Encoder 2
 
@@ -104,7 +104,7 @@ public final class Constants {
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
-    //gear ratio at the absolute encoder
+    // gear ratio at the absolute encoder
     public static final double ENCODER_GEAR = 10.0 / 90.0;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
