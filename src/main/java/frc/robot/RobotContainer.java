@@ -74,6 +74,8 @@ public class RobotContainer {
   private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    gamestate =
+      new GameState();
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -137,6 +139,11 @@ public class RobotContainer {
           indexer = new Indexer(new IndexerIO() {});
           shooter = new Shooter(new ShooterIOSim());
           break;
+                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
+        intake = new Intake(new IntakeIOSim(simDrive));
+        indexer = new Indexer(new IndexerIO() {});
+        shooter = new Shooter(new ShooterIOSim());
+        break;
 
       case REPLAY:
         // Replayed robot, disable IO implementations
