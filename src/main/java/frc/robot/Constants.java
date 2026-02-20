@@ -75,6 +75,7 @@ public final class Constants {
     public static final int STD_DEV_RANGE = 30;
   }
   /** Configuration and tuning constants for the intake mechanism. */
+
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
@@ -156,5 +157,10 @@ public final class Constants {
     public static final double HOOD_MIN_POS = 0.0;
     public static final double HOOD_DEPLOYED_POSITION = 0.0;
     public static final double HOOD_STOWED_POSITION = 0.0;
+  }
+
+  public static class LedConstants {
+    public static final int CANDLE_ID1 = 0; // TODO: replace with actual CAN ID
+    public static final double DEFAULT_STROBE_FRAME_RATE = 50.0;
   }
 }
