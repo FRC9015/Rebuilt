@@ -40,21 +40,23 @@ public final class Constants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
+    public static final int INDEXER_MOTOR_ID = 13;
   }
 
 
-
-  /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
-            .withKP(2)
+            .withKP(0.001)
             .withKI(0)
-            .withKD(0.05)
+            .withKD(0.02)
             .withKG(0.01)
             .withKA(0)
             .withKS(0)
             .withKV(0);
+
+    public static final int INTAKE_MOTOR_ID = 27;
+    public static final int INTAKE2_MOTOR_ID = 28;
 
     public static final Slot1Configs intakeSlotVelocityConfigs =
         new Slot1Configs().withKP(2).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
@@ -65,16 +67,68 @@ public final class Constants {
     public static final FeedbackConfigs GROUND_FEEDBACK_CONFIGS =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
-    public static final double INTAKE_MAX_POS = 300.0;
-    public static final double INTAKE_MIN_POS = 0.0;
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double INTAKE_DEPLOYED_POSITION = 100.0;
-    public static final double INTAKE_STOWED_POSITION = 10.0;
+    public static final double PIVOT_MAX_POS = 300.0;
+    public static final double PIVOT_MIN_POS = 0.0;
+    public static final double PIVOT_DEPLOYED_POSITION = 100.0;
+    public static final double PIVOT_STOWED_POSITION = 10.0;
+  }
+
+  public static class SimConstants {
+    // Simulation constants (e.g., physics parameters) can be added here
+    public static final double INTAKE_LENGTH = 0.2;
+    public static final double INTAKE_WIDTH = 0.7;
+    public static final int HOPPER_CAPACITY = 50;
+    public static final String GAMEPIECE = "Fuel";
+  }
+
+  public static class ShooterConstants {
+    public static final int FLY_WHEEL_LEFT_ID = 5;
+    public static final int FLY_WHEEL_RIGHT_ID = 29;
+    public static final int HOOD_ID = 3;
+    public static final int HOOD_ENCODER_ID = 11;
+
+    public static final Slot0Configs flyWheelSlotVelocityConfigs =
+        new Slot0Configs()
+            .withKP(0.01)
+            .withKI(0)
+            .withKD(0.0025)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final Slot1Configs hoodSlotPositionConfigs =
+        new Slot1Configs()
+            .withKP(0.02)
+            .withKI(0)
+            .withKD(0.005)
+            .withKG(0.001)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final MotionMagicConfigs hoodMagicConfigs =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final FeedbackConfigs hoodFeedbackConfigs =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    // TODO tune these values
+    public static final double SHOOTER_MAX_SPEED = 100;
+    public static final double SHOOTER_MIN_SPEED = 0.0;
+    public static final double FLYWHEEL_ACCELERATION = 100;
+    public static final double FEEDFORWARD_VOLTAGE = 12.0;
+    public static final double HOOD_MAX_POS = 0.0;
+    public static final double HOOD_MIN_POS = 0.0;
+    public static final double HOOD_DEPLOYED_POSITION = 0.0;
+    public static final double HOOD_STOWED_POSITION = 0.0;
   }
 
   public static class LedConstants {
-    public static final int candleID1 = 0; // TODO: replace with actual CAN ID
+    public static final int CANDLE_ID1 = 0; // TODO: replace with actual CAN ID
+    public static final double DEFAULT_STROBE_FRAME_RATE = 50.0;
   }
 }

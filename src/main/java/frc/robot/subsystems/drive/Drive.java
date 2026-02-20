@@ -187,7 +187,7 @@ public class Drive extends SubsystemBase {
         this::setPose,
         this::getChassisSpeeds,
         this::runVelocity,
-        //  new PPHolonomicDriveController(new PIDConstants(5, 0.0, 0), new PIDConstants(5.0, 0.0,
+        //  new PPHolonomicDriveController(new PIDConstants(5, 0.0, 0), new PIDConstants(5.0,
         // 0)),
         //     new PIDConstants(4.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.02)),
         new PPHolonomicDriveController(
@@ -229,7 +229,7 @@ public class Drive extends SubsystemBase {
   public void periodic() {
     odometryLock.lock(); // Prevents odometry updates while reading data
     gyroIO.updateInputs(gyroInputs);
-    Logger.recordOutput("oribtsafe", orbitSafeSupplier());
+    Logger.recordOutput("orbitSafe", orbitSafeSupplier());
     Logger.processInputs("Drive/Gyro", gyroInputs);
     for (Module module : modules) {
       module.periodic();
