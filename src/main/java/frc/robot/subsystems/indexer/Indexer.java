@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** The Indexer subsystem controls the indexer mechanism. */
@@ -29,7 +30,7 @@ public class Indexer extends SubsystemBase {
   private static final double jamCurrentAmps = 30.0;
   private static final double jamRPMThreshold = 50.0;
   private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
-  @AutoLogOutputs
+  @AutoLogOutput
   private int jamCycles = 0;
 
 
