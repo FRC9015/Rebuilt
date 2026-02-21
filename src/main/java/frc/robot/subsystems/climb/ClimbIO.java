@@ -48,7 +48,4 @@ public interface ClimbIO {
 
   /** Sets the voltage for the climb motor. */
   default void setClimbVoltage(double voltage) {}
-
-  /** Sets target position */
-  default void setClimbPosition(double position) {}
 }
