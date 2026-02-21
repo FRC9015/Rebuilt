@@ -76,7 +76,7 @@ public class ClimbIOTalonFX implements ClimbIO {
 
   @Override
   public void setBrakeMode(boolean enable) {
-    com.ctre.phoenix6.configs.MotorOutputConfigs config = new com.ctre.phoenix6.configs.MotorOutputConfigs();
+    MotorOutputConfigs config = new MotorOutputConfigs();
     climbMotor1.getConfigurator().refresh(config);
     config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
     climbMotor1.getConfigurator().apply(config);
