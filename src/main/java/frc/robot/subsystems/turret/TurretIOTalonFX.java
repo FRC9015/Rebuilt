@@ -20,6 +20,8 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants;
 import frc.robot.Constants.turretConstants;
 import yams.units.EasyCRT;
@@ -43,6 +45,11 @@ public class TurretIOTalonFX implements TurretIO {
   private final NeutralOut neutralOut = new NeutralOut();
   private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
+  private Alert outofSyncAlert = new Alert("⚠️ CRT-Motor desync detected! Resyncing motor."
+                       , AlertType.kWarning);
+  private Alert outofBoundsAlert = new Alert("Turret out of bounds; no longer tracking", AlertType.kError);
+
+
   public TurretIOTalonFX(int motorID, int encoderId13, int encoderId15) {
     turretMotor = new TalonFX(motorID);
     encoder13 = new CANcoder(encoderId13);
@@ -63,7 +70,7 @@ public class TurretIOTalonFX implements TurretIO {
             .withSlot0(turretConstants.SLOT0_CONFIGS)
             .withFeedback(turretConstants.FEEDBACK_CONFIGS)
             .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1));
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     turretMotor.getConfigurator().apply(motorConfig);
@@ -154,17 +161,18 @@ public class TurretIOTalonFX implements TurretIO {
               inputs.turretResolvedPosition = angle.in(Rotations);
               if (Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
                   > Constants.turretConstants.SYNC_THRESHOLD) {
-                System.out.println(
-                    "⚠️ CRT-Motor desync detected! Resyncing motor to "
-                        + (angle.in(Rotations) * 360.0)
-                        + " degrees");
+                    
+                outofSyncAlert.set(Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
+                  > Constants.turretConstants.SYNC_THRESHOLD);
+
                 this.seedMotorPosition(angle.in(Rotations));
               }
-              System.out.println("Turret CRT at " + (angle.in(Rotations) * 360.0) + " degrees");
+              // System.out.println("Turret CRT at " + (angle.in(Rotations) * 360.0) + " degrees");
             },
             () -> {
               inputs.turretResolvedValid = false;
-              System.out.println("  Best guess: " + easyCRT.getLastErrorRotations() * 360);
+              outofBoundsAlert.set(!inputs.turretResolvedValid);
+              
             });
   }
 
