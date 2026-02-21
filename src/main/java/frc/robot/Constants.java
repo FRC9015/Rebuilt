@@ -82,7 +82,6 @@ public final class Constants {
 
     public static final int ENCODER_13_TOOTH = 35; // Encoder 13 motor id
     public static final int ENCODER_15_TOOTH = 36; // Encoder 15 motor id
-    public static final int ENCODER_DRIVE_GEAR = 5; // Absolute Encoder id
 
     // --- MATH CONSTANTS ---
     /** The error allowance (in turret rotations) when comparing encoder predictions. */
@@ -104,19 +103,22 @@ public final class Constants {
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
-    // gear ratio at the absolute encoder
-    public static final double ENCODER_GEAR = 10.0 / 90.0;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
-        new Slot0Configs().withKP(1).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+        new Slot0Configs()
+            .withKP(6)
+            .withKI(0.01)
+            .withKD(0.2)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)
-            .withFeedbackRemoteSensorID(ENCODER_DRIVE_GEAR) // ID of Drive Gear Encoder
-            .withFeedbackSensorSource(
-                FeedbackSensorSourceValue.RemoteCANcoder); // USE REMOTE SENSOR
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
   }
 
   public static class FieldConstants {

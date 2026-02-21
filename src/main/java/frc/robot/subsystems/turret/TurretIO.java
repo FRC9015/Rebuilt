@@ -33,4 +33,6 @@ public interface TurretIO {
   public default void setCoastMode() {}
 
   public default void setTurretPosition(double value) {}
+
+  public default void seedMotorPosition(double positionRotations) {}
 }

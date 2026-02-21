@@ -26,7 +26,7 @@ public class Turret extends SubsystemBase {
           // 1. Get bounds and current position in degrees
           double minDegrees = turretConstants.MINROTATION * 360.0;
           double maxDegrees = turretConstants.MAXROTATION * 360.0;
-          double currentPosDegrees = inputs.encoderPositionRot * 360.0;
+          double currentPosDegrees = inputs.turretResolvedPosition * 360.0;
 
           // 2. Normalize user input to [0, 360)
           double target = targetAngleDegrees % 360.0;
@@ -70,6 +70,13 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+
+    if (inputs.turretResolvedValid) {
+      if (Math.abs(inputs.turretMotorPosition - inputs.turretResolvedPosition)
+          > turretConstants.SYNC_THRESHOLD) {
+        io.seedMotorPosition(inputs.turretResolvedPosition);
+      }
+    }
     Logger.processInputs("Turret", inputs);
   }
 }
