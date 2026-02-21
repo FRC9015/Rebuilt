@@ -88,7 +88,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", VisionConstants.FrontCamera));
+                new VisionIOPhotonVision("Test_Cam", VisionConstants.FrontCamera));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(

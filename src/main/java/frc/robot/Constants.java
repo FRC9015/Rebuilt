@@ -53,7 +53,7 @@ public final class Constants {
   }
 
   public static class VisionConstants {
-    public static final double MAX_AMBIGUITY = 0.1;
+    public static final double MAX_AMBIGUITY = 0.3;
     public static final int MAX_AVERAGE_DISTANCE = 3;
     public static final int STD_DEV_RANGE = 30;
 
