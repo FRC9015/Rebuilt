@@ -69,7 +69,7 @@ public final class Constants {
     public static final double INTAKE_STOWED_POSITION = 10.0;
   }
 
-  public static class climbConstants {
+  public static class ClimbConstants {
     public static final Slot0Configs climbSlot0Configs =
         new Slot0Configs()
             .withKP(0.1)
