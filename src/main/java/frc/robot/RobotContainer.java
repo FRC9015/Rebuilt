@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -56,6 +57,7 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.Constants.turretConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -325,11 +327,19 @@ public class RobotContainer {
             Commands.runOnce(
                     () ->
                         drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                            new Pose2d(
+                                new Translation2d(0, Units.inchesToMeters(317)), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
     driverController.leftTrigger().whileTrue(intake.runIntakeSim());
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
+
+    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
+  }
+
+  public Command checkShooterUpdate() {
+
+    return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
   }
 
   /**
