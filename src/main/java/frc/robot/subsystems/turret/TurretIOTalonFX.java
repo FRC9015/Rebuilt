@@ -158,6 +158,7 @@ public class TurretIOTalonFX implements TurretIO {
             angle -> {
               inputs.turretResolvedValid = true;
               inputs.turretResolvedPosition = angle.in(Rotations);
+              inputs.turretResolvedPositionDegrees = angle.in(Rotations) * 360.0;
               if (Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
                   > Constants.turretConstants.SYNC_THRESHOLD) {
 

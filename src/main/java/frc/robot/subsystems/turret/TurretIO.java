@@ -18,6 +18,7 @@ public interface TurretIO {
     public boolean encoder15Connected = false;
 
     public double turretResolvedPosition = 0.0;
+    public double turretResolvedPositionDegrees = 0.0;
     public boolean turretResolvedValid = false;
     public double turretMotorVelocity = 0.0;
 
