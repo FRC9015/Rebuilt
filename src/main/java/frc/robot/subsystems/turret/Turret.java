@@ -68,13 +68,6 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-
-    if (inputs.turretResolvedValid) {
-      if (Math.abs(inputs.turretMotorPosition - inputs.turretResolvedPosition)
-          > turretConstants.SYNC_THRESHOLD) {
-        io.seedMotorPosition(inputs.turretResolvedPosition);
-      }
-    }
     Logger.processInputs("Turret", inputs);
   }
 }

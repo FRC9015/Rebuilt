@@ -200,37 +200,7 @@ public class RobotContainer {
                     turretConstants.ENCODER_13_TOOTH,
                     turretConstants.ENCODER_15_TOOTH));
         break;
-
-      case REPLAY:
-        // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-        intake = new Intake(new RollerIO() {}, new PivotIO() {});
-        indexer = new Indexer(new IndexerIO() {});
-        shooter =
-            new Shooter(
-                new ShooterIOTalonFX(
-                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
-                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.HOOD_ID));
-
-        turret =
-            new Turret(
-                new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH,
-                    turretConstants.ENCODER_15_TOOTH));
-        break;
-
+        
       default:
         throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
@@ -328,7 +298,7 @@ public class RobotContainer {
                     () ->
                         drive.setPose(
                             new Pose2d(
-                                new Translation2d(0, Units.inchesToMeters(317)), Rotation2d.kZero)),
+                                drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
     driverController.leftTrigger().whileTrue(intake.runIntakeSim());
@@ -347,9 +317,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  // public Command getAutonomousCommand() {
-  //   return autoChooser.get();
-  // }
+  public Command getAutonomousCommand() {
+    return autoChooser.get();
+  }
 
   public void displaySimFieldToAdvantageScope() {
     if (Constants.currentMode != Constants.Mode.SIM) return;
