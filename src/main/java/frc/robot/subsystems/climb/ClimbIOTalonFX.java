@@ -2,6 +2,7 @@ package frc.robot.subsystems.climb;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -17,9 +18,9 @@ import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
+/** TalonFX-based I/O implementation for the climb subsystem. */
 public class ClimbIOTalonFX implements ClimbIO {
-
-  public final TalonFX topMotor, climbMotor1;
+  public final TalonFX climbMotor1;
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;
   public StatusSignal<AngularVelocity> motorRPM;
@@ -29,8 +30,11 @@ public class ClimbIOTalonFX implements ClimbIO {
   private final VoltageOut voltageOut = new VoltageOut(0.0);
   private final MotionMagicVoltage positionVoltage = new MotionMagicVoltage(0.0);
 
-  public ClimbIOTalonFX(int topMotorID, int climbID1, int climbID2) {
-    topMotor = new TalonFX(topMotorID);
+  // Constants extracted to avoid magic numbers
+  private static final double STATUS_UPDATE_FREQUENCY = 50.0;
+  private static final double MAX_OUTPUT_VOLTAGE = 12.0;
+
+  public ClimbIOTalonFX(int climbID1) {
     climbMotor1 = new TalonFX(climbID1);
 
     // Configure motor
@@ -39,20 +43,21 @@ public class ClimbIOTalonFX implements ClimbIO {
             .withSlot0(Constants.climbConstants.climbSlot0Configs)
             .withFeedback(Constants.climbConstants.CLIMB_FEEDBACK_CONFIGS)
             .withMotionMagic(Constants.climbConstants.CLIMB_MAGIC_CONFIGS);
+    
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    // motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-    topMotor.getConfigurator().apply(motorConfig);
+    
+    // Apply Config
     climbMotor1.getConfigurator().apply(motorConfig);
-    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    motorVolts = topMotor.getMotorVoltage();
-    motorAmps = topMotor.getStatorCurrent();
-    motorRPM = topMotor.getVelocity();
+
+    motorVolts = climbMotor1.getMotorVoltage();
+    motorAmps = climbMotor1.getStatorCurrent();
+    motorRPM = climbMotor1.getVelocity();
     motorPosition = climbMotor1.getPosition();
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM);
-    ParentDevice.optimizeBusUtilizationForAll(topMotor);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        STATUS_UPDATE_FREQUENCY, motorVolts, motorAmps, motorRPM, motorPosition);
+    ParentDevice.optimizeBusUtilizationForAll(climbMotor1);
   }
 
   @Override
@@ -65,32 +70,31 @@ public class ClimbIOTalonFX implements ClimbIO {
   }
 
   @Override
-  public void stop() {}
-
-  @Override
-  public void setBrakeMode(boolean enable) {}
-
-  @Override
-  public void setTopRPM(double voltage) {
-    topMotor.setVoltage(MathUtil.clamp(voltage, -12.0, 12.0));
+  public void stop() {
+    climbMotor1.stopMotor();
   }
 
   @Override
-  public void setClimbRPM(double voltage) {
-    climbMotor1.setVoltage(MathUtil.clamp(voltage, -12, 12));
+  public void setBrakeMode(boolean enable) {
+    com.ctre.phoenix6.configs.MotorOutputConfigs config = new com.ctre.phoenix6.configs.MotorOutputConfigs();
+    climbMotor1.getConfigurator().refresh(config);
+    config.NeutralMode = enable ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+    climbMotor1.getConfigurator().apply(config);
+  }
+
+  @Override
+  public void setClimbVoltage(double voltage) {
+    climbMotor1.setVoltage(MathUtil.clamp(voltage, -MAX_OUTPUT_VOLTAGE, MAX_OUTPUT_VOLTAGE));
   }
 
   @Override
   public void setClimbPosition(double position) {
-
     final double clampedPosition =
         MathUtil.clamp(
             position,
             Constants.climbConstants.CLIMB_MIN_POS,
             Constants.climbConstants.CLIMB_MAX_POS);
-
     climbMotor1.setControl(positionVoltage.withPosition(clampedPosition));
-
   }
 
   public double getPosition() {
