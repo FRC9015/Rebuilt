@@ -43,18 +43,14 @@ public class TurretAngleAim extends Command {
                 : FieldConstants.HUB_POSE_RED);
 
     // Get the angle to the hub relative to the position of the robot
-    double angleToHub = Math.atan(relativePose.getY() / relativePose.getX());
+    double angleToHub = Math.atan2(relativePose.getY(), relativePose.getX());
 
     // Calculates the angle the turret needs to be at based on the angle from the robot to the hub -
     // the angle the robot is already at
     double headingSetpoint =
         Units.radiansToDegrees(angleToHub) - robotCurrentPose.getRotation().getDegrees();
-
-    // acounts for if the number is negative and sets it to the corisponding positive degree for the
-    // set turret angle function
-    if (headingSetpoint < 0) {
-      headingSetpoint = (headingSetpoint + 360);
-    }
+    // the atan2 command is -180 to 180 so you add 180 to get it to 0 to 360;
+    headingSetpoint += 180;
 
     // runs the turret function for setting the angle based on a given degree
     turret.setTurretAngleFastestPath(headingSetpoint);

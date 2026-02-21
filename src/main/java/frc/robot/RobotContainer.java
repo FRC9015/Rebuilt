@@ -105,22 +105,7 @@ public class RobotContainer {
         break;
 
       default:
-        // Replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
-
-        turret =
-            new Turret(
-                new TurretIOTalonFX(
-                    motorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH,
-                    turretConstants.ENCODER_15_TOOTH));
-        break;
+        throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
 
     // Set up auto routines
@@ -157,9 +142,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -operatorController.getLeftY(),
-            () -> -operatorController.getLeftX(),
-            () -> -operatorController.getRightX()));
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
 
     // // Lock to 0° when A button is held
     driverController
@@ -167,8 +152,8 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -operatorController.getLeftY(),
-                () -> -operatorController.getLeftX(),
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
                 () -> Rotation2d.kZero));
 
     // // Switch to X pattern when X button is pressed
@@ -182,7 +167,7 @@ public class RobotContainer {
                     () ->
                         drive.setPose(
                             new Pose2d(
-                                new Translation2d(0, Units.inchesToMeters(317)), Rotation2d.kZero)),
+                                drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
 
@@ -199,9 +184,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  // public Command getAutonomousCommand() {
-  //   return autoChooser.get();
-  // }
+  public Command getAutonomousCommand() {
+    return autoChooser.get();
+  }
 
   public void displaySimFieldToAdvantageScope() {
     if (Constants.currentMode != Constants.Mode.SIM) return;

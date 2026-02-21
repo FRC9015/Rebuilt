@@ -70,7 +70,6 @@ public class Robot extends LoggedRobot {
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
-    // THIS is where Turret gets created, and its Periodic loop starts immediately.
     robotContainer = new RobotContainer();
   }
 
@@ -103,7 +102,7 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    // autonomousCommand = robotContainer.getAutonomousCommand();
+    autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
@@ -153,6 +152,6 @@ public class Robot extends LoggedRobot {
   public void simulationPeriodic() {
     // simulation period method in your Robot
     SimulatedArena.getInstance().simulationPeriodic();
-    // robotContainer.displaySimFieldToAdvantageScope();
+    robotContainer.displaySimFieldToAdvantageScope();
   }
 }

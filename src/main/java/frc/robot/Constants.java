@@ -101,6 +101,9 @@ public final class Constants {
     public static final double MAXROTATION = 1.0;
     public static final double MINROTATION = -1.0;
 
+    public static final double ENCODER13_MAGNET_OFFSET = -0.1020507;
+    public static final double ENCODER15_MAGNET_OFFSET = 0.1274414;
+
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
     // --- MOTOR CONFIGS ---
