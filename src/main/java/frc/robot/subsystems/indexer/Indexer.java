@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /** The Indexer subsystem controls the indexer mechanism. */
@@ -25,6 +26,16 @@ public class Indexer extends SubsystemBase {
   private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
   private final Alert encoderDisconnectedAlert;
   private final Alert jamAlert;
+
+  private static final double jamCurrentAmps = 30.0;
+  private static final double jamRPMThreshold = 50.0;
+  private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
+
+  private static boolean highCurrent;
+  private static boolean lowSpeed;
+  private static boolean isRunning;
+
+  @AutoLogOutput private int jamCycles = 0;
 
   /**
    * Constructs an Indexer subsystem.
@@ -42,9 +53,17 @@ public class Indexer extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
 
-    // Update alerts
-    // TODO: Implement encoder connection status and jam detection logic to update these alerts
+    highCurrent = inputs.indexerCurrentAmps >= jamCurrentAmps;
+    lowSpeed = Math.abs(inputs.indexerVelocity) <= jamRPMThreshold;
+    isRunning = Math.abs(inputs.indexerAppliedVolts) > 0.1;
 
+    if (highCurrent && lowSpeed && isRunning) {
+      jamCycles++;
+    } else {
+      jamCycles = 0;
+    }
+
+    jamAlert.set(isJamDetected());
   }
 
   /**
@@ -74,12 +93,12 @@ public class Indexer extends SubsystemBase {
   }
 
   /**
-   * Returns whether jam is currently detected.
+   * Checks whether jam is currently detected and increments appropretly.
    *
    * @return True if jam is detected, false otherwise.
    */
   public boolean isJamDetected() {
-    return false; // TODO implement jam detection logic based on current spikes or encoder feedback
+    return jamCycles >= jamCyclesThreshold;
   }
 
   /**
@@ -117,5 +136,24 @@ public class Indexer extends SubsystemBase {
    */
   public Command runIndexer(double voltage) {
     return this.startEnd(() -> io.setVoltage(voltage), () -> stop());
+  }
+
+  /**
+   * Unjams the indexer by running it in reverse for 0.5 seconds.
+   *
+   * @return A command that unjams the indexer.
+   */
+  public Command unjam() {
+    return this.runEnd(() -> io.setVoltage(-4.0), () -> stop()).withTimeout(0.5);
+  }
+
+  /**
+   * Runs the indexer at the specified voltage but automatically unjams.
+   *
+   * @param voltage Voltage provided to the motor.
+   * @return A command that runs the indexer with auto unjam functionality.
+   */
+  public Command runIndexerWithAutoUnjam(double voltage) {
+    return runIndexer(voltage).until(this::isJamDetected).andThen(unjam()).repeatedly();
   }
 }
