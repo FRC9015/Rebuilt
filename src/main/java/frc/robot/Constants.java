@@ -178,7 +178,7 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
-    // Following naming scheme for subsystem motor and sensor ids
+    //  Following naming scheme for subsystem motor and sensor ids
     public static final int FLY_WHEEL_LEFT_ID = 11;
     public static final int FLY_WHEEL_RIGHT_ID = 12;
     public static final int HOOD_ID = 13;

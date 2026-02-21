@@ -68,6 +68,8 @@ public class Shooter extends SubsystemBase {
     return this.run(() -> io.setHoodPosition(position));
   }
 
+
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
