@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -43,6 +44,7 @@ public class TurretIOTalonFX implements TurretIO {
   private final StatusSignal<Angle> motorPositionSignal;
 
   private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
+  private final NeutralOut neutralOut = new NeutralOut();
   private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
   private Alert outofSyncAlert =
@@ -55,7 +57,6 @@ public class TurretIOTalonFX implements TurretIO {
     encoder13 = new CANcoder(encoderId13);
     encoder15 = new CANcoder(encoderId15);
   
-
     // Hardware-level soft limits provide physical protection even if code crashes
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
@@ -71,9 +72,8 @@ public class TurretIOTalonFX implements TurretIO {
             .withSlot0(turretConstants.SLOT0_CONFIGS)
             .withFeedback(turretConstants.FEEDBACK_CONFIGS)
             .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1));
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
     turretMotor.getConfigurator().apply(motorConfig);
 
     CANcoderConfiguration encoderConfig13 = new CANcoderConfiguration();
@@ -177,8 +177,8 @@ public class TurretIOTalonFX implements TurretIO {
   }
 
   @Override
-  public void seedMotorPosition(double pos) {
-    turretMotor.setPosition(pos);
+  public void seedMotorPosition(double positionRotations) {
+    turretMotor.setPosition(positionRotations);
   }
 
   @Override

@@ -154,9 +154,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
-                    turretConstants.ENCODER_15_TOOTH, // ID of the CANCoder on the 15 Tooth Gear
-                    turretConstants.ENCODER_DRIVE_GEAR));
+                    turretConstants.ENCODER_13_TOOTH,
+                    turretConstants.ENCODER_15_TOOTH));
         break;
 
       case SIM:
@@ -196,9 +195,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
-                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
-                    ));
+                    turretConstants.ENCODER_13_TOOTH,
+                    turretConstants.ENCODER_15_TOOTH));
         break;
 
       case REPLAY:
@@ -227,9 +225,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
-                    turretConstants.ENCODER_15_TOOTH, // ID of the CANCoder on the 15 Tooth Gear
-                    turretConstants.ENCODER_DRIVE_GEAR));
+                    turretConstants.ENCODER_13_TOOTH,
+                    turretConstants.ENCODER_15_TOOTH));
         break;
 
       default:
