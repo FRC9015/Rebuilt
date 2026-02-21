@@ -38,15 +38,15 @@ public interface ClimbIO {
     public double servoPosition = 0.0;
   }
 
+  /** Updates the set of loggable inputs. */
   public default void updateInputs(ClimbIOInputs inputs) {}
 
+  /** Stop the Climb. */
   default void stop() {}
 
+  /** Enable or disable brake mode on the climb motor. */
   default void setBrakeMode(boolean enable) {}
 
-  default void setTopRPM(double rpm) {}
-
-  default void setClimbRPM(double rpm) {}
-
-  default void setClimbPosition(double position) {}
+  /** Sets the voltage for the climb motor. */
+  default void setClimbVoltage(double voltage) {}
 }

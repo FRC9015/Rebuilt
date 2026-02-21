@@ -168,4 +168,25 @@ public final class Constants {
     public static final int CANDLE_ID1 = 0; // TODO: replace with actual CAN ID
     public static final double DEFAULT_STROBE_FRAME_RATE = 50.0;
   }
+
+  public static class ClimbConstants {
+    public static final Slot0Configs climbSlot0Configs =
+        new Slot0Configs()
+            .withKP(0.1)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final FeedbackConfigs CLIMB_FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final MotionMagicConfigs CLIMB_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final double CLIMB_MAX_POS = 300.0;
+    public static final double CLIMB_MIN_POS = 0.0;
+  }
 }
