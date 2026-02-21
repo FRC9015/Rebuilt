@@ -42,6 +42,7 @@ public class ClimbIOTalonFX implements ClimbIO {
             .withSlot0(Constants.ClimbConstants.climbSlot0Configs)
             .withFeedback(Constants.ClimbConstants.CLIMB_FEEDBACK_CONFIGS);
     
+    // TODO: Determine motor directions
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     

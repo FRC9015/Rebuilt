@@ -12,6 +12,7 @@ public class Climb extends SubsystemBase {
   private final PIDController pidController;
 
   // PID constants
+  // TODO: Update PID constants during tuning
   private static final double kP = 0.0;
   private static final double kI = 0.0;
   private static final double kD = 0.0;
