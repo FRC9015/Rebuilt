@@ -79,22 +79,21 @@ public class Intake extends SubsystemBase {
     return this.startEnd(
         () -> {
           this.setIntakeSpeed(intakeSpeed);
-          this.setPivotSpeed(pivotSpeed);
+          this.setPivotPosition(pivotPosition);
         },
         () -> {
           this.setIntakeSpeed(idleSpeed);
-          this.setPivotSpeed(idleSpeed);
+          this.setPivotPosition(pivotPosition);
         });
   }
 
   public Command runIntakeAtReverseSpeed(double speed) {
-    Logger.recordOutput("Intake/Speed", speed);
     return this.startEnd(
         () -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
   }
 
   public Command stopIntake() {
-    return this.run(() -> io.stop());
+    return this.run(() -> roller.stop());
   }
 
   @Override

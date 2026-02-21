@@ -47,6 +47,13 @@ import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.PivotIOSim;
+import frc.robot.subsystems.intake.PivotIOSparkFlex;
+import frc.robot.subsystems.intake.PivotIOTalonFX;
+import frc.robot.subsystems.intake.RollerIOSim;
+import frc.robot.subsystems.intake.RollerIOSparkFlex;
+import frc.robot.subsystems.intake.RollerIOTalonFX;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
