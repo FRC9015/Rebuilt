@@ -45,23 +45,6 @@ public final class Constants {
     REPLAY
   }
 
-  public static class CameraConstants {
-    public static final AprilTagFieldLayout aprilTagLayout =
-        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
-    public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
-    public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
-    public static final double CAMERA_HEIGHT = Units.inchesToMeters(7);
-    public static final double CAMERA_PITCH = Units.degreesToRadians(15);
-    public static final double CAMERA_X_OFFSET = Units.inchesToMeters(13.5);
-    public static final Transform3d placeHolderCamera =
-        new Transform3d(
-            new Translation3d(CAMERA_X_OFFSET, Units.inchesToMeters(0), CAMERA_HEIGHT),
-            new Rotation3d(0, CAMERA_PITCH, Units.degreesToRadians(0)));
-
-    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
-    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
-  }
-
   public static class MotorIDConstants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
@@ -73,9 +56,21 @@ public final class Constants {
     public static final double MAX_AMBIGUITY = 0.1;
     public static final int MAX_AVERAGE_DISTANCE = 3;
     public static final int STD_DEV_RANGE = 30;
+
+    public static final AprilTagFieldLayout aprilTagLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+    public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
+    public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
+    public static final Transform3d FrontCamera =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(11.75), Units.inchesToMeters(0), Units.inchesToMeters(5.25)),
+            new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(0)));
+
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
   }
   /** Configuration and tuning constants for the intake mechanism. */
-
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()

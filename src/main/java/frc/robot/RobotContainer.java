@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.CameraConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -88,7 +88,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+                new VisionIOPhotonVision("placeholder", VisionConstants.FrontCamera));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
@@ -120,7 +120,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+                new VisionIOPhotonVision("placeholder", VisionConstants.FrontCamera));
 
         new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
         intake = new Intake(new IntakeIOSim(simDrive));
@@ -140,7 +140,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+                new VisionIOPhotonVision("placeholder", VisionConstants.FrontCamera));
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
