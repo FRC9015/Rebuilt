@@ -93,12 +93,18 @@ public class Indexer extends SubsystemBase {
   }
 
   /**
-   * Returns whether jam is currently detected.
+   * Checks whether jam is currently detected and increments appropretly.
    *
    * @return True if jam is detected, false otherwise.
    */
   public boolean isJamDetected() {
     
+    return jamCycles >= jamCyclesThreshold;
+  }
+/** return whether indexer is jammed WITHOUT incrementing
+ * @return True if jam is detected, false otherwise.
+ */
+  public boolean getJammedIndexer(){
     return jamCycles >= jamCyclesThreshold;
   }
 
@@ -156,7 +162,7 @@ public class Indexer extends SubsystemBase {
    */
   public Command runIndexerWithAutoUnjam(double voltage) {
     return runIndexer(voltage)
-        .until(this::isJamDetected)
+        .until(this::getJammedIndexer)
         .andThen(unjam())
         .andThen(this.runIndexerWithAutoUnjam(voltage));
   }
