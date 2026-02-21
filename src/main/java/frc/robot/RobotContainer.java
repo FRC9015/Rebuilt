@@ -11,6 +11,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.motorIDConstants;
 import frc.robot.Constants.turretConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -179,24 +181,12 @@ public class RobotContainer {
             Commands.runOnce(
                     () ->
                         drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                            new Pose2d(
+                                new Translation2d(0, Units.inchesToMeters(317)), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
 
-    // operatorController.povDown().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.1));
-    // operatorController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
-    // operatorController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
-    // operatorController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
-    // operatorController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
-    // operatorController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
-    // operatorController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale +=
-    // 0.01));
-    // operatorController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -=
-    // 0.01));
-    operatorController.a().onTrue(turret.setTurretAngleFastestPath(0));
-    operatorController.b().onTrue(turret.setTurretAngleFastestPath(180));
-    operatorController.x().onTrue(turret.setTurretAngleFastestPath(270));
-    operatorController.y().onTrue(turret.setTurretAngleFastestPath(90));
+    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
   }
 
   public Command checkShooterUpdate() {
