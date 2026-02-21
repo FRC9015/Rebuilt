@@ -30,6 +30,11 @@ public class Indexer extends SubsystemBase {
   private static final double jamCurrentAmps = 30.0;
   private static final double jamRPMThreshold = 50.0;
   private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
+
+  private static boolean highCurrent;
+  private static boolean lowSpeed;
+  private static boolean isRunning;
+
   @AutoLogOutput private int jamCycles = 0;
 
   /**
@@ -47,6 +52,17 @@ public class Indexer extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
+
+    highCurrent = inputs.indexerCurrentAmps >= jamCurrentAmps;
+    lowSpeed = Math.abs(inputs.indexerVelocity) <= jamRPMThreshold;
+    isRunning = Math.abs(inputs.indexerAppliedVolts) > 0.1;
+
+    if (highCurrent && lowSpeed && isRunning) {
+      jamCycles++;
+    } else {
+      jamCycles = 0;
+    }
+    
     jamAlert.set(isJamDetected());
   }
 
@@ -82,15 +98,7 @@ public class Indexer extends SubsystemBase {
    * @return True if jam is detected, false otherwise.
    */
   public boolean isJamDetected() {
-    boolean highCurrent = inputs.indexerCurrentAmps >= jamCurrentAmps;
-    boolean lowSpeed = Math.abs(inputs.indexerVelocity) <= jamRPMThreshold;
-    boolean isRunning = Math.abs(inputs.indexerAppliedVolts) > 0.1;
-
-    if (highCurrent && lowSpeed && isRunning) {
-      jamCycles++;
-    } else {
-      jamCycles = 0;
-    }
+    
     return jamCycles >= jamCyclesThreshold;
   }
 
