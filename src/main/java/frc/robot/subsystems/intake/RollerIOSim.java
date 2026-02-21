@@ -31,6 +31,10 @@ public class RollerIOSim implements RollerIO {
     inputs.fuelInside = intakeSimulation.getGamePiecesAmount();
   }
 
+  public int returnFuelInside() {
+    return intakeSimulation.getGamePiecesAmount();
+  }
+
   @Override
   public void setRollerSpeed(boolean runIntake) {
     if (runIntake) {
