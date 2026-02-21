@@ -30,9 +30,8 @@ public class Indexer extends SubsystemBase {
   private static final double jamCurrentAmps = 30.0;
   private static final double jamRPMThreshold = 50.0;
   private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
-  @AutoLogOutput
-  private int jamCycles = 0;
-  
+  @AutoLogOutput private int jamCycles = 0;
+
   /**
    * Constructs an Indexer subsystem.
    *
@@ -50,7 +49,7 @@ public class Indexer extends SubsystemBase {
     Logger.processInputs("Indexer", inputs);
     jamAlert.set(isJamDetected());
   }
-  
+
   /**
    * Sets the indexer's applied voltage.
    *
@@ -132,22 +131,25 @@ public class Indexer extends SubsystemBase {
     return this.startEnd(() -> io.setVoltage(voltage), () -> stop());
   }
 
-   /**
+  /**
    * Unjams the indexer by running it in reverse for 0.5 seconds.
-   * 
+   *
    * @return A command that unjams the indexer.
    */
   public Command unjam() {
     return this.runEnd(() -> io.setVoltage(-4.0), () -> stop()).withTimeout(0.5);
   }
 
-    /**
+  /**
    * Runs the indexer at the specified voltage but automatically unjams.
    *
    * @param voltage Voltage provided to the motor.
    * @return A command that runs the indexer with auto unjam functionality.
    */
   public Command runIndexerWithAutoUnjam(double voltage) {
-    return runIndexer(voltage).until(this::isJamDetected).andThen(unjam()).andThen(this.runIndexerWithAutoUnjam(voltage));
+    return runIndexer(voltage)
+        .until(this::isJamDetected)
+        .andThen(unjam())
+        .andThen(this.runIndexerWithAutoUnjam(voltage));
   }
 }
