@@ -34,8 +34,7 @@ public class Shooter extends SubsystemBase {
 
   public Command runShooterAtReverseSpeed(double speed) {
     Logger.recordOutput("Shooter/Speed", speed);
-    return this.startEnd(
-        () -> this.setShooterReverseSpeed(speed), () -> io.stopFlywheels());
+    return this.startEnd(() -> this.setShooterReverseSpeed(speed), () -> io.stopFlywheels());
   }
 
   public Command stopFlywheels() {
@@ -49,6 +48,8 @@ public class Shooter extends SubsystemBase {
   public Command setHoodPosition(double position) {
     return this.run(() -> io.setHoodPosition(position));
   }
+
+
 
   @Override
   public void periodic() {

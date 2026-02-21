@@ -35,6 +35,10 @@ public class Intake extends SubsystemBase {
     return this.run(() -> io.stop());
   }
 
+  public int getIntakeFuelCount() {
+    return inputs.fuelInside;
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);

@@ -17,7 +17,7 @@ public class Climb extends SubsystemBase {
   private static final double kI = 0.0;
   private static final double kD = 0.0;
   private static final double kTolerance = 0.0;
-  
+
   /**
    * Constructs an Climb subsystem.
    *
@@ -37,7 +37,7 @@ public class Climb extends SubsystemBase {
   public void setPresetPosition(ClimbIOInputs.ClimbPositions position) {
     pidController.setSetpoint(position.getClimbEncoderPositions());
   }
-  
+
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Climber", inputs);

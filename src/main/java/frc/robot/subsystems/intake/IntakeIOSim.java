@@ -32,6 +32,10 @@ public class IntakeIOSim implements IntakeIO {
     inputs.fuelInside = intakeSimulation.getGamePiecesAmount();
   }
 
+  public int returnFuelInside() {
+    return intakeSimulation.getGamePiecesAmount();
+  }
+
   @Override
   public void setRunning(boolean runIntake) {
     if (runIntake) {

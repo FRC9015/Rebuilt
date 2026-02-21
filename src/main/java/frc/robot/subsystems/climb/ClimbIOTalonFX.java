@@ -19,7 +19,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** TalonFX-based I/O implementation for the climb subsystem. */
 public class ClimbIOTalonFX implements ClimbIO {
-  
+
   public final TalonFX climbMotor1;
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;
@@ -28,7 +28,7 @@ public class ClimbIOTalonFX implements ClimbIO {
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private final VoltageOut voltageOut = new VoltageOut(0.0);
-  
+
   // Constants extracted to avoid magic numbers
   private static final double STATUS_UPDATE_FREQUENCY = 50.0;
   private static final double MAX_OUTPUT_VOLTAGE = 12.0;
@@ -41,11 +41,11 @@ public class ClimbIOTalonFX implements ClimbIO {
         new TalonFXConfiguration()
             .withSlot0(Constants.ClimbConstants.climbSlot0Configs)
             .withFeedback(Constants.ClimbConstants.CLIMB_FEEDBACK_CONFIGS);
-    
+
     // TODO: Determine motor directions
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    
+
     // Apply Config
     climbMotor1.getConfigurator().apply(motorConfig);
 
