@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.motorIDConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -25,8 +26,12 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIOSim;
-import frc.robot.subsystems.intake.IntakeIOSparkFlex;
+import frc.robot.subsystems.intake.PivotIOSim;
+import frc.robot.subsystems.intake.PivotIOSparkFlex;
+import frc.robot.subsystems.intake.PivotIOTalonFX;
+import frc.robot.subsystems.intake.RollerIOSim;
+import frc.robot.subsystems.intake.RollerIOSparkFlex;
+import frc.robot.subsystems.intake.RollerIOTalonFX;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -63,7 +68,13 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        intake = new Intake(new IntakeIOSparkFlex(11, 12));
+        intake =
+            new Intake(
+                new RollerIOTalonFX(
+                    motorIDConstants.INTAKE_ROLLER_LEFT_ID,
+                    Constants.motorIDConstants.INTAKE_ROLLER_RIGHT_ID),
+                new PivotIOTalonFX(
+                    motorIDConstants.INTAKE_PIVOT_LEFT_ID, motorIDConstants.INTAKE_PIVOT_RIGHT_ID));
 
         break;
 
@@ -76,7 +87,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        intake = new Intake(new IntakeIOSim());
+        intake = new Intake(new RollerIOSim(), new PivotIOSim());
         break;
 
       default:
@@ -88,7 +99,13 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        intake = new Intake(new IntakeIOSparkFlex(0, 0));
+        intake =
+            new Intake(
+                new RollerIOSparkFlex(
+                    motorIDConstants.INTAKE_ROLLER_LEFT_ID,
+                    motorIDConstants.INTAKE_ROLLER_RIGHT_ID),
+                new PivotIOSparkFlex(
+                    motorIDConstants.INTAKE_PIVOT_LEFT_ID, motorIDConstants.INTAKE_PIVOT_RIGHT_ID));
         break;
     }
 
