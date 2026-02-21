@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** TalonFX-based I/O implementation for the climb subsystem. */
 public class ClimbIOTalonFX implements ClimbIO {
+  
   public final TalonFX climbMotor1;
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;

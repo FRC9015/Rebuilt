@@ -5,13 +5,13 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeIO {
 
-  /** Class representing the inputs for the Intake. */
+  /** Container for intake inputs used for logging and control. */
   @AutoLog
   public static class IntakeIOInputs {
 
     public enum IntakePositions {
-      STOWED(Constants.intakeConstants.INTAKE_STOWED_POSITION),
-      DEPLOYED(Constants.intakeConstants.INTAKE_DEPLOYED_POSITION);
+      STOWED(Constants.IntakeConstants.PIVOT_STOWED_POSITION),
+      DEPLOYED(Constants.IntakeConstants.PIVOT_DEPLOYED_POSITION);
 
       private final double position;
 
@@ -25,13 +25,14 @@ public interface IntakeIO {
     }
 
     // Fields representing the intake state and inputs
-    public double IntakeAppliedVolts = 0.0;
-    public double IntakeCurrentAmps = 0.0;
-    public double IntakeCurrentSpeed = 0.0;
-    public boolean IntakeEncoderConnected = false;
-    public double IntakeEncoderPosition = 0.0;
-    public double IntakeTargetPosition = 0.0;
-    public double IntakeRPM = 0.0;
+    public double intakeAppliedVolts = 0.0;
+    public double intakeCurrentAmps = 0.0;
+    public double intakeCurrentSpeed = 0.0;
+    public boolean intakeEncoderConnected = false;
+    public double intakeEncoderPosition = 0.0;
+    public double intakeTargetPosition = 0.0;
+    public double intakeRPM = 0.0;
+    public int fuelInside = 0;
   }
 
   /** Method to update the inputs of the Intake subsystem. */
@@ -41,11 +42,19 @@ public interface IntakeIO {
 
   public default void setIntakePosition(double position) {}
 
+  public default void updatePIDFromDashboard() {}
+
   public default double getVelocity() {
     return 0.0;
   }
 
-  default void stop() {}
+  public default void stop() {}
 
-  default void setBrakeMode(boolean enable) {}
+  public default void setBrakeMode(boolean enable) {}
+
+  public default boolean isFuelInsideIntake() {
+    return false;
+  }
+
+  public default void setRunning(boolean runIntake) {}
 }
