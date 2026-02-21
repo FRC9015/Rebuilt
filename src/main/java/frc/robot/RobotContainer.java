@@ -29,7 +29,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.turret.Turret;
-import frc.robot.subsystems.turret.TurretIO;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -45,13 +44,13 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Turret turret; // Added Turret Subsystem
+  private final Turret turret;
 
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController driverController = new CommandXboxController(1);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
+  private final CommandXboxController driverController = new CommandXboxController(0);
 
   private double topShooterPowerScale = 0.5;
   private double bottomShooterPowerScale = 0.5;
@@ -73,16 +72,12 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
-        // --- TURRET SETUP ---
-        // Instantiating the Turret here ensures the code starts running immediately on boot.
-        // CHECK THESE IDs: Motor ID, Encoder 13T ID, Encoder 15T ID
         turret =
             new Turret(
                 new TurretIOTalonFX(
                     motorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
-                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
-                    ));
+                    turretConstants.ENCODER_13_TOOTH,
+                    turretConstants.ENCODER_15_TOOTH));
         break;
 
       case SIM:
@@ -99,14 +94,12 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
 
-        // Use a blank IO for Turret Sim for now (unless you have a Turret Sim implementation)
         turret =
             new Turret(
                 new TurretIOTalonFX(
                     motorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
-                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
-                    ));
+                    turretConstants.ENCODER_13_TOOTH,
+                    turretConstants.ENCODER_15_TOOTH));
         break;
 
       default:
@@ -123,9 +116,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     motorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH, // ID of the CANCoder on the 13 Tooth Gear
-                    turretConstants.ENCODER_15_TOOTH // ID of the CANCoder on the 15 Tooth Gear
-                    ));
+                    turretConstants.ENCODER_13_TOOTH,
+                    turretConstants.ENCODER_15_TOOTH));
         break;
     }
 
@@ -163,25 +155,25 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -operatorController.getLeftY(),
+            () -> -operatorController.getLeftX(),
+            () -> -operatorController.getRightX()));
 
-    // Lock to 0° when A button is held
-    controller
+    // // Lock to 0° when A button is held
+    driverController
         .a()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> -operatorController.getLeftY(),
+                () -> -operatorController.getLeftX(),
                 () -> Rotation2d.kZero));
 
-    // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // // Switch to X pattern when X button is pressed
+    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
-    controller
+    // // Reset gyro to 0° when B button is pressed
+    driverController
         .b()
         .onTrue(
             Commands.runOnce(
@@ -191,15 +183,20 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.povDown().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.1));
-    driverController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
-    driverController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
-    driverController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
-    driverController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
-    driverController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
-    driverController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale += 0.01));
-    driverController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -= 0.01));
-
+    // operatorController.povDown().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.1));
+    // operatorController.povUp().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.1));
+    // operatorController.povLeft().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.05));
+    // operatorController.povRight().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.05));
+    // operatorController.x().onTrue(Commands.runOnce(() -> topShooterPowerScale += 0.01));
+    // operatorController.y().onTrue(Commands.runOnce(() -> topShooterPowerScale -= 0.01));
+    // operatorController.leftBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale +=
+    // 0.01));
+    // operatorController.rightBumper().onTrue(Commands.runOnce(() -> bottomShooterPowerScale -=
+    // 0.01));
+    operatorController.a().onTrue(turret.setTurretAngleFastestPath(0));
+    operatorController.b().onTrue(turret.setTurretAngleFastestPath(180));
+    operatorController.x().onTrue(turret.setTurretAngleFastestPath(270));
+    operatorController.y().onTrue(turret.setTurretAngleFastestPath(90));
   }
 
   public Command checkShooterUpdate() {
@@ -212,9 +209,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-    return autoChooser.get();
-  }
+  // public Command getAutonomousCommand() {
+  //   return autoChooser.get();
+  // }
 
   public void displaySimFieldToAdvantageScope() {
     if (Constants.currentMode != Constants.Mode.SIM) return;

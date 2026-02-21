@@ -1,5 +1,7 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -18,13 +20,20 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
+import frc.robot.Constants;
 import frc.robot.Constants.turretConstants;
+import yams.units.EasyCRT;
+import yams.units.EasyCRT.CRTStatus;
+import yams.units.EasyCRTConfig;
 
 public class TurretIOTalonFX implements TurretIO {
 
   private final TalonFX turretMotor;
   private final CANcoder encoder13;
   private final CANcoder encoder15;
+  private final EasyCRT easyCRT;
 
   private final StatusSignal<Angle> encoder13PosSignal;
   private final StatusSignal<Angle> encoder15PosSignal;
@@ -36,36 +45,45 @@ public class TurretIOTalonFX implements TurretIO {
   private final NeutralOut neutralOut = new NeutralOut();
   private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
+  private Alert outofSyncAlert =
+      new Alert("⚠️ CRT-Motor desync detected! Resyncing motor.", AlertType.kWarning);
+  private Alert outofBoundsAlert =
+      new Alert("Turret out of bounds; no longer tracking", AlertType.kError);
+
   public TurretIOTalonFX(int motorID, int encoderId13, int encoderId15) {
     turretMotor = new TalonFX(motorID);
     encoder13 = new CANcoder(encoderId13);
     encoder15 = new CANcoder(encoderId15);
 
-    // SAFETY LAYER 1: Hardware-Level Software Limits
-    // These are sent to the TalonFX memory. If the motor reaches these positions, 
-    // it will physically cut power to the motor in that direction, even if the 
-    // RoboRIO code crashes.
+    // Hardware-level soft limits provide physical protection even if code crashes
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
             .withSoftwareLimitSwitch(
                 new SoftwareLimitSwitchConfigs()
                     .withForwardSoftLimitEnable(true)
-                    .withForwardSoftLimitThreshold(turretConstants.MAXROTATION) // Stop at 2.0
+                    .withForwardSoftLimitThreshold(
+                        turretConstants.MAXROTATION) // Stop at 1 rotations
                     .withReverseSoftLimitEnable(true)
-                    .withReverseSoftLimitThreshold(turretConstants.MINROTATION)) // Stop at 0.0
+                    .withReverseSoftLimitThreshold(
+                        turretConstants.MINROTATION)) // Stop at -1 rotations
             .withMotionMagic(turretConstants.MOTION_MAGIC_CONFIGS)
             .withSlot0(turretConstants.SLOT0_CONFIGS)
             .withFeedback(turretConstants.FEEDBACK_CONFIGS)
             .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1));
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
     turretMotor.getConfigurator().apply(motorConfig);
 
-    CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
-    encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    encoder13.getConfigurator().apply(encoderConfig);
-    encoder15.getConfigurator().apply(encoderConfig);
+    CANcoderConfiguration encoderConfig13 = new CANcoderConfiguration();
+    encoderConfig13.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig13.MagnetSensor.MagnetOffset = 0.03857;
+
+    CANcoderConfiguration encoderConfig15 = new CANcoderConfiguration();
+    encoderConfig15.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig15.MagnetSensor.MagnetOffset = 0.1274414;
+
+    encoder13.getConfigurator().apply(encoderConfig13);
+    encoder15.getConfigurator().apply(encoderConfig15);
 
     encoder13PosSignal = encoder13.getAbsolutePosition();
     encoder15PosSignal = encoder15.getAbsolutePosition();
@@ -80,6 +98,38 @@ public class TurretIOTalonFX implements TurretIO {
         motorAppliedVoltsSignal,
         motorCurrentSignal,
         motorPositionSignal);
+
+    // Configure EasyCRT to resolve turret angle from two encoders using Chinese Remainder Theorem
+    EasyCRTConfig easyCRTConfig =
+        new EasyCRTConfig(
+                () -> encoder13.getAbsolutePosition().getValue(),
+                () -> encoder15.getAbsolutePosition().getValue())
+            .withAbsoluteEncoder1Gearing(turretConstants.T_TEETH, turretConstants.E1_TEETH)
+            .withAbsoluteEncoder2Gearing(turretConstants.T_TEETH, turretConstants.E2_TEETH)
+            .withMechanismRange(
+                Rotations.of(turretConstants.MINROTATION),
+                Rotations.of(turretConstants.MAXROTATION))
+            .withMatchTolerance(Rotations.of(turretConstants.CRT_TOLERANCE))
+            .withAbsoluteEncoderOffsets(Rotations.of(0.0), Rotations.of(0.0))
+            .withAbsoluteEncoderInversions(false, false);
+
+    easyCRT = new EasyCRT(easyCRTConfig);
+
+    // Log initialization result for debugging
+    easyCRT
+        .getAngleOptional()
+        .ifPresentOrElse(
+            angle -> {
+              this.seedMotorPosition(angle.in(Rotations));
+              System.out.println(
+                  "✓ Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
+            },
+            () -> {
+              System.out.println("✗ CRT failed to resolve turret angle!");
+              System.out.println("  Status: " + easyCRT.getLastStatus());
+              System.out.println("  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
+              System.out.println("  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
+            });
   }
 
   @Override
@@ -101,59 +151,28 @@ public class TurretIOTalonFX implements TurretIO {
     inputs.turretCurrentAmps = motorCurrentSignal.getValueAsDouble();
     inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
 
-    Double resolvedPos =
-        calculateTrueAngle(inputs.encoder13PositionRot, inputs.encoder15PositionRot);
-    if (resolvedPos != null) {
-      inputs.turretResolvedValid = true;
-      inputs.turretResolvedPosition = resolvedPos;
-    } else {
-      inputs.turretResolvedValid = false;
-    }
-  }
+    // Resolve turret angle using CRT from two encoder readings
+    easyCRT
+        .getAngleOptional()
+        .ifPresentOrElse(
+            angle -> {
+              inputs.turretResolvedValid = true;
+              inputs.turretResolvedPosition = angle.in(Rotations);
+              if (Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
+                  > Constants.turretConstants.SYNC_THRESHOLD) {
 
-    /**
-   *
-   *
-   * <h3>Chinese Remainder Theorem (CRT) Resolver</h3>
-   *
-   * <p>This function determines the absolute position of the turret gear by comparing the readings
-   * of two different-sized encoder gears. Because absolute single-turn encoders wrap around every
-   * 360 degrees, a single encoder on a small gear does not know which "lap" the turret is on.
-   * <b>The Logic:</b>
-   *
-   * <ol>
-   *   <li>We normalize the encoder readings to a 0.0 - 1.0 range (representing 0-360 degrees).
-   *   <li>An encoder on a small gear spins faster than the turret. Predicted Turret Rotation =
-   *       (Laps + Reading) * (Encoder_Teeth / Turret_Teeth).
-   *   <li>Because we don't know the "Laps" (n and k), we test every mathematically possible lap
-   *       count for both encoders.
-   *   <li>For each combination of laps, we calculate where Encoder 1 thinks the turret is, and
-   *       where Encoder 2 thinks the turret is.
-   *   <li>When both predictions align within {@link turretConstants#CRT_TOLERANCE}, we have found
-   *       the unique absolute position of the turret.
-   * </ol>
-   *
-   * @param raw13 The 0-1 absolute rotation reading from the 13-tooth gear encoder.
-   * @param raw15 The 0-1 absolute rotation reading from the 15-tooth gear encoder.
-   * @return The absolute rotation of the turret (e.g., 1.5 rotations), or null if no match is
-   *     found.
-   */
-  private Double calculateTrueAngle(double raw13, double raw15) {
-    double val13 = MathUtil.inputModulus(raw13, 0, 1.0);
-    double val15 = MathUtil.inputModulus(raw15, 0, 1.0);
+                outofSyncAlert.set(
+                    Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
+                        > Constants.turretConstants.SYNC_THRESHOLD);
 
-    for (int n = 0; n < turretConstants.E1_SEARCH_LIMIT; n++) {
-      double attemptA = (n + val13) * (turretConstants.E1_TEETH / turretConstants.T_TEETH);
-
-      for (int k = 0; k < turretConstants.E2_SEARCH_LIMIT; k++) {
-        double attemptB = (k + val15) * (turretConstants.E2_TEETH / turretConstants.T_TEETH);
-
-        if (Math.abs(attemptA - attemptB) < turretConstants.CRT_TOLERANCE) {
-          return attemptA;
-        }
-      }
-    }
-    return null;
+                this.seedMotorPosition(angle.in(Rotations));
+              }
+              // System.out.println("Turret CRT at " + (angle.in(Rotations) * 360.0) + " degrees");
+            },
+            () -> {
+              inputs.turretResolvedValid = false;
+              outofBoundsAlert.set(!inputs.turretResolvedValid);
+            });
   }
 
   @Override
@@ -163,7 +182,7 @@ public class TurretIOTalonFX implements TurretIO {
 
   @Override
   public void stop() {
-    turretMotor.stopMotor();;
+    turretMotor.stopMotor();
   }
 
   @Override
@@ -177,17 +196,22 @@ public class TurretIOTalonFX implements TurretIO {
   }
 
   @Override
-  public void setTurretPosition(double positionRotations){
-    // SAFETY LAYER 2: Command Clamping
-    // If a command is given outside 0.0-2.0, this forces it back into the safe range.
-    // Because software limits are enabled, if you are at 2.0 and command 0.5, 
-    // the motor will move BACKWARDS because moving forward is blocked by the limit.
-    double safePosition = MathUtil.clamp(
-        positionRotations, 
-        turretConstants.MINROTATION, 
-        turretConstants.MAXROTATION
-    );
-
+  public void setTurretPosition(double positionDegrees) {
+    // Convert degrees to rotations and clamp between -1.0 and 1.0
+    double rotations = positionDegrees / 360.0;
+    double safePosition = MathUtil.clamp(rotations, -1.0, 1.0);
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
+  }
+
+  public CRTStatus getLastCRTStatus() {
+    return easyCRT.getLastStatus();
+  }
+
+  public double getLastCRTErrorRotations() {
+    return easyCRT.getLastErrorRotations();
+  }
+
+  public int getLastCRTIterations() {
+    return easyCRT.getLastIterations();
   }
 }
