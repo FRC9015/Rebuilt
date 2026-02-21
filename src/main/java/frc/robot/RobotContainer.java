@@ -176,6 +176,7 @@ public class RobotContainer {
                 // .alongWith(
                 // IntakeAtSpeed(intakeRollerValue))
                 .alongWith(shooter.runShooterAtSpeed(100)));
+    driverController.leftBumper().whileTrue(shooter.runShooterAtSpeed(50));
   }
 
   /**
