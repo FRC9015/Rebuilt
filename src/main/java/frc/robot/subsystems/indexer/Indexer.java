@@ -62,7 +62,7 @@ public class Indexer extends SubsystemBase {
     } else {
       jamCycles = 0;
     }
-    
+
     jamAlert.set(isJamDetected());
   }
 
@@ -154,9 +154,6 @@ public class Indexer extends SubsystemBase {
    * @return A command that runs the indexer with auto unjam functionality.
    */
   public Command runIndexerWithAutoUnjam(double voltage) {
-    return runIndexer(voltage)
-        .until(this::isJamDetected)
-        .andThen(unjam())
-        .andThen(this.runIndexerWithAutoUnjam(voltage));
+    return runIndexer(voltage).until(this::isJamDetected).andThen(unjam()).repeatedly();
   }
 }
