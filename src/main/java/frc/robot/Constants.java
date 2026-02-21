@@ -177,15 +177,25 @@ public final class Constants {
     public static final Pose2d HUB_POSE_RED = FlippingUtil.flipFieldPose(HUB_POSE_BLUE);
   }
   public static class ShooterConstants {
+    //Following naming scheme for subsystem motor and sensor ids
+    public static final int FLY_WHEEL_LEFT_ID = 11;
+    public static final int FLY_WHEEL_RIGHT_ID = 12;
+    public static final int HOOD_ID = 13;
+    public static final int HOOD_ENCODER_ID = 14;
+
+            //TODO tune these values once final bot comes; reference this link: https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
+
     public static final Slot1Configs hoodSlotPositionConfigs =
         new Slot1Configs()
-            .withKP(0.02)
+            .withKP(0.0)
             .withKI(0)
-            .withKD(0.005)
-            .withKG(0.001)
+            .withKD(0.0)
+            .withKG(0.0)
             .withKA(0)
             .withKS(0)
             .withKV(0);
+
+            //TODO tune these values once final bot comes.
 
     public static final MotionMagicConfigs hoodMagicConfigs =
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
@@ -203,11 +213,6 @@ public final class Constants {
     public static final double HOOD_MIN_POS = 0.0;
     public static final double HOOD_DEPLOYED_POSITION = 0.0;
     public static final double HOOD_STOWED_POSITION = 0.0;
-    public static final int FLY_WHEEL_LEFT_ID = 5;
-    public static final int FLY_WHEEL_RIGHT_ID = 29;
-    public static final int HOOD_ID = 3;
-    public static final int HOOD_ENCODER_ID = 11;
-
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
         new Slot0Configs()
             .withKP(0.01)

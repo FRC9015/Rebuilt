@@ -43,14 +43,17 @@ public class ShooterIOTalonFX implements ShooterIO {
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs);
 
+    flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    
+
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
             .withSlot1(Constants.ShooterConstants.hoodSlotPositionConfigs)
             .withFeedback(Constants.ShooterConstants.hoodFeedbackConfigs)
             .withMotionMagic(Constants.ShooterConstants.hoodMagicConfigs);
 
-    flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
     TalonFXConfiguration flyWheelConfigRight =
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs);
@@ -114,25 +117,15 @@ public class ShooterIOTalonFX implements ShooterIO {
     hoodMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
-  // Minimum Value of speedValue: -512.0
-  // Maximum Value of speedValkue: 511.998046875
+  // Minimum Value of speedValue: -100 RPS
+  // Maximum Value of speedValue: 100 RPS
   // Unit of output: RPS
   @Override
   public void setFlyWheelSpeed(double speed) {
-    final VelocityVoltage flyWheelVelocityVoltage = new VelocityVoltage(0.0);
-    flywheelMotorLeft.setControl(
-        flyWheelVelocityVoltage
-            .withVelocity(
-                MathUtil.clamp(
-                    speed,
-                    Constants.ShooterConstants.SHOOTER_MIN_SPEED,
-                    Constants.ShooterConstants.SHOOTER_MAX_SPEED))
-            .withAcceleration(Constants.ShooterConstants.FLYWHEEL_ACCELERATION)
-            .withFeedForward(Constants.ShooterConstants.FEEDFORWARD_VOLTAGE)
-            .withSlot(0));
+   final VelocityVoltage flyWheelVelocityVoltage = new VelocityVoltage(0.0);
 
-    flywheelMotorRight.setControl(
-        new Follower(flywheelMotorLeft.getDeviceID(), MotorAlignmentValue.Aligned));
+   flywheelMotorLeft.setControl(flyWheelVelocityVoltage.withVelocity(speed));
+   flywheelMotorRight.setControl(flyWheelVelocityVoltage.withVelocity(speed));
   }
 
   @Override
@@ -141,7 +134,7 @@ public class ShooterIOTalonFX implements ShooterIO {
         MathUtil.clamp(
             position,
             Constants.ShooterConstants.HOOD_MIN_POS,
-            Constants.ShooterConstants.HOOD_MAX_POS);
+            Constants.ShooterConstants.HOOD_MAX_POS); //TODO figure out max and min position for Hood 
 
     hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }
