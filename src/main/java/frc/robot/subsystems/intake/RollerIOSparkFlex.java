@@ -31,9 +31,9 @@ public class RollerIOSparkFlex implements RollerIO {
 
   // ---------------- PID CONSTANTS ----------------
   // Intake velocity (RPM)
-  private LoggedNetworkNumber INTAKE_kP = new LoggedNetworkNumber("/Intake/P", 1.0);
-  private LoggedNetworkNumber INTAKE_kI = new LoggedNetworkNumber("/Intake/I", 0.0);
-  private LoggedNetworkNumber INTAKE_kD = new LoggedNetworkNumber("/Intake/D", 0.0);
+  private LoggedNetworkNumber kp = new LoggedNetworkNumber("/Intake/P", 1.0);
+  private LoggedNetworkNumber ki = new LoggedNetworkNumber("/Intake/I", 0.0);
+  private LoggedNetworkNumber kd = new LoggedNetworkNumber("/Intake/D", 0.0);
   private LoggedNetworkBoolean updatePIDs = new LoggedNetworkBoolean("/Intake/UpdatePIDs", false);
 
   public RollerIOSparkFlex(int rollerLeftID, int rollerRightID) {
@@ -61,7 +61,7 @@ public class RollerIOSparkFlex implements RollerIO {
 
     rollerLeftConfig
         .closedLoop
-        .pid(INTAKE_kP.getAsDouble(), INTAKE_kI.getAsDouble(), INTAKE_kD.getAsDouble())
+        .pid(kp.getAsDouble(), ki.getAsDouble(), kd.getAsDouble())
         .outputRange(-1.0, 1.0);
 
     rollerRightConfig
@@ -71,7 +71,7 @@ public class RollerIOSparkFlex implements RollerIO {
 
     rollerRightConfig
         .closedLoop
-        .pid(INTAKE_kP.getAsDouble(), INTAKE_kI.getAsDouble(), INTAKE_kD.getAsDouble())
+        .pid(kp.getAsDouble(), ki.getAsDouble(), kd.getAsDouble())
         .outputRange(-1.0, 1.0);
 
     // ---------------- APPLY CONFIG ----------------
@@ -109,9 +109,9 @@ public class RollerIOSparkFlex implements RollerIO {
   // --------- CONTROL ----------------
   @Override
   public void updatePIDFromDashboard() {
-    double intakeP = INTAKE_kP.getAsDouble();
-    double intakeI = INTAKE_kI.getAsDouble();
-    double intakeD = INTAKE_kD.getAsDouble();
+    double intakeP = kp.getAsDouble();
+    double intakeI = ki.getAsDouble();
+    double intakeD = kd.getAsDouble();
 
     // Update configs
     rollerLeftConfig.closedLoop.pid(intakeP, intakeI, intakeD).outputRange(-1.0, 1.0);
@@ -121,7 +121,7 @@ public class RollerIOSparkFlex implements RollerIO {
     rollerLeft.configure(
         rollerLeftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     rollerRight.configure(
-        rollerRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        rollerRightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   @Override

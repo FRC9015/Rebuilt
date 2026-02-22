@@ -45,7 +45,6 @@ import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -230,9 +229,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
-
   }
-
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

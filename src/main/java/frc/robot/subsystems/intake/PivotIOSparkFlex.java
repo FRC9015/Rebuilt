@@ -29,9 +29,9 @@ public class PivotIOSparkFlex implements PivotIO {
 
   // ---------------- PID CONSTANTS ----------------
   // Pivot position (rotations)
-  private LoggedNetworkNumber PIVOT_kP = new LoggedNetworkNumber("/Pivot/P", 1.0);
-  private LoggedNetworkNumber PIVOT_kI = new LoggedNetworkNumber("/Pivot/I", 0.0);
-  private LoggedNetworkNumber PIVOT_kD = new LoggedNetworkNumber("/Pivot/D", 0.0);
+  private LoggedNetworkNumber kp = new LoggedNetworkNumber("/Pivot/P", 1.0);
+  private LoggedNetworkNumber ki = new LoggedNetworkNumber("/Pivot/I", 0.0);
+  private LoggedNetworkNumber kd = new LoggedNetworkNumber("/Pivot/D", 0.0);
 
   public PivotIOSparkFlex(int pivotIDLeft, int pivotIDRight) {
 
@@ -59,7 +59,7 @@ public class PivotIOSparkFlex implements PivotIO {
 
     pivotLeftConfig
         .closedLoop
-        .pid(PIVOT_kP.getAsDouble(), PIVOT_kI.getAsDouble(), PIVOT_kD.getAsDouble())
+        .pid(kp.getAsDouble(), ki.getAsDouble(), kd.getAsDouble())
         .outputRange(-1.0, 1.0);
 
     pivotRightConfig
@@ -69,7 +69,7 @@ public class PivotIOSparkFlex implements PivotIO {
 
     pivotRightConfig
         .closedLoop
-        .pid(PIVOT_kP.getAsDouble(), PIVOT_kI.getAsDouble(), PIVOT_kD.getAsDouble())
+        .pid(kp.getAsDouble(), ki.getAsDouble(), kd.getAsDouble())
         .outputRange(-1.0, 1.0);
     // ---------------- APPLY CONFIG ----------------
     pivotLeft.configure(
@@ -103,9 +103,9 @@ public class PivotIOSparkFlex implements PivotIO {
   // --------- CONTROL ----------------
   @Override
   public void updatePIDFromDashboard() {
-    double pivotP = PIVOT_kP.getAsDouble();
-    double pivotI = PIVOT_kI.getAsDouble();
-    double pivotD = PIVOT_kD.getAsDouble();
+    double pivotP = kp.getAsDouble();
+    double pivotI = ki.getAsDouble();
+    double pivotD = kd.getAsDouble();
 
     // Update configs
     pivotLeftConfig.closedLoop.pid(pivotP, pivotI, pivotD).outputRange(-1.0, 1.0);
