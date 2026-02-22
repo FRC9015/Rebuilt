@@ -11,11 +11,11 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.configs.Slot1Configs;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
@@ -48,7 +48,6 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
-
 
   public static class CameraConstants {
     public static final AprilTagFieldLayout aprilTagLayout =
@@ -84,7 +83,6 @@ public final class Constants {
     public static final int STD_DEV_RANGE = 30;
   }
   /** Configuration and tuning constants for the intake mechanism. */
-
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
@@ -97,7 +95,6 @@ public final class Constants {
             .withKV(0);
     public static final Slot0Configs ROLLER_SLOT0_CONFIGS =
         new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
-
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
@@ -175,23 +172,17 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
-    //Following naming scheme for subsystem motor and sensor ids
+    // Following naming scheme for subsystem motor and sensor ids
     public static final int FLY_WHEEL_LEFT_ID = 11;
     public static final int FLY_WHEEL_RIGHT_ID = 12;
     public static final int HOOD_ID = 13;
     public static final int HOOD_ENCODER_ID = 14;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
-        new Slot0Configs()
-            .withKP(0)
-            .withKI(0)
-            .withKD(0)
-            .withKG(0)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
+        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
 
-            //TODO tune these values once final bot comes; reference this link: https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
+    // TODO tune these values once final bot comes; reference this link:
+    // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
 
     public static final Slot1Configs hoodSlotPositionConfigs =
         new Slot1Configs()
@@ -203,7 +194,7 @@ public final class Constants {
             .withKS(0)
             .withKV(0);
 
-            //TODO tune these values once final bot comes.
+    // TODO tune these values once final bot comes.
 
     public static final MotionMagicConfigs hoodMagicConfigs =
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);

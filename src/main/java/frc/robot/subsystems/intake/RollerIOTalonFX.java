@@ -10,8 +10,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
-import frc.robot.Constants.intakeConstants;
+import frc.robot.Constants.IntakeConstants;
 
 public class RollerIOTalonFX implements RollerIO {
 
@@ -32,8 +31,8 @@ public class RollerIOTalonFX implements RollerIO {
     rollerMotorLeft = new TalonFX(rollerIDLeft);
     rollerMotorRight = new TalonFX(rollerIDRight);
 
-    rollerMotorLeft.getConfigurator().apply(intakeConstants.rollerConfigLeft);
-    rollerMotorRight.getConfigurator().apply(intakeConstants.rollerConfigRight);
+    rollerMotorLeft.getConfigurator().apply(IntakeConstants.rollerConfigLeft);
+    rollerMotorRight.getConfigurator().apply(IntakeConstants.rollerConfigRight);
 
     rollerLeftVolts = rollerMotorLeft.getMotorVoltage();
     rollerLeftAmps = rollerMotorLeft.getStatorCurrent();
@@ -43,7 +42,8 @@ public class RollerIOTalonFX implements RollerIO {
     rollerRightAmps = rollerMotorRight.getStatorCurrent();
     rollerRightSpeed = rollerMotorRight.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, rollerLeftVolts, rollerLeftAmps, rollerLeftspeed);
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50.0, rollerLeftVolts, rollerLeftAmps, rollerLeftspeed);
 
     ParentDevice.optimizeBusUtilizationForAll(rollerMotorLeft, rollerMotorRight);
   }
@@ -86,14 +86,10 @@ public class RollerIOTalonFX implements RollerIO {
     rollerMotorLeft.setControl(
         intakeVelocityVoltage.withVelocity(
             MathUtil.clamp(
-                speed,
-                Constants.intakeConstants.INTAKE_MIN_SPEED,
-                Constants.intakeConstants.INTAKE_MAX_SPEED)));
+                speed, IntakeConstants.INTAKE_MIN_SPEED, IntakeConstants.INTAKE_MAX_SPEED)));
     rollerMotorRight.setControl(
         intakeVelocityVoltage.withVelocity(
             MathUtil.clamp(
-                speed,
-                Constants.intakeConstants.INTAKE_MIN_SPEED,
-                Constants.intakeConstants.INTAKE_MAX_SPEED)));
+                speed, IntakeConstants.INTAKE_MIN_SPEED, IntakeConstants.INTAKE_MAX_SPEED)));
   }
 }

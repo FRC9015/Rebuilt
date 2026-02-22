@@ -7,15 +7,12 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.pathplanner.lib.events.CancelCommandEvent;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
-import frc.robot.Constants.intakeConstants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.generated.TunerConstants;
 
 public class PivotIOTalonFX implements PivotIO {
@@ -38,8 +35,8 @@ public class PivotIOTalonFX implements PivotIO {
     pivotMotorRight = new TalonFX(pivotIDRight);
     pivotEncoder = new CANcoder(encoderID, TunerConstants.kCANBus);
 
-    pivotMotorLeft.getConfigurator().apply(intakeConstants.pivotConfigLeft);
-    pivotMotorRight.getConfigurator().apply(intakeConstants.pivotConfigRight);
+    pivotMotorLeft.getConfigurator().apply(IntakeConstants.pivotConfigLeft);
+    pivotMotorRight.getConfigurator().apply(IntakeConstants.pivotConfigRight);
 
     pivotLeftVolts = pivotMotorLeft.getMotorVoltage();
     pivotLeftAmps = pivotMotorLeft.getStatorCurrent();
@@ -58,8 +55,7 @@ public class PivotIOTalonFX implements PivotIO {
 
   @Override
   public void updateInputs(PivotIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        pivotLeftVolts, pivotLeftAmps, pivotLeftVelocity, pivotPosition);
+    BaseStatusSignal.refreshAll(pivotLeftVolts, pivotLeftAmps, pivotLeftVelocity, pivotPosition);
     inputs.pivotLeftApppliedVolts = pivotLeftVolts.getValueAsDouble();
     inputs.pivotPosition = pivotPosition.getValueAsDouble();
     inputs.pivotLeftCurrentSpeed = pivotLeftVelocity.getValueAsDouble();
@@ -75,7 +71,6 @@ public class PivotIOTalonFX implements PivotIO {
     pivotMotorRight.stopMotor();
   }
 
-
   @Override
   public void setBrakeMode(boolean enable) {
     pivotMotorLeft.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
@@ -86,10 +81,7 @@ public class PivotIOTalonFX implements PivotIO {
   public void setPivotPosition(double position) {
 
     final double clampedPosition =
-        MathUtil.clamp(
-            position,
-            Constants.intakeConstants.INTAKE_MIN_POS,
-            Constants.intakeConstants.INTAKE_MAX_POS);
+        MathUtil.clamp(position, IntakeConstants.INTAKE_MIN_POS, IntakeConstants.INTAKE_MAX_POS);
 
     pivotMotorLeft.setControl(pivotMagicVoltage.withPosition(clampedPosition));
     pivotMotorRight.setControl(pivotMagicVoltage.withPosition(clampedPosition));

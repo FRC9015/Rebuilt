@@ -18,8 +18,8 @@ public interface PivotIO {
   }
 
   public enum PivotPositions {
-    STOWED(Constants.intakeConstants.INTAKE_STOWED_POSITION),
-    DEPLOYED(Constants.intakeConstants.INTAKE_DEPLOYED_POSITION);
+    STOWED(Constants.IntakeConstants.PIVOT_STOWED_POSITION),
+    DEPLOYED(Constants.IntakeConstants.PIVOT_DEPLOYED_POSITION);
 
     private final double position;
 

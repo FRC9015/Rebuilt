@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.CameraConstants;
+import frc.robot.Constants.MotorIDConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -27,43 +27,25 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.PivotIOSim;
-import frc.robot.subsystems.intake.PivotIOSparkFlex;
-import frc.robot.subsystems.intake.PivotIOTalonFX;
-import frc.robot.subsystems.intake.RollerIOSim;
-import frc.robot.subsystems.intake.RollerIOSparkFlex;
-import frc.robot.subsystems.intake.RollerIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.gamestate.GameState;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIOSim;
-import frc.robot.subsystems.shooter.ShooterIOTalonFX;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.littletonrobotics.junction.Logger;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.PivotIO.PivotPositions;
 import frc.robot.subsystems.intake.PivotIOSim;
-import frc.robot.subsystems.intake.PivotIOSparkFlex;
 import frc.robot.subsystems.intake.PivotIOTalonFX;
+import frc.robot.subsystems.intake.RollerIO;
 import frc.robot.subsystems.intake.RollerIOSim;
-import frc.robot.subsystems.intake.RollerIOSparkFlex;
 import frc.robot.subsystems.intake.RollerIOTalonFX;
-import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
-import frc.robot.subsystems.gamestate.GameState;
-import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.indexer.IndexerIO;
-import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -79,8 +61,6 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController driverController = new CommandXboxController(1);
   private final Vision vision;
   private final Shooter shooter;
   private final GameState gamestate;
@@ -89,7 +69,6 @@ public class RobotContainer {
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
@@ -115,10 +94,12 @@ public class RobotContainer {
         intake =
             new Intake(
                 new RollerIOTalonFX(
-                    motorIDConstants.INTAKE_ROLLER_LEFT_ID,
-                    Constants.motorIDConstants.INTAKE_ROLLER_RIGHT_ID),
+                    MotorIDConstants.INTAKE_ROLLER_LEFT_ID,
+                    MotorIDConstants.INTAKE_ROLLER_RIGHT_ID),
                 new PivotIOTalonFX(
-                    motorIDConstants.INTAKE_PIVOT_LEFT_ID, motorIDConstants.INTAKE_PIVOT_RIGHT_ID, motorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
+                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
+                    MotorIDConstants.INTAKE_ENCODER_ID));
 
         vision =
             new Vision(
@@ -152,9 +133,9 @@ public class RobotContainer {
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
 
         new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
-        intake = new Intake(new IntakeIOSim(simDrive));
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
+        intake = new Intake(new RollerIOSim(), new PivotIOSim());
         break;
 
       case REPLAY:
@@ -222,7 +203,9 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
+    driverController
+        .leftBumper()
+        .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, PivotPositions.DEPLOYED));
 
     // Lock to 0° when A button is held
     driverController
@@ -246,24 +229,10 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
+
   }
 
-  public Command checkShooterUpdate() {
-
-    return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
-
-    driverController.a().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, intakePivotValue));
-    driverController.povDown().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.1));
-    driverController.povUp().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.1));
-    driverController.povLeft().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.05));
-    driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
-    driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
-    driverController.y().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.01));
-    driverController.leftBumper().onTrue(Commands.runOnce(() -> intakePivotValue += 0.01));
-    driverController.rightBumper().onTrue(Commands.runOnce(() -> intakePivotValue -= 0.01));
-  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

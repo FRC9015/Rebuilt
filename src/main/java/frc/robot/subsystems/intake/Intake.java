@@ -1,6 +1,5 @@
 package frc.robot.subsystems.intake;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -12,12 +11,9 @@ public class Intake extends SubsystemBase {
   private final RollerIOInputsAutoLogged rollerInputs = new RollerIOInputsAutoLogged();
   private final PivotIOInputsAutoLogged pivotInputs = new PivotIOInputsAutoLogged();
 
-
   public Intake(RollerIO roller, PivotIO pivot) {
     this.roller = roller;
     this.pivot = pivot;
-
-
   }
 
   // Minimum Value of speedValue: -512.0
@@ -55,44 +51,10 @@ public class Intake extends SubsystemBase {
   }
 
   public Command runIntakeAtReverseSpeed(double speed) {
-    return this.startEnd(
-        () -> this.setIntakeReverseSpeed(speed), () -> this.stopRoller());
+    return this.startEnd(() -> this.setIntakeReverseSpeed(speed), () -> this.stopRoller());
   }
 
   public Command stopRoller() {
-    return this.run(() -> roller.stop());
-  }
-
-  public void setIntakeReverseSpeed(double speedValue) {
-    
-    io.setIntakeSpeed(-speedValue);
-  }
-
-  public void setPivotSpeed(double speedValue) {
-    io.setIntakePosition(speedValue);
-  }
-
-  public Command runIntakeAtSpeed(double intakeSpeed, double pivotSpeed) {
-    Logger.recordOutput("Intake/Speed", intakeSpeed);
-    Logger.recordOutput("Intake2/Speed", pivotSpeed);
-
-    return this.startEnd(
-        () -> {
-          this.setIntakeSpeed(intakeSpeed);
-          this.setPivotPosition(pivotPosition);
-        },
-        () -> {
-          this.setIntakeSpeed(idleSpeed);
-          this.setPivotPosition(pivotPosition);
-        });
-  }
-
-  public Command runIntakeAtReverseSpeed(double speed) {
-    return this.startEnd(
-        () -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
-  }
-
-  public Command stopIntake() {
     return this.run(() -> roller.stop());
   }
 
