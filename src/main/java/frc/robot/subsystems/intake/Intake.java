@@ -12,26 +12,18 @@ public class Intake extends SubsystemBase {
   private final RollerIOInputsAutoLogged rollerInputs = new RollerIOInputsAutoLogged();
   private final PivotIOInputsAutoLogged pivotInputs = new PivotIOInputsAutoLogged();
 
-  private PIDController pivotPIDController;
-
-  private double kP = 0.0;
-  private double kI = 0.0;
-  private double kD = 0.0;
-  private double toleranceMeters = 0.0;
-  private double idleSpeed = 0.0;
 
   public Intake(RollerIO roller, PivotIO pivot) {
     this.roller = roller;
     this.pivot = pivot;
 
-    pivotPIDController = new PIDController(kP, kI, kD);
-    pivotPIDController.setTolerance(toleranceMeters);
+
   }
 
   // Minimum Value of speedValue: -512.0
   // Maximum Value of speedValkue: 511.998046875
 
-  public void setIntakeSpeed(double speedValue) {
+  public void setRollerSpeed(double speedValue) {
     roller.setRollerSpeed(speedValue);
   }
 
@@ -49,25 +41,25 @@ public class Intake extends SubsystemBase {
     return this.run(() -> setPivotPosition(position.getPivotPosition()));
   }
 
-  public Command runIntakeAtSpeed(double intakeSpeed, double pivotPosition) {
+  public Command runIntakeAtSpeed(double intakeSpeed, PivotIO.PivotPositions pivotPosition) {
 
     return this.startEnd(
         () -> {
-          this.setIntakeSpeed(intakeSpeed);
+          this.setRollerSpeed(intakeSpeed);
           this.setPivotPosition(pivotPosition);
         },
         () -> {
-          this.setIntakeSpeed(idleSpeed);
+          this.stopRoller();
           this.setPivotPosition(pivotPosition);
         });
   }
 
   public Command runIntakeAtReverseSpeed(double speed) {
     return this.startEnd(
-        () -> this.setIntakeReverseSpeed(speed), () -> this.setIntakeReverseSpeed(idleSpeed));
+        () -> this.setIntakeReverseSpeed(speed), () -> this.stopRoller());
   }
 
-  public Command stopIntake() {
+  public Command stopRoller() {
     return this.run(() -> roller.stop());
   }
 

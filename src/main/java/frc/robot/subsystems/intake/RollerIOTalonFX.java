@@ -20,11 +20,11 @@ public class RollerIOTalonFX implements RollerIO {
 
   public StatusSignal<Voltage> rollerLeftVolts;
   public StatusSignal<Current> rollerLeftAmps;
-  public StatusSignal<AngularVelocity> rollerLeftRPM;
+  public StatusSignal<AngularVelocity> rollerLeftspeed;
 
   public StatusSignal<Voltage> rollerRightVolts;
   public StatusSignal<Current> rollerRightAmps;
-  public StatusSignal<AngularVelocity> rollerRightRPM;
+  public StatusSignal<AngularVelocity> rollerRightSpeed;
 
   private final VelocityVoltage intakeVelocityVoltage = new VelocityVoltage(0.0);
 
@@ -37,9 +37,13 @@ public class RollerIOTalonFX implements RollerIO {
 
     rollerLeftVolts = rollerMotorLeft.getMotorVoltage();
     rollerLeftAmps = rollerMotorLeft.getStatorCurrent();
-    rollerLeftRPM = rollerMotorLeft.getVelocity();
+    rollerLeftspeed = rollerMotorLeft.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, rollerLeftVolts, rollerLeftAmps, rollerLeftRPM);
+    rollerRightVolts = rollerMotorRight.getMotorVoltage();
+    rollerRightAmps = rollerMotorRight.getStatorCurrent();
+    rollerRightSpeed = rollerMotorRight.getVelocity();
+
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, rollerLeftVolts, rollerLeftAmps, rollerLeftspeed);
 
     ParentDevice.optimizeBusUtilizationForAll(rollerMotorLeft, rollerMotorRight);
   }
@@ -47,11 +51,14 @@ public class RollerIOTalonFX implements RollerIO {
   @Override
   public void updateInputs(RollerIOInputs inputs) {
 
-    BaseStatusSignal.refreshAll(rollerLeftVolts, rollerLeftAmps, rollerLeftRPM);
+    BaseStatusSignal.refreshAll(rollerLeftVolts, rollerLeftAmps, rollerLeftspeed);
 
-    inputs.rollerAppliedVolts = rollerLeftVolts.getValueAsDouble();
-    inputs.rollerCurrentSpeed = rollerLeftRPM.getValueAsDouble();
-    inputs.rollerCurentAmps = rollerLeftAmps.getValueAsDouble();
+    inputs.rollerLeftAppliedVolts = rollerLeftVolts.getValueAsDouble();
+    inputs.rollerLeftCurrentSpeed = rollerLeftspeed.getValueAsDouble();
+    inputs.rollerLeftCurentAmps = rollerLeftAmps.getValueAsDouble();
+    inputs.rollerRightAppliedVolts = rollerRightVolts.getValueAsDouble();
+    inputs.rollerRightCurrentSpeed = rollerRightSpeed.getValueAsDouble();
+    inputs.rollerRightCurentAmps = rollerRightAmps.getValueAsDouble();
   }
 
   @Override

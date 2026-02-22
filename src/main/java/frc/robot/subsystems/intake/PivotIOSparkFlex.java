@@ -29,12 +29,6 @@ public class PivotIOSparkFlex implements PivotIO {
   private static final double maxFreeSpeed = 6784.0; // RPM
 
   // ---------------- PID CONSTANTS ----------------
-  // Intake velocity (RPM)
-  private LoggedNetworkNumber INTAKE_kP = new LoggedNetworkNumber("/Intake/P", 1.0);
-  private LoggedNetworkNumber INTAKE_kI = new LoggedNetworkNumber("/Intake/I", 0.0);
-  private LoggedNetworkNumber INTAKE_kD = new LoggedNetworkNumber("/Intake/D", 0.0);
-  private LoggedNetworkBoolean updatePIDs = new LoggedNetworkBoolean("/Intake/UpdatePIDs", false);
-
   // Pivot position (rotations)
   private LoggedNetworkNumber PIVOT_kP = new LoggedNetworkNumber("/Pivot/P", 1.0);
   private LoggedNetworkNumber PIVOT_kI = new LoggedNetworkNumber("/Pivot/I", 0.0);
@@ -92,9 +86,12 @@ public class PivotIOSparkFlex implements PivotIO {
 
   @Override
   public void updateInputs(PivotIOInputs inputs) {
-    inputs.pivotApppliedVolts = pivotLeft.getAppliedOutput() * pivotLeft.getBusVoltage();
-    inputs.pivotCurrentAmps = pivotLeft.getOutputCurrent();
-    inputs.pivotCurrentSpeed = pivotLeftEncoder.getVelocity();
+    inputs.pivotLeftApppliedVolts = pivotLeft.getAppliedOutput() * pivotLeft.getBusVoltage();
+    inputs.pivotLeftCurrentAmps = pivotLeft.getOutputCurrent();
+    inputs.pivotLeftCurrentSpeed = pivotLeftEncoder.getVelocity();
+    inputs.pivotRightApppliedVolts = pivotRight.getAppliedOutput() * pivotRight.getBusVoltage();
+    inputs.pivotRightCurrentAmps = pivotRight.getOutputCurrent();
+    inputs.pivotRightCurrentSpeed = pivotRightEncoder.getVelocity();
     inputs.pivotPosition = pivotLeftEncoder.getPosition();
   }
 
@@ -107,12 +104,12 @@ public class PivotIOSparkFlex implements PivotIO {
   // --------- CONTROL ----------------
   @Override
   public void updatePIDFromDashboard() {
-    double intakeP = INTAKE_kP.getAsDouble();
-    double intakeI = INTAKE_kI.getAsDouble();
-    double intakeD = INTAKE_kD.getAsDouble();
+    double pivotP = PIVOT_kP.getAsDouble();
+    double pivotI = PIVOT_kI.getAsDouble();
+    double pivotD = PIVOT_kD.getAsDouble();
 
     // Update configs
-    pivotLeftConfig.closedLoop.pid(intakeP, intakeI, intakeD).outputRange(-1.0, 1.0);
+    pivotLeftConfig.closedLoop.pid(pivotP, pivotI, pivotD).outputRange(-1.0, 1.0);
 
     // Apply without resetting other parameters
     pivotLeft.configure(

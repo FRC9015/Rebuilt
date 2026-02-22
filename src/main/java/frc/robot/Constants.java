@@ -43,8 +43,8 @@ public final class Constants {
     public static final int INTAKE_ROLLER_RIGHT_ID = 0;
     public static final int INTAKE_PIVOT_LEFT_ID = 0;
     public static final int INTAKE_PIVOT_RIGHT_ID = 0;
+    public static final int INTAKE_ENCODER_ID = 0;
 
-    public static final int EXTEND_INTAKE_MOTOR_ID = 0;
   }
 
   public static class intakeConstants {

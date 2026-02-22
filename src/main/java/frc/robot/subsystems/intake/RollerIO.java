@@ -7,11 +7,12 @@ public interface RollerIO {
   /** Class representing the inputs for the intake rollers. */
   @AutoLog
   public static class RollerIOInputs {
-    public double rollerAppliedVolts = 0.0;
-    public double rollerCurentAmps = 0.0;
-    public double rollerCurrentSpeed = 0.0;
-    public boolean rollerEncoderConnected = false;
-    public double rollerRPM = 0.0;
+    public double rollerLeftAppliedVolts = 0.0;
+    public double rollerLeftCurentAmps = 0.0;
+    public double rollerLeftCurrentSpeed = 0.0;
+    public double rollerRightAppliedVolts = 0.0;
+    public double rollerRightCurentAmps = 0.0;
+    public double rollerRightCurrentSpeed = 0.0;
   }
 
   /** Method to update the inputs of the Intake subsystem. */

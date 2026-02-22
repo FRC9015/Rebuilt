@@ -74,7 +74,7 @@ public class RobotContainer {
                     motorIDConstants.INTAKE_ROLLER_LEFT_ID,
                     Constants.motorIDConstants.INTAKE_ROLLER_RIGHT_ID),
                 new PivotIOTalonFX(
-                    motorIDConstants.INTAKE_PIVOT_LEFT_ID, motorIDConstants.INTAKE_PIVOT_RIGHT_ID));
+                    motorIDConstants.INTAKE_PIVOT_LEFT_ID, motorIDConstants.INTAKE_PIVOT_RIGHT_ID, motorIDConstants.INTAKE_ENCODER_ID));
 
         break;
 

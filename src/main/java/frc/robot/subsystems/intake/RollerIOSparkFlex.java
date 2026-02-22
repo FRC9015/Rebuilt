@@ -19,6 +19,7 @@ public class RollerIOSparkFlex implements RollerIO {
   private final SparkFlex rollerRight;
 
   private final RelativeEncoder rollerLeftEncoder;
+  private final RelativeEncoder rollerRightEncoder;
 
   private final SparkClosedLoopController rollerLeftPID;
   private final SparkClosedLoopController rollerrightPID;
@@ -42,6 +43,7 @@ public class RollerIOSparkFlex implements RollerIO {
     rollerRight = new SparkFlex(rollerRightID, SparkFlex.MotorType.kBrushless);
 
     rollerLeftEncoder = rollerLeft.getEncoder();
+    rollerRightEncoder = rollerRight.getEncoder();
 
     rollerLeftPID = rollerLeft.getClosedLoopController();
     rollerrightPID = rollerRight.getClosedLoopController();
@@ -74,9 +76,9 @@ public class RollerIOSparkFlex implements RollerIO {
 
     // ---------------- APPLY CONFIG ----------------
     rollerLeft.configure(
-        rollerLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        rollerLeftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     rollerRight.configure(
-        rollerRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        rollerRightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   // ------------------------------------------------
@@ -85,9 +87,12 @@ public class RollerIOSparkFlex implements RollerIO {
 
   @Override
   public void updateInputs(RollerIOInputs inputs) {
-    inputs.rollerAppliedVolts = rollerLeft.getAppliedOutput();
-    inputs.rollerCurrentSpeed = rollerLeftEncoder.getVelocity();
-    inputs.rollerCurentAmps = rollerLeft.getOutputCurrent();
+    inputs.rollerLeftAppliedVolts = rollerLeft.getAppliedOutput() * rollerLeft.getBusVoltage();
+    inputs.rollerLeftCurrentSpeed = rollerLeftEncoder.getVelocity();
+    inputs.rollerLeftCurentAmps = rollerLeft.getOutputCurrent();
+    inputs.rollerRightAppliedVolts = rollerRight.getAppliedOutput() * rollerRight.getBusVoltage();
+    inputs.rollerRightCurrentSpeed = rollerRightEncoder.getVelocity();
+    inputs.rollerRightCurentAmps = rollerRight.getOutputCurrent();
   }
 
   @Override
