@@ -10,20 +10,22 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.motorIDConstants;
+import frc.robot.Constants.MotorIDConstants;
+import frc.robot.Constants.CameraConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.PivotIOSim;
@@ -32,6 +34,19 @@ import frc.robot.subsystems.intake.PivotIOTalonFX;
 import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.RollerIOSparkFlex;
 import frc.robot.subsystems.intake.RollerIOTalonFX;
+import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
+import frc.robot.subsystems.gamestate.GameState;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
+import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -43,19 +58,28 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Intake intake;
-
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
   private final CommandXboxController driverController = new CommandXboxController(1);
+  private final Vision vision;
+  private final Shooter shooter;
+  private final GameState gamestate;
+  private final Indexer indexer;
+  private final Intake intake;
+  private SwerveDriveSimulation simDrive = null;
+
+  // Controller
+  private final CommandXboxController controller = new CommandXboxController(1);
+  private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private double intakeRollerValue = 0.5;
-  private double intakePivotValue = 0.5;
+  private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
+  private double indexerRollerValue = 0;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    gamestate = new GameState();
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -76,10 +100,26 @@ public class RobotContainer {
                 new PivotIOTalonFX(
                     motorIDConstants.INTAKE_PIVOT_LEFT_ID, motorIDConstants.INTAKE_PIVOT_RIGHT_ID, motorIDConstants.INTAKE_ENCODER_ID));
 
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        simDrive =
+            new SwerveDriveSimulation(
+                Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
+        SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
+
         drive =
             new Drive(
                 new GyroIO() {},
@@ -87,10 +127,24 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        intake = new Intake(new RollerIOSim(), new PivotIOSim());
+        intake = new Intake(
+                new GyroIOSim(simDrive.getGyroSimulation()),
+                new ModuleIOTalonFXMapleSim(TunerConstants.FrontLeft, simDrive.getModules()[0]),
+                new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
+                new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
+                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+
+        new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
+        intake = new Intake(new IntakeIOSim(simDrive));
+        indexer = new Indexer(new IndexerIO() {});
+        shooter = new Shooter(new ShooterIOSim());
         break;
 
-      default:
+      case REPLAY:
         // Replayed robot, disable IO implementations
         drive =
             new Drive(
@@ -99,14 +153,22 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        intake =
-            new Intake(
-                new RollerIOSparkFlex(
-                    motorIDConstants.INTAKE_ROLLER_LEFT_ID,
-                    motorIDConstants.INTAKE_ROLLER_RIGHT_ID),
-                new PivotIOSparkFlex(
-                    motorIDConstants.INTAKE_PIVOT_LEFT_ID, motorIDConstants.INTAKE_PIVOT_RIGHT_ID));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+        intake = new Intake(new RollerIO() {}, new PivotIO() {});
+        indexer = new Indexer(new IndexerIO() {});
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         break;
+
+      default:
+        throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
 
     // Set up auto routines
@@ -143,25 +205,26 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
+
+    driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
 
     // Lock to 0° when A button is held
-    controller
+    driverController
         .a()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
                 () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
+    driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
     // Reset gyro to 0° when B button is pressed
-    controller
+    driverController
         .b()
         .onTrue(
             Commands.runOnce(
@@ -170,16 +233,8 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-
-    driverController.a().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, intakePivotValue));
-    driverController.povDown().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.1));
-    driverController.povUp().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.1));
-    driverController.povLeft().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.05));
-    driverController.povRight().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.05));
-    driverController.x().onTrue(Commands.runOnce(() -> intakeRollerValue += 0.01));
-    driverController.y().onTrue(Commands.runOnce(() -> intakeRollerValue -= 0.01));
-    driverController.leftBumper().onTrue(Commands.runOnce(() -> intakePivotValue += 0.01));
-    driverController.rightBumper().onTrue(Commands.runOnce(() -> intakePivotValue -= 0.01));
+    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
+    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
   }
 
   /**
@@ -189,5 +244,13 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public void displaySimFieldToAdvantageScope() {
+    if (Constants.currentMode != Constants.Mode.SIM) return;
+
+    Logger.recordOutput("FieldSimulation/RobotPosition", simDrive.getSimulatedDriveTrainPose());
+    Logger.recordOutput(
+        "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
   }
 }

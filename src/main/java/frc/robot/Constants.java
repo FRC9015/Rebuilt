@@ -12,9 +12,20 @@ import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.Slot1Configs;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -26,6 +37,7 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  /** The runtime mode for the robot (real, simulation, or replay). */
   public static enum Mode {
     /** Running on a real robot. */
     REAL,
@@ -37,27 +49,57 @@ public final class Constants {
     REPLAY
   }
 
-  public static class motorIDConstants {
+
+  public static class CameraConstants {
+    public static final AprilTagFieldLayout aprilTagLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+    public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
+    public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
+    public static final double CAMERA_HEIGHT = Units.inchesToMeters(7);
+    public static final double CAMERA_PITCH = Units.degreesToRadians(15);
+    public static final double CAMERA_X_OFFSET = Units.inchesToMeters(13.5);
+    public static final Transform3d placeHolderCamera =
+        new Transform3d(
+            new Translation3d(CAMERA_X_OFFSET, Units.inchesToMeters(0), CAMERA_HEIGHT),
+            new Rotation3d(0, CAMERA_PITCH, Units.degreesToRadians(0)));
+
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+  }
+
+  public static class MotorIDConstants {
     // placeholders
+
     public static final int INTAKE_ROLLER_LEFT_ID = 0;
     public static final int INTAKE_ROLLER_RIGHT_ID = 0;
     public static final int INTAKE_PIVOT_LEFT_ID = 0;
     public static final int INTAKE_PIVOT_RIGHT_ID = 0;
     public static final int INTAKE_ENCODER_ID = 0;
-
+    public static final int INDEXER_MOTOR_ID = 13;
   }
 
-  public static class intakeConstants {
-    public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
+  public static class VisionConstants {
+    public static final double MAX_AMBIGUITY = 0.1;
+    public static final int MAX_AVERAGE_DISTANCE = 3;
+    public static final int STD_DEV_RANGE = 30;
+  }
+  /** Configuration and tuning constants for the intake mechanism. */
+
+  public static class IntakeConstants {
+    public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
-            .withKP(2)
+            .withKP(0.001)
             .withKI(0)
-            .withKD(0.05)
+            .withKD(0.02)
             .withKG(0.01)
             .withKA(0)
             .withKS(0)
             .withKV(0);
     public static final Slot0Configs ROLLER_SLOT0_CONFIGS =
+        new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
+
+
+    public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
 
     public static final MotionMagicConfigs PIVOT_MAGIC_CONFIGS =
@@ -97,9 +139,9 @@ public final class Constants {
             .withNeutralMode(NeutralModeValue.Brake);
     public static final TalonFXConfiguration pivotConfigLeft =
         new TalonFXConfiguration()
-            .withSlot0(Constants.intakeConstants.PIVOT_SLOT0_CONFIGS)
-            .withFeedback(Constants.intakeConstants.PIVOT_FEEDBACK_CONFIGS)
-            .withMotionMagic(Constants.intakeConstants.PIVOT_MAGIC_CONFIGS)
+            .withSlot0(PIVOT_SLOT0_CONFIGS)
+            .withFeedback(PIVOT_FEEDBACK_CONFIGS)
+            .withMotionMagic(PIVOT_MAGIC_CONFIGS)
             .withMotorOutput(pivotOutputLeftConfigs);
 
     private static final MotorOutputConfigs pivotOutputRightConfigs =
@@ -108,9 +150,9 @@ public final class Constants {
             .withNeutralMode(NeutralModeValue.Brake);
     public static final TalonFXConfiguration pivotConfigRight =
         new TalonFXConfiguration()
-            .withSlot0(Constants.intakeConstants.PIVOT_SLOT0_CONFIGS)
-            .withFeedback(Constants.intakeConstants.PIVOT_FEEDBACK_CONFIGS)
-            .withMotionMagic(Constants.intakeConstants.PIVOT_MAGIC_CONFIGS)
+            .withSlot0(PIVOT_SLOT0_CONFIGS)
+            .withFeedback(PIVOT_FEEDBACK_CONFIGS)
+            .withMotionMagic(PIVOT_MAGIC_CONFIGS)
             .withMotorOutput(pivotOutputRightConfigs);
 
     public static final double INTAKE_MAX_POS = 300.0;
@@ -118,7 +160,91 @@ public final class Constants {
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double INTAKE_DEPLOYED_POSITION = 100.0;
-    public static final double INTAKE_STOWED_POSITION = 10.0;
+    public static final double PIVOT_MAX_POS = 300.0;
+    public static final double PIVOT_MIN_POS = 0.0;
+    public static final double PIVOT_DEPLOYED_POSITION = 100.0;
+    public static final double PIVOT_STOWED_POSITION = 10.0;
+  }
+
+  public static class SimConstants {
+    // Simulation constants (e.g., physics parameters) can be added here
+    public static final double INTAKE_LENGTH = 0.2;
+    public static final double INTAKE_WIDTH = 0.7;
+    public static final int HOPPER_CAPACITY = 50;
+    public static final String GAMEPIECE = "Fuel";
+  }
+
+  public static class ShooterConstants {
+    //Following naming scheme for subsystem motor and sensor ids
+    public static final int FLY_WHEEL_LEFT_ID = 11;
+    public static final int FLY_WHEEL_RIGHT_ID = 12;
+    public static final int HOOD_ID = 13;
+    public static final int HOOD_ENCODER_ID = 14;
+
+    public static final Slot0Configs flyWheelSlotVelocityConfigs =
+        new Slot0Configs()
+            .withKP(0)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+            //TODO tune these values once final bot comes; reference this link: https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
+
+    public static final Slot1Configs hoodSlotPositionConfigs =
+        new Slot1Configs()
+            .withKP(0.0)
+            .withKI(0)
+            .withKD(0.0)
+            .withKG(0.0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+            //TODO tune these values once final bot comes.
+
+    public static final MotionMagicConfigs hoodMagicConfigs =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final FeedbackConfigs hoodFeedbackConfigs =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    // TODO tune these values
+    public static final double SHOOTER_MAX_SPEED = 100;
+    public static final double SHOOTER_MIN_SPEED = 0.0;
+    public static final double FLYWHEEL_ACCELERATION = 100;
+    public static final double FEEDFORWARD_VOLTAGE = 12.0;
+    public static final double HOOD_MAX_POS = 0.0;
+    public static final double HOOD_MIN_POS = 0.0;
+    public static final double HOOD_DEPLOYED_POSITION = 0.0;
+    public static final double HOOD_STOWED_POSITION = 0.0;
+  }
+
+  public static class LedConstants {
+    public static final int CANDLE_ID1 = 0; // TODO: replace with actual CAN ID
+    public static final double DEFAULT_STROBE_FRAME_RATE = 50.0;
+  }
+
+  public static class ClimbConstants {
+    public static final Slot0Configs climbSlot0Configs =
+        new Slot0Configs()
+            .withKP(0.1)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final FeedbackConfigs CLIMB_FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final MotionMagicConfigs CLIMB_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final double CLIMB_MAX_POS = 300.0;
+    public static final double CLIMB_MIN_POS = 0.0;
   }
 }
