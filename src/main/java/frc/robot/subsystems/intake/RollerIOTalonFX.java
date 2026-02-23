@@ -2,7 +2,7 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -25,7 +25,8 @@ public class RollerIOTalonFX implements RollerIO {
   public StatusSignal<Current> rollerRightAmps;
   public StatusSignal<AngularVelocity> rollerRightSpeed;
 
-  private final VelocityVoltage intakeVelocityVoltage = new VelocityVoltage(0.0);
+  private final MotionMagicVelocityVoltage intakeVelocityVoltage =
+      new MotionMagicVelocityVoltage(0.0);
 
   public RollerIOTalonFX(int rollerIDLeft, int rollerIDRight) {
     rollerMotorLeft = new TalonFX(rollerIDLeft);
@@ -65,11 +66,6 @@ public class RollerIOTalonFX implements RollerIO {
   public void stop() {
     rollerMotorLeft.stopMotor();
     rollerMotorRight.stopMotor();
-  }
-
-  @Override
-  public void updatePIDFromDashboard() {
-    // Implement PID update logic if needed
   }
 
   @Override

@@ -23,8 +23,6 @@ public interface RollerIO {
 
   public default void setRollerSpeed(boolean runIntake) {}
 
-  public default void updatePIDFromDashboard() {}
-
   default void stop() {}
 
   default void setBrakeMode(boolean enable) {}

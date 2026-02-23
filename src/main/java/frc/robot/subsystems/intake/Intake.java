@@ -16,7 +16,6 @@ public class Intake extends SubsystemBase {
     this.pivot = pivot;
   }
 
-
   // Minimum Value of speedValue: -512.0
   // Maximum Value of speedValkue: 511.998046875
 

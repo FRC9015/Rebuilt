@@ -106,24 +106,6 @@ public class RollerIOSparkFlex implements RollerIO {
     return updatePIDs;
   }
 
-  // --------- CONTROL ----------------
-  @Override
-  public void updatePIDFromDashboard() {
-    double intakeP = kp.getAsDouble();
-    double intakeI = ki.getAsDouble();
-    double intakeD = kd.getAsDouble();
-
-    // Update configs
-    rollerLeftConfig.closedLoop.pid(intakeP, intakeI, intakeD).outputRange(-1.0, 1.0);
-    rollerRightConfig.closedLoop.pid(intakeP, intakeI, intakeD).outputRange(-1.0, 1.0);
-
-    // Apply without resetting other parameters
-    rollerLeft.configure(
-        rollerLeftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-    rollerRight.configure(
-        rollerRightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-  }
-
   @Override
   public void setRollerSpeed(double speed) {
 
