@@ -8,7 +8,6 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
@@ -46,14 +45,12 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    
 
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
             .withSlot1(Constants.ShooterConstants.hoodSlotPositionConfigs)
             .withFeedback(Constants.ShooterConstants.hoodFeedbackConfigs)
             .withMotionMagic(Constants.ShooterConstants.hoodMagicConfigs);
-
 
     TalonFXConfiguration flyWheelConfigRight =
         new TalonFXConfiguration()
@@ -134,7 +131,8 @@ public class ShooterIOTalonFX implements ShooterIO {
         MathUtil.clamp(
             position,
             Constants.ShooterConstants.HOOD_MIN_POS,
-            Constants.ShooterConstants.HOOD_MAX_POS); //TODO figure out max and min position for Hood 
+            Constants.ShooterConstants
+                .HOOD_MAX_POS); // TODO figure out max and min position for Hood
 
     hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }

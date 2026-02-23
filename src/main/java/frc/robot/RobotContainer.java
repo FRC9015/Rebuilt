@@ -207,7 +207,7 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, PivotPositions.DEPLOYED));
 
-    // Lock to 0° when A button is held
+    // Lock to 0 degrees when A button is held
     driverController
         .a()
         .whileTrue(
@@ -219,7 +219,7 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0 degreesisFuelInsideIntake() when B button is pressed
     driverController
         .b()
         .onTrue(

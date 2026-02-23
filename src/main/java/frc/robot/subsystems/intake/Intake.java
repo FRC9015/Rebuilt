@@ -58,6 +58,10 @@ public class Intake extends SubsystemBase {
     return this.run(() -> roller.stop());
   }
 
+  public Command runIntakeSim() {
+    return this.startEnd(() -> roller.setRollerSpeed(true), () -> roller.setRollerSpeed(false));
+  }
+
   public boolean isFuelInsideIntake() {
     return rollerInputs.fuelInside > 0;
   }
