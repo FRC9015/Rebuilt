@@ -28,6 +28,7 @@ public class TurretAngleAim extends Command {
   public TurretAngleAim(Supplier<Pose2d> poseSupplier, Turret turret) {
     this.poseSupplier = poseSupplier;
     this.turret = turret;
+    addRequirements(turret);
   }
 
   @Override
