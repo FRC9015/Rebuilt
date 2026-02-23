@@ -110,7 +110,7 @@ public final class Constants {
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
-        new Slot0Configs()
+        new Slot0Configs() // TODO Tune these values
             .withKP(6)
             .withKI(0.01)
             .withKD(0.2)
