@@ -254,8 +254,9 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
-    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
+    driverController.leftTrigger().whileTrue(intake.runIntakeAtSpeed(0.0));
+    driverController.rightTrigger().whileTrue(intake.runIntakeAtSpeed(-0.0));
+    //driverController.start().whileTrue(); add when there is a command for moving the pivot
 
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
 
