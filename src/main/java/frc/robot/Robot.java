@@ -63,6 +63,9 @@ public class Robot extends LoggedRobot {
         Logger.setReplaySource(new WPILOGReader(logPath));
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         break;
+      default:
+        // No-op default to satisfy style checks; all enum values are handled above.
+        break;
     }
 
     // Start AdvantageKit logger

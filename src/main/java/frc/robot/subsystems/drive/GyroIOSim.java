@@ -6,6 +6,7 @@ import edu.wpi.first.math.util.Units;
 import frc.robot.util.PhoenixUtil;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
 
+/** Simulation implementation of {@link GyroIO} used in the software simulator. */
 public class GyroIOSim implements GyroIO {
   private final GyroSimulation gyro;
 

@@ -113,9 +113,9 @@ public class PhoenixUtil {
 
   public static double[] getSimulationOdometryTimeStamps() {
     final double[] odometryTimeStamps = new double[SimulatedArena.getSimulationSubTicksIn1Period()];
+    final double dt = SimulatedArena.getSimulationDt().in(Seconds);
     for (int i = 0; i < odometryTimeStamps.length; i++) {
-      odometryTimeStamps[i] =
-          Timer.getFPGATimestamp() - 0.02 + i * SimulatedArena.getSimulationDt().in(Seconds);
+      odometryTimeStamps[i] = Timer.getFPGATimestamp() - (dt * odometryTimeStamps.length) + i * dt;
     }
 
     return odometryTimeStamps;

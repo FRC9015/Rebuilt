@@ -41,6 +41,9 @@ public class ModuleIOSim implements ModuleIO {
   private static final double TURN_KD = 0.0;
   private static final DCMotor DRIVE_GEARBOX = DCMotor.getKrakenX60Foc(1);
   private static final DCMotor TURN_GEARBOX = DCMotor.getKrakenX60Foc(1);
+  // Simulation constants
+  private static final double SIM_MAX_VOLTAGE = 12.0;
+  private static final double SIM_TIME_STEP = 0.02;
 
   private final DCMotorSim driveSim;
   private final DCMotorSim turnSim;
@@ -88,10 +91,10 @@ public class ModuleIOSim implements ModuleIO {
     }
 
     // Update simulation state
-    driveSim.setInputVoltage(MathUtil.clamp(driveAppliedVolts, -12.0, 12.0));
-    turnSim.setInputVoltage(MathUtil.clamp(turnAppliedVolts, -12.0, 12.0));
-    driveSim.update(0.02);
-    turnSim.update(0.02);
+    driveSim.setInputVoltage(MathUtil.clamp(driveAppliedVolts, -SIM_MAX_VOLTAGE, SIM_MAX_VOLTAGE));
+    turnSim.setInputVoltage(MathUtil.clamp(turnAppliedVolts, -SIM_MAX_VOLTAGE, SIM_MAX_VOLTAGE));
+    driveSim.update(SIM_TIME_STEP);
+    turnSim.update(SIM_TIME_STEP);
 
     // Update drive inputs
     inputs.driveConnected = true;
