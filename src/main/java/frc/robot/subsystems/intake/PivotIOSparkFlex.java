@@ -7,7 +7,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class PivotIOSparkFlex implements PivotIO {
@@ -22,8 +22,8 @@ public class PivotIOSparkFlex implements PivotIO {
   private final SparkClosedLoopController pivotLeftPID;
   private final SparkClosedLoopController pivotRightPID;
 
-  private final SparkMaxConfig pivotLeftConfig;
-  private final SparkMaxConfig pivotRightConfig;
+  private final SparkFlexConfig pivotLeftConfig;
+  private final SparkFlexConfig pivotRightConfig;
 
   private static final double maxFreeSpeed = 6784.0; // RPM
 
@@ -45,8 +45,8 @@ public class PivotIOSparkFlex implements PivotIO {
     pivotLeftPID = pivotLeft.getClosedLoopController();
     pivotRightPID = pivotRight.getClosedLoopController();
 
-    pivotLeftConfig = new SparkMaxConfig();
-    pivotRightConfig = new SparkMaxConfig();
+    pivotLeftConfig = new SparkFlexConfig();
+    pivotRightConfig = new SparkFlexConfig();
 
     // ---------------- PIVOT CONFIG ----------------
     pivotLeftConfig.idleMode(IdleMode.kBrake);

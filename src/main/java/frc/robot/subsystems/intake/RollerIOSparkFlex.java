@@ -7,7 +7,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.math.MathUtil;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
@@ -24,8 +24,8 @@ public class RollerIOSparkFlex implements RollerIO {
   private final SparkClosedLoopController rollerLeftPID;
   private final SparkClosedLoopController rollerrightPID;
 
-  private final SparkMaxConfig rollerLeftConfig;
-  private final SparkMaxConfig rollerRightConfig;
+  private final SparkFlexConfig rollerLeftConfig;
+  private final SparkFlexConfig rollerRightConfig;
 
   private static final double maxFreeSpeed = 6784.0; // RPM
 
@@ -48,8 +48,8 @@ public class RollerIOSparkFlex implements RollerIO {
     rollerLeftPID = rollerLeft.getClosedLoopController();
     rollerrightPID = rollerRight.getClosedLoopController();
 
-    rollerLeftConfig = new SparkMaxConfig();
-    rollerRightConfig = new SparkMaxConfig();
+    rollerLeftConfig = new SparkFlexConfig();
+    rollerRightConfig = new SparkFlexConfig();
 
     rollerLeftConfig.idleMode(IdleMode.kBrake);
     rollerRightConfig.inverted(true).idleMode(IdleMode.kBrake);
