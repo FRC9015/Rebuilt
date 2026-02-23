@@ -258,6 +258,9 @@ public class RobotContainer {
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
 
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
+
+    operatorController.leftTrigger().whileTrue(gamestate.manualGameData(0));
+    operatorController.rightTrigger().whileTrue(gamestate.manualGameData(1));
   }
 
   /**
