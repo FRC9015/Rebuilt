@@ -121,14 +121,13 @@ public class TurretIOTalonFX implements TurretIO {
         .ifPresentOrElse(
             angle -> {
               this.seedMotorPosition(angle.in(Rotations));
-              System.out.println(
-                  "✓ Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
+              Logger.recordOutput("Turret/InitStatus", "✓ Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
             },
             () -> {
-              System.out.println("✗ CRT failed to resolve turret angle!");
-              System.out.println("  Status: " + easyCRT.getLastStatus());
-              System.out.println("  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
-              System.out.println("  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
+              Logger.recordOutput("Turret/InitStatus", "✗ CRT failed to resolve turret angle!");
+              Logger.recordOutput("Turret/InitStatus", "  Status: " + easyCRT.getLastStatus());
+              Logger.recordOutput("Turret/InitStatus", "  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
+              Logger.recordOutput("Turret/InitStatus", "  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
             });
   }
 
