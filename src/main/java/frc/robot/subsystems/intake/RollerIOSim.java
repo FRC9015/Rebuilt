@@ -1,3 +1,43 @@
 package frc.robot.subsystems.intake;
 
-public class RollerIOSim implements RollerIO {}
+import static edu.wpi.first.units.Units.Meters;
+
+import org.ironmaple.simulation.IntakeSimulation;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+
+import frc.robot.Constants.SimConstants;
+
+public class RollerIOSim implements RollerIO {
+    private final IntakeSimulation intakeSimulation;
+
+    public RollerIOSim(SwerveDriveSimulation driveTrainSimulation) {
+        this.intakeSimulation =
+            IntakeSimulation.OverTheBumperIntake(
+                // Specify the type of game pieces that the intake can collect
+                SimConstants.GAMEPIECE,
+                // Specify the drivetrain to which this intake is attached
+                driveTrainSimulation,
+                // Width of the intake
+                Meters.of(SimConstants.INTAKE_WIDTH),
+                // The extension length of the intake beyond the robot's frame (when activated)
+                Meters.of(SimConstants.INTAKE_LENGTH),
+                // The intake is mounted on the back side of the chassis
+                IntakeSimulation.IntakeSide.FRONT,
+                // The intake can hold up to 50 Fuel
+                SimConstants.HOPPER_CAPACITY);
+  }
+
+  @Override
+  public void updateInputs(RollerIOInputs inputs) {
+    inputs.fuelInside = intakeSimulation.getGamePiecesAmount();
+  }
+
+  @Override
+  public void setRollerSpeed(boolean runIntake) {
+    if (runIntake) {
+      intakeSimulation.startIntake();
+    } else {
+      intakeSimulation.stopIntake();
+    }
+  }
+}

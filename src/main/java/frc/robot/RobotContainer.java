@@ -134,7 +134,7 @@ public class RobotContainer {
         new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
-        intake = new Intake(new RollerIOSim(), new PivotIOSim());
+        intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
         break;
 
       case REPLAY:

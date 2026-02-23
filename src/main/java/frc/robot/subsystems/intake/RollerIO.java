@@ -13,12 +13,15 @@ public interface RollerIO {
     public double rollerRightAppliedVolts = 0.0;
     public double rollerRightCurentAmps = 0.0;
     public double rollerRightCurrentSpeed = 0.0;
+    public int fuelInside = 0;
   }
 
   /** Method to update the inputs of the Intake subsystem. */
   public default void updateInputs(RollerIOInputs inputs) {}
 
   public default void setRollerSpeed(double speed) {}
+
+  public default void setRollerSpeed(boolean runIntake) {}
 
   public default void updatePIDFromDashboard() {}
 
