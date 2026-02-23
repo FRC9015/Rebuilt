@@ -3,6 +3,7 @@ package frc.robot.subsystems.gamestate;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.NoSuchElementException;
 import java.util.OptionalDouble;
@@ -48,12 +49,16 @@ public class GameState extends SubsystemBase {
     return this.alliance;
   }
 
-  public void setGameDataManualy(int button) {
+  private void setGameDataManualy(int button) {
     if (button == 1) {
       this.gameDataManual = "B";
     } else {
       this.gameDataManual = "R";
     }
+  }
+
+  public Command manualGameData(int color){
+    return runOnce(() -> setGameDataManualy(color));
   }
 
   /**
