@@ -75,7 +75,6 @@ public final class Constants {
     public static final int STD_DEV_RANGE = 30;
   }
   /** Configuration and tuning constants for the intake mechanism. */
-
   public static class IntakeConstants {
     public static final Slot0Configs intakeSlotPositionConfigs =
         new Slot0Configs()
@@ -117,23 +116,17 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
-    //Following naming scheme for subsystem motor and sensor ids
+    // Following naming scheme for subsystem motor and sensor ids
     public static final int FLY_WHEEL_LEFT_ID = 11;
     public static final int FLY_WHEEL_RIGHT_ID = 12;
     public static final int HOOD_ID = 13;
     public static final int HOOD_ENCODER_ID = 14;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
-        new Slot0Configs()
-            .withKP(0)
-            .withKI(0)
-            .withKD(0)
-            .withKG(0)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
+        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
 
-            //TODO tune these values once final bot comes; reference this link: https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
+    // TODO tune these values once final bot comes; reference this link:
+    // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
 
     public static final Slot1Configs hoodSlotPositionConfigs =
         new Slot1Configs()
@@ -145,7 +138,7 @@ public final class Constants {
             .withKS(0)
             .withKV(0);
 
-            //TODO tune these values once final bot comes.
+    // TODO tune these values once final bot comes.
 
     public static final MotionMagicConfigs hoodMagicConfigs =
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);

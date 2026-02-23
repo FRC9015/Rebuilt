@@ -10,12 +10,15 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
 import com.ctre.phoenix6.signals.StripTypeValue;
 import com.ctre.phoenix6.signals.VBatOutputModeValue;
-import frc.robot.Constants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
-public class RobotLed extends SubsystemBase{
+public class RobotLed extends SubsystemBase {
   private static final int NUM_LEDS = 110; // The number of LEDs on the strip
-  private final CANdle candle = new CANdle(Constants.LedConstants.CANDLE_ID1); // CANdle is the CTRE hardware we use to configure our LEDs
+  private final CANdle candle =
+      new CANdle(
+          Constants.LedConstants
+              .CANDLE_ID1); // CANdle is the CTRE hardware we use to configure our LEDs
   private final StrobeAnimation bufferedAnimation = new StrobeAnimation(0, NUM_LEDS);
 
   // The constructor just configures the CANdle
@@ -36,22 +39,23 @@ public class RobotLed extends SubsystemBase{
 
     candleConfigurator.apply(candleConfig);
   }
-/** Sets color */
+  /** Sets color */
   public void setColor(RGBWColor color) {
     bufferedAnimation.withColor(color).withFrameRate(0);
   }
-/** Sets color and framerate */
+  /** Sets color and framerate */
   public void strobeAnimation(RGBWColor color) {
-    bufferedAnimation.withColor(color).withFrameRate(Constants.LedConstants.DEFAULT_STROBE_FRAME_RATE);
+    bufferedAnimation
+        .withColor(color)
+        .withFrameRate(Constants.LedConstants.DEFAULT_STROBE_FRAME_RATE);
   }
-/** Sets color to CANdle */
+  /** Sets color to CANdle */
   public void updateLEDs() {
     candle.setControl(bufferedAnimation);
   }
 
   @Override
-  public void periodic(){
+  public void periodic() {
     updateLEDs();
   }
-
 }
