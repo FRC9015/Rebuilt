@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.turretConstants;
 import frc.robot.Constants.CameraConstants;
+import frc.robot.Constants.MotorIDConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
@@ -38,9 +39,13 @@ import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOSim;
-import frc.robot.subsystems.intake.IntakeIOSparkFlex;
+import frc.robot.subsystems.intake.PivotIO;
+import frc.robot.subsystems.intake.PivotIO.PivotPositions;
+import frc.robot.subsystems.intake.PivotIOSim;
+import frc.robot.subsystems.intake.PivotIOTalonFX;
+import frc.robot.subsystems.intake.RollerIO;
+import frc.robot.subsystems.intake.RollerIOSim;
+import frc.robot.subsystems.intake.RollerIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -104,16 +109,21 @@ public class RobotContainer {
                     turretConstants.ENCODER_15_TOOTH));
         gamestate =
             new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
+        intake =
+            new Intake(
+                new RollerIOTalonFX(
+                    MotorIDConstants.INTAKE_ROLLER_LEFT_ID,
+                    MotorIDConstants.INTAKE_ROLLER_RIGHT_ID),
+                new PivotIOTalonFX(
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
+                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
+                    MotorIDConstants.INTAKE_ENCODER_ID));
+
         vision =
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
-        intake =
-            new Intake(
-                new IntakeIOSparkFlex(
-                    Constants.IntakeConstants.INTAKE_MOTOR_ID,
-                    Constants.IntakeConstants.INTAKE2_MOTOR_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -128,7 +138,6 @@ public class RobotContainer {
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
-
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
@@ -152,9 +161,9 @@ public class RobotContainer {
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
 
         new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
-        intake = new Intake(new IntakeIOSim(simDrive));
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
+        intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
         break;
 
       case REPLAY:
@@ -170,7 +179,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-        intake = new Intake(new IntakeIO() {});
+        intake = new Intake(new RollerIO() {}, new PivotIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
             new Shooter(
@@ -253,8 +262,11 @@ public class RobotContainer {
 
     return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
     driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
+    driverController
+        .leftBumper()
+        .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, PivotPositions.DEPLOYED));
 
-    // Lock to 0° when A button is held
+    // Lock to 0 degrees when A button is held
     driverController
         .a()
         .whileTrue(
@@ -266,7 +278,7 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0 degreesisFuelInsideIntake() when B button is pressed
     driverController
         .b()
         .onTrue(

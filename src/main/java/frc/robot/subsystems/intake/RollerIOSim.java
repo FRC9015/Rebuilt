@@ -6,11 +6,10 @@ import frc.robot.Constants.SimConstants;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 
-/** Simulation implementation of {@link IntakeIO}. */
-public class IntakeIOSim implements IntakeIO {
+public class RollerIOSim implements RollerIO {
   private final IntakeSimulation intakeSimulation;
 
-  public IntakeIOSim(SwerveDriveSimulation driveTrainSimulation) {
+  public RollerIOSim(SwerveDriveSimulation driveTrainSimulation) {
     this.intakeSimulation =
         IntakeSimulation.OverTheBumperIntake(
             // Specify the type of game pieces that the intake can collect
@@ -28,21 +27,16 @@ public class IntakeIOSim implements IntakeIO {
   }
 
   @Override
-  public void updateInputs(IntakeIOInputs inputs) {
+  public void updateInputs(RollerIOInputs inputs) {
     inputs.fuelInside = intakeSimulation.getGamePiecesAmount();
   }
 
   @Override
-  public void setRunning(boolean runIntake) {
+  public void setRollerSpeed(boolean runIntake) {
     if (runIntake) {
       intakeSimulation.startIntake();
     } else {
       intakeSimulation.stopIntake();
     }
-  }
-
-  @Override
-  public boolean isFuelInsideIntake() {
-    return intakeSimulation.getGamePiecesAmount() > 0;
   }
 }
