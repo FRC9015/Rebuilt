@@ -7,8 +7,6 @@
 
 package frc.robot;
 
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -63,8 +61,23 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
+import frc.robot.subsystems.gamestate.GameState;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer.IndexerIO;
+import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.PivotIO.PivotPositions;
+import frc.robot.subsystems.intake.PivotIOSim;
+import frc.robot.subsystems.intake.PivotIOTalonFX;
+import frc.robot.subsystems.intake.RollerIOSim;
+import frc.robot.subsystems.intake.RollerIOTalonFX;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIOSim;
+import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -80,13 +93,11 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Turret turret;
-
   private final Vision vision;
   private final Shooter shooter;
   private final GameState gamestate;
   private final Indexer indexer;
   private final Intake intake;
-  private final Turret turret; // Added Turret Subsystem
 
   private SwerveDriveSimulation simDrive = null;
 
@@ -197,7 +208,7 @@ public class RobotContainer {
                     turretConstants.ENCODER_13_TOOTH,
                     turretConstants.ENCODER_15_TOOTH));
         break;
-        
+
       default:
         throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
@@ -263,42 +274,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-
-    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
-  }
-
-  public Command checkShooterUpdate() {
-
-    return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
-    driverController.leftBumper().whileTrue(intake.runIntakeAtSpeed(intakeRollerValue));
-    driverController
-        .leftBumper()
-        .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, PivotPositions.DEPLOYED));
-
-    // Lock to 0 degrees when A button is held
-    driverController
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> Rotation2d.kZero));
-
-    // Switch to X pattern when X button is pressed
-    driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    // Reset gyro to 0 degreesisFuelInsideIntake() when B button is pressed
-    driverController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
-    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
-    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
 
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
   }

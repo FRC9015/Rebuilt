@@ -2,8 +2,6 @@ package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.Rotations;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -26,6 +24,7 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants;
 import frc.robot.Constants.turretConstants;
+import org.littletonrobotics.junction.Logger;
 import yams.units.EasyCRT;
 import yams.units.EasyCRT.CRTStatus;
 import yams.units.EasyCRTConfig;
@@ -123,13 +122,19 @@ public class TurretIOTalonFX implements TurretIO {
         .ifPresentOrElse(
             angle -> {
               this.seedMotorPosition(angle.in(Rotations));
-              Logger.recordOutput("Turret/InitStatus", "✓ Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
+              Logger.recordOutput(
+                  "Turret/InitStatus",
+                  "✓ Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
             },
             () -> {
               Logger.recordOutput("Turret/InitStatus", "✗ CRT failed to resolve turret angle!");
               Logger.recordOutput("Turret/InitStatuslast", "  Status: " + easyCRT.getLastStatus());
-              Logger.recordOutput("Turret/InitStatus13", "  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
-              Logger.recordOutput("Turret/InitStatus15", "  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
+              Logger.recordOutput(
+                  "Turret/InitStatus13",
+                  "  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
+              Logger.recordOutput(
+                  "Turret/InitStatus15",
+                  "  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
             });
   }
 
