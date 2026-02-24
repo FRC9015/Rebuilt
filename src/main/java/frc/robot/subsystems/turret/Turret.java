@@ -6,6 +6,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.turretConstants;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * Main turret class which runs had functions to move the turret within bounds and updates inputs
+ */
 public class Turret extends SubsystemBase {
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private final TurretIO io;

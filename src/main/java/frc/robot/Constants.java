@@ -14,9 +14,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.pathplanner.lib.util.FlippingUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.util.FlippingUtil;
@@ -180,62 +177,6 @@ public final class Constants {
     public static final String GAMEPIECE = "Fuel";
   }
 
-  public static class turretConstants {
-    // --- GEAR TEETH ---
-    public static final int T_TEETH = 90; // Gear count on final turret gear
-    public static final int E1_TEETH = 13; // Gear on Encoder 1
-    public static final int E2_TEETH = 15; // Gear on Encoder 2
-
-    public static final int ENCODER_13_TOOTH = 35; // Encoder 13 motor id
-    public static final int ENCODER_15_TOOTH = 36; // Encoder 15 motor id
-
-    // --- MATH CONSTANTS ---
-    /** The error allowance (in turret rotations) when comparing encoder predictions. */
-    public static final double CRT_TOLERANCE = 0.034;
-
-    /**
-     * The difference threshold between calculated and internal motor position to trigger a re-seed.
-     */
-    public static final double SYNC_THRESHOLD = 0.05;
-
-    /** Search limit for Encoder 1 (should be equal to e2_teeth). */
-    public static final int E1_SEARCH_LIMIT = (int) E2_TEETH;
-    /** Search limit for Encoder 2 (should be equal to e1_teeth). */
-    public static final int E2_SEARCH_LIMIT = (int) E1_TEETH;
-
-    // --- MOVEMENT LIMITS ---
-    public static final double MAXROTATION = 1.0;
-    public static final double MINROTATION = -1.0;
-
-    public static final double ENCODER13_MAGNET_OFFSET = -0.1020507;
-    public static final double ENCODER15_MAGNET_OFFSET = 0.1274414;
-
-    // total gear ratio on turret
-    public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
-    // --- MOTOR CONFIGS ---
-    public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
-    public static final Slot0Configs SLOT0_CONFIGS =
-        new Slot0Configs() // TODO Tune these values
-            .withKP(6)
-            .withKI(0.01)
-            .withKD(0.2)
-            .withKG(0)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
-
-    public static final FeedbackConfigs FEEDBACK_CONFIGS =
-        new FeedbackConfigs()
-            .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)
-            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
-  }
-
-  public static class FieldConstants {
-    public static final Pose2d HUB_POSE_BLUE =
-        new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), new Rotation2d());
-    public static final Pose2d HUB_POSE_RED = FlippingUtil.flipFieldPose(HUB_POSE_BLUE);
-  }
   public static class ShooterConstants {
     // Following naming scheme for subsystem motor and sensor ids
     public static final int FLY_WHEEL_LEFT_ID = 11;
@@ -243,7 +184,8 @@ public final class Constants {
     public static final int HOOD_ID = 13;
     public static final int HOOD_ENCODER_ID = 14;
 
-            //TODO tune these values once final bot comes; reference this link: https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
+    // TODO tune these values once final bot comes; reference this link:
+    // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
 
     public static final Slot1Configs hoodSlotPositionConfigs =
         new Slot1Configs()
@@ -282,7 +224,7 @@ public final class Constants {
             .withKA(0)
             .withKS(0)
             .withKV(0);
-    }
+  }
 
   public static class LedConstants {
     public static final int CANDLE_ID1 = 0; // TODO: replace with actual CAN ID

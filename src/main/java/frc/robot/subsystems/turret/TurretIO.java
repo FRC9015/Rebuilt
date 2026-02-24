@@ -2,6 +2,7 @@ package frc.robot.subsystems.turret;
 
 import org.littletonrobotics.junction.AutoLog;
 
+/** TurretIO file which has all the values that are loged and the default functions */
 public interface TurretIO {
 
   @AutoLog

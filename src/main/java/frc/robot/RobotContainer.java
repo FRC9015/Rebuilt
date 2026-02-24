@@ -17,8 +17,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.MotorIDConstants;
-import frc.robot.Constants.turretConstants;
 import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.turretConstants;
@@ -26,12 +24,9 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
-import frc.robot.subsystems.turret.Turret;
-import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
@@ -45,30 +40,6 @@ import frc.robot.subsystems.intake.PivotIO.PivotPositions;
 import frc.robot.subsystems.intake.PivotIOSim;
 import frc.robot.subsystems.intake.PivotIOTalonFX;
 import frc.robot.subsystems.intake.RollerIO;
-import frc.robot.subsystems.intake.RollerIOSim;
-import frc.robot.subsystems.intake.RollerIOTalonFX;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIOSim;
-import frc.robot.subsystems.shooter.ShooterIOTalonFX;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.Constants.turretConstants;
-import frc.robot.commands.DriveCommands;
-import frc.robot.commands.TurretAngleAim;
-import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.GyroIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
-import frc.robot.subsystems.gamestate.GameState;
-import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.indexer.IndexerIO;
-import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.PivotIO.PivotPositions;
-import frc.robot.subsystems.intake.PivotIOSim;
-import frc.robot.subsystems.intake.PivotIOTalonFX;
 import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.RollerIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
@@ -92,21 +63,18 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Turret turret;
+  // Controller
   private final Vision vision;
   private final Shooter shooter;
   private final GameState gamestate;
   private final Indexer indexer;
   private final Intake intake;
-
+  private final Turret turret;
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
-
-  private double topShooterPowerScale = 0.5;
-  private double bottomShooterPowerScale = 0.5;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -119,7 +87,8 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-
+        // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
+        // a CANcoder
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -127,15 +96,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-
-        turret =
-            new Turret(
-                new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH,
-                    turretConstants.ENCODER_15_TOOTH));
-        gamestate =
-            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         intake =
             new Intake(
                 new RollerIOTalonFX(
@@ -157,9 +117,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID));
-        // --- TURRET SETUP ---
-        // Instantiating the Turret here ensures the code starts running immediately on boot.
-        // CHECK THESE IDs: Motor ID, Encoder 13T ID, Encoder 15T ID
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -181,16 +138,6 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
-
-        turret =
-            new Turret(
-                new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH,
-                    turretConstants.ENCODER_15_TOOTH));
-
-        gamestate =
-            new GameState(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue));
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -200,7 +147,35 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
         intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID,
+                    turretConstants.ENCODER_13_TOOTH,
+                    turretConstants.ENCODER_15_TOOTH));
+        break;
 
+      case REPLAY:
+        // Replayed robot, disable IO implementations
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+        intake = new Intake(new RollerIO() {}, new PivotIO() {});
+        indexer = new Indexer(new IndexerIO() {});
+        shooter =
+            new Shooter(
+                new ShooterIOTalonFX(
+                    Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
+                    Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
+                    Constants.ShooterConstants.HOOD_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -251,7 +226,11 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    // // Lock to 0° when A button is held
+    driverController
+        .leftBumper()
+        .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, PivotPositions.DEPLOYED));
+
+    // Lock to 0 degrees when A button is held
     driverController
         .a()
         .whileTrue(
@@ -261,10 +240,9 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> Rotation2d.kZero));
 
-    // // Switch to X pattern when X button is pressed
-    // controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-
-    // // Reset gyro to 0° when B button is pressed
+    // Switch to X pattern when X button is pressed
+    driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // Reset gyro to 0 degreesisFuelInsideIntake() when B button is pressed
     driverController
         .b()
         .onTrue(
@@ -274,13 +252,10 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
+    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
 
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
-  }
-
-  public Command checkShooterUpdate() {
-
-    return Commands.runOnce(() -> System.out.println(topShooterPowerScale));
   }
 
   /**

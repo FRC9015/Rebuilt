@@ -29,6 +29,10 @@ import yams.units.EasyCRT;
 import yams.units.EasyCRT.CRTStatus;
 import yams.units.EasyCRTConfig;
 
+/**
+ * TurretIOTalonFX for actually running the turret and updating the turretIO file using a TalonFX
+ * motor.
+ */
 public class TurretIOTalonFX implements TurretIO {
 
   private final TalonFX turretMotor;
@@ -55,7 +59,7 @@ public class TurretIOTalonFX implements TurretIO {
     turretMotor = new TalonFX(motorID);
     encoder13 = new CANcoder(encoderId13);
     encoder15 = new CANcoder(encoderId15);
-  
+
     // Hardware-level soft limits provide physical protection even if code crashes
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
