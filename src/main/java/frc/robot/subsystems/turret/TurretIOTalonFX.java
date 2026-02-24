@@ -2,6 +2,8 @@ package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.Rotations;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -125,9 +127,9 @@ public class TurretIOTalonFX implements TurretIO {
             },
             () -> {
               Logger.recordOutput("Turret/InitStatus", "✗ CRT failed to resolve turret angle!");
-              Logger.recordOutput("Turret/InitStatus", "  Status: " + easyCRT.getLastStatus());
-              Logger.recordOutput("Turret/InitStatus", "  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
-              Logger.recordOutput("Turret/InitStatus", "  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
+              Logger.recordOutput("Turret/InitStatuslast", "  Status: " + easyCRT.getLastStatus());
+              Logger.recordOutput("Turret/InitStatus13", "  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
+              Logger.recordOutput("Turret/InitStatus15", "  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
             });
   }
 
