@@ -110,7 +110,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   public void stopFlywheels() {
     flywheelMotorLeft.stopMotor();
     flywheelMotorRight.stopMotor();
-    kickerMotor.stopMotor();
   }
 
   @Override
@@ -119,9 +118,15 @@ public class ShooterIOTalonFX implements ShooterIO {
   }
 
   @Override
+  public void stopKicker() {
+    kickerMotor.stopMotor();
+  }
+
+  @Override
   public void stopShooter() {
     stopFlywheels();
     stopHood();
+    stopKicker();
   }
 
   @Override
@@ -139,9 +144,11 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     flywheelMotorLeft.setControl(flywheelMagicVelocityVoltage.withVelocity(speed));
     flywheelMotorRight.setControl(flywheelMagicVelocityVoltage.withVelocity(speed));
+  }
 
-    //Running kicker motor along with flywheels since it's required to shoot
-    kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(idealKickerSpeed));
+  @Override
+  public void setKickerSpeed(double speed) {
+    kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(speed));
   }
 
   @Override

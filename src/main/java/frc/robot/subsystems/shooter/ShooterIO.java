@@ -27,6 +27,8 @@ public interface ShooterIO {
 
   public default void setFlyWheelSpeed(double speed) {}
 
+  public default void setKickerSpeed(double speed) {}
+
   public default double getFlyWheelSpeed() {
     return 0.0;
   }
@@ -42,6 +44,8 @@ public interface ShooterIO {
   default void stopHood() {}
 
   default void stopShooter() {}
+
+  default void stopKicker() {}
 
   default void setBrakeMode(boolean enable) {}
 }
