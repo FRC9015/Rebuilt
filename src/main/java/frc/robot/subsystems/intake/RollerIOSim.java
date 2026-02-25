@@ -2,10 +2,9 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import frc.robot.Constants.SimConstants;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-
-import frc.robot.Constants.SimConstants;
 
 public class RollerIOSim implements RollerIO {
   private final IntakeSimulation intakeSimulation;
