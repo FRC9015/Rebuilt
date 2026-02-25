@@ -177,9 +177,16 @@ public final class Constants {
     public static final int FLY_WHEEL_RIGHT_ID = 12;
     public static final int HOOD_ID = 13;
     public static final int HOOD_ENCODER_ID = 14;
+    public static final int KICKER_ID = 15;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
         new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+
+    public static final Slot0Configs kickerSlotVelocityConfigs =
+        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+
+    public static final FeedbackConfigs kickerFeedbackConfigs =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     // TODO tune these values once final bot comes; reference this link:
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
