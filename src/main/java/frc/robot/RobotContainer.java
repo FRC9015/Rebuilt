@@ -53,6 +53,8 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOSim;
+
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -68,7 +70,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private Vision vision;
+  private final Vision vision;
   private final Shooter shooter;
   private final GameState gamestate;
   private final Indexer indexer;
@@ -163,6 +165,7 @@ public class RobotContainer {
         intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim(simIntake, simDrive));
+        vision = new Vision(new VisionIOSim());
         turret =
             new Turret(
                 new TurretIOTalonFX(

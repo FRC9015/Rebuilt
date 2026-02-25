@@ -56,6 +56,18 @@ public class Vision extends SubsystemBase {
           new Alert(
               "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
     }
+
+  }
+
+  public Vision(VisionIO io){
+    this.consumer = null;
+    this.io = new VisionIO[] { io };
+    this.inputs = new VisionIOInputsAutoLogged[1];
+    this.inputs[0] = new VisionIOInputsAutoLogged();
+    this.disconnectedAlerts = new Alert[1];
+    this.disconnectedAlerts[0] =
+        new Alert(
+            "Vision camera 0 is disconnected.", AlertType.kWarning);
   }
 
   /**
