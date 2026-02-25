@@ -45,13 +45,15 @@ public class Shooter extends SubsystemBase {
 
   public Command runShooterAtSpeed(double speed) {
     Logger.recordOutput("Shooter/Speed", speed);
-    return this.startEnd(() -> {
-      this.setShooterSpeed(speed);
-      
-      if (inputs.flywheelAtSpeed) {
-        this.setKickerSpeed(speed);
-      }
-    }, () -> io.stopFlywheels());
+    return this.startEnd(
+        () -> {
+          this.setShooterSpeed(speed);
+
+          if (inputs.flywheelAtSpeed) {
+            this.setKickerSpeed(speed);
+          }
+        },
+        () -> io.stopFlywheels());
   }
 
   public Command runShooterAtReverseSpeed(double speed) {

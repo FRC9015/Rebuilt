@@ -82,7 +82,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
-    kickerMotor.getConfigurator().apply(kickerConfig);  
+    kickerMotor.getConfigurator().apply(kickerConfig);
     hoodMotor.getConfigurator().apply(hoodConfig);
 
     motorVolts = flywheelMotorLeft.getMotorVoltage();
@@ -92,7 +92,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM, motorPosition);
 
-    ParentDevice.optimizeBusUtilizationForAll(flywheelMotorLeft, flywheelMotorRight, kickerMotor, hoodMotor);
+    ParentDevice.optimizeBusUtilizationForAll(
+        flywheelMotorLeft, flywheelMotorRight, kickerMotor, hoodMotor);
   }
 
   @Override
