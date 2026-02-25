@@ -7,10 +7,13 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CameraConstants;
+import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
@@ -49,6 +53,7 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -63,14 +68,14 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  // Controller
-  private final Vision vision;
+  private Vision vision;
   private final Shooter shooter;
   private final GameState gamestate;
   private final Indexer indexer;
   private final Intake intake;
   private final Turret turret;
-  private SwerveDriveSimulation simDrive = null;
+  private SwerveDriveSimulation simDrive;
+  private IntakeSimulation simIntake;
 
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -132,6 +137,21 @@ public class RobotContainer {
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
+        simIntake =
+            IntakeSimulation.OverTheBumperIntake(
+                // Specify the type of game pieces that the intake can collect
+                SimConstants.GAMEPIECE,
+                // Specify the drivetrain to which this intake is attached
+                simDrive,
+                // Width of the intake
+                Meters.of(SimConstants.INTAKE_WIDTH),
+                // The extension length of the intake beyond the robot's frame (when activated)
+                Meters.of(SimConstants.INTAKE_LENGTH),
+                // The intake is mounted on the back side of the chassis
+                IntakeSimulation.IntakeSide.FRONT,
+                // The intake can hold up to 50 Fuel
+                SimConstants.HOPPER_CAPACITY);
+
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
@@ -139,15 +159,10 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
 
-        new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
-        indexer = new Indexer(new IndexerIO() {});
-        shooter = new Shooter(new ShooterIOSim());
         intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
+        indexer = new Indexer(new IndexerIO() {});
+        shooter = new Shooter(new ShooterIOSim(simIntake, simDrive));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -256,6 +271,16 @@ public class RobotContainer {
                 .ignoringDisable(true));
     driverController.leftTrigger().whileTrue(intake.runIntakeSim());
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            shooter.runShooterAtSpeedAngle(
+                6000, Units.degreesToRadians(55))); // TODO FIX THESE NUMBERS
+    driverController
+        .y()
+        .whileTrue(
+            shooter.runShooterAtSpeedAngle(
+                5000, Units.degreesToRadians(10))); // TODO FIX THESE NUMBERS, also figure out
 
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
   }
