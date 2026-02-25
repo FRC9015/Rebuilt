@@ -178,6 +178,7 @@ public final class Constants {
     public static final int HOOD_ID = 13;
     public static final int HOOD_ENCODER_ID = 14;
     public static final int KICKER_ID = 15;
+    public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
         new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);

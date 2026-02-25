@@ -37,7 +37,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private final MotionMagicVelocityVoltage kickerMagicVelocityVoltage =
       new MotionMagicVelocityVoltage(0.0);
 
-  private final double idealKickerSpeed = 0.0; // TODO figure out ideal kicker speed
+  private double lastFlywheelSetpointSpeed = 0.0;
 
   public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int hoodID, int kickerID) {
     flywheelMotorLeft = new TalonFX(flywheelID1);
@@ -104,6 +104,14 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.flywheelRPM = motorRPM.getValueAsDouble();
     inputs.flywheelCurrentAmps = flywheelMotorLeft.getStatorCurrent().getValueAsDouble();
     inputs.hoodEncoderConnected = hoodMotor.getPosition().isAllGood();
+    inputs.flywheelTargetSpeed = lastFlywheelSetpointSpeed;
+
+    if (Math.abs(inputs.flywheelCurrentSpeed - inputs.flywheelTargetSpeed)
+        < Constants.ShooterConstants.FLYWHEEL_RPM_TOLERANCE) {
+      inputs.flywheelAtSpeed = true;
+    } else {
+      inputs.flywheelAtSpeed = false;
+    }
   }
 
   @Override
@@ -141,7 +149,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   // Unit of output: RPS
   @Override
   public void setFlyWheelSpeed(double speed) {
-
+    lastFlywheelSetpointSpeed = speed;
     flywheelMotorLeft.setControl(flywheelMagicVelocityVoltage.withVelocity(speed));
     flywheelMotorRight.setControl(flywheelMagicVelocityVoltage.withVelocity(speed));
   }

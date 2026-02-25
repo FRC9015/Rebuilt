@@ -13,11 +13,13 @@ public interface ShooterIO {
     public double flywheelCurrentAmps = 0.0;
     public double flywheelCurrentSpeed = 0.0;
     public double flywheelRPM = 0.0;
+    public double flywheelTargetSpeed = 0.0;
 
     // Fields representing the hood state and inputs
     public double hoodEncoderPosition = 0.0;
     public double hoodTargetPosition = 0.0;
     public boolean hoodEncoderConnected = false;
+    public boolean flywheelAtSpeed = false;
     public double hoodAppliedVolts = 0.0;
     public double hoodCurrentAmps = 0.0;
   }
