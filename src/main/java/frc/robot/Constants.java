@@ -183,6 +183,17 @@ public final class Constants {
     public static final int FLY_WHEEL_RIGHT_ID = 12;
     public static final int HOOD_ID = 13;
     public static final int HOOD_ENCODER_ID = 14;
+    public static final int KICKER_ID = 15;
+    public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value
+
+    public static final Slot0Configs flyWheelSlotVelocityConfigs =
+        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+    // TODO: Tune kicker PID values
+    public static final Slot0Configs kickerSlotVelocityConfigs =
+        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+
+    public static final FeedbackConfigs kickerFeedbackConfigs =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     // TODO tune these values once final bot comes; reference this link:
     // https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html
@@ -206,7 +217,6 @@ public final class Constants {
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     // TODO tune these values
-
     public static final double SHOOTER_MAX_SPEED = 100;
     public static final double SHOOTER_MIN_SPEED = 0.0;
     public static final double FLYWHEEL_ACCELERATION = 100;
@@ -215,15 +225,6 @@ public final class Constants {
     public static final double HOOD_MIN_POS = 0.0;
     public static final double HOOD_DEPLOYED_POSITION = 0.0;
     public static final double HOOD_STOWED_POSITION = 0.0;
-    public static final Slot0Configs flyWheelSlotVelocityConfigs =
-        new Slot0Configs()
-            .withKP(0.01)
-            .withKI(0)
-            .withKD(0.0025)
-            .withKG(0)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
   }
 
   public static class LedConstants {

@@ -116,7 +116,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.HOOD_ID));
+                    Constants.ShooterConstants.HOOD_ID,
+                    Constants.ShooterConstants.KICKER_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -175,13 +176,15 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.HOOD_ID));
+                    Constants.ShooterConstants.HOOD_ID,
+                    Constants.ShooterConstants.KICKER_ID));        
         turret =
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
                     turretConstants.ENCODER_13_TOOTH,
                     turretConstants.ENCODER_15_TOOTH));
+
         break;
 
       default:
