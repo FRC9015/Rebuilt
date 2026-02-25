@@ -272,7 +272,7 @@ public class RobotContainer {
     operatorController.leftStick().onTrue(gamestate.manualGameData(0));
     operatorController.rightStick().onTrue(gamestate.manualGameData(1));
 
-    operatorController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(0.0));
+    operatorController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(0.0).alongWith(indexer.runIndexerWithAutoUnjam(0)));
     //operatorController.povRight().whileTrue(shooter.);
     operatorController.b().whileTrue(shooter.setHoodPosition(0)); //10 degrees
     operatorController.a().whileTrue(shooter.setHoodPosition(0)); //10 degrees
