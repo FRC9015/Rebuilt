@@ -51,7 +51,7 @@ public class TurretIOTalonFX implements TurretIO {
   private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
   private Alert outofSyncAlert =
-      new Alert("⚠️ CRT-Motor desync detected! Resyncing motor.", AlertType.kWarning);
+      new Alert("CRT-Motor desync detected! Resyncing motor.", AlertType.kWarning);
   private Alert outofBoundsAlert =
       new Alert("Turret out of bounds; no longer tracking", AlertType.kError);
 
@@ -128,10 +128,10 @@ public class TurretIOTalonFX implements TurretIO {
               this.seedMotorPosition(angle.in(Rotations));
               Logger.recordOutput(
                   "Turret/InitStatus",
-                  "✓ Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
+                  "Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
             },
             () -> {
-              Logger.recordOutput("Turret/InitStatus", "✗ CRT failed to resolve turret angle!");
+              Logger.recordOutput("Turret/InitStatus", "CRT failed to resolve turret angle!");
               Logger.recordOutput("Turret/InitStatuslast", "  Status: " + easyCRT.getLastStatus());
               Logger.recordOutput(
                   "Turret/InitStatus13",

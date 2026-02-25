@@ -245,7 +245,6 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    // Reset gyro to 0 degreesisFuelInsideIntake() when B button is pressed
     driverController
         .b()
         .onTrue(
