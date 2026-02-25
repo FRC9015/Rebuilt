@@ -27,9 +27,33 @@ public class Shooter extends SubsystemBase {
     io.setFlyWheelSpeed(-speedValue);
   }
 
+  public void setKickerSpeed(double speedValue) {
+    io.setKickerSpeed(speedValue);
+  }
+
+  public void setKickerSpeedReverse(double speedValue) {
+    io.setKickerSpeed(-speedValue);
+  }
+
+  public Command setKickerSpeedCommand(double speedValue) {
+    return this.run(() -> this.setKickerSpeed(speedValue));
+  }
+
+  public Command setKickerSpeedReverseCommand(double speedValue) {
+    return this.run(() -> this.setKickerSpeedReverse(speedValue));
+  }
+
   public Command runShooterAtSpeed(double speed) {
     Logger.recordOutput("Shooter/Speed", speed);
-    return this.startEnd(() -> this.setShooterSpeed(speed), () -> io.stopFlywheels());
+    return this.startEnd(
+        () -> {
+          this.setShooterSpeed(speed);
+
+          if (inputs.flywheelAtSpeed) {
+            this.setKickerSpeed(speed);
+          }
+        },
+        () -> io.stopFlywheels());
   }
 
   public Command runShooterAtReverseSpeed(double speed) {
