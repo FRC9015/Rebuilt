@@ -3,8 +3,8 @@ package frc.robot.subsystems.shooter;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -21,6 +21,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   public final TalonFX flywheelMotorLeft;
   public final TalonFX flywheelMotorRight;
+  public final TalonFX kickerMotor;
   public final TalonFX hoodMotor;
 
   public StatusSignal<Voltage> motorVolts;
@@ -31,10 +32,17 @@ public class ShooterIOTalonFX implements ShooterIO {
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private final MotionMagicVoltage hoodMagicVoltage =
       new MotionMagicVoltage(Constants.ShooterConstants.HOOD_MAX_POS);
+  private final MotionMagicVelocityVoltage flywheelMagicVelocityVoltage =
+      new MotionMagicVelocityVoltage(0.0);
+  private final MotionMagicVelocityVoltage kickerMagicVelocityVoltage =
+      new MotionMagicVelocityVoltage(0.0);
 
-  public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int hoodID) {
+  private double lastFlywheelSetpointSpeed = 0.0;
+
+  public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int hoodID, int kickerID) {
     flywheelMotorLeft = new TalonFX(flywheelID1);
     flywheelMotorRight = new TalonFX(flywheelID2);
+    kickerMotor = new TalonFX(kickerID);
     hoodMotor = new TalonFX(hoodID);
     // Configure motor
     TalonFXConfiguration flyWheelConfigLeft =
@@ -57,6 +65,14 @@ public class ShooterIOTalonFX implements ShooterIO {
     flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     flyWheelConfigRight.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
+    TalonFXConfiguration kickerConfig =
+        new TalonFXConfiguration()
+            .withSlot0(Constants.ShooterConstants.kickerSlotVelocityConfigs)
+            .withFeedback(Constants.ShooterConstants.kickerFeedbackConfigs);
+
+    kickerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
@@ -66,6 +82,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
+    kickerMotor.getConfigurator().apply(kickerConfig);
     hoodMotor.getConfigurator().apply(hoodConfig);
 
     motorVolts = flywheelMotorLeft.getMotorVoltage();
@@ -75,7 +92,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM, motorPosition);
 
-    ParentDevice.optimizeBusUtilizationForAll(flywheelMotorLeft, flywheelMotorRight, hoodMotor);
+    ParentDevice.optimizeBusUtilizationForAll(
+        flywheelMotorLeft, flywheelMotorRight, kickerMotor, hoodMotor);
   }
 
   @Override
@@ -87,6 +105,14 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.flywheelRPM = motorRPM.getValueAsDouble();
     inputs.flywheelCurrentAmps = flywheelMotorLeft.getStatorCurrent().getValueAsDouble();
     inputs.hoodEncoderConnected = hoodMotor.getPosition().isAllGood();
+    inputs.flywheelTargetSpeed = lastFlywheelSetpointSpeed;
+
+    if (Math.abs(inputs.flywheelCurrentSpeed - inputs.flywheelTargetSpeed)
+        < Constants.ShooterConstants.FLYWHEEL_RPM_TOLERANCE) {
+      inputs.flywheelAtSpeed = true;
+    } else {
+      inputs.flywheelAtSpeed = false;
+    }
   }
 
   @Override
@@ -101,9 +127,15 @@ public class ShooterIOTalonFX implements ShooterIO {
   }
 
   @Override
+  public void stopKicker() {
+    kickerMotor.stopMotor();
+  }
+
+  @Override
   public void stopShooter() {
     stopFlywheels();
     stopHood();
+    stopKicker();
   }
 
   @Override
@@ -118,10 +150,14 @@ public class ShooterIOTalonFX implements ShooterIO {
   // Unit of output: RPS
   @Override
   public void setFlyWheelSpeed(double speed) {
-    final VelocityVoltage flyWheelVelocityVoltage = new VelocityVoltage(0.0);
+    lastFlywheelSetpointSpeed = speed;
+    flywheelMotorLeft.setControl(flywheelMagicVelocityVoltage.withVelocity(speed));
+    flywheelMotorRight.setControl(flywheelMagicVelocityVoltage.withVelocity(speed));
+  }
 
-    flywheelMotorLeft.setControl(flyWheelVelocityVoltage.withVelocity(speed));
-    flywheelMotorRight.setControl(flyWheelVelocityVoltage.withVelocity(speed));
+  @Override
+  public void setKickerSpeed(double speed) {
+    kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(speed));
   }
 
   @Override
