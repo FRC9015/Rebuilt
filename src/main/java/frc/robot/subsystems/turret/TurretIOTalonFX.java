@@ -23,7 +23,7 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants;
-import frc.robot.Constants.turretConstants;
+import frc.robot.Constants.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 import yams.units.EasyCRT;
 import yams.units.EasyCRT.CRTStatus;
@@ -67,13 +67,13 @@ public class TurretIOTalonFX implements TurretIO {
                 new SoftwareLimitSwitchConfigs()
                     .withForwardSoftLimitEnable(true)
                     .withForwardSoftLimitThreshold(
-                        turretConstants.MAXROTATION) // Stop at 1 rotations
+                        TurretConstants.MAXROTATION) // Stop at 1 rotations
                     .withReverseSoftLimitEnable(true)
                     .withReverseSoftLimitThreshold(
-                        turretConstants.MINROTATION)) // Stop at -1 rotations
-            .withMotionMagic(turretConstants.MOTION_MAGIC_CONFIGS)
-            .withSlot0(turretConstants.SLOT0_CONFIGS)
-            .withFeedback(turretConstants.FEEDBACK_CONFIGS)
+                        TurretConstants.MINROTATION)) // Stop at -1 rotations
+            .withMotionMagic(TurretConstants.MOTION_MAGIC_CONFIGS)
+            .withSlot0(TurretConstants.SLOT0_CONFIGS)
+            .withFeedback(TurretConstants.FEEDBACK_CONFIGS)
             .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1));
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -81,11 +81,11 @@ public class TurretIOTalonFX implements TurretIO {
 
     CANcoderConfiguration encoderConfig13 = new CANcoderConfiguration();
     encoderConfig13.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    encoderConfig13.MagnetSensor.MagnetOffset = turretConstants.ENCODER13_MAGNET_OFFSET;
+    encoderConfig13.MagnetSensor.MagnetOffset = TurretConstants.ENCODER13_MAGNET_OFFSET;
 
     CANcoderConfiguration encoderConfig15 = new CANcoderConfiguration();
     encoderConfig15.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-    encoderConfig15.MagnetSensor.MagnetOffset = turretConstants.ENCODER15_MAGNET_OFFSET;
+    encoderConfig15.MagnetSensor.MagnetOffset = TurretConstants.ENCODER15_MAGNET_OFFSET;
 
     encoder13.getConfigurator().apply(encoderConfig13);
     encoder15.getConfigurator().apply(encoderConfig15);
@@ -109,12 +109,12 @@ public class TurretIOTalonFX implements TurretIO {
         new EasyCRTConfig(
                 () -> encoder13.getAbsolutePosition().getValue(),
                 () -> encoder15.getAbsolutePosition().getValue())
-            .withAbsoluteEncoder1Gearing(turretConstants.T_TEETH, turretConstants.E1_TEETH)
-            .withAbsoluteEncoder2Gearing(turretConstants.T_TEETH, turretConstants.E2_TEETH)
+            .withAbsoluteEncoder1Gearing(TurretConstants.T_TEETH, TurretConstants.E1_TEETH)
+            .withAbsoluteEncoder2Gearing(TurretConstants.T_TEETH, TurretConstants.E2_TEETH)
             .withMechanismRange(
-                Rotations.of(turretConstants.MINROTATION),
-                Rotations.of(turretConstants.MAXROTATION))
-            .withMatchTolerance(Rotations.of(turretConstants.CRT_TOLERANCE))
+                Rotations.of(TurretConstants.MINROTATION),
+                Rotations.of(TurretConstants.MAXROTATION))
+            .withMatchTolerance(Rotations.of(TurretConstants.CRT_TOLERANCE))
             .withAbsoluteEncoderOffsets(Rotations.of(0.0), Rotations.of(0.0))
             .withAbsoluteEncoderInversions(false, false);
 
@@ -170,11 +170,11 @@ public class TurretIOTalonFX implements TurretIO {
               inputs.turretResolvedPosition = angle.in(Rotations);
               inputs.turretResolvedPositionDegrees = angle.in(Rotations) * 360.0;
               if (Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
-                  > Constants.turretConstants.SYNC_THRESHOLD) {
+                  > Constants.TurretConstants.SYNC_THRESHOLD) {
 
                 outofSyncAlert.set(
                     Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
-                        > Constants.turretConstants.SYNC_THRESHOLD);
+                        > Constants.TurretConstants.SYNC_THRESHOLD);
 
                 this.seedMotorPosition(angle.in(Rotations));
               }

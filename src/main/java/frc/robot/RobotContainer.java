@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.MotorIDConstants;
-import frc.robot.Constants.turretConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
@@ -122,8 +122,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH,
-                    turretConstants.ENCODER_15_TOOTH));
+                    TurretConstants.ENCODER_13_TOOTH,
+                    TurretConstants.ENCODER_15_TOOTH));
         break;
 
       case SIM:
@@ -152,8 +152,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH,
-                    turretConstants.ENCODER_15_TOOTH));
+                    TurretConstants.ENCODER_13_TOOTH,
+                    TurretConstants.ENCODER_15_TOOTH));
         break;
 
       case REPLAY:
@@ -182,8 +182,8 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
-                    turretConstants.ENCODER_13_TOOTH,
-                    turretConstants.ENCODER_15_TOOTH));
+                    TurretConstants.ENCODER_13_TOOTH,
+                    TurretConstants.ENCODER_15_TOOTH));
 
         break;
 
