@@ -253,7 +253,7 @@ public final class Constants {
     public static final double CLIMB_MIN_POS = 0.0;
   }
 
-  public static class turretConstants {
+  public static class TurretConstants {
     // --- GEAR TEETH ---
     public static final int T_TEETH = 90; // Gear count on final turret gear
     public static final int E1_TEETH = 13; // Gear on Encoder 1
