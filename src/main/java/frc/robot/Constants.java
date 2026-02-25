@@ -181,7 +181,7 @@ public final class Constants {
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
         new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
-
+    // TODO: Tune kicker PID values
     public static final Slot0Configs kickerSlotVelocityConfigs =
         new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
 
