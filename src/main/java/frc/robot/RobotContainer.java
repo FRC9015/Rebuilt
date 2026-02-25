@@ -19,7 +19,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.MotorIDConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -43,6 +45,8 @@ import frc.robot.subsystems.intake.RollerIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.ironmaple.simulation.SimulatedArena;
@@ -65,10 +69,11 @@ public class RobotContainer {
   private final GameState gamestate;
   private final Indexer indexer;
   private final Intake intake;
+  private final Turret turret;
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(1);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
@@ -113,6 +118,12 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.KICKER_ID));
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID,
+                    TurretConstants.ENCODER_13_TOOTH,
+                    TurretConstants.ENCODER_15_TOOTH));
         break;
 
       case SIM:
@@ -137,6 +148,12 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
         intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID,
+                    TurretConstants.ENCODER_13_TOOTH,
+                    TurretConstants.ENCODER_15_TOOTH));
         break;
 
       case REPLAY:
@@ -160,7 +177,14 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID));        
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID,
+                    TurretConstants.ENCODER_13_TOOTH,
+                    TurretConstants.ENCODER_15_TOOTH));
+
         break;
 
       default:
@@ -221,7 +245,6 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    // Reset gyro to 0 degreesisFuelInsideIntake() when B button is pressed
     driverController
         .b()
         .onTrue(
@@ -233,6 +256,8 @@ public class RobotContainer {
                 .ignoringDisable(true));
     driverController.leftTrigger().whileTrue(intake.runIntakeSim());
     driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
+
+    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
   }
 
   /**
