@@ -27,7 +27,7 @@ public class Turret extends SubsystemBase {
     // 1. Get bounds and current position in degrees
     double minDegrees = TurretConstants.MINROTATION * 360.0;
     double maxDegrees = TurretConstants.MAXROTATION * 360.0;
-    double currentPosDegrees = inputs.TurretResolvedPosition * 360.0;
+    double currentPosDegrees = inputs.turretResolvedPosition * 360.0;
 
     // 2. Normalize user input to [0, 360)
     double target = targetAngleDegrees % 360.0;
