@@ -217,12 +217,26 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    driverController.leftTrigger().whileTrue(intake.runIntakeAtSpeed(0.0));
-    driverController.rightTrigger().whileTrue(intake.runIntakeAtSpeed(-0.0));
+    /**driverController
+        .y()
+        .onTrue();*/
+    driverController
+        .leftTrigger()
+        .whileTrue(
+            intake.runIntakeAtSpeed(0.0));
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            intake.runIntakeAtSpeed(-0.0));
     //driverController.start().whileTrue(); add when there is a command for moving the pivot
 
-    operatorController.leftTrigger().whileTrue(gamestate.manualGameData(0));
-    operatorController.rightTrigger().whileTrue(gamestate.manualGameData(1));
+    operatorController.leftStick().onTrue(gamestate.manualGameData(0));
+    operatorController.rightStick().onTrue(gamestate.manualGameData(1));
+
+    operatorController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(0.0));
+    //operatorController.povRight().whileTrue(shooter.);
+    operatorController.b().whileTrue(shooter.setHoodPosition(0)); //10 degrees
+    operatorController.a().whileTrue(shooter.setHoodPosition(0)); //10 degrees
   }
 
   /**
