@@ -22,8 +22,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.MotorIDConstants;
-import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.SimConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
@@ -53,12 +53,6 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOSim;
-
-import org.ironmaple.simulation.IntakeSimulation;
-import frc.robot.subsystems.vision.VisionIOSim;
-
-import org.ironmaple.simulation.IntakeSimulation;
 import frc.robot.subsystems.vision.VisionIOSim;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
@@ -144,6 +138,7 @@ public class RobotContainer {
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
+
         simIntake =
             IntakeSimulation.OverTheBumperIntake(
                 // Specify the type of game pieces that the intake can collect
@@ -155,7 +150,7 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.FRONT,
+                IntakeSimulation.IntakeSide.BACK,
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
 
@@ -167,7 +162,7 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
 
-        intake = new Intake(new RollerIOSim(simDrive), new PivotIOSim());
+        intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim(simIntake, simDrive));
         vision = new Vision(new VisionIOSim());
@@ -200,14 +195,13 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID,
-                    Constants.ShooterConstants.KICKER_ID));        
+                    Constants.ShooterConstants.KICKER_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
-
         break;
 
       default:

@@ -62,6 +62,11 @@ public class ShooterIOSim implements ShooterIO {
     // Update the launch speed based on the RPM; assumed to be 16 meters/second at
     // 6000 RPM
     launchSpeed = LinearVelocity.ofBaseUnits((rpm / velocityRPM) * 8, MetersPerSecond);
+    // if (!intakeSimulation.obtainGamePieceFromIntake()) {
+    //   System.out.println("No game piece obtained from intake, cannot shoot.");
+    //   return;
+    // }
+
     if (!intakeSimulation.obtainGamePieceFromIntake()) {
       return;
     }
@@ -74,6 +79,7 @@ public class ShooterIOSim implements ShooterIO {
                     () ->
                         FieldMirroringUtils.toCurrentAllianceTranslation(
                             new Translation3d(0.25, 5.56, 2.3)))
+                .withTargetTolerance(new Translation3d(0.5, 1.2, 0.3))
                 .withProjectileTrajectoryDisplayCallBack(
                     (poses) ->
                         Logger.recordOutput(
