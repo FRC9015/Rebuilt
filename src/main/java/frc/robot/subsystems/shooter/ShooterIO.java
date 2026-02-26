@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.Constants.ShooterConstants;
-
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ShooterIO {
