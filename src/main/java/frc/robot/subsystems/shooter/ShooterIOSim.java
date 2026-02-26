@@ -31,16 +31,18 @@ public class ShooterIOSim implements ShooterIO {
   private Angle launchAngle =
       Angle.ofBaseUnits(15, Degrees); // TODO Update Example Launch Angle of the projectile
   private int shotsMade = 0;
+  private Hood hoodSim;
 
-  public ShooterIOSim(IntakeSimulation simIntake, SwerveDriveSimulation simDrive) {
+  public ShooterIOSim(IntakeSimulation simIntake, SwerveDriveSimulation simDrive, Hood hoodSim) {
     this.intakeSimulation = simIntake;
     this.swerveDriveSimulation = simDrive;
+    this.hoodSim = hoodSim;
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
     inputs.flywheelLinearVelocity = this.getLaunchSpeed();
-    // inputs.launchAngle = this.getLaunchAngle();
+    launchAngle = hoodSim.getLaunchAngle();
   }
 
   private LinearVelocity getLaunchSpeed() {

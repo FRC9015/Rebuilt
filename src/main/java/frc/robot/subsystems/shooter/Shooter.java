@@ -21,6 +21,7 @@ public class Shooter extends SubsystemBase {
 
   public void setShooterSpeed(double speedValue, double angleValue) {
     io.setFlyWheelSpeed(speedValue);
+    io.setHoodPosition(angleValue);
   }
 
   public void setShooterReverseSpeed(double speedValue) {

@@ -25,8 +25,8 @@ public interface HoodIO {
 
   public default void setHoodPosition(double position) {}
 
-  public default double getHoodPosition() {
-    return 0.0;
+  public default Angle getHoodPosition() {
+    return Angle.ofBaseUnits(ShooterConstants.HOOD_RESTING_ANGLE, Degrees);
   }
 
   default void stopHood() {}

@@ -169,8 +169,8 @@ public class RobotContainer {
 
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
-        shooter = new Shooter(new ShooterIOSim(simIntake, simDrive));
         hood = new Hood(new HoodIOSim());
+        shooter = new Shooter(new ShooterIOSim(simIntake, simDrive, hood));
         vision = new Vision(new VisionIOSim());
         turret =
             new Turret(
