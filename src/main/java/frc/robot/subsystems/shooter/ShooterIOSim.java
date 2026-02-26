@@ -40,7 +40,7 @@ public class ShooterIOSim implements ShooterIO {
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
     inputs.flywheelLinearVelocity = this.getLaunchSpeed();
-    inputs.launchAngle = this.getLaunchAngle();
+    // inputs.launchAngle = this.getLaunchAngle();
   }
 
   private LinearVelocity getLaunchSpeed() {

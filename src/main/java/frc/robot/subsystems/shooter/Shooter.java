@@ -20,7 +20,6 @@ public class Shooter extends SubsystemBase {
   // Maximum Value of speedValue: 100 RPS
 
   public void setShooterSpeed(double speedValue, double angleValue) {
-    io.setHoodPosition(angleValue);
     io.setFlyWheelSpeed(speedValue);
   }
 
@@ -58,14 +57,6 @@ public class Shooter extends SubsystemBase {
 
   public Command stopFlywheels() {
     return this.run(() -> io.stopFlywheels());
-  }
-
-  public Command stopHood() {
-    return this.run(() -> io.stopHood());
-  }
-
-  public Command setHoodPosition(double position) {
-    return this.run(() -> io.setHoodPosition(position));
   }
 
   @Override

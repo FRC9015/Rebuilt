@@ -46,6 +46,10 @@ import frc.robot.subsystems.intake.PivotIOTalonFX;
 import frc.robot.subsystems.intake.RollerIO;
 import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.RollerIOTalonFX;
+import frc.robot.subsystems.shooter.Hood;
+import frc.robot.subsystems.shooter.HoodIO;
+import frc.robot.subsystems.shooter.HoodIOSim;
+import frc.robot.subsystems.shooter.HoodIOTalonFX;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -75,6 +79,7 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Intake intake;
   private final Turret turret;
+  private final Hood hood;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
 
@@ -122,7 +127,6 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.KICKER_ID));
         turret =
             new Turret(
@@ -130,6 +134,7 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
+        hood = new Hood(new HoodIOTalonFX(Constants.ShooterConstants.HOOD_ENCODER_ID));
         break;
 
       case SIM:
@@ -165,6 +170,7 @@ public class RobotContainer {
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim(simIntake, simDrive));
+        hood = new Hood(new HoodIOSim());
         vision = new Vision(new VisionIOSim());
         turret =
             new Turret(
@@ -194,7 +200,6 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.KICKER_ID));
         turret =
             new Turret(
@@ -202,6 +207,7 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
+        hood = new Hood(new HoodIO() {});
         break;
 
       default:
