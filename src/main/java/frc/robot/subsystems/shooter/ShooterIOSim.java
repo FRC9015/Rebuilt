@@ -3,13 +3,15 @@ package frc.robot.subsystems.shooter;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.ShooterConstants;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -55,7 +57,7 @@ public class ShooterIOSim implements ShooterIO {
   }
 
   public void stopHood() {
-    launchAngle = Angle.ofBaseUnits(15, Degrees);
+    launchAngle = Angle.ofBaseUnits(ShooterConstants.HOOD_RESTING_ANGLE, Degrees);
   }
 
   public void setFlyWheelSpeed(double rpm) {
@@ -78,8 +80,9 @@ public class ShooterIOSim implements ShooterIO {
                 .withTargetPosition(
                     () ->
                         FieldMirroringUtils.toCurrentAllianceTranslation(
-                            new Translation3d(0.25, 5.56, 2.3)))
-                .withTargetTolerance(new Translation3d(0.5, 1.2, 0.3))
+                            FieldConstants.HUB_TARGET_TRANSLATION))
+                // increase tolerance so shots that visually go through the target register as hits
+                .withTargetTolerance(FieldConstants.HUB_TARGET_TOLERANCE)
                 .withProjectileTrajectoryDisplayCallBack(
                     (poses) ->
                         Logger.recordOutput(

@@ -185,6 +185,7 @@ public final class Constants {
     public static final int HOOD_ENCODER_ID = 14;
     public static final int KICKER_ID = 15;
     public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value
+    public static final double HOOD_RESTING_ANGLE = 10.0;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
         new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
@@ -307,5 +308,11 @@ public final class Constants {
     public static final Pose2d HUB_POSE_BLUE =
         new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), new Rotation2d());
     public static final Pose2d HUB_POSE_RED = FlippingUtil.flipFieldPose(HUB_POSE_BLUE);
+    public static final Translation3d HUB_TARGET_TRANSLATION =
+        new Translation3d(
+            Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), Units.inchesToMeters(72));
+    public static final Translation3d HUB_TARGET_TOLERANCE =
+        new Translation3d(
+            Units.inchesToMeters(24), Units.inchesToMeters(21), Units.inchesToMeters(0.02));
   }
 }
