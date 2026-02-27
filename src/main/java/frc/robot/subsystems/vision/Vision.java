@@ -10,7 +10,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import java.util.LinkedList;
@@ -37,7 +36,7 @@ public class Vision extends SubsystemBase {
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
-  private Matrix<N3, N1> curStdDevs = CameraConstants.kSingleTagStdDevs;
+  private Matrix<N3, N1> curStdDevs = VisionConstants.kSingleTagStdDevs;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -102,7 +101,7 @@ public class Vision extends SubsystemBase {
 
       // Add tag poses
       for (int tagId : inputs[cameraIndex].tagIds) {
-        Optional<Pose3d> tagPose = CameraConstants.aprilTagLayout.getTagPose(tagId);
+        Optional<Pose3d> tagPose = VisionConstants.aprilTagLayout.getTagPose(tagId);
         if (tagPose.isPresent()) {
           tagPoses.add(tagPose.get());
         }
@@ -119,9 +118,9 @@ public class Vision extends SubsystemBase {
 
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
-                || observation.pose().getX() > CameraConstants.FIELD_LENGTH
+                || observation.pose().getX() > VisionConstants.FIELD_LENGTH
                 || observation.pose().getY() < 0.0
-                || observation.pose().getY() > CameraConstants.FIELD_WIDTH;
+                || observation.pose().getY() > VisionConstants.FIELD_WIDTH;
 
         // Add pose to log
         robotPoses.add(observation.pose());
@@ -137,14 +136,14 @@ public class Vision extends SubsystemBase {
         }
 
         // Pose present. Start running Heuristic
-        var estStdDevs = CameraConstants.kSingleTagStdDevs;
+        var estStdDevs = VisionConstants.kSingleTagStdDevs;
         int numTags = observation.tagCount();
         double avgDist = observation.averageTagDistance();
 
         // One or more tags visible, run the full heuristic.
         // Decrease std devs if multiple targets are visible
         if (numTags > 1) {
-          estStdDevs = CameraConstants.kMultiTagStdDevs;
+          estStdDevs = VisionConstants.kMultiTagStdDevs;
         }
 
         // Increase std devs based on (average) distance

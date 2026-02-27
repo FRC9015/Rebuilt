@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.CameraConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -38,7 +38,6 @@ import frc.robot.subsystems.intake.IntakeIOSparkFlex;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
-import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.ironmaple.simulation.SimulatedArena;
@@ -60,7 +59,6 @@ public class RobotContainer {
   private final GameState gamestate;
   private final Indexer indexer;
   private final Intake intake;
-  private final ObjectDetection objectDetection;
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
@@ -90,7 +88,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+                new VisionIOPhotonVision("Test_Cam", VisionConstants.FrontCamera));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
@@ -103,7 +101,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID));
-        objectDetection = new ObjectDetection();
         break;
 
       case SIM:
@@ -123,8 +120,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-        objectDetection = new ObjectDetection();
+                new VisionIOPhotonVision("placeholder", VisionConstants.FrontCamera));
+
         new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
         intake = new Intake(new IntakeIOSim(simDrive));
         indexer = new Indexer(new IndexerIO() {});
@@ -143,7 +140,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+                new VisionIOPhotonVision("placeholder", VisionConstants.FrontCamera));
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
@@ -152,7 +149,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.HOOD_ID));
-        objectDetection = new ObjectDetection();
         break;
 
       default:
