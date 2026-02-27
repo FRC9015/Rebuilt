@@ -23,6 +23,8 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -49,6 +51,9 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+
+import java.util.function.Supplier;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -70,6 +75,7 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Intake intake;
   private final Turret turret;
+  private final Climb climb;
   private SwerveDriveSimulation simDrive = null;
 
   // Controller
@@ -254,19 +260,22 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    /**driverController
+    driverController
         .y()
-        .onTrue();*/
+        .onTrue(
+            Commands.either(
+                climb.setClimbPresetPosition(ClimbPositions.ReadyToClimbL1),
+                climb.setClimbPresetPosition(ClimbPositions.FullyClimbedL1),
+                () -> climb.getClimbPosition() != ClimbPositions.ReadyToClimbL1));
     driverController
         .leftTrigger()
         .whileTrue(
-            intake.runIntakeAtSpeed(0.0));
+            intake.runIntakeAtSpeed(0.0, PivotIO.PivotPositions.DEPLOYED));
     driverController
         .rightTrigger()
         .whileTrue(
-            intake.runIntakeAtSpeed(-0.0));
+            intake.runIntakeAtSpeed(-0.0,PivotIO.PivotPositions.DEPLOYED));
     //driverController.start().whileTrue(); add when there is a command for moving the pivot
-
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
 
 
@@ -283,7 +292,6 @@ public class RobotContainer {
         .whileTrue(
             shooter.runShooterAtSpeed(0.0)
             .alongWith(indexer.runIndexerWithAutoUnjam(0)));
-    //operatorController.povRight().whileTrue(shooter.);
     operatorController
         .b()
         .whileTrue(

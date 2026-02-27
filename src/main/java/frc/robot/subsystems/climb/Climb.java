@@ -1,6 +1,7 @@
 package frc.robot.subsystems.climb;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs;
 import org.littletonrobotics.junction.Logger;
@@ -10,6 +11,7 @@ public class Climb extends SubsystemBase {
   private final ClimbIO io;
   private final ClimbIOInputsAutoLogged inputs = new ClimbIOInputsAutoLogged();
   private final PIDController pidController;
+  private ClimbIOInputs.ClimbPositions climbPosition;
 
   // PID constants
   // TODO: Update PID constants during tuning
@@ -34,8 +36,17 @@ public class Climb extends SubsystemBase {
    *
    * @param position pre-set climb positions listed in ClimbIO
    */
-  public void setPresetPosition(ClimbIOInputs.ClimbPositions position) {
+  private void setPresetPosition(ClimbIOInputs.ClimbPositions position) {
     pidController.setSetpoint(position.getClimbEncoderPositions());
+    this.climbPosition = position;
+  }
+
+  public ClimbIOInputs.ClimbPositions getClimbPosition(){
+    return this.climbPosition;
+  }
+
+  public Command setClimbPresetPosition(ClimbIOInputs.ClimbPositions position){
+    return this.runOnce(() -> setPresetPosition(position));
   }
 
   public void periodic() {
