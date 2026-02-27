@@ -38,6 +38,7 @@ import frc.robot.subsystems.intake.IntakeIOSparkFlex;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
+import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import org.ironmaple.simulation.SimulatedArena;
@@ -60,6 +61,7 @@ public class RobotContainer {
   private final Indexer indexer;
   private final Intake intake;
   private SwerveDriveSimulation simDrive = null;
+  private ObjectDetection objectDetection;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(1);
