@@ -88,7 +88,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("Test_Cam", VisionConstants.FrontCamera));
+                new VisionIOPhotonVision("Test_Cam", VisionConstants.FRONT_CAMERA));
         indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
@@ -120,9 +120,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", VisionConstants.FrontCamera));
+                new VisionIOPhotonVision("placeholder", VisionConstants.FRONT_CAMERA));
 
-        new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]);
         intake = new Intake(new IntakeIOSim(simDrive));
         indexer = new Indexer(new IndexerIO() {});
         shooter = new Shooter(new ShooterIOSim());
@@ -140,7 +139,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", VisionConstants.FrontCamera));
+                new VisionIOPhotonVision("placeholder", VisionConstants.FRONT_CAMERA));
         intake = new Intake(new IntakeIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
