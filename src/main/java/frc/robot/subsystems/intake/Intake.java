@@ -4,40 +4,79 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-/** Subsystem that controls the robot's intake mechanism (roller + pivot). */
 public class Intake extends SubsystemBase {
-  private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
-  private final IntakeIO io;
+  private final RollerIO roller;
+  private final PivotIO pivot;
 
-  public Intake(IntakeIO io) {
-    this.io = io;
+  private final RollerIOInputsAutoLogged rollerInputs = new RollerIOInputsAutoLogged();
+  private final PivotIOInputsAutoLogged pivotInputs = new PivotIOInputsAutoLogged();
+
+  public Intake(RollerIO roller, PivotIO pivot) {
+    this.roller = roller;
+    this.pivot = pivot;
   }
 
-  public void setIntakeSpeed(double speedValue) {
-    io.setIntakeSpeed(speedValue);
+  // Minimum Value of speedValue: -512.0
+  // Maximum Value of speedValkue: 511.998046875
+
+  public void setRollerSpeed(double speedValue) {
+    roller.setRollerSpeed(speedValue);
   }
 
-  public void setPivotSpeed(double speedValue) {
-    io.setIntakePosition(speedValue);
+  public void setIntakeReverseSpeed(double speedValue) {
+    roller.setRollerSpeed(-speedValue);
   }
 
-  public Command runIntakeAtSpeed(double intakeSpeed) {
-    Logger.recordOutput("Intake/Speed", intakeSpeed);
+  public void setPivotPosition(double position) {
+    pivot.setPivotPosition(position);
 
-    return this.startEnd(() -> this.setIntakeSpeed(intakeSpeed), () -> io.stop());
+    Logger.recordOutput("Pivot/setpoint", position);
+  }
+
+  public Command setPivotPosition(PivotIO.PivotPositions position) {
+    return this.run(() -> setPivotPosition(position.getPivotPosition()));
+  }
+
+  public Command runIntakeAtSpeed(double intakeSpeed, PivotIO.PivotPositions pivotPosition) {
+
+    return this.startEnd(
+        () -> {
+          this.setRollerSpeed(intakeSpeed);
+          this.setPivotPosition(pivotPosition);
+        },
+        () -> {
+          this.stopRoller();
+          this.setPivotPosition(pivotPosition);
+        });
+  }
+
+  public Command runIntakeAtReverseSpeed(double speed) {
+    return this.startEnd(() -> this.setIntakeReverseSpeed(speed), () -> this.stopRoller());
+  }
+
+  public Command stopRoller() {
+    return this.run(() -> roller.stop());
   }
 
   public Command runIntakeSim() {
-    return this.startEnd(() -> io.setRunning(true), () -> io.setRunning(false));
+    return this.startEnd(() -> roller.setRollerSpeed(true), () -> roller.setRollerSpeed(false));
   }
 
-  public Command stopIntake() {
-    return this.run(() -> io.stop());
+  // Only used for simulation
+  public boolean isFuelInsideIntake() {
+    return rollerInputs.fuelInside > 0;
+  }
+
+  public int getIntakeFuelCount() {
+    return rollerInputs.fuelInside;
   }
 
   @Override
   public void periodic() {
-    io.updateInputs(inputs);
-    Logger.processInputs("Intake", inputs);
+    roller.updateInputs(rollerInputs);
+    pivot.updateInputs(pivotInputs);
+
+    Logger.processInputs("Intake/Roller", rollerInputs);
+    Logger.processInputs("Intake/Pivot", pivotInputs);
   }
 }

@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
@@ -15,10 +16,11 @@ public class Shooter extends SubsystemBase {
     this.io = io;
   }
 
-  // Minimum Value of speedValue: -512.0
-  // Maximum Value of speedValkue: 511.998046875
+  // Minimum Value of speedValue: -100 RPS
+  // Maximum Value of speedValue: 100 RPS
 
-  public void setShooterSpeed(double speedValue) {
+  public void setShooterSpeed(double speedValue, double angleValue) {
+    io.setHoodPosition(angleValue);
     io.setFlyWheelSpeed(speedValue);
   }
 
@@ -27,15 +29,31 @@ public class Shooter extends SubsystemBase {
     io.setFlyWheelSpeed(-speedValue);
   }
 
-  public Command runShooterAtSpeed(double speed) {
-    Logger.recordOutput("Shooter/Speed", speed);
-    return this.startEnd(() -> this.setShooterSpeed(speed), () -> this.setShooterSpeed(idleSpeed));
+  public void setKickerSpeed(double speedValue) {
+    io.setKickerSpeed(speedValue);
+  }
+
+  public void setKickerSpeedReverse(double speedValue) {
+    io.setKickerSpeed(-speedValue);
+  }
+
+  public Command setKickerSpeedCommand(double speedValue) {
+    return this.run(() -> this.setKickerSpeed(speedValue));
+  }
+
+  public Command setKickerSpeedReverseCommand(double speedValue) {
+    return this.run(() -> this.setKickerSpeedReverse(speedValue));
+  }
+
+  public Command runShooterAtSpeedAngle(double speed, double angle) {
+    return this.runOnce(() -> this.setShooterSpeed(speed, angle))
+        .alongWith(new WaitCommand(1 / 6.0))
+        .repeatedly();
   }
 
   public Command runShooterAtReverseSpeed(double speed) {
     Logger.recordOutput("Shooter/Speed", speed);
-    return this.startEnd(
-        () -> this.setShooterReverseSpeed(speed), () -> this.setShooterSpeed(idleSpeed));
+    return this.startEnd(() -> this.setShooterReverseSpeed(speed), () -> io.stopFlywheels());
   }
 
   public Command stopFlywheels() {
