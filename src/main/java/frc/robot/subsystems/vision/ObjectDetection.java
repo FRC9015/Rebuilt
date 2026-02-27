@@ -1,4 +1,5 @@
 package frc.robot.subsystems.vision;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonCamera;
@@ -40,7 +41,7 @@ public class ObjectDetection extends SubsystemBase {
     }
 
     // Distance calculations
-    PhotonTrackedTarget target = result.getBestTarget();    
+    PhotonTrackedTarget target = result.getBestTarget();
     double pitch = target.getPitch();
     double distanceCm = 0;
     double lastDistance = distanceCm;
@@ -50,10 +51,8 @@ public class ObjectDetection extends SubsystemBase {
 
     // Convert distance and yaw into translation2d cus why not
     double yawRad = Math.toRadians(target.getYaw());
-    Translation2d lastTranslation = new Translation2d(
-      distanceCm * Math.cos(yawRad),
-      distanceCm * Math.sin(yawRad)
-    );
+    this.lastTranslation =
+        new Translation2d(distanceCm * Math.cos(yawRad), distanceCm * Math.sin(yawRad));
   }
 
   public Translation2d getLastTranslation() {
