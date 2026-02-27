@@ -292,6 +292,10 @@ public class RobotContainer {
         .whileTrue(
             shooter.runShooterAtSpeed(0.0)
             .alongWith(indexer.runIndexerWithAutoUnjam(0)));
+    operatorController.povRight().whileTrue(turret.setTurretAngleFastestPathCommand(0));
+    operatorController.povDown().whileTrue(turret.setTurretAngleFastestPathCommand(270));
+    operatorController.povLeft().whileTrue(turret.setTurretAngleFastestPathCommand(180));
+    operatorController.povUp().whileTrue(turret.setTurretAngleFastestPathCommand(90));
     operatorController
         .b()
         .whileTrue(
