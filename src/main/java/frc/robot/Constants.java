@@ -101,7 +101,7 @@ public final class Constants {
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
     public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
-    public static final Transform3d FrontCamera =
+    public static final Transform3d FRONT_CAMERA =
         new Transform3d(
             new Translation3d(
                 Units.inchesToMeters(11.75), Units.inchesToMeters(0), Units.inchesToMeters(5.25)),
