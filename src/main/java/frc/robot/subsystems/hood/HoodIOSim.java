@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.hood;
 
 import static edu.wpi.first.units.Units.Degrees;
 
@@ -27,5 +27,9 @@ public class HoodIOSim implements HoodIO {
 
   public void setHoodPosition(double angle) {
     launchAngle = Angle.ofBaseUnits(Math.PI / 2 + angle, Degrees);
+  }
+
+  public void stopHood() {
+    launchAngle = Angle.ofBaseUnits(ShooterConstants.HOOD_RESTING_ANGLE, Degrees);
   }
 }

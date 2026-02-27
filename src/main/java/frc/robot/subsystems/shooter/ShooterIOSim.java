@@ -10,7 +10,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.ShooterConstants;
+import frc.robot.subsystems.hood.Hood;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -49,31 +49,15 @@ public class ShooterIOSim implements ShooterIO {
     return launchSpeed;
   }
 
-  private Angle getLaunchAngle() {
-    return launchAngle;
-  }
-
-  public void setHoodPosition(double angle) {
-    launchAngle = Angle.ofBaseUnits(Math.PI / 2 + angle, Degrees);
-  }
-
-  public void stopHood() {
-    launchAngle = Angle.ofBaseUnits(ShooterConstants.HOOD_RESTING_ANGLE, Degrees);
-  }
-
-  public void setFlyWheelSpeed(double rpm) {
+  public void setFlyWheelSpeed(double rpm, double angle) {
     // Update the launch speed based on the RPM; assumed to be 16 meters/second at
     // 6000 RPM
     launchSpeed = LinearVelocity.ofBaseUnits((rpm / velocityRPM) * 8, MetersPerSecond);
-    // if (!intakeSimulation.obtainGamePieceFromIntake()) {
-    //   System.out.println("No game piece obtained from intake, cannot shoot.");
-    //   return;
-    // }
 
     if (!intakeSimulation.obtainGamePieceFromIntake()) {
       return;
     }
-    RebuiltFuelOnFly projectile = createProjectile();
+    RebuiltFuelOnFly projectile = createProjectile(Angle.ofBaseUnits(angle, Degrees));
     projectile.setHitTargetCallBack(() -> Logger.recordOutput("Shots Made", ++shotsMade));
     SimulatedArena.getInstance()
         .addGamePieceProjectile(
@@ -93,7 +77,7 @@ public class ShooterIOSim implements ShooterIO {
                             "missedShotsTrajectory", poses.toArray(Pose3d[]::new))));
   }
 
-  private RebuiltFuelOnFly createProjectile() {
+  private RebuiltFuelOnFly createProjectile(Angle launchAngle) {
     return new RebuiltFuelOnFly(
         swerveDriveSimulation.getSimulatedDriveTrainPose().getTranslation(),
         new Translation2d(0, 0), // shooter offet from center
@@ -101,6 +85,6 @@ public class ShooterIOSim implements ShooterIO {
         swerveDriveSimulation.getSimulatedDriveTrainPose().getRotation(),
         initialHeight, // initial height of the ball, in meters
         this.getLaunchSpeed(), // initial velocity, in m/s
-        this.getLaunchAngle()); // shooter angle
+        launchAngle); // shooter angle
   }
 }

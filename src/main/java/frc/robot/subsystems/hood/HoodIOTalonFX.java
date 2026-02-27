@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.hood;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -51,7 +51,8 @@ public class HoodIOTalonFX implements HoodIO {
     motorRPM = hoodMotor.getVelocity();
     motorPosition = hoodMotor.getPosition();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM, motorPosition);
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM,
+motorPosition);
 
     ParentDevice.optimizeBusUtilizationForAll(hoodMotor);
   }
