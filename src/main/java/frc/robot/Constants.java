@@ -22,7 +22,10 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
+import static edu.wpi.first.units.Units.*;
+
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -51,6 +54,43 @@ public final class Constants {
     public static final int EXTEND_INTAKE_MOTOR_ID = 0;
     public static final int INDEXER_MOTOR_ID = 13;
   }
+
+   public static class Dimensions {
+      public static final Distance BUMPER_THICKNESS = Inches.of(5.9375); // frame to edge of bumper
+      public static final Distance FRAME_SIZE_Y = Inches.of(30.5); // left to right (y-axis)
+      public static final Distance FRAME_SIZE_X = Inches.of(23.5); // front to back (x-axis)
+
+      public static final Distance FULL_WIDTH = FRAME_SIZE_Y.plus(BUMPER_THICKNESS.times(2));
+      public static final Distance FULL_LENGTH = FRAME_SIZE_X.plus(BUMPER_THICKNESS.times(2));
+  }
+
+  public static class FieldConstants {
+    public static final Distance FIELD_LENGTH = Inches.of(650.12);
+    public static final Distance FIELD_WIDTH = Inches.of(316.64);
+
+    public static final Distance ALLIANCE_ZONE = Inches.of(156.06);
+
+    public static final Translation3d HUB_BLUE =
+            new Translation3d(Inches.of(181.56), FIELD_WIDTH.div(2), Inches.of(56.4));
+    public static final Translation3d HUB_RED =
+            new Translation3d(FIELD_LENGTH.minus(Inches.of(181.56)), FIELD_WIDTH.div(2), Inches.of(56.4));
+    public static final Distance FUNNEL_RADIUS = Inches.of(24);
+    public static final Distance FUNNEL_HEIGHT = Inches.of(72 - 56.4);
+
+    public static final Distance TRENCH_BUMP_X =
+            Inches.of(181.56); // x position of the center of the trench and bump
+    public static final Distance TRENCH_WIDTH = Inches.of(49.86); // y width of the trench
+    public static final Distance TRENCH_BUMP_LENGTH = Inches.of(47); // x length of the trench and bump
+    public static final Distance TRENCH_BAR_WIDTH = Inches.of(4); // x width of the trench bar
+    public static final Distance TRENCH_BLOCK_WIDTH = Inches.of(12); // y width of block separating bump and trench
+    public static final Distance BUMP_WIDTH = Inches.of(73); // y width of bump
+
+    public static final Distance TRENCH_CENTER = TRENCH_WIDTH.div(2);
+  }
+
+  public static class ZoneConstants {
+  public static final Distance EXTRA_DUCK_DISTANCE = Meters.of(0.5); 
+}
 
   public static class VisionConstants {
     public static final double MAX_AMBIGUITY = 0.3;
