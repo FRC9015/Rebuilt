@@ -278,7 +278,10 @@ public class RobotContainer {
         .rightTrigger()
         .whileTrue(
             intake.runIntakeAtSpeed(-0.0,PivotIO.PivotPositions.DEPLOYED));
-    //driverController.start().whileTrue(); add when there is a command for moving the pivot
+    // deploys intake
+    driverController
+        .start()
+        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     //set Turret aim to normal when y is pressed
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
     // sets gamedata manualy when stick pressed, left = red, right = blue
