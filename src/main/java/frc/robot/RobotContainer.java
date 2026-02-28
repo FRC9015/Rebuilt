@@ -55,9 +55,6 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-
-import java.util.function.Supplier;
-
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -275,6 +272,11 @@ public class RobotContainer {
                 climb.setClimbPresetPosition(ClimbPositions.ReadyToClimbL1),
                 climb.setClimbPresetPosition(ClimbPositions.FullyClimbedL1),
                 () -> climb.getClimbPosition() != ClimbPositions.ReadyToClimbL1));
+    // retracts climb fully in case a mistake was made
+    driverController
+        .back()
+        .onTrue(
+            climb.setClimbPresetPosition(ClimbPositions.Retracted));
     // runs intake normaly
     driverController
         .leftTrigger()
