@@ -77,6 +77,7 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.climbSetpoint = currentSetpoint;
     inputs.climbZeroed = climbZeroed;
     inputs.climbTargetPosition = climbTargetPosition;
+    
     if (Math.abs(
             climbMotor1.getPosition().getValueAsDouble()
                 - inputs.climbTargetPosition)

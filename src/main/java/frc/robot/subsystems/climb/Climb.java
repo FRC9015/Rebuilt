@@ -31,8 +31,16 @@ public class Climb extends SubsystemBase {
     io.setClimbPosition(position);
   }
 
+  public void setClimbPositionwithDouble(double position) {
+    io.setClimbPosition(position);
+  }
+
   public Command setClimbPreset(ClimbIOInputs.ClimbPositions position) {
-    return this.startEnd(() -> setPresetPosition(position), () -> io.stop());
+    return this.run(() -> setPresetPosition(position)).until(() -> inputs.climbAtSetpoint);
+  }
+
+  public Command setCustomClimbPosition(double position) {
+    return this.run(() -> setClimbPositionwithDouble(position)).until(() -> inputs.climbAtSetpoint);
   }
 
   public void zeroClimbDefault() {
