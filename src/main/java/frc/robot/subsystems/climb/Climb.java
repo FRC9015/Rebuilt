@@ -18,7 +18,7 @@ public class Climb extends SubsystemBase {
    */
   public Climb(ClimbIO io) {
     this.io = io;
-    setDefaultCommand(run(() -> zeroClimbDefault()));
+    this.setDefaultCommand(run(() -> zeroClimbDefault()));
   }
 
   /**
