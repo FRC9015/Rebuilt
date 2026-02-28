@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CameraConstants;
@@ -25,6 +26,7 @@ import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -155,7 +157,7 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.BACK,
+                IntakeSimulation.IntakeSide.FRONT,
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
 
@@ -282,17 +284,21 @@ public class RobotContainer {
     driverController
         .rightTrigger()
         .whileTrue(
-            shooter.runShooterAtSpeedAngle(
-                6000, Units.degreesToRadians(55))); // TODO FIX THESE NUMBERS
+            new ShootAtAngleSim(
+                    simIntake, simDrive, hood, shooter, 6000, Units.degreesToRadians(10))
+                .alongWith(new WaitCommand(1 / 6.0))
+                .repeatedly());
     driverController
         .y()
         .whileTrue(
-            shooter.runShooterAtSpeedAngle(
-                5000, Units.degreesToRadians(10))); // TODO FIX THESE NUMBERS, also figure out
+            new ShootAtAngleSim(
+                    simIntake, simDrive, hood, shooter, 6000, Units.degreesToRadians(55))
+                .alongWith(new WaitCommand(1 / 6.0))
+                .repeatedly());
 
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
+    
   }
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *

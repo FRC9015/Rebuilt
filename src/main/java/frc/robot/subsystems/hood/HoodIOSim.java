@@ -25,10 +25,12 @@ public class HoodIOSim implements HoodIO {
     return launchAngle;
   }
 
+  @Override
   public void setHoodPosition(double angle) {
     launchAngle = Angle.ofBaseUnits(Math.PI / 2 + angle, Degrees);
   }
 
+  @Override
   public void stopHood() {
     launchAngle = Angle.ofBaseUnits(ShooterConstants.HOOD_RESTING_ANGLE, Degrees);
   }

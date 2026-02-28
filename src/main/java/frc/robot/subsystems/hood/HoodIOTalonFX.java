@@ -51,8 +51,7 @@ public class HoodIOTalonFX implements HoodIO {
     motorRPM = hoodMotor.getVelocity();
     motorPosition = hoodMotor.getPosition();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM,
-motorPosition);
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM, motorPosition);
 
     ParentDevice.optimizeBusUtilizationForAll(hoodMotor);
   }

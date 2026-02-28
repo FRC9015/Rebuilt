@@ -29,7 +29,8 @@ public class ShootAtAngleSim extends Command {
   private double velocityRPM;
   private final Distance initialHeight = Distance.ofBaseUnits(0.45, Meters);
   private LinearVelocity launchSpeed = LinearVelocity.ofBaseUnits(8, MetersPerSecond);
-  private Angle launchAngle = Angle.ofBaseUnits(15, Degrees);
+  private Angle launchAngle = Angle.ofBaseUnits(0, Degrees);
+  private double desiredLaunchAngle;
 
   private int shotsMade = 0;
 
@@ -39,14 +40,13 @@ public class ShootAtAngleSim extends Command {
       Hood hoodSim,
       Shooter shooterSim,
       double velocityRPM,
-      Angle launchAngle) {
-
+      double desiredLaunchAngle) {
     this.simIntake = simIntake;
     this.simDrive = simDrive;
     this.hoodSim = hoodSim;
     this.shooterSim = shooterSim;
     this.velocityRPM = velocityRPM;
-    this.launchAngle = launchAngle;
+    this.desiredLaunchAngle = desiredLaunchAngle;
   }
 
   // Called when the command is initially scheduled.
@@ -56,7 +56,9 @@ public class ShootAtAngleSim extends Command {
         LinearVelocity.ofBaseUnits(
             8, MetersPerSecond); // TODO Update Example Launch Speed of the projectile
     launchAngle =
-        Angle.ofBaseUnits(15, Degrees); // TODO Update Example Launch Angle of the projectile
+        Angle.ofBaseUnits(
+            Math.PI / 2 + desiredLaunchAngle,
+            Degrees); // TODO Update Example Launch Angle of the projectile
   }
 
   // Called every time the scheduler runs while the command is scheduled.
