@@ -4,12 +4,10 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
@@ -22,7 +20,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   public final TalonFX flywheelMotorLeft;
   public final TalonFX flywheelMotorRight;
   public final TalonFX kickerMotor;
-  public final TalonFX hoodMotor;
 
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;
@@ -30,8 +27,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   public StatusSignal<Angle> motorPosition;
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
-  private final MotionMagicVoltage hoodMagicVoltage =
-      new MotionMagicVoltage(Constants.ShooterConstants.HOOD_MAX_POS);
   private final MotionMagicVelocityVoltage flywheelMagicVelocityVoltage =
       new MotionMagicVelocityVoltage(0.0);
   private final MotionMagicVelocityVoltage kickerMagicVelocityVoltage =
@@ -39,11 +34,11 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   private double lastFlywheelSetpointSpeed = 0.0;
 
-  public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int hoodID, int kickerID) {
+  public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int kickerID) {
     flywheelMotorLeft = new TalonFX(flywheelID1);
     flywheelMotorRight = new TalonFX(flywheelID2);
     kickerMotor = new TalonFX(kickerID);
-    hoodMotor = new TalonFX(hoodID);
+
     // Configure motor
     TalonFXConfiguration flyWheelConfigLeft =
         new TalonFXConfiguration()
@@ -51,12 +46,6 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-    TalonFXConfiguration hoodConfig =
-        new TalonFXConfiguration()
-            .withSlot1(Constants.ShooterConstants.hoodSlotPositionConfigs)
-            .withFeedback(Constants.ShooterConstants.hoodFeedbackConfigs)
-            .withMotionMagic(Constants.ShooterConstants.hoodMagicConfigs);
 
     TalonFXConfiguration flyWheelConfigRight =
         new TalonFXConfiguration()
@@ -73,38 +62,25 @@ public class ShooterIOTalonFX implements ShooterIO {
     kickerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition.get();
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-
     flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
     kickerMotor.getConfigurator().apply(kickerConfig);
-    hoodMotor.getConfigurator().apply(hoodConfig);
 
     motorVolts = flywheelMotorLeft.getMotorVoltage();
     motorAmps = flywheelMotorLeft.getStatorCurrent();
     motorRPM = flywheelMotorLeft.getVelocity();
-    motorPosition = hoodMotor.getPosition();
-
     BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM, motorPosition);
 
-    ParentDevice.optimizeBusUtilizationForAll(
-        flywheelMotorLeft, flywheelMotorRight, kickerMotor, hoodMotor);
+    ParentDevice.optimizeBusUtilizationForAll(flywheelMotorLeft, flywheelMotorRight, kickerMotor);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
     BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM, motorPosition);
     inputs.flywheelAppliedVolts = motorVolts.getValueAsDouble();
-    inputs.hoodEncoderPosition = hoodMotor.getPosition().getValueAsDouble();
     inputs.flywheelCurrentSpeed = flywheelMotorLeft.getVelocity().getValueAsDouble();
     inputs.flywheelRPM = motorRPM.getValueAsDouble();
     inputs.flywheelCurrentAmps = flywheelMotorLeft.getStatorCurrent().getValueAsDouble();
-    inputs.hoodEncoderConnected = hoodMotor.getPosition().isAllGood();
     inputs.flywheelTargetSpeed = lastFlywheelSetpointSpeed;
 
     if (Math.abs(inputs.flywheelCurrentSpeed - inputs.flywheelTargetSpeed)
@@ -122,11 +98,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   }
 
   @Override
-  public void stopHood() {
-    hoodMotor.stopMotor();
-  }
-
-  @Override
   public void stopKicker() {
     kickerMotor.stopMotor();
   }
@@ -134,7 +105,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void stopShooter() {
     stopFlywheels();
-    stopHood();
     stopKicker();
   }
 
@@ -142,7 +112,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   public void setBrakeMode(boolean enable) {
     flywheelMotorLeft.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     flywheelMotorRight.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-    hoodMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
   // Minimum Value of speedValue: -100 RPS
@@ -158,18 +127,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setKickerSpeed(double speed) {
     kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(speed));
-  }
-
-  @Override
-  public void setHoodPosition(double position) {
-    final double clampedPosition =
-        MathUtil.clamp(
-            position,
-            Constants.ShooterConstants.HOOD_MIN_POS,
-            Constants.ShooterConstants
-                .HOOD_MAX_POS); // TODO figure out max and min position for Hood
-
-    hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }
 
   @Override
