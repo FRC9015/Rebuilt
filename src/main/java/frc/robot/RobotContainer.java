@@ -28,6 +28,7 @@ import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
+import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs;
 import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -271,7 +272,7 @@ public class RobotContainer {
             Commands.either(
                 climb.setClimbPresetPosition(ClimbPositions.ReadyToClimbL1),
                 climb.setClimbPresetPosition(ClimbPositions.FullyClimbedL1),
-                () -> climb.getClimbPosition() != ClimbPositions.ReadyToClimbL1));
+                () -> climb.ClimbIOInputs.ClimbPositions != 0.1));
     // retracts climb fully in case a mistake was made
     driverController
         .back()

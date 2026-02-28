@@ -13,7 +13,6 @@ public class Climb extends SubsystemBase {
   private final ClimbIO io;
   private final ClimbIOInputsAutoLogged inputs = new ClimbIOInputsAutoLogged();
   private final PIDController pidController;
-  private ClimbIOInputs.ClimbPositions climbPosition = ClimbPositions.Retracted;
 
   // PID constants
   // TODO: Update PID constants during tuning
@@ -40,12 +39,8 @@ public class Climb extends SubsystemBase {
    */
   private void setPresetPosition(ClimbIOInputs.ClimbPositions position) {
     pidController.setSetpoint(position.getClimbEncoderPositions());
-    this.climbPosition = position;
   }
 
-  public ClimbIOInputs.ClimbPositions getClimbPosition(){
-    return this.climbPosition;
-  }
 
   public Command setClimbPresetPosition(ClimbIOInputs.ClimbPositions position){
     return this.runOnce(() -> setPresetPosition(position));
