@@ -30,6 +30,8 @@ public class ObjectDetection extends SubsystemBase {
    * So like that's how all these random-ass numbers came from.
    * I'M BATMAN.
    */
+
+  // TODO This equation accounts for the camera lens distortion for the usb driver camera, and needs to be updated for a new camera.
   private double getDistanceFromPitch(double pitch) {
     double x = pitch;
     return -0.93193701 * Math.pow(x, 3)
