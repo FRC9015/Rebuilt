@@ -10,6 +10,8 @@ import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.fasterxml.jackson.databind.introspect.WithMember;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -32,6 +34,8 @@ public class ClimbIOTalonFX implements ClimbIO {
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private final VoltageOut voltageOut = new VoltageOut(0.0);
 
+  private boolean climbZeroed = false;
+
   // Constants extracted to avoid magic numbers
   private static final double STATUS_UPDATE_FREQUENCY = 50.0;
   private static final double MAX_OUTPUT_VOLTAGE = 12.0;
@@ -45,7 +49,9 @@ public class ClimbIOTalonFX implements ClimbIO {
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
             .withSlot0(Constants.ClimbConstants.climbSlot0Configs)
-            .withFeedback(Constants.ClimbConstants.CLIMB_FEEDBACK_CONFIGS);
+            .withFeedback(Constants.ClimbConstants.CLIMB_FEEDBACK_CONFIGS)
+            .withMotionMagic(Constants.ClimbConstants.CLIMB_MAGIC_CONFIGS);
+            
 
     // TODO: Determine motor directions
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -76,6 +82,7 @@ public class ClimbIOTalonFX implements ClimbIO {
     } else {
       inputs.climbAtSetpoint = false;
     }
+    inputs.climbZeroed = climbZeroed;
   }
 
   @Override
@@ -101,6 +108,12 @@ public class ClimbIOTalonFX implements ClimbIO {
   @Override
   public void setClimbVoltage(double voltage) {
     climbMotor1.setVoltage(MathUtil.clamp(voltage, -MAX_OUTPUT_VOLTAGE, MAX_OUTPUT_VOLTAGE));
+  }
+
+  @Override
+  public void zeroClimb() {
+    climbMotor1.setPosition(0);
+    climbZeroed = true;
   }
 
   public double getPosition() {

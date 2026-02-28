@@ -41,6 +41,7 @@ public interface ClimbIO {
     public double servoPosition = 0.0;
     public ClimbPositions climbSetpoint = ClimbPositions.ReadyToLatch;
     public boolean climbAtSetpoint = false;
+    public boolean climbZeroed = false;
   }
 
   /** Updates the set of loggable inputs. */
@@ -56,4 +57,6 @@ public interface ClimbIO {
   default void setClimbVoltage(double voltage) {}
 
   default void setClimbPosition(ClimbPositions position) {}
+
+  default void zeroClimb() {}
 }
