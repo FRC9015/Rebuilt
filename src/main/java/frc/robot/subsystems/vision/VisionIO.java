@@ -17,6 +17,8 @@ public interface VisionIO {
         new TargetObservation(new Rotation2d(), new Rotation2d(), 0, 0, 0); // default values...
     public PoseObservation[] poseObservations = new PoseObservation[0];
     public int[] tagIds = new int[0];
+    public int[] targetIDs = new int[0];
+    public boolean hasTargets;
   }
 
   /** Represents the angle to a simple target, not used for pose estimation. */

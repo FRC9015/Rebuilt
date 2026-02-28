@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -29,6 +31,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -52,23 +55,6 @@ public final class Constants {
     REPLAY
   }
 
-  public static class CameraConstants {
-    public static final AprilTagFieldLayout aprilTagLayout =
-        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
-    public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
-    public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
-    public static final double CAMERA_HEIGHT = Units.inchesToMeters(7);
-    public static final double CAMERA_PITCH = Units.degreesToRadians(15);
-    public static final double CAMERA_X_OFFSET = Units.inchesToMeters(13.5);
-    public static final Transform3d placeHolderCamera =
-        new Transform3d(
-            new Translation3d(CAMERA_X_OFFSET, Units.inchesToMeters(0), CAMERA_HEIGHT),
-            new Rotation3d(0, CAMERA_PITCH, Units.degreesToRadians(0)));
-
-    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
-    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
-  }
-
   public static class MotorIDConstants {
     // placeholders
     public static final int UPPER_INTAKE_MOTOR_ID = 0;
@@ -83,10 +69,68 @@ public final class Constants {
     public static final int INDEXER_MOTOR_ID = 13;
   }
 
+  public static class RobotDimensionConstants {
+    public static final Distance BUMPER_THICKNESS = Inches.of(5.9375); // frame to edge of bumper
+    public static final Distance FRAME_SIZE_Y = Inches.of(30.5); // left to right (y-axis)
+    public static final Distance FRAME_SIZE_X = Inches.of(23.5); // front to back (x-axis)
+
+    public static final Distance FULL_WIDTH = FRAME_SIZE_Y.plus(BUMPER_THICKNESS.times(2));
+    public static final Distance FULL_LENGTH = FRAME_SIZE_X.plus(BUMPER_THICKNESS.times(2));
+  }
+
+  public static class FieldConstants {
+    public static final Distance FIELD_LENGTH = Inches.of(650.12);
+    public static final Distance FIELD_WIDTH = Inches.of(316.64);
+
+    public static final Distance ALLIANCE_ZONE = Inches.of(156.06);
+
+    public static final Distance FUNNEL_RADIUS = Inches.of(24);
+    public static final Distance FUNNEL_HEIGHT = Inches.of(72 - 56.4);
+
+    public static final Distance TRENCH_BUMP_X =
+        Inches.of(181.56); // x position of the center of the trench and bump
+    public static final Distance TRENCH_WIDTH = Inches.of(49.86); // y width of the trench
+    public static final Distance TRENCH_BUMP_LENGTH =
+        Inches.of(47); // x length of the trench and bump
+    public static final Distance TRENCH_BAR_WIDTH = Inches.of(4); // x width of the trench bar
+    public static final Distance TRENCH_BLOCK_WIDTH =
+        Inches.of(12); // y width of block separating bump and trench
+    public static final Distance BUMP_WIDTH = Inches.of(73); // y width of bump
+
+    public static final Distance TRENCH_CENTER = TRENCH_WIDTH.div(2);
+
+    public static final Pose2d HUB_POSE_BLUE =
+        new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), new Rotation2d());
+    public static final Pose2d HUB_POSE_RED = FlippingUtil.flipFieldPose(HUB_POSE_BLUE);
+    public static final Translation3d HUB_TARGET_TRANSLATION =
+        new Translation3d(
+            Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), Units.inchesToMeters(72));
+    public static final Translation3d HUB_TARGET_TOLERANCE =
+        new Translation3d(
+            Units.inchesToMeters(24), Units.inchesToMeters(21), Units.inchesToMeters(0.02));
+  }
+
+  public static class ZoneConstants {
+    public static final Distance EXTRA_DUCK_DISTANCE = Meters.of(0.5);
+  }
+
   public static class VisionConstants {
-    public static final double MAX_AMBIGUITY = 0.1;
+    public static final double MAX_AMBIGUITY = 0.3;
     public static final int MAX_AVERAGE_DISTANCE = 3;
     public static final int STD_DEV_RANGE = 30;
+
+    public static final AprilTagFieldLayout aprilTagLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+    public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
+    public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
+    public static final Transform3d FRONT_CAMERA =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(11.75), Units.inchesToMeters(0), Units.inchesToMeters(5.25)),
+            new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(0)));
+
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
   }
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
@@ -177,6 +221,27 @@ public final class Constants {
     public static final String GAMEPIECE = "Fuel";
   }
 
+  public static class ClimbConstants {
+    public static final Slot0Configs climbSlot0Configs =
+        new Slot0Configs()
+            .withKP(0.1)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0.01)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0);
+
+    public static final FeedbackConfigs CLIMB_FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final MotionMagicConfigs CLIMB_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+
+    public static final double CLIMB_MAX_POS = 300.0;
+    public static final double CLIMB_MIN_POS = 0.0;
+  }
+
   public static class ShooterConstants {
     //  Following naming scheme for subsystem motor and sensor ids
     public static final int FLY_WHEEL_LEFT_ID = 11;
@@ -233,27 +298,6 @@ public final class Constants {
     public static final double DEFAULT_STROBE_FRAME_RATE = 50.0;
   }
 
-  public static class ClimbConstants {
-    public static final Slot0Configs climbSlot0Configs =
-        new Slot0Configs()
-            .withKP(0.1)
-            .withKI(0)
-            .withKD(0)
-            .withKG(0.01)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
-
-    public static final FeedbackConfigs CLIMB_FEEDBACK_CONFIGS =
-        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
-
-    public static final MotionMagicConfigs CLIMB_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
-
-    public static final double CLIMB_MAX_POS = 300.0;
-    public static final double CLIMB_MIN_POS = 0.0;
-  }
-
   public static class TurretConstants {
     // --- GEAR TEETH ---
     public static final int T_TEETH = 90; // Gear count on final turret gear
@@ -302,17 +346,5 @@ public final class Constants {
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
-  }
-
-  public static class FieldConstants {
-    public static final Pose2d HUB_POSE_BLUE =
-        new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), new Rotation2d());
-    public static final Pose2d HUB_POSE_RED = FlippingUtil.flipFieldPose(HUB_POSE_BLUE);
-    public static final Translation3d HUB_TARGET_TRANSLATION =
-        new Translation3d(
-            Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), Units.inchesToMeters(72));
-    public static final Translation3d HUB_TARGET_TOLERANCE =
-        new Translation3d(
-            Units.inchesToMeters(24), Units.inchesToMeters(21), Units.inchesToMeters(0.02));
   }
 }
