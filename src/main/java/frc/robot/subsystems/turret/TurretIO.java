@@ -11,6 +11,7 @@ public interface TurretIO {
     public double turretCurrentAmps = 0.0;
     public double turretMotorPosition = 0.0;
     public boolean turretAtSetpoint = false;
+    public double turretSetpoint = 0.0;
 
     public double encoder13PositionRot = 0.0;
     public boolean encoder13Connected = false;
@@ -35,4 +36,6 @@ public interface TurretIO {
   public default void setTurretPosition(double value) {}
 
   public default void seedMotorPosition(double positionRotations) {}
+
+  public default void setTurretSetPoint(double value) {}
 }

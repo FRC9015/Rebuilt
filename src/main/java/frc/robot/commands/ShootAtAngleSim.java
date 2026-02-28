@@ -5,11 +5,13 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.turret.Turret;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -20,6 +22,7 @@ import org.littletonrobotics.junction.Logger;
 public class ShootAtAngleSim {
   private final IntakeSimulation simIntake;
   private final SwerveDriveSimulation simDrive;
+  private final Turret turret;
   private final double maxVelocityRPM = 6000;
   private double velocityRPM;
   private final Distance initialHeight = Distance.ofBaseUnits(0.45, Meters);
@@ -32,10 +35,12 @@ public class ShootAtAngleSim {
   public ShootAtAngleSim(
       IntakeSimulation simIntake,
       SwerveDriveSimulation simDrive,
+      Turret turret,
       double velocityRPM,
       double desiredLaunchAngle) {
     this.simIntake = simIntake;
     this.simDrive = simDrive;
+    this.turret = turret;
     this.velocityRPM = velocityRPM;
     this.desiredLaunchAngle = desiredLaunchAngle;
   }
@@ -78,9 +83,9 @@ public class ShootAtAngleSim {
   private RebuiltFuelOnFly createProjectile(Angle launchAngle) {
     return new RebuiltFuelOnFly(
         simDrive.getSimulatedDriveTrainPose().getTranslation(),
-        new Translation2d(0, 0), // shooter offet from center
+        new Translation2d(0, 0), // shooter offet from center,
         simDrive.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-        simDrive.getSimulatedDriveTrainPose().getRotation(),
+        new Rotation2d(turret.getTurretPositionRadians()),
         initialHeight, // initial height of the ball, in meters
         this.getLaunchSpeed(), // initial velocity, in m/s
         launchAngle); // shooter angle

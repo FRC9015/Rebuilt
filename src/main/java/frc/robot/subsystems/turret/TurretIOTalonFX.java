@@ -224,4 +224,9 @@ public class TurretIOTalonFX implements TurretIO {
   public int getLastCRTIterations() {
     return easyCRT.getLastIterations();
   }
+
+  @Override
+  public void setTurretSetPoint(double value) {
+    setTurretPosition(value);
+  }
 }

@@ -54,6 +54,7 @@ public class TurretAngleAim extends Command {
     headingSetpoint += 180;
 
     // runs the turret function for setting the angle based on a given degree
+    turret.setTurretSetPoint(headingSetpoint);
     turret.setTurretAngleFastestPath(headingSetpoint);
     Logger.recordOutput("Turret/headingsetpoint", headingSetpoint);
     Logger.recordOutput("Turret/angleToHub", angleToHub);

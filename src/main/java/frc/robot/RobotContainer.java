@@ -60,6 +60,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
@@ -184,12 +185,10 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOSim(
                     "Camera", VisionConstants.FRONT_CAMERA, simDrive::getSimulatedDriveTrainPose));
-        turret =
-            new Turret(
-                new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    TurretConstants.ENCODER_13_TOOTH,
-                    TurretConstants.ENCODER_15_TOOTH));
+        turret = new Turret(new TurretIOSim());
+        simShooter =
+            new ShootAtAngleSim(
+                simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         break;
 
       case REPLAY:
