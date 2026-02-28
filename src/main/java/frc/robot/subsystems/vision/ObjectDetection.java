@@ -126,3 +126,50 @@ public class ObjectDetection extends SubsystemBase {
     return hasTarget && Math.abs(lastYawDeg) < toleranceDeg;
   }
 }
+
+/*
+ * interpolation stuff
+ * 
+import numpy as np
+
+EPSILON = 0.15
+
+pitch = np.array([1.2, -0.2, -1.5, -1.75, -1.7, -2.4])
+area = np.array([13.1, 10.5, 6.8, 5.8, 4.6, 3.3])
+distance = np.array([50, 60, 70, 80, 90, 100])
+#pitch = 2.35, area = 26.5, distance = 40
+
+points = np.column_stack((pitch, area))
+
+def gaussian_rbf(r):
+    return np.exp(-(EPSILON * r) ** 2)
+
+
+def compute_weights(points, values):
+    n = len(points)
+    A = np.zeros((n, n))
+
+    for i in range(n):
+        for j in range(n):
+            r = np.linalg.norm(points[i] - points[j])
+            A[i, j] = gaussian_rbf(r)
+
+    return np.linalg.solve(A, values)
+
+
+weights = compute_weights(points, distance)
+
+def interpolate(p, a):
+    result = 0
+    for i in range(len(points))):
+        r = np.linalg.norm(np.array([p, a]) - points[i])
+        result += weights[i] * gaussian_rbf(r)
+    return result
+
+if __name__ == "__main__":
+    test_pitch = 2.35
+    test_area = 26.5
+
+    print("RBF:", interpolate(test_pitch, test_area))
+ * 
+ */
