@@ -67,6 +67,10 @@ public class Intake extends SubsystemBase {
     return rollerInputs.fuelInside > 0;
   }
 
+  public int getIntakeFuelCount() {
+    return rollerInputs.fuelInside;
+  }
+
   @Override
   public void periodic() {
     roller.updateInputs(rollerInputs);

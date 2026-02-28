@@ -1,5 +1,8 @@
 package frc.robot.subsystems.shooter;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
+import edu.wpi.first.units.measure.LinearVelocity;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ShooterIO {
@@ -13,15 +16,11 @@ public interface ShooterIO {
     public double flywheelCurrentAmps = 0.0;
     public double flywheelCurrentSpeed = 0.0;
     public double flywheelRPM = 0.0;
+    public LinearVelocity flywheelLinearVelocity = LinearVelocity.ofBaseUnits(0.0, MetersPerSecond);
     public double flywheelTargetSpeed = 0.0;
 
     // Fields representing the hood state and inputs
-    public double hoodEncoderPosition = 0.0;
-    public double hoodTargetPosition = 0.0;
-    public boolean hoodEncoderConnected = false;
     public boolean flywheelAtSpeed = false;
-    public double hoodAppliedVolts = 0.0;
-    public double hoodCurrentAmps = 0.0;
   }
 
   /** Method to update the inputs of the Shooter subsystem. */
@@ -35,15 +34,7 @@ public interface ShooterIO {
     return 0.0;
   }
 
-  public default void setHoodPosition(double position) {}
-
-  public default double getHoodPosition() {
-    return 0.0;
-  }
-
   default void stopFlywheels() {}
-
-  default void stopHood() {}
 
   default void stopShooter() {}
 
