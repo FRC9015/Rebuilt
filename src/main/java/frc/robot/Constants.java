@@ -289,10 +289,10 @@ public final class Constants {
             .withKS(0)
             .withKV(0);
 
-    public static final FeedbackConfigs CLIMB_FEEDBACK_CONFIGS =
+    public static final FeedbackConfigs climbFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
-    public static final MotionMagicConfigs CLIMB_MAGIC_CONFIGS =
+    public static final MotionMagicConfigs climbMagicConfigs =
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
 
     public static final double CLIMB_MAX_POS = 300.0;

@@ -39,6 +39,7 @@ public interface ClimbIO {
     public double climberPosition = 0.0;
     public double servoPosition = 0.0;
     public ClimbPositions climbSetpoint = ClimbPositions.ReadyToLatch;
+    public double climbTargetPosition = 0.0;
     public boolean climbAtSetpoint = false;
     public boolean climbZeroed = false;
   }
@@ -58,4 +59,6 @@ public interface ClimbIO {
   default void setClimbPosition(ClimbPositions position) {}
 
   default void zeroClimb() {}
+
+  default void setClimbPosition(double position) {}
 }

@@ -18,7 +18,7 @@ public class Climb extends SubsystemBase {
    */
   public Climb(ClimbIO io) {
     this.io = io;
-    this.setDefaultCommand(run(() -> zeroClimbDefault()));
+    this.runOnce(() -> zeroClimbDefault());
   }
 
   /**
@@ -38,9 +38,6 @@ public class Climb extends SubsystemBase {
   public void zeroClimbDefault() {
     if (!inputs.climbZeroed) {
       io.zeroClimb();
-    }
-    else {
-      new InstantCommand();
     }
   }
 

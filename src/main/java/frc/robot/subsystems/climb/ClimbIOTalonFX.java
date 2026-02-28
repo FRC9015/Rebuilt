@@ -32,6 +32,7 @@ public class ClimbIOTalonFX implements ClimbIO {
   private final VoltageOut voltageOut = new VoltageOut(0.0);
 
   private boolean climbZeroed = false;
+  private double climbTargetPosition = 0.0;
 
   // Constants extracted to avoid magic numbers
   private static final double STATUS_UPDATE_FREQUENCY = 50.0;
@@ -47,8 +48,8 @@ public class ClimbIOTalonFX implements ClimbIO {
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
             .withSlot0(Constants.ClimbConstants.climbSlot0Configs)
-            .withFeedback(Constants.ClimbConstants.CLIMB_FEEDBACK_CONFIGS)
-            .withMotionMagic(Constants.ClimbConstants.CLIMB_MAGIC_CONFIGS);
+            .withFeedback(Constants.ClimbConstants.climbFeedbackConfigs)
+            .withMotionMagic(Constants.ClimbConstants.climbMagicConfigs);
 
     // TODO: Determine motor directions
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -74,21 +75,32 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.climberRPM = motorRPM.getValueAsDouble();
     inputs.climberPosition = motorPosition.getValueAsDouble();
     inputs.climbSetpoint = currentSetpoint;
+    inputs.climbZeroed = climbZeroed;
+    inputs.climbTargetPosition = climbTargetPosition;
     if (Math.abs(
             climbMotor1.getPosition().getValueAsDouble()
-                - inputs.climbSetpoint.getClimbEncoderPositions())
+                - inputs.climbTargetPosition)
         < Constants.ClimbConstants.CLIMB_POSITION_TOLERANCE) {
       inputs.climbAtSetpoint = true;
     } else {
       inputs.climbAtSetpoint = false;
     }
-    inputs.climbZeroed = climbZeroed;
+    
   }
 
   @Override
   public void setClimbPosition(ClimbIOInputs.ClimbPositions position) {
-    climbMotor1.setControl(climbPositionVoltage.withPosition(position.getClimbEncoderPositions()));
     currentSetpoint = position;
+    climbTargetPosition = position.getClimbEncoderPositions();
+    climbMotor1.setControl(climbPositionVoltage.withPosition(position.getClimbEncoderPositions()));
+  }
+
+  @Override
+  public void setClimbPosition(double position) {
+    double clampedPosition = MathUtil.clamp(position, Constants.ClimbConstants.CLIMB_MIN_POS, Constants.ClimbConstants.CLIMB_MAX_POS);
+    climbMotor1.setControl(climbPositionVoltage.withPosition(clampedPosition));
+    currentSetpoint = null; // Clear preset setpoint since we're using a custom position
+    climbTargetPosition = clampedPosition;
   }
 
   @Override
