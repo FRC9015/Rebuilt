@@ -2,10 +2,10 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
-import org.littletonrobotics.junction.Logger;
 
 public class ObjectDetection extends SubsystemBase {
 
@@ -54,16 +54,14 @@ public class ObjectDetection extends SubsystemBase {
       hasMeasurement = true;
     } else {
       double alpha = 0.3; // smoothing factor (0 = heavy smoothing, 1 = no smoothing)
-      smoothedDistanceCm =
-          (1 - alpha) * smoothedDistanceCm + alpha * rawDistanceCm;
+      smoothedDistanceCm = (1 - alpha) * smoothedDistanceCm + alpha * rawDistanceCm;
     }
 
     double yawRad = Math.toRadians(target.getYaw());
 
     lastTranslation =
         new Translation2d(
-            smoothedDistanceCm * Math.cos(yawRad),
-            smoothedDistanceCm * Math.sin(yawRad));
+            smoothedDistanceCm * Math.cos(yawRad), smoothedDistanceCm * Math.sin(yawRad));
 
     Logger.recordOutput("Vision/DistanceCmRaw", rawDistanceCm);
     Logger.recordOutput("Vision/DistanceCmSmoothed", smoothedDistanceCm);
