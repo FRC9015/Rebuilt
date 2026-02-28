@@ -4,6 +4,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs;
+import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
+
 import org.littletonrobotics.junction.Logger;
 
 /** Subsystem for controlling the robot climb mechanism. */
@@ -11,7 +13,7 @@ public class Climb extends SubsystemBase {
   private final ClimbIO io;
   private final ClimbIOInputsAutoLogged inputs = new ClimbIOInputsAutoLogged();
   private final PIDController pidController;
-  private ClimbIOInputs.ClimbPositions climbPosition;
+  private ClimbIOInputs.ClimbPositions climbPosition = ClimbPositions.Retracted;
 
   // PID constants
   // TODO: Update PID constants during tuning
