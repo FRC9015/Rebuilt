@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.MotorIDConstants;
@@ -143,8 +144,6 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
-        climb = new Climb(new ClimbIOTalonFX(0));
-        hood = new Hood(new HoodIOTalonFX(Constants.ShooterConstants.HOOD_ENCODER_ID));
         break;
 
       case SIM:
@@ -191,10 +190,6 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
-        climb = new Climb(new ClimbIOSim());
-        simShooter =
-            new ShootAtAngleSim(
-                simIntake, simDrive, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         break;
 
       case REPLAY:
@@ -224,8 +219,6 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
-        climb = new Climb(new ClimbIOSim());
-        hood = new Hood(new HoodIO() {});
         break;
 
       default:
@@ -312,31 +305,25 @@ public class RobotContainer {
     // runs intake in reverse
     driverController
         .rightTrigger()
-        .whileTrue(intake.runIntakeAtSpeed(-0.0, PivotIO.PivotPositions.DEPLOYED));
-    // deploys intake
-    driverController.start().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    // set Turret aim to normal when y is pressed
-    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
-    // sets gamedata manualy when stick pressed, left = blue, right = red
-    operatorController.start().onTrue(gamestate.manualGameData("R"));
-    operatorController.back().onTrue(gamestate.manualGameData("B"));
-    // when right trigger pressed, run shooter and indexer to fire
-    operatorController
-        .rightTrigger()
         .whileTrue(
-            shooter
-                .runShooterAtSpeedAngle(0.0, 0.0, 0.0)
-                .alongWith(indexer.runIndexerWithAutoUnjam(0)));
-    // uses d-pad to manualy angle turret
-    operatorController.povRight().whileTrue(turret.setTurretAngleFastestPathCommand(0));
-    operatorController.povDown().whileTrue(turret.setTurretAngleFastestPathCommand(270));
-    operatorController.povLeft().whileTrue(turret.setTurretAngleFastestPathCommand(180));
-    operatorController.povUp().whileTrue(turret.setTurretAngleFastestPathCommand(90));
-    // while b is pressed set hood to position 0
-    operatorController.b().whileTrue(hood.setHoodPosition(0)); // 10 degrees
-    // while a is pressed set hood to position 0
-    operatorController.a().whileTrue(hood.setHoodPosition(0)); // 10 degrees
+            Commands.runOnce(
+                    () ->
+                        simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
+                .andThen(() -> simShooter.shootBalls())
+                .alongWith(new WaitCommand(1 / 6.0))
+                .repeatedly());
+
+    driverController
+        .y()
+        .whileTrue(
+            Commands.runOnce(() -> simShooter.setLaunchAngle(Units.degreesToRadians(55)))
+                .andThen(() -> simShooter.shootBalls())
+                .alongWith(new WaitCommand(1 / 6.0))
+                .repeatedly());
+
+    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
   }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
