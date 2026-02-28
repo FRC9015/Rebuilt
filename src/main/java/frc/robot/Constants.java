@@ -233,6 +233,8 @@ public final class Constants {
   }
 
   public static class ClimbConstants {
+    //TODO set motor id
+    public static final int CLIMB_MOTOR_ID = 0;
     public static final Slot0Configs climbSlot0Configs =
         new Slot0Configs()
             .withKP(0.1)
