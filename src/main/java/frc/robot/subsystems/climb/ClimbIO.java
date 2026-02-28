@@ -1,5 +1,6 @@
 package frc.robot.subsystems.climb;
 
+import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
 import org.littletonrobotics.junction.AutoLog;
 
 /** I/O interface for the climb subsystem. */
@@ -11,6 +12,7 @@ public interface ClimbIO {
 
     /** Preset climb positions with associated encoder setpoints. */
     public static enum ClimbPositions {
+      // TODO: Tune these positions
       ReadyToLatch(0),
       ReadyToClimbL1(0.1),
       ReadyToClimbL2(0.2),
@@ -36,6 +38,10 @@ public interface ClimbIO {
     public double climberRPM = 0.0;
     public double climberPosition = 0.0;
     public double servoPosition = 0.0;
+    public ClimbPositions climbSetpoint = ClimbPositions.ReadyToLatch;
+    public double climbTargetPosition = 0.0;
+    public boolean climbAtSetpoint = false;
+    public boolean climbZeroed = false;
   }
 
   /** Updates the set of loggable inputs. */
@@ -49,4 +55,10 @@ public interface ClimbIO {
 
   /** Sets the voltage for the climb motor. */
   default void setClimbVoltage(double voltage) {}
+
+  default void setClimbPosition(ClimbPositions position) {}
+
+  default void zeroClimb() {}
+
+  default void setClimbPosition(double position) {}
 }
