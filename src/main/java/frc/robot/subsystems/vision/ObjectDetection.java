@@ -16,6 +16,15 @@ public class ObjectDetection extends SubsystemBase {
   private double smoothedDistanceCm = 0.0;
   private boolean hasMeasurement = false;
 
+  /*
+   * Alr, explanation time.
+   * So like basically, you have the pitch and then you have the distance.
+   * If you have a pitch axis and distance axis.
+   * You can basically do a regression to find a formula that maps pitch to distance nicely.
+   * So like that's how all these random-ass numbers came from.
+   * I'M BATMAN.
+   */
+
   private double getDistanceFromPitch(double pitch) {
     double x = pitch;
     return -0.93193701 * Math.pow(x, 3)
