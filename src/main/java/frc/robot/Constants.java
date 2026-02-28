@@ -347,4 +347,22 @@ public final class Constants {
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
   }
+
+  public static class VisionAlignConstants {
+    public static final double X_KP = 2.5;
+    public static final double X_KI = 0;
+    public static final double X_KD = 0.02;
+
+    public static final double Y_KP = 2.5;
+    public static final double Y_KI = 0;
+    public static final double Y_KD = 0.02;
+
+    public static final double ROTATION_KP = 4.0;
+    public static final double ROTATION_KI = 0;
+    public static final double ROTATION_KD = 0.02;
+
+    public static final double XY_TOLERANCE_METERS = 0.1;
+    public static final double ROTATION_TOLERANCE_DEGREES = 1.0;
+    public static final double DISTANCE_TOLERANCE_METERS = 0.05;
+  }
 }

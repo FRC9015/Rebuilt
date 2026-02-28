@@ -7,20 +7,21 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.vision.ObjectDetection;
 import org.littletonrobotics.junction.Logger;
+import frc.robot.Constants.VisionAlignConstants;
 
-public class VisionDriveToTarget extends Command {
+public class VisionAlign extends Command {
 
     private final Drive drive;
     private final ObjectDetection vision;
 
-    private final PIDController xController = new PIDController(2.5, 0, 0.02);
-    private final PIDController yController = new PIDController(2.5, 0, 0.02);
-    private final PIDController rotationController = new PIDController(4.0, 0, 0.02);
+    private final PIDController xController = new PIDController(VisionAlignConstants.X_KP, VisionAlignConstants.X_KI, VisionAlignConstants.X_KD);
+    private final PIDController yController = new PIDController(VisionAlignConstants.Y_KP, VisionAlignConstants.Y_KI, VisionAlignConstants.Y_KD);
+    private final PIDController rotationController = new PIDController(VisionAlignConstants.ROTATION_KP, VisionAlignConstants.ROTATION_KI, VisionAlignConstants.ROTATION_KD);
 
     private Translation2d goalTranslation = new Translation2d();
     private boolean hasGoal = false;
 
-    public VisionDriveToTarget(Drive drive, ObjectDetection vision) {
+    public VisionAlign(Drive drive, ObjectDetection vision) {
         this.drive = drive;
         this.vision = vision;
         addRequirements(drive);
@@ -29,9 +30,9 @@ public class VisionDriveToTarget extends Command {
     @Override
     public void initialize() {
         rotationController.enableContinuousInput(-180, 180);
-        rotationController.setTolerance(1.0);
-        xController.setTolerance(0.1);
-        yController.setTolerance(0.1);
+        rotationController.setTolerance(VisionAlignConstants.ROTATION_TOLERANCE_DEGREES);
+        xController.setTolerance(VisionAlignConstants.XY_TOLERANCE_METERS);
+        yController.setTolerance(VisionAlignConstants.XY_TOLERANCE_METERS);
         hasGoal = false;
     }
 
@@ -50,7 +51,7 @@ public class VisionDriveToTarget extends Command {
 
         double distance = goalTranslation.getNorm();
 
-        if (distance < 0.05) {
+        if (distance < VisionAlignConstants.DISTANCE_TOLERANCE_METERS) {
             drive.runVelocity(new ChassisSpeeds());
             return;
         }
