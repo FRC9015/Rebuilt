@@ -4,6 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -15,6 +16,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants;
+import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
+
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /** TalonFX-based I/O implementation for the climb subsystem. */
@@ -33,6 +36,8 @@ public class ClimbIOTalonFX implements ClimbIO {
   private static final double STATUS_UPDATE_FREQUENCY = 50.0;
   private static final double MAX_OUTPUT_VOLTAGE = 12.0;
 
+  private MotionMagicVoltage climbPositionVoltage = new MotionMagicVoltage(0).withSlot(0);
+  private ClimbPositions currentSetpoint = ClimbPositions.ReadyToLatch;
   public ClimbIOTalonFX(int climbID1) {
     climbMotor1 = new TalonFX(climbID1);
 
@@ -65,6 +70,19 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.climberCurrentAmps = motorAmps.getValueAsDouble();
     inputs.climberRPM = motorRPM.getValueAsDouble();
     inputs.climberPosition = motorPosition.getValueAsDouble();
+    inputs.climbSetpoint = currentSetpoint;
+    if (Math.abs(climbMotor1.getPosition().getValueAsDouble() - inputs.climbSetpoint.getClimbEncoderPositions()) < Constants.ClimbConstants.CLIMB_POSITION_TOLERANCE) {
+      inputs.climbAtSetpoint = true;
+    } else {
+      inputs.climbAtSetpoint = false;
+    }
+  }
+
+  @Override
+  public void setClimbPosition(ClimbIOInputs.ClimbPositions position) {
+    climbMotor1.setControl(climbPositionVoltage.withPosition(position.getClimbEncoderPositions()));
+    currentSetpoint = position;
+    
   }
 
   @Override
