@@ -50,10 +50,10 @@ public class GameState extends SubsystemBase {
   }
 
   private void setGameDataManualy(String teamColor) {
-  this.gameDataManual = teamColor;
+    this.gameDataManual = teamColor;
   }
 
-  public Command manualGameData(String color){
+  public Command manualGameData(String color) {
     return runOnce(() -> setGameDataManualy(color));
   }
 

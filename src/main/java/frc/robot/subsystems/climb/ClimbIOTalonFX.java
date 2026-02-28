@@ -77,16 +77,13 @@ public class ClimbIOTalonFX implements ClimbIO {
     inputs.climbSetpoint = currentSetpoint;
     inputs.climbZeroed = climbZeroed;
     inputs.climbTargetPosition = climbTargetPosition;
-    
-    if (Math.abs(
-            climbMotor1.getPosition().getValueAsDouble()
-                - inputs.climbTargetPosition)
+
+    if (Math.abs(climbMotor1.getPosition().getValueAsDouble() - inputs.climbTargetPosition)
         < Constants.ClimbConstants.CLIMB_POSITION_TOLERANCE) {
       inputs.climbAtSetpoint = true;
     } else {
       inputs.climbAtSetpoint = false;
     }
-    
   }
 
   @Override
@@ -98,7 +95,11 @@ public class ClimbIOTalonFX implements ClimbIO {
 
   @Override
   public void setClimbPosition(double position) {
-    double clampedPosition = MathUtil.clamp(position, Constants.ClimbConstants.CLIMB_MIN_POS, Constants.ClimbConstants.CLIMB_MAX_POS);
+    double clampedPosition =
+        MathUtil.clamp(
+            position,
+            Constants.ClimbConstants.CLIMB_MIN_POS,
+            Constants.ClimbConstants.CLIMB_MAX_POS);
     climbMotor1.setControl(climbPositionVoltage.withPosition(clampedPosition));
     currentSetpoint = null; // Clear preset setpoint since we're using a custom position
     climbTargetPosition = clampedPosition;

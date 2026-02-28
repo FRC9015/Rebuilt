@@ -18,11 +18,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.CameraConstants;
-import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
@@ -32,11 +29,9 @@ import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIO;
+import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
-import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs;
-import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -92,7 +87,6 @@ public class RobotContainer {
   private ObjectDetection objectDetection;
   private final Turret turret;
   private final Climb climb;
-  private SwerveDriveSimulation simDrive = null;
   private final Hood hood;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
@@ -265,8 +259,7 @@ public class RobotContainer {
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   * TODO set values for motors
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}. TODO set values for motors
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
@@ -307,60 +300,42 @@ public class RobotContainer {
         .y()
         .onTrue(
             Commands.either(
-                climb.setClimbPresetPosition(ClimbPositions.ReadyToClimbL1),
-                climb.setClimbPresetPosition(ClimbPositions.FullyClimbedL1),
-                () -> climb.ClimbIOInputs.ClimbPositions != 0.1));
+                climb.setClimbPreset(ClimbPositions.ReadyToClimbL1),
+                climb.setClimbPreset(ClimbPositions.FullyClimbedL1),
+                () -> climb.readyToClimbL1()));
     // retracts climb fully in case a mistake was made
-    driverController
-        .back()
-        .onTrue(
-            climb.setClimbPresetPosition(ClimbPositions.Retracted));
+    driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
     driverController
         .leftTrigger()
-        .whileTrue(
-            intake.runIntakeAtSpeed(0.0, PivotIO.PivotPositions.DEPLOYED));
+        .whileTrue(intake.runIntakeAtSpeed(0.0, PivotIO.PivotPositions.DEPLOYED));
     // runs intake in reverse
     driverController
         .rightTrigger()
-        .whileTrue(
-            intake.runIntakeAtSpeed(-0.0,PivotIO.PivotPositions.DEPLOYED));
+        .whileTrue(intake.runIntakeAtSpeed(-0.0, PivotIO.PivotPositions.DEPLOYED));
     // deploys intake
-    driverController
-        .start()
-        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    //set Turret aim to normal when y is pressed
+    driverController.start().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    // set Turret aim to normal when y is pressed
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
     // sets gamedata manualy when stick pressed, left = red, right = blue
-    operatorController
-        .start()
-        .onTrue(
-            gamestate.manualGameData("R"));
-    operatorController
-        .back()
-        .onTrue(
-            gamestate.manualGameData("B"));
-    //when right trigger pressed, run shooter and indexer to fire
+    operatorController.start().onTrue(gamestate.manualGameData("R"));
+    operatorController.back().onTrue(gamestate.manualGameData("B"));
+    // when right trigger pressed, run shooter and indexer to fire
     operatorController
         .rightTrigger()
         .whileTrue(
-            shooter.runShooterAtSpeed(0.0)
-            .alongWith(indexer.runIndexerWithAutoUnjam(0)));
+            shooter
+                .runShooterAtSpeedAngle(0.0, 0.0, 0.0)
+                .alongWith(indexer.runIndexerWithAutoUnjam(0)));
     // uses d-pad to manualy angle turret
     operatorController.povRight().whileTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().whileTrue(turret.setTurretAngleFastestPathCommand(270));
     operatorController.povLeft().whileTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.povUp().whileTrue(turret.setTurretAngleFastestPathCommand(90));
-    //while b is pressed set hood to position 0
-    operatorController
-        .b()
-        .whileTrue(
-            shooter.setHoodPosition(0)); //10 degrees
-    //while a is pressed set hood to position 0
-    operatorController
-        .a()
-        .whileTrue(
-            shooter.setHoodPosition(0)); //10 degrees
+    // while b is pressed set hood to position 0
+    operatorController.b().whileTrue(hood.setHoodPosition(0)); // 10 degrees
+    // while a is pressed set hood to position 0
+    operatorController.a().whileTrue(hood.setHoodPosition(0)); // 10 degrees
   }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
