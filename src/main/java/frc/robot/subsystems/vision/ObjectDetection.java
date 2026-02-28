@@ -10,7 +10,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 public class ObjectDetection extends SubsystemBase {
 
   private final PhotonCamera camera = new PhotonCamera("Wsp");
-  private int counter = 0;
 
   private Translation2d lastTranslation = new Translation2d();
 
@@ -27,21 +26,16 @@ public class ObjectDetection extends SubsystemBase {
 
   @Override
   public void periodic() {
-    counter++;
-    if (counter % 10 != 0) return;
-
     var results = camera.getAllUnreadResults();
 
     if (results.isEmpty()) {
       Logger.recordOutput("Vision/Status", "No result");
-      return;
     }
 
     PhotonPipelineResult result = results.get(results.size() - 1);
 
     if (!result.hasTargets()) {
       Logger.recordOutput("Vision/Status", "No targets");
-      return;
     }
 
     PhotonTrackedTarget target = result.getBestTarget();
