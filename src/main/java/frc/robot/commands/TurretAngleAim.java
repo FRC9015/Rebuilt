@@ -52,7 +52,10 @@ public class TurretAngleAim extends Command {
         Units.radiansToDegrees(angleToHub) - robotCurrentPose.getRotation().getDegrees();
     // the atan2 command is -180 to 180 so you add 180 to get it to 0 to 360;
     headingSetpoint += 180;
-
+    // headingSetpoint = (headingSetpoint + 540) % 360;
+    // headingSetpoint = (headingSetpoint + 180 < 0 ? headingSetpoint + 540 : headingSetpoint +
+    // 180);
+    if (headingSetpoint < 0) headingSetpoint += 360;
     // runs the turret function for setting the angle based on a given degree
     turret.setTurretSetPoint(headingSetpoint);
     turret.setTurretAngleFastestPath(headingSetpoint);

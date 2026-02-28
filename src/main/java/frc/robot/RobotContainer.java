@@ -320,7 +320,10 @@ public class RobotContainer {
                 .alongWith(new WaitCommand(1 / 6.0))
                 .repeatedly());
 
-    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
+    // Run TurretAngleAim while the Y button is held so the turret continuously tracks the hub
+    operatorController
+        .y()
+        .onTrue(new TurretAngleAim(() -> simDrive.getSimulatedDriveTrainPose(), turret));
   }
 
   /**

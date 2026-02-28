@@ -27,9 +27,14 @@ public class TurretIOSim implements TurretIO {
 
   @Override
   public void setTurretPosition(double value) {
-    inputs.turretResolvedPosition = value % 360.0;
+    inputs.turretResolvedPosition = (value);
   }
 
   @Override
   public void seedMotorPosition(double positionRotations) {}
+
+  @Override
+  public void setTurretSetPoint(double value) {
+    inputs.turretSetpoint = value;
+  }
 }

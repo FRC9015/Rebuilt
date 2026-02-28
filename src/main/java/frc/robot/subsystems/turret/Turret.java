@@ -75,12 +75,13 @@ public class Turret extends SubsystemBase {
   }
 
   public double getTurretPositionRadians() {
-    return Units.rotationsToRadians(inputs.turretResolvedPosition);
+    return Units.degreesToRadians(inputs.turretSetpoint);
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Turret", inputs);
+    Logger.recordOutput("Turret/setpoint", inputs.turretSetpoint);
   }
 }

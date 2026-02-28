@@ -85,7 +85,9 @@ public class ShootAtAngleSim {
         simDrive.getSimulatedDriveTrainPose().getTranslation(),
         new Translation2d(0, 0), // shooter offet from center,
         simDrive.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-        new Rotation2d(turret.getTurretPositionRadians()),
+        new Rotation2d(
+            simDrive.getSimulatedDriveTrainPose().getRotation().getRadians()
+                + turret.getTurretPositionRadians() + Math.PI),//accounting for drivertrain being flipped?
         initialHeight, // initial height of the ball, in meters
         this.getLaunchSpeed(), // initial velocity, in m/s
         launchAngle); // shooter angle
