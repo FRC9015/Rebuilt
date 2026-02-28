@@ -84,6 +84,7 @@ public class RobotContainer {
   private final Hood hood;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
+  private ShootAtAngleSim simShooter;
 
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -172,7 +173,7 @@ public class RobotContainer {
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());
-        shooter = new Shooter(new ShooterIOSim(simIntake, simDrive, hood));
+        shooter = new Shooter(new ShooterIOSim());
         vision = new Vision(new VisionIOSim());
         turret =
             new Turret(
@@ -180,6 +181,9 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
+        simShooter =
+            new ShootAtAngleSim(
+                simIntake, simDrive, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         break;
 
       case REPLAY:
@@ -284,20 +288,22 @@ public class RobotContainer {
     driverController
         .rightTrigger()
         .whileTrue(
-            new ShootAtAngleSim(
-                    simIntake, simDrive, hood, shooter, 6000, Units.degreesToRadians(10))
+            Commands.runOnce(
+                    () ->
+                        simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
+                .andThen(() -> simShooter.shootBalls())
                 .alongWith(new WaitCommand(1 / 6.0))
                 .repeatedly());
+
     driverController
         .y()
         .whileTrue(
-            new ShootAtAngleSim(
-                    simIntake, simDrive, hood, shooter, 6000, Units.degreesToRadians(55))
+            Commands.runOnce(() -> simShooter.setLaunchAngle(Units.degreesToRadians(55)))
+                .andThen(() -> simShooter.shootBalls())
                 .alongWith(new WaitCommand(1 / 6.0))
                 .repeatedly());
 
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
-    
   }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
