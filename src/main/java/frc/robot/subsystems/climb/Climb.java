@@ -1,6 +1,5 @@
 package frc.robot.subsystems.climb;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -12,7 +11,6 @@ public class Climb extends SubsystemBase {
   private final ClimbIO io;
   private final ClimbIOInputsAutoLogged inputs = new ClimbIOInputsAutoLogged();
 
-
   /**
    * Constructs an Climb subsystem.
    *
@@ -21,7 +19,6 @@ public class Climb extends SubsystemBase {
   public Climb(ClimbIO io) {
     this.io = io;
     setDefaultCommand(zeroClimbDefault());
-    
   }
 
   /**
@@ -30,9 +27,8 @@ public class Climb extends SubsystemBase {
    * @param position pre-set climb positions listed in ClimbIO
    */
   public void setPresetPosition(ClimbIOInputs.ClimbPositions position) {
-    //TODO: add safety checks to make sure you don't go past maxPosition.
+    // TODO: add safety checks to make sure you don't go past maxPosition.
     io.setClimbPosition(position);
-
   }
 
   public Command setClimbPreset(ClimbIOInputs.ClimbPositions position) {
@@ -46,6 +42,5 @@ public class Climb extends SubsystemBase {
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Climber", inputs);
-
-}
+  }
 }

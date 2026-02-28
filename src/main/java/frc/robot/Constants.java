@@ -235,7 +235,7 @@ public final class Constants {
 
   public static class ClimbConstants {
     public static final Slot0Configs climbSlot0Configs =
-    //TODO: Tune these values once final bot comes
+        // TODO: Tune these values once final bot comes
         new Slot0Configs()
             .withKP(0.1)
             .withKI(0)
@@ -254,7 +254,7 @@ public final class Constants {
     public static final double CLIMB_MAX_POS = 300.0;
     public static final double CLIMB_MIN_POS = 0.0;
 
-    public static final double CLIMB_POSITION_TOLERANCE = 0; //TODO: Tune this value
+    public static final double CLIMB_POSITION_TOLERANCE = 0; // TODO: Tune this value
   }
 
   public static class TurretConstants {

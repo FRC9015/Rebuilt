@@ -1,8 +1,7 @@
 package frc.robot.subsystems.climb;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
+import org.littletonrobotics.junction.AutoLog;
 
 /** I/O interface for the climb subsystem. */
 public interface ClimbIO {
@@ -13,7 +12,7 @@ public interface ClimbIO {
 
     /** Preset climb positions with associated encoder setpoints. */
     public static enum ClimbPositions {
-      //TODO: Tune these positions
+      // TODO: Tune these positions
       ReadyToLatch(0),
       ReadyToClimbL1(0.1),
       ReadyToClimbL2(0.2),
