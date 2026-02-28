@@ -44,6 +44,10 @@ public class Climb extends SubsystemBase {
     }
   }
 
+  public boolean readyToClimbL1 () {
+    return inputs.climberPosition != 0.1;
+  }
+  
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Climber", inputs);
