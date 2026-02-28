@@ -131,7 +131,7 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
-        climb = new Climb(new ClimbIOTalonFX(ClimbConstants.CLIMB_MOTOR_ID));
+        climb = new Climb(new ClimbIOTalonFX(0));
         break;
 
       case SIM:
@@ -297,11 +297,11 @@ public class RobotContainer {
     operatorController
         .leftStick()
         .onTrue(
-            gamestate.manualGameData(0));
+            gamestate.manualGameData("R"));
     operatorController
         .rightStick()
         .onTrue(
-            gamestate.manualGameData(1));
+            gamestate.manualGameData("B"));
     //when right trigger pressed, run shooter and indexer to fire
     operatorController
         .rightTrigger()

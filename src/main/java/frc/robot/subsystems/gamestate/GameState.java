@@ -49,15 +49,11 @@ public class GameState extends SubsystemBase {
     return this.alliance;
   }
 
-  private void setGameDataManualy(int button) {
-    if (button == 1) {
-      this.gameDataManual = "B";
-    } else {
-      this.gameDataManual = "R";
-    }
+  private void setGameDataManualy(String teamColor) {
+  this.gameDataManual = teamColor;
   }
 
-  public Command manualGameData(int color){
+  public Command manualGameData(String color){
     return runOnce(() -> setGameDataManualy(color));
   }
 
