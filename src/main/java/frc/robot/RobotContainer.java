@@ -296,11 +296,11 @@ public class RobotContainer {
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
     // sets gamedata manualy when stick pressed, left = red, right = blue
     operatorController
-        .leftStick()
+        .start()
         .onTrue(
             gamestate.manualGameData("R"));
     operatorController
-        .rightStick()
+        .back()
         .onTrue(
             gamestate.manualGameData("B"));
     //when right trigger pressed, run shooter and indexer to fire
