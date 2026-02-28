@@ -317,7 +317,7 @@ public class RobotContainer {
     driverController.start().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     // set Turret aim to normal when y is pressed
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
-    // sets gamedata manualy when stick pressed, left = red, right = blue
+    // sets gamedata manualy when stick pressed, left = blue, right = red
     operatorController.start().onTrue(gamestate.manualGameData("R"));
     operatorController.back().onTrue(gamestate.manualGameData("B"));
     // when right trigger pressed, run shooter and indexer to fire
