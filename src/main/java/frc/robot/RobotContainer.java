@@ -21,10 +21,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.TurretAngleAim;
@@ -57,6 +57,7 @@ import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
+import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
@@ -80,6 +81,7 @@ public class RobotContainer {
   private final GameState gamestate;
   private final Indexer indexer;
   private final Intake intake;
+  private ObjectDetection objectDetection;
   private final Turret turret;
   private final Hood hood;
   private SwerveDriveSimulation simDrive;
@@ -110,6 +112,11 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision("Test_Cam", VisionConstants.FRONT_CAMERA));
+        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
@@ -120,11 +127,6 @@ public class RobotContainer {
                     MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
                     MotorIDConstants.INTAKE_ENCODER_ID));
 
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
-        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -169,12 +171,15 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
-
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());
         shooter = new Shooter(new ShooterIOSim());
-        vision = new Vision(new VisionIOSim());
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOSim(
+                    "Camera", VisionConstants.FRONT_CAMERA, simDrive::getSimulatedDriveTrainPose));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -198,7 +203,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", CameraConstants.placeHolderCamera));
+                new VisionIOPhotonVision("placeholder", VisionConstants.FRONT_CAMERA));
         intake = new Intake(new RollerIO() {}, new PivotIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
