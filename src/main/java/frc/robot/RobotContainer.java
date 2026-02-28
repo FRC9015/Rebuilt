@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.MotorIDConstants;
@@ -25,6 +26,7 @@ import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -35,6 +37,10 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.drive.ModuleIOTalonFXMapleSim;
 import frc.robot.subsystems.gamestate.GameState;
+import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.hood.HoodIO;
+import frc.robot.subsystems.hood.HoodIOSim;
+import frc.robot.subsystems.hood.HoodIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
@@ -77,8 +83,10 @@ public class RobotContainer {
   private final Intake intake;
   private ObjectDetection objectDetection;
   private final Turret turret;
+  private final Hood hood;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
+  private ShootAtAngleSim simShooter;
 
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -124,7 +132,6 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.KICKER_ID));
         turret =
             new Turret(
@@ -132,6 +139,7 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
+        hood = new Hood(new HoodIOTalonFX(Constants.ShooterConstants.HOOD_ENCODER_ID));
         break;
 
       case SIM:
@@ -152,7 +160,7 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.BACK,
+                IntakeSimulation.IntakeSide.FRONT,
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
 
@@ -165,7 +173,8 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
-        shooter = new Shooter(new ShooterIOSim(simIntake, simDrive));
+        hood = new Hood(new HoodIOSim());
+        shooter = new Shooter(new ShooterIOSim());
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -177,6 +186,9 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
+        simShooter =
+            new ShootAtAngleSim(
+                simIntake, simDrive, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         break;
 
       case REPLAY:
@@ -199,7 +211,6 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.KICKER_ID));
         turret =
             new Turret(
@@ -207,6 +218,7 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
+        hood = new Hood(new HoodIO() {});
         break;
 
       default:
@@ -281,17 +293,23 @@ public class RobotContainer {
     driverController
         .rightTrigger()
         .whileTrue(
-            shooter.runShooterAtSpeedAngle(
-                6000, Units.degreesToRadians(55))); // TODO FIX THESE NUMBERS
+            Commands.runOnce(
+                    () ->
+                        simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
+                .andThen(() -> simShooter.shootBalls())
+                .alongWith(new WaitCommand(1 / 6.0))
+                .repeatedly());
+
     driverController
         .y()
         .whileTrue(
-            shooter.runShooterAtSpeedAngle(
-                5000, Units.degreesToRadians(10))); // TODO FIX THESE NUMBERS, also figure out
+            Commands.runOnce(() -> simShooter.setLaunchAngle(Units.degreesToRadians(55)))
+                .andThen(() -> simShooter.shootBalls())
+                .alongWith(new WaitCommand(1 / 6.0))
+                .repeatedly());
 
     operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
   }
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
