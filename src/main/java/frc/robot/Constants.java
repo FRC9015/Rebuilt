@@ -69,7 +69,7 @@ public final class Constants {
     public static final int INDEXER_MOTOR_ID = 13;
   }
 
-  public static class Dimensions {
+  public static class RobotDimensionConstants {
     public static final Distance BUMPER_THICKNESS = Inches.of(5.9375); // frame to edge of bumper
     public static final Distance FRAME_SIZE_Y = Inches.of(30.5); // left to right (y-axis)
     public static final Distance FRAME_SIZE_X = Inches.of(23.5); // front to back (x-axis)

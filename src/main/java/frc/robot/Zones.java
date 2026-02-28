@@ -9,7 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.Dimensions;
+import frc.robot.Constants.RobotDimensionConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.ZoneConstants;
 import java.util.function.Supplier;
@@ -159,10 +159,10 @@ public class Zones {
       new PredictiveXBaseZone(
           FieldConstants.TRENCH_BUMP_X
               .minus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
-              .minus(Dimensions.FULL_LENGTH.div(2)),
+              .minus(RobotDimensionConstants.FULL_LENGTH.div(2)),
           FieldConstants.TRENCH_BUMP_X
               .plus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
-              .plus(Dimensions.FULL_LENGTH.div(2)),
+              .plus(RobotDimensionConstants.FULL_LENGTH.div(2)),
           Meters.of(0),
           FieldConstants.TRENCH_WIDTH);
   private static final PredictiveXBaseZone BLUE_TOP_TRENCH = BLUE_BOTTOM_TRENCH.mirroredY();
@@ -200,10 +200,10 @@ public class Zones {
       new PredictiveXBaseZone(
           FieldConstants.TRENCH_BUMP_X
               .minus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
-              .minus(Dimensions.FULL_LENGTH.div(2)),
+              .minus(RobotDimensionConstants.FULL_LENGTH.div(2)),
           FieldConstants.TRENCH_BUMP_X
               .plus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
-              .plus(Dimensions.FULL_LENGTH.div(2)),
+              .plus(RobotDimensionConstants.FULL_LENGTH.div(2)),
           FieldConstants.TRENCH_WIDTH.plus(FieldConstants.TRENCH_BLOCK_WIDTH),
           FieldConstants.TRENCH_WIDTH
               .plus(FieldConstants.TRENCH_BLOCK_WIDTH)
