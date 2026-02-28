@@ -18,7 +18,7 @@ public class Climb extends SubsystemBase {
    */
   public Climb(ClimbIO io) {
     this.io = io;
-    setDefaultCommand(zeroClimbDefault());
+    setDefaultCommand(run(() -> zeroClimbDefault()));
   }
 
   /**
@@ -35,8 +35,13 @@ public class Climb extends SubsystemBase {
     return this.startEnd(() -> setPresetPosition(position), () -> io.stop());
   }
 
-  public Command zeroClimbDefault() {
-    return (!inputs.climbZeroed ? this.runOnce(() -> io.zeroClimb()) : new InstantCommand());
+  public void zeroClimbDefault() {
+    if (!inputs.climbZeroed) {
+      io.zeroClimb();
+    }
+    else {
+      new InstantCommand();
+    }
   }
 
   public void periodic() {
