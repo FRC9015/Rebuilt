@@ -1,7 +1,6 @@
 package frc.robot.subsystems.climb;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs;
 import org.littletonrobotics.junction.Logger;
@@ -49,10 +48,10 @@ public class Climb extends SubsystemBase {
     }
   }
 
-  public boolean readyToClimbL1 () {
+  public boolean readyToClimbL1() {
     return inputs.climberPosition != 0.1;
   }
-  
+
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Climber", inputs);
