@@ -2,6 +2,7 @@ package frc.robot.subsystems.climb;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs;
 import org.littletonrobotics.junction.Logger;
@@ -39,7 +40,7 @@ public class Climb extends SubsystemBase {
   }
 
   public Command zeroClimbDefault() {
-    return (!inputs.climbZeroed ? this.runOnce(() -> io.zeroClimb()) : this.runOnce(() -> {}));
+    return (!inputs.climbZeroed ? this.runOnce(() -> io.zeroClimb()) : new InstantCommand());
   }
 
   public void periodic() {
