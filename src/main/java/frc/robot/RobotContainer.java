@@ -170,9 +170,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOSim(
-                    "placeholder",
-                    VisionConstants.FRONT_CAMERA,
-                    simDrive::getSimulatedDriveTrainPose));
+                    "Camera", VisionConstants.FRONT_CAMERA, simDrive::getSimulatedDriveTrainPose));
         turret =
             new Turret(
                 new TurretIOTalonFX(
