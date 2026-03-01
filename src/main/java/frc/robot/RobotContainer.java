@@ -30,6 +30,7 @@ import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
 import frc.robot.subsystems.climb.ClimbIOSim;
 import frc.robot.subsystems.climb.ClimbIOTalonFX;
@@ -149,6 +150,7 @@ public class RobotContainer {
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIOTalonFX(Constants.ShooterConstants.HOOD_ENCODER_ID));
         poseSupplier = () -> drive.getPose();
+        climb = new Climb(new ClimbIOTalonFX(0));
         break;
 
       case SIM:
@@ -194,6 +196,7 @@ public class RobotContainer {
             new ShootAtAngleSim(
                 simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         poseSupplier = () -> simDrive.getSimulatedDriveTrainPose();
+        climb = new Climb(new ClimbIOSim());
         break;
 
       case REPLAY:
@@ -225,6 +228,7 @@ public class RobotContainer {
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
         poseSupplier = () -> drive.getPose();
+        climb = new Climb(new ClimbIO() {});
         break;
 
       default:
@@ -307,9 +311,7 @@ public class RobotContainer {
     // retracts climb fully in case a mistake was made
     driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
-    driverController
-        .leftTrigger()
-        .whileTrue(intake.runIntakeAtSpeed(0.0, PivotIO.PivotPositions.DEPLOYED));
+    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
     // runs intake in reverse
     driverController
         .rightTrigger()
