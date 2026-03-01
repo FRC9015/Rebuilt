@@ -66,6 +66,7 @@ import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import java.util.function.Supplier;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -90,6 +91,7 @@ public class RobotContainer {
   private final Turret turret;
   private final Climb climb;
   private final Hood hood;
+  private final Supplier<Pose2d> poseSupplier;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
   private ShootAtAngleSim simShooter;
@@ -145,6 +147,8 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
+        hood = new Hood(new HoodIOTalonFX(Constants.ShooterConstants.HOOD_ENCODER_ID));
+        poseSupplier = () -> drive.getPose();
         break;
 
       case SIM:
@@ -189,6 +193,7 @@ public class RobotContainer {
         simShooter =
             new ShootAtAngleSim(
                 simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
+        poseSupplier = () -> simDrive.getSimulatedDriveTrainPose();
         break;
 
       case REPLAY:
@@ -218,6 +223,8 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
+        hood = new Hood(new HoodIO() {});
+        poseSupplier = () -> drive.getPose();
         break;
 
       default:
@@ -261,6 +268,8 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
+
+    turret.setDefaultCommand(new TurretAngleAim(poseSupplier, turret));
 
     driverController
         .leftBumper()
@@ -319,11 +328,6 @@ public class RobotContainer {
                 .andThen(() -> simShooter.shootBalls())
                 .alongWith(new WaitCommand(1 / 6.0))
                 .repeatedly());
-
-    // Run TurretAngleAim while the Y button is held so the turret continuously tracks the hub
-    operatorController
-        .y()
-        .onTrue(new TurretAngleAim(() -> simDrive.getSimulatedDriveTrainPose(), turret));
   }
 
   /**
