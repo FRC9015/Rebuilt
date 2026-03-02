@@ -311,7 +311,7 @@ public class RobotContainer {
     // retracts climb fully in case a mistake was made
     driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
-    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
+    driverController.leftTrigger().whileTrue(intake.runIntakeSim().onlyIf(()-> Constants.currentMode != Constants.Mode.SIM));
     // runs intake in reverse
     driverController
         .rightTrigger()
