@@ -171,7 +171,7 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.FRONT,
+                IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
 
@@ -311,7 +311,9 @@ public class RobotContainer {
     // retracts climb fully in case a mistake was made
     driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
-    driverController.leftTrigger().whileTrue(intake.runIntakeSim().onlyIf(()-> Constants.currentMode != Constants.Mode.SIM));
+    driverController
+        .leftTrigger()
+        .whileTrue(intake.runIntakeSim().onlyIf(() -> Constants.currentMode != Constants.Mode.SIM));
     // runs intake in reverse
     driverController
         .rightTrigger()
@@ -319,8 +321,10 @@ public class RobotContainer {
             Commands.runOnce(
                     () ->
                         simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
-                .andThen(() -> simShooter.shootBalls()).onlyIf(()-> Constants.currentMode != Constants.Mode.SIM)
-                .alongWith(new WaitCommand(1 / 6.0)).onlyIf(()-> Constants.currentMode != Constants.Mode.SIM)
+                .andThen(() -> simShooter.shootBalls())
+                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
+                .alongWith(new WaitCommand(1 / 6.0))
+                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
                 .repeatedly());
   }
 
