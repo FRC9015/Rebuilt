@@ -24,6 +24,7 @@ public class ShootAtAngleSim {
   private final SwerveDriveSimulation simDrive;
   private final Turret turret;
   private final double maxVelocityRPM = 6000;
+  private double standardHoodOffset = Math.PI / 2;
   private double velocityRPM;
   private final Distance initialHeight = Distance.ofBaseUnits(0.45, Meters);
   private LinearVelocity launchSpeed = LinearVelocity.ofBaseUnits(8, MetersPerSecond);
@@ -87,8 +88,7 @@ public class ShootAtAngleSim {
         simDrive.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
         new Rotation2d(
             simDrive.getSimulatedDriveTrainPose().getRotation().getRadians()
-                + turret.getTurretPositionRadians()
-                + Math.PI), // accounting for drivertrain being flipped?
+                + turret.getTurretPositionRadians()), // accounting for drivertrain being flipped?
         initialHeight, // initial height of the ball, in meters
         this.getLaunchSpeed(), // initial velocity, in m/s
         launchAngle); // shooter angle
@@ -101,7 +101,7 @@ public class ShootAtAngleSim {
   public void setLaunchAngle(double desiredLaunchAngle) {
     this.launchAngle =
         Angle.ofBaseUnits(
-            Math.PI / 2 + desiredLaunchAngle,
+            standardHoodOffset + desiredLaunchAngle,
             Degrees); // TODO Update Example Launch Angle of the projectile;
   }
 
