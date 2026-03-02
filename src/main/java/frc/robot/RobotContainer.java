@@ -299,10 +299,8 @@ public class RobotContainer {
                     () ->
                         drive.setPose(
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
-    // lifts climb first time y pressed, lifts robot second time y pressed
-    driverController
+                    drive));
+ driverController
         .y()
         .onTrue(
             Commands.either(
@@ -312,8 +310,44 @@ public class RobotContainer {
     // retracts climb fully in case a mistake was made
     driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
+    driverController
+        .leftTrigger()
+        .whileTrue(intake.runIntakeAtSpeed(0.0, PivotIO.PivotPositions.DEPLOYED));
     simController.leftTrigger().whileTrue(intake.runIntakeSim());
     // runs intake in reverse
+    driverController
+        .rightTrigger()
+        .whileTrue(intake.runIntakeAtSpeed(-0.0, PivotIO.PivotPositions.DEPLOYED));
+    // deploys intake
+    driverController.start().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    // set Turret aim to normal when y is pressed
+    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
+    // sets gamedata manualy when stick pressed, left = blue, right = red
+    operatorController.start().onTrue(gamestate.manualGameData("R"));
+    operatorController.back().onTrue(gamestate.manualGameData("B"));
+    // when right trigger pressed, run shooter and indexer to fire
+    operatorController
+        .rightTrigger()
+        .whileTrue(
+            shooter
+                .runShooterAtSpeedAngle(0.0, 0.0, 0.0)
+                .alongWith(indexer.runIndexerWithAutoUnjam(0)));
+    // uses d-pad to manualy angle turret
+    operatorController.povRight().whileTrue(turret.setTurretAngleFastestPathCommand(0));
+    operatorController.povDown().whileTrue(turret.setTurretAngleFastestPathCommand(270));
+    operatorController.povLeft().whileTrue(turret.setTurretAngleFastestPathCommand(180));
+    operatorController.povUp().whileTrue(turret.setTurretAngleFastestPathCommand(90));
+    // while b is pressed set hood to position 0
+    operatorController.b().whileTrue(hood.setHoodPosition(0)); // 10 degrees
+    // while a is pressed set hood to position 0
+    operatorController.a().whileTrue(hood.setHoodPosition(0)); // 10 degrees
+     simController.leftTrigger().whileTrue(intake.runIntakeSim());
+      simController
+        .rightTrigger()
+        .whileTrue(
+            Commands.runOnce(
+                    () ->
+                        simShooter.setLaunchAngle(Units.degreesToRadians(10)))) // TODO add hood sim
     simController
         .rightTrigger()
         .whileTrue(
