@@ -162,17 +162,11 @@ public class RobotContainer {
 
         simIntake =
             IntakeSimulation.OverTheBumperIntake(
-                // Specify the type of game pieces that the intake can collect
                 SimConstants.GAMEPIECE,
-                // Specify the drivetrain to which this intake is attached
                 simDrive,
-                // Width of the intake
                 Meters.of(SimConstants.INTAKE_WIDTH),
-                // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
-                // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.FRONT,
-                // The intake can hold up to 50 Fuel
+                IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
                 SimConstants.HOPPER_CAPACITY);
 
         drive =
@@ -311,7 +305,9 @@ public class RobotContainer {
     // retracts climb fully in case a mistake was made
     driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
-    driverController.leftTrigger().whileTrue(intake.runIntakeSim().onlyIf(()-> Constants.currentMode != Constants.Mode.SIM));
+    driverController
+        .leftTrigger()
+        .whileTrue(intake.runIntakeSim().onlyIf(() -> Constants.currentMode != Constants.Mode.SIM));
     // runs intake in reverse
     driverController
         .rightTrigger()
@@ -319,8 +315,10 @@ public class RobotContainer {
             Commands.runOnce(
                     () ->
                         simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
-                .andThen(() -> simShooter.shootBalls()).onlyIf(()-> Constants.currentMode != Constants.Mode.SIM)
-                .alongWith(new WaitCommand(1 / 6.0)).onlyIf(()-> Constants.currentMode != Constants.Mode.SIM)
+                .andThen(() -> simShooter.shootBalls())
+                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
+                .alongWith(new WaitCommand(1 / 6.0))
+                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
                 .repeatedly());
   }
 
