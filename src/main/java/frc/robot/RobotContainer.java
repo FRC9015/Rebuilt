@@ -162,11 +162,17 @@ public class RobotContainer {
 
         simIntake =
             IntakeSimulation.OverTheBumperIntake(
+                // Specify the type of game pieces that the intake can collect
                 SimConstants.GAMEPIECE,
+                // Specify the drivetrain to which this intake is attached
                 simDrive,
+                // Width of the intake
                 Meters.of(SimConstants.INTAKE_WIDTH),
+                // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
+                // The intake is mounted on the back side of the chassis
                 IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
+                // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
 
         drive =
