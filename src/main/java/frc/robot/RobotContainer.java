@@ -319,16 +319,8 @@ public class RobotContainer {
             Commands.runOnce(
                     () ->
                         simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
-                .andThen(() -> simShooter.shootBalls())
-                .alongWith(new WaitCommand(1 / 6.0))
-                .repeatedly());
-
-    driverController
-        .y()
-        .whileTrue(
-            Commands.runOnce(() -> simShooter.setLaunchAngle(Units.degreesToRadians(55)))
-                .andThen(() -> simShooter.shootBalls())
-                .alongWith(new WaitCommand(1 / 6.0))
+                .andThen(() -> simShooter.shootBalls()).onlyIf(()-> Constants.currentMode != Constants.Mode.SIM)
+                .alongWith(new WaitCommand(1 / 6.0)).onlyIf(()-> Constants.currentMode != Constants.Mode.SIM)
                 .repeatedly());
   }
 
