@@ -1,6 +1,7 @@
 package frc.robot.subsystems.turret;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.TurretConstants;
@@ -61,6 +62,7 @@ public class Turret extends SubsystemBase {
     }
     // 5. Send the safe, optimized position to the motor
     // (The setTurretPosition method in IO expects degrees based on your last file)
+
     io.setTurretPosition(chosenDegrees);
   }
 
@@ -68,9 +70,18 @@ public class Turret extends SubsystemBase {
     return this.run(() -> setTurretAngleFastestPath(targetAngleDegrees));
   }
 
+  public void setTurretSetPoint(double value) {
+    io.setTurretSetPoint(value);
+  }
+
+  public double getTurretPositionRadians() {
+    return Units.degreesToRadians(inputs.turretSetpoint);
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Turret", inputs);
+    Logger.recordOutput("Turret/setpoint", inputs.turretSetpoint);
   }
 }
