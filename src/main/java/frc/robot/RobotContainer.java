@@ -100,6 +100,7 @@ public class RobotContainer {
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
+  private final CommandXboxController simController = new CommandXboxController(2);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -311,16 +312,16 @@ public class RobotContainer {
     // retracts climb fully in case a mistake was made
     driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
-    driverController.leftTrigger().whileTrue(intake.runIntakeSim().onlyIf(()-> Constants.currentMode != Constants.Mode.SIM));
+    simController.leftTrigger().whileTrue(intake.runIntakeSim());
     // runs intake in reverse
-    driverController
+    simController
         .rightTrigger()
         .whileTrue(
             Commands.runOnce(
                     () ->
                         simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
-                .andThen(() -> simShooter.shootBalls()).onlyIf(()-> Constants.currentMode != Constants.Mode.SIM)
-                .alongWith(new WaitCommand(1 / 6.0)).onlyIf(()-> Constants.currentMode != Constants.Mode.SIM)
+                .andThen(() -> simShooter.shootBalls())
+                .alongWith(new WaitCommand(1 / 6.0))
                 .repeatedly());
   }
 
