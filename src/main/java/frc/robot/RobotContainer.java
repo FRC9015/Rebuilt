@@ -341,13 +341,6 @@ public class RobotContainer {
     operatorController.b().whileTrue(hood.setHoodPosition(0)); // 10 degrees
     // while a is pressed set hood to position 0
     operatorController.a().whileTrue(hood.setHoodPosition(0)); // 10 degrees
-     simController.leftTrigger().whileTrue(intake.runIntakeSim());
-      simController
-        .rightTrigger()
-        .whileTrue(
-            Commands.runOnce(
-                    () ->
-                        simShooter.setLaunchAngle(Units.degreesToRadians(10)))) // TODO add hood sim
     simController
         .rightTrigger()
         .whileTrue(
