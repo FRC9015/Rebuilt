@@ -13,17 +13,13 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 public class PivotIOSparkFlex implements PivotIO {
 
   // ---------------- MOTORS ----------------
-  private final SparkFlex pivotLeft;
-  private final SparkFlex pivotRight;
+  private final SparkFlex pivotMotor;
 
   private final RelativeEncoder pivotLeftEncoder;
-  private final RelativeEncoder pivotRightEncoder;
 
   private final SparkClosedLoopController pivotLeftPID;
-  private final SparkClosedLoopController pivotRightPID;
 
   private final SparkFlexConfig pivotLeftConfig;
-  private final SparkFlexConfig pivotRightConfig;
 
   private static final double maxFreeSpeed = 6784.0; // RPM
 
@@ -33,24 +29,19 @@ public class PivotIOSparkFlex implements PivotIO {
   private LoggedNetworkNumber ki = new LoggedNetworkNumber("/Pivot/I", 0.0);
   private LoggedNetworkNumber kd = new LoggedNetworkNumber("/Pivot/D", 0.0);
 
-  public PivotIOSparkFlex(int pivotIDLeft, int pivotIDRight) {
+  public PivotIOSparkFlex(int pivotID) {
 
     // ---------------- MOTOR INIT ----------------
-    pivotLeft = new SparkFlex(pivotIDLeft, SparkFlex.MotorType.kBrushless);
-    pivotRight = new SparkFlex(pivotIDRight, SparkFlex.MotorType.kBrushless);
+    pivotMotor = new SparkFlex(pivotID, SparkFlex.MotorType.kBrushless);
 
-    pivotLeftEncoder = pivotLeft.getEncoder();
-    pivotRightEncoder = pivotRight.getEncoder();
+    pivotLeftEncoder = pivotMotor.getEncoder();
 
-    pivotLeftPID = pivotLeft.getClosedLoopController();
-    pivotRightPID = pivotRight.getClosedLoopController();
+    pivotLeftPID = pivotMotor.getClosedLoopController();
 
     pivotLeftConfig = new SparkFlexConfig();
-    pivotRightConfig = new SparkFlexConfig();
 
     // ---------------- PIVOT CONFIG ----------------
     pivotLeftConfig.idleMode(IdleMode.kBrake);
-    pivotRightConfig.inverted(true).idleMode(IdleMode.kBrake);
 
     pivotLeftConfig
         .encoder
@@ -62,21 +53,11 @@ public class PivotIOSparkFlex implements PivotIO {
         .pid(kp.getAsDouble(), ki.getAsDouble(), kd.getAsDouble())
         .outputRange(-1.0, 1.0);
 
-    pivotRightConfig
-        .encoder
-        .positionConversionFactor(1.0) // rotations
-        .velocityConversionFactor(1.0);
-
-    pivotRightConfig
-        .closedLoop
-        .pid(kp.getAsDouble(), ki.getAsDouble(), kd.getAsDouble())
-        .outputRange(-1.0, 1.0);
     // ---------------- APPLY CONFIG ----------------
-    pivotLeft.configure(
+    pivotMotor.configure(
         pivotLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    pivotRight.configure(
-        pivotRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
   }
 
   // ------------------------------------------------
@@ -85,19 +66,15 @@ public class PivotIOSparkFlex implements PivotIO {
 
   @Override
   public void updateInputs(PivotIOInputs inputs) {
-    inputs.pivotLeftApppliedVolts = pivotLeft.getAppliedOutput() * pivotLeft.getBusVoltage();
-    inputs.pivotLeftCurrentAmps = pivotLeft.getOutputCurrent();
+    inputs.pivotLeftApppliedVolts = pivotMotor.getAppliedOutput() * pivotMotor.getBusVoltage();
+    inputs.pivotLeftCurrentAmps = pivotMotor.getOutputCurrent();
     inputs.pivotLeftCurrentSpeed = pivotLeftEncoder.getVelocity();
-    inputs.pivotRightApppliedVolts = pivotRight.getAppliedOutput() * pivotRight.getBusVoltage();
-    inputs.pivotRightCurrentAmps = pivotRight.getOutputCurrent();
-    inputs.pivotRightCurrentSpeed = pivotRightEncoder.getVelocity();
     inputs.pivotPosition = pivotLeftEncoder.getPosition();
   }
 
   @Override
   public void stop() {
-    pivotLeft.stopMotor();
-    pivotRight.stopMotor();
+    pivotMotor.stopMotor();
   }
 
   // --------- CONTROL ----------------
@@ -111,21 +88,17 @@ public class PivotIOSparkFlex implements PivotIO {
     pivotLeftConfig.closedLoop.pid(pivotP, pivotI, pivotD).outputRange(-1.0, 1.0);
 
     // Apply without resetting other parameters
-    pivotLeft.configure(
+    pivotMotor.configure(
         pivotLeftConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-    pivotRight.configure(
-        pivotRightConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 
   @Override
   public void setPivotPosition(double position) {
     pivotLeftPID.setSetpoint(position, ControlType.kPosition);
-    pivotRightPID.setSetpoint(position, ControlType.kPosition);
   }
 
   @Override
   public void setPivotPosition(PivotPositions position) {
     pivotLeftPID.setSetpoint(position.getPivotPosition(), ControlType.kPosition);
-    pivotRightPID.setSetpoint(position.getPivotPosition(), ControlType.kPosition);
   }
 }
