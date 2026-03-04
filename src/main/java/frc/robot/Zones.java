@@ -9,8 +9,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.RobotDimensionConstants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.RobotDimensionConstants;
 import frc.robot.Constants.ZoneConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -215,6 +215,32 @@ public class Zones {
   public static final PredictiveXZoneCollection BUMP_ZONES =
       new PredictiveXZoneCollection(BLUE_BOTTOM_BUMP, BLUE_TOP_BUMP, RED_BOTTOM_BUMP, RED_TOP_BUMP);
 
+  private static final PredictiveXBaseZone BLUE_ALLIANCE_ZONE =
+      new PredictiveXBaseZone(
+          Meters.of(0),
+          FieldConstants.ALLIANCE_ZONE,
+          Meters.of(0),
+          FieldConstants.FIELD_WIDTH);
+
+  private static final PredictiveXBaseZone RED_ALLIANCE_ZONE =
+      BLUE_ALLIANCE_ZONE.mirroredX();
+
+  private static final PredictiveXBaseZone NEUTRAL_ZONE =
+      new PredictiveXBaseZone(
+          FieldConstants.ALLIANCE_ZONE,
+          FieldConstants.FIELD_LENGTH.minus(FieldConstants.ALLIANCE_ZONE),
+          Meters.of(0),
+          FieldConstants.FIELD_WIDTH);
+
+  public static final PredictiveXZoneCollection FIELD_ALLIANCE_ZONES =
+      new PredictiveXZoneCollection(
+          BLUE_ALLIANCE_ZONE,
+          RED_ALLIANCE_ZONE);
+
+  public static final PredictiveXZoneCollection FIELD_NEUTRAL_ZONE =
+      new PredictiveXZoneCollection(
+          NEUTRAL_ZONE);
+
   public static void logAllZones() {
     Logger.recordOutput("Zones/Trenches/Blue Bottom", BLUE_BOTTOM_TRENCH.getCorners());
     Logger.recordOutput("Zones/Trenches/Blue Top", BLUE_TOP_TRENCH.getCorners());
@@ -230,5 +256,9 @@ public class Zones {
     Logger.recordOutput("Zones/Bumps/Blue Top", BLUE_TOP_BUMP.getCorners());
     Logger.recordOutput("Zones/Bumps/Red Bottom", RED_BOTTOM_BUMP.getCorners());
     Logger.recordOutput("Zones/Bumps/Red Top", RED_TOP_BUMP.getCorners());
+
+    Logger.recordOutput("Zones/Field/Blue Alliance", BLUE_ALLIANCE_ZONE.getCorners());
+    Logger.recordOutput("Zones/Field/Red Alliance", RED_ALLIANCE_ZONE.getCorners());
+    Logger.recordOutput("Zones/Field/Neutral", NEUTRAL_ZONE.getCorners());
   }
 }
