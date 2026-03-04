@@ -56,8 +56,6 @@ public class PivotIOSparkFlex implements PivotIO {
     // ---------------- APPLY CONFIG ----------------
     pivotMotor.configure(
         pivotLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-
   }
 
   // ------------------------------------------------

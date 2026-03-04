@@ -4,7 +4,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
@@ -42,7 +41,6 @@ public class PivotIOTalonFX implements PivotIO {
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, pivotLeftVolts, pivotLeftAmps, pivotLeftVelocity, pivotPosition);
-
   }
 
   @Override

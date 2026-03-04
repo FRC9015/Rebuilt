@@ -56,16 +56,15 @@ public final class Constants {
   }
 
   public static class MotorIDConstants {
-    // placeholders
-    public static final int UPPER_INTAKE_MOTOR_ID = 0;
-    public static final int EXTEND_INTAKE_MOTOR_ID = 0;
-    public static final int TURRET_MOTOR_ID = 1;
+    public static final int TURRET_MOTOR_ID = 60;
 
-    public static final int INTAKE_ROLLER_LEFT_ID = 0;
-    public static final int INTAKE_ROLLER_RIGHT_ID = 0;
-    public static final int INTAKE_PIVOT_LEFT_ID = 0;
-    public static final int INTAKE_ENCODER_ID = 0;
-    public static final int INDEXER_MOTOR_ID = 13;
+    public static final int INTAKE_ROLLER_LEFT_ID = 51;
+    public static final int INTAKE_ROLLER_RIGHT_ID = 52;
+    public static final int INTAKE_PIVOT_LEFT_ID = 53;
+    public static final int INTAKE_ENCODER_ID = 50;
+    public static final int INDEXER1_MOTOR_ID = 5;
+    public static final int INDEXER2_MOTOR_ID = 6;
+
   }
 
   public static class RobotDimensionConstants {
@@ -222,11 +221,10 @@ public final class Constants {
 
   public static class ShooterConstants {
     //  Following naming scheme for subsystem motor and sensor ids
-    public static final int FLY_WHEEL_LEFT_ID = 11;
-    public static final int FLY_WHEEL_RIGHT_ID = 12;
-    public static final int HOOD_ID = 13;
-    public static final int HOOD_ENCODER_ID = 14;
-    public static final int KICKER_ID = 15;
+    public static final int FLY_WHEEL_LEFT_ID = 56;
+    public static final int FLY_WHEEL_RIGHT_ID = 57;
+    public static final int HOOD_ID = 58;
+    public static final int KICKER_ID = 59;
     public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value
     public static final double HOOD_RESTING_ANGLE = 10.0;
 
@@ -306,8 +304,8 @@ public final class Constants {
     public static final int E1_TEETH = 13; // Gear on Encoder 1
     public static final int E2_TEETH = 15; // Gear on Encoder 2
 
-    public static final int ENCODER_13_TOOTH = 35; // Encoder 13 motor id
-    public static final int ENCODER_15_TOOTH = 36; // Encoder 15 motor id
+    public static final int ENCODER_13_TOOTH = 61; // Encoder 13 motor id
+    public static final int ENCODER_15_TOOTH = 62; // Encoder 15 motor id
 
     // --- MATH CONSTANTS ---
     /** The error allowance (in turret rotations) when comparing encoder predictions. */
