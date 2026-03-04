@@ -69,14 +69,14 @@ public class ShooterIOTalonFX implements ShooterIO {
     motorVolts = flywheelMotorLeft.getMotorVoltage();
     motorAmps = flywheelMotorLeft.getStatorCurrent();
     motorRPM = flywheelMotorLeft.getVelocity();
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM, motorPosition);
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM);
 
     ParentDevice.optimizeBusUtilizationForAll(flywheelMotorLeft, flywheelMotorRight, kickerMotor);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM, motorPosition);
+    BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM);
     inputs.flywheelAppliedVolts = motorVolts.getValueAsDouble();
     inputs.flywheelCurrentSpeed = flywheelMotorLeft.getVelocity().getValueAsDouble();
     inputs.flywheelRPM = motorRPM.getValueAsDouble();

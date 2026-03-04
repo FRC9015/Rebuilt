@@ -64,7 +64,6 @@ public final class Constants {
     public static final int INTAKE_ENCODER_ID = 50;
     public static final int INDEXER1_MOTOR_ID = 5;
     public static final int INDEXER2_MOTOR_ID = 6;
-
   }
 
   public static class RobotDimensionConstants {
@@ -124,8 +123,10 @@ public final class Constants {
     public static final Transform3d FRONT_CAMERA =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(11.75), Units.inchesToMeters(0), Units.inchesToMeters(5.25)),
-            new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(0)));
+                Units.inchesToMeters(3.5),
+                Units.inchesToMeters(-15.25),
+                Units.inchesToMeters(7.25)),
+            new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(270)));
 
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
@@ -322,26 +323,19 @@ public final class Constants {
     public static final int E2_SEARCH_LIMIT = (int) E1_TEETH;
 
     // --- MOVEMENT LIMITS ---
-    public static final double MAXROTATION = 1.0;
-    public static final double MINROTATION = -1.0;
+    public static final double MAXROTATION = 0.7;
+    public static final double MINROTATION = -0.7;
 
-    public static final double ENCODER13_MAGNET_OFFSET = -0.1020507;
-    public static final double ENCODER15_MAGNET_OFFSET = 0.1274414;
+    public static final double ENCODER13_MAGNET_OFFSET = -0.2917480;
+    public static final double ENCODER15_MAGNET_OFFSET = -0.3728027;
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
+        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(25);
     public static final Slot0Configs SLOT0_CONFIGS =
-        new Slot0Configs()
-            .withKP(6)
-            .withKI(0.01)
-            .withKD(0.2)
-            .withKG(0)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
+        new Slot0Configs().withKP(12).withKI(0.0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)

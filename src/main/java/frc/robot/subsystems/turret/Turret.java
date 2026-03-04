@@ -50,14 +50,17 @@ public class Turret extends SubsystemBase {
         chosenDegrees = option2;
       }
     } else if (opt1Valid) {
+      System.out.println("1");
       // Only option 1 is safe
       chosenDegrees = option1;
     } else if (opt2Valid) {
+      System.out.println("2");
       // Only option 2 is safe
       chosenDegrees = option2;
     } else {
       // Neither is valid (this happens if your range is narrower than 360 total degrees)
       // Fallback: Pick option 1 but clamp it to the turret limits
+      System.out.println("3");
       chosenDegrees = MathUtil.clamp(option1, minDegrees, maxDegrees);
     }
     // 5. Send the safe, optimized position to the motor
@@ -65,6 +68,42 @@ public class Turret extends SubsystemBase {
 
     io.setTurretPosition(chosenDegrees);
   }
+
+  // public Command setTurretAngleFastestPath(double targetAngle0to360) {
+  //   return this.run(
+  //       () -> {
+  //         double currentPos = inputs.turretMotorPosition; // rotations
+
+  //         double target = (targetAngle0to360 % 360.0) / 360.0;
+  //         if (target < 0) target += 1.0;
+
+  //         // Our two possible destinations in rotations
+  //         double opt1 = target; // 0.0 to 1.0
+  //         double opt2 = target - 1.0; // -1.0 to 0.0
+
+  //         // Check if the options are within your -0.7 to 0.7 bounds
+  //         boolean opt1Valid =
+  //             (opt1 >= TurretConstants.MINROTATION && opt1 <= TurretConstants.MAXROTATION);
+  //         boolean opt2Valid =
+  //             (opt2 >= TurretConstants.MINROTATION && opt2 <= TurretConstants.MAXROTATION);
+
+  //         double chosen;
+  //         if (opt1Valid && opt2Valid) {
+  //           // Both are valid, pick the closest one
+  //           chosen = (Math.abs(opt1 - currentPos) <= Math.abs(opt2 - currentPos)) ? opt1 : opt2;
+  //         } else if (opt1Valid) {
+  //           chosen = opt1;
+  //         } else if (opt2Valid) {
+  //           chosen = opt2;
+  //         } else {
+  //           // Neither version of the angle fits in your -0.7 to 0.7 range
+  //           // We pick the closest valid rotation and let the IO layer clamp it.
+  //           chosen = opt1;
+  //         }
+
+  //         io.setTurretPosition(chosen);
+  //       });
+  // }
 
   public Command setTurretAngleFastestPathCommand(double targetAngleDegrees) {
     return this.run(() -> setTurretAngleFastestPath(targetAngleDegrees));

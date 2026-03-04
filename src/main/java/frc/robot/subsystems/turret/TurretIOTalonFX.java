@@ -211,7 +211,7 @@ public class TurretIOTalonFX implements TurretIO {
   public void setTurretPosition(double positionDegrees) {
     // Convert degrees to rotations and clamp between -1.0 and 1.0
     double rotations = positionDegrees / 360.0;
-    double safePosition = MathUtil.clamp(rotations, -1.0, 1.0);
+    double safePosition = MathUtil.clamp(rotations, -0.7, 0.7);
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
   }
 
