@@ -71,9 +71,10 @@ import org.littletonrobotics.junction.Logger;
 
 /** Subsystem for swerve drivetrain control and odometry. */
 public class Drive extends SubsystemBase {
-  // TunerConstants doesn't include these constants, so they are declared locally
+  // TunerConstants doesn't include these constanswerveDrivetrainConstantsts, so they are declared
+  // locally
   static final double ODOMETRY_FREQUENCY =
-      new CANBus(TunerConstants.swerveDrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
+      new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
   public static final double DRIVE_BASE_RADIUS =
       Math.max(
           Math.max(

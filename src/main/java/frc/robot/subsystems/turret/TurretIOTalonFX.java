@@ -39,6 +39,7 @@ public class TurretIOTalonFX implements TurretIO {
   private final CANcoder encoder13;
   private final CANcoder encoder15;
   private final EasyCRT easyCRT;
+  private double setpointDegrees = 0.0;
 
   private final StatusSignal<Angle> encoder13PosSignal;
   private final StatusSignal<Angle> encoder15PosSignal;
@@ -160,6 +161,7 @@ public class TurretIOTalonFX implements TurretIO {
     inputs.turretAppliedVolts = motorAppliedVoltsSignal.getValueAsDouble();
     inputs.turretCurrentAmps = motorCurrentSignal.getValueAsDouble();
     inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
+    inputs.turretSetpoint = setpointDegrees;
 
     // Resolve turret angle using CRT from two encoder readings
     easyCRT
@@ -223,5 +225,10 @@ public class TurretIOTalonFX implements TurretIO {
 
   public int getLastCRTIterations() {
     return easyCRT.getLastIterations();
+  }
+
+  @Override
+  public void setTurretSetPoint(double value) {
+    setpointDegrees = value;
   }
 }

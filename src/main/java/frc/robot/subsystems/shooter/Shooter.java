@@ -44,8 +44,9 @@ public class Shooter extends SubsystemBase {
     return this.run(() -> this.setKickerSpeedReverse(speedValue));
   }
 
-  public Command runShooterAtSpeedAngle(double speed, double angle) {
+  public Command runShooterAtSpeedAngle(double speed, double angle, double kickerSpeed) {
     return this.runOnce(() -> this.setShooterSpeed(speed, angle))
+        .alongWith(this.runOnce(() -> this.setKickerSpeed(kickerSpeed)))
         .alongWith(new WaitCommand(1 / 6.0))
         .repeatedly();
   }

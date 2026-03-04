@@ -29,6 +29,11 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbIO;
+import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
+import frc.robot.subsystems.climb.ClimbIOSim;
+import frc.robot.subsystems.climb.ClimbIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -56,11 +61,13 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
 import frc.robot.subsystems.turret.Turret;
+import frc.robot.subsystems.turret.TurretIOSim;
 import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import java.util.function.Supplier;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -83,7 +90,9 @@ public class RobotContainer {
   private final Intake intake;
   private ObjectDetection objectDetection;
   private final Turret turret;
+  private final Climb climb;
   private final Hood hood;
+  private final Supplier<Pose2d> poseSupplier;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
   private ShootAtAngleSim simShooter;
@@ -116,16 +125,14 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("Test_Cam", VisionConstants.FRONT_CAMERA));
-        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER_MOTOR_ID));
+        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER1_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
                     MotorIDConstants.INTAKE_ROLLER_LEFT_ID,
                     MotorIDConstants.INTAKE_ROLLER_RIGHT_ID),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
-                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
-                    MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
 
         shooter =
             new Shooter(
@@ -139,7 +146,9 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
-        hood = new Hood(new HoodIOTalonFX(Constants.ShooterConstants.HOOD_ENCODER_ID));
+        hood = new Hood(new HoodIOTalonFX(Constants.ShooterConstants.HOOD_ID));
+        poseSupplier = () -> drive.getPose();
+        climb = new Climb(new ClimbIOTalonFX(0));
         break;
 
       case SIM:
@@ -160,7 +169,7 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.FRONT,
+                IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
 
@@ -180,15 +189,12 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOSim(
                     "Camera", VisionConstants.FRONT_CAMERA, simDrive::getSimulatedDriveTrainPose));
-        turret =
-            new Turret(
-                new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    TurretConstants.ENCODER_13_TOOTH,
-                    TurretConstants.ENCODER_15_TOOTH));
+        turret = new Turret(new TurretIOSim());
         simShooter =
             new ShootAtAngleSim(
-                simIntake, simDrive, 6000, Units.degreesToRadians(45)); // TODO add hood sim
+                simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
+        poseSupplier = () -> simDrive.getSimulatedDriveTrainPose();
+        climb = new Climb(new ClimbIOSim());
         break;
 
       case REPLAY:
@@ -219,6 +225,8 @@ public class RobotContainer {
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
+        poseSupplier = () -> drive.getPose();
+        climb = new Climb(new ClimbIO() {});
         break;
 
       default:
@@ -252,7 +260,7 @@ public class RobotContainer {
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}. TODO set values for motors
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
@@ -262,6 +270,8 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
+
+    turret.setDefaultCommand(new TurretAngleAim(poseSupplier, turret));
 
     driverController
         .leftBumper()
@@ -288,8 +298,21 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    driverController.leftTrigger().whileTrue(intake.runIntakeSim());
-    driverController.rightBumper().whileTrue(indexer.runIndexer(indexerRollerValue));
+    // lifts climb first time y pressed, lifts robot second time y pressed
+    driverController
+        .y()
+        .onTrue(
+            Commands.either(
+                climb.setClimbPreset(ClimbPositions.ReadyToClimbL1),
+                climb.setClimbPreset(ClimbPositions.FullyClimbedL1),
+                () -> climb.readyToClimbL1()));
+    // retracts climb fully in case a mistake was made
+    driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
+    // runs intake normaly
+    driverController
+        .leftTrigger()
+        .whileTrue(intake.runIntakeSim().onlyIf(() -> Constants.currentMode != Constants.Mode.SIM));
+    // runs intake in reverse
     driverController
         .rightTrigger()
         .whileTrue(
@@ -297,19 +320,12 @@ public class RobotContainer {
                     () ->
                         simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
                 .andThen(() -> simShooter.shootBalls())
+                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
                 .alongWith(new WaitCommand(1 / 6.0))
+                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
                 .repeatedly());
-
-    driverController
-        .y()
-        .whileTrue(
-            Commands.runOnce(() -> simShooter.setLaunchAngle(Units.degreesToRadians(55)))
-                .andThen(() -> simShooter.shootBalls())
-                .alongWith(new WaitCommand(1 / 6.0))
-                .repeatedly());
-
-    operatorController.y().onTrue(new TurretAngleAim(() -> drive.getPose(), turret));
   }
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
