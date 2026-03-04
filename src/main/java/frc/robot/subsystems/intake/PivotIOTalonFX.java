@@ -4,7 +4,6 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
@@ -16,8 +15,7 @@ import frc.robot.Constants.IntakeConstants;
 import frc.robot.generated.TunerConstants;
 
 public class PivotIOTalonFX implements PivotIO {
-  public final TalonFX pivotMotorLeft;
-  public final TalonFX pivotMotorRight;
+  public final TalonFX pivotMotor;
 
   public final CANcoder pivotEncoder;
   public StatusSignal<Voltage> pivotLeftVolts;
@@ -30,27 +28,19 @@ public class PivotIOTalonFX implements PivotIO {
   public StatusSignal<Angle> pivotPosition;
   private final MotionMagicExpoVoltage pivotMagicVoltage = new MotionMagicExpoVoltage(0.0);
 
-  public PivotIOTalonFX(int pivotIDLeft, int pivotIDRight, int encoderID) {
-    pivotMotorLeft = new TalonFX(pivotIDLeft);
-    pivotMotorRight = new TalonFX(pivotIDRight);
+  public PivotIOTalonFX(int pivotIDLeft, int encoderID) {
+    pivotMotor = new TalonFX(pivotIDLeft);
     pivotEncoder = new CANcoder(encoderID, TunerConstants.kCANBus);
 
-    pivotMotorLeft.getConfigurator().apply(IntakeConstants.pivotConfigLeft);
-    pivotMotorRight.getConfigurator().apply(IntakeConstants.pivotConfigRight);
+    pivotMotor.getConfigurator().apply(IntakeConstants.pivotConfigLeft);
 
-    pivotLeftVolts = pivotMotorLeft.getMotorVoltage();
-    pivotLeftAmps = pivotMotorLeft.getStatorCurrent();
-    pivotLeftVelocity = pivotMotorLeft.getVelocity();
-
-    pivotRightVolts = pivotMotorRight.getMotorVoltage();
-    pivotRightAmps = pivotMotorRight.getStatorCurrent();
-    pivotRightVelocity = pivotMotorRight.getVelocity();
+    pivotLeftVolts = pivotMotor.getMotorVoltage();
+    pivotLeftAmps = pivotMotor.getStatorCurrent();
+    pivotLeftVelocity = pivotMotor.getVelocity();
     pivotPosition = pivotEncoder.getPosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, pivotLeftVolts, pivotLeftAmps, pivotLeftVelocity, pivotPosition);
-
-    ParentDevice.optimizeBusUtilizationForAll(pivotMotorLeft, pivotMotorRight, pivotEncoder);
   }
 
   @Override
@@ -60,21 +50,16 @@ public class PivotIOTalonFX implements PivotIO {
     inputs.pivotPosition = pivotPosition.getValueAsDouble();
     inputs.pivotLeftCurrentSpeed = pivotLeftVelocity.getValueAsDouble();
     inputs.pivotLeftCurrentAmps = pivotLeftAmps.getValueAsDouble();
-    inputs.pivotRightApppliedVolts = pivotRightVolts.getValueAsDouble();
-    inputs.pivotRightCurrentSpeed = pivotRightVelocity.getValueAsDouble();
-    inputs.pivotRightCurrentAmps = pivotRightAmps.getValueAsDouble();
   }
 
   @Override
   public void stop() {
-    pivotMotorLeft.stopMotor();
-    pivotMotorRight.stopMotor();
+    pivotMotor.stopMotor();
   }
 
   @Override
   public void setBrakeMode(boolean enable) {
-    pivotMotorLeft.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-    pivotMotorRight.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    pivotMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
   @Override
@@ -83,13 +68,11 @@ public class PivotIOTalonFX implements PivotIO {
     final double clampedPosition =
         MathUtil.clamp(position, IntakeConstants.INTAKE_MIN_POS, IntakeConstants.INTAKE_MAX_POS);
 
-    pivotMotorLeft.setControl(pivotMagicVoltage.withPosition(clampedPosition));
-    pivotMotorRight.setControl(pivotMagicVoltage.withPosition(clampedPosition));
+    pivotMotor.setControl(pivotMagicVoltage.withPosition(clampedPosition));
   }
 
   @Override
   public void setPivotPosition(PivotPositions position) {
-    pivotMotorLeft.setControl(pivotMagicVoltage.withPosition(position.getPivotPosition()));
-    pivotMotorRight.setControl(pivotMagicVoltage.withPosition(position.getPivotPosition()));
+    pivotMotor.setControl(pivotMagicVoltage.withPosition(position.getPivotPosition()));
   }
 }
