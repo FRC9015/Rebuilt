@@ -1,6 +1,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,6 +19,8 @@ public class TurretAngleAim extends Command {
 
   private final Supplier<Pose2d> poseSupplier;
   private Turret turret;
+  private double y = 6.95;
+  private double x = 3.186;
 
   /**
    * Constructs a TrackTargetCommand
@@ -33,7 +37,13 @@ public class TurretAngleAim extends Command {
 
   @Override
   public void execute() {
-    Pose2d robotCurrentPose = poseSupplier.get();
+    Pose2d robotCurrentPose =
+        new Pose2d(
+            new Translation2d(
+                poseSupplier.get().getX() + Units.inchesToMeters(x),
+                poseSupplier.get().getY() - Units.inchesToMeters(y)),
+            new Rotation2d(
+                poseSupplier.get().getRotation().getRadians() + Units.degreesToRadians(90)));
 
     // Get the robot's pose relative to the target.
     Pose2d relativePose =
@@ -53,7 +63,7 @@ public class TurretAngleAim extends Command {
     // the atan2 command is -180 to 180 so this gets it to 0,360 because you add 360 and get
     // positive and then you add another 180 because its -180 t0 180 and then you modulo 360 to
     // finialize it
-    headingSetpoint = (headingSetpoint + 360) % 360;
+    headingSetpoint = (headingSetpoint + 540) % 360;
 
     // runs the turret function for setting the angle based on a given degree
     turret.setTurretSetPoint(headingSetpoint);
