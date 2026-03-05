@@ -123,7 +123,7 @@ public final class Constants {
     public static final Transform3d FRONT_CAMERA =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(3.5),
+                Units.inchesToMeters(2.25),
                 Units.inchesToMeters(-15.25),
                 Units.inchesToMeters(7.25)),
             new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(270)));
@@ -326,8 +326,11 @@ public final class Constants {
     public static final double MAXROTATION = 0.7;
     public static final double MINROTATION = -0.7;
 
-    public static final double ENCODER13_MAGNET_OFFSET = -0.2917480;
-    public static final double ENCODER15_MAGNET_OFFSET = -0.3728027;
+    public static final double ENCODER13_MAGNET_OFFSET = 0.278808593;
+    public static final double ENCODER15_MAGNET_OFFSET = 0.361328125;
+
+    public static final double TURRET_X_OFFSET = Units.inchesToMeters(-3.186);
+    public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.95);
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;

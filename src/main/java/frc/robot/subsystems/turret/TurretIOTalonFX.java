@@ -81,11 +81,11 @@ public class TurretIOTalonFX implements TurretIO {
     turretMotor.getConfigurator().apply(motorConfig);
 
     CANcoderConfiguration encoderConfig13 = new CANcoderConfiguration();
-    encoderConfig13.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig13.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     encoderConfig13.MagnetSensor.MagnetOffset = TurretConstants.ENCODER13_MAGNET_OFFSET;
 
     CANcoderConfiguration encoderConfig15 = new CANcoderConfiguration();
-    encoderConfig15.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig15.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     encoderConfig15.MagnetSensor.MagnetOffset = TurretConstants.ENCODER15_MAGNET_OFFSET;
 
     encoder13.getConfigurator().apply(encoderConfig13);
@@ -169,16 +169,18 @@ public class TurretIOTalonFX implements TurretIO {
         .ifPresentOrElse(
             angle -> {
               inputs.turretResolvedValid = true;
+              double last = inputs.turretResolvedPosition;
               inputs.turretResolvedPosition = angle.in(Rotations);
               inputs.turretResolvedPositionDegrees = angle.in(Rotations) * 360.0;
-              if (Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
+
+              if (Math.abs(inputs.turretResolvedPosition - last)
                   > Constants.TurretConstants.SYNC_THRESHOLD) {
 
                 outofSyncAlert.set(
                     Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
                         > Constants.TurretConstants.SYNC_THRESHOLD);
 
-                this.seedMotorPosition(angle.in(Rotations));
+                inputs.turretResolvedPosition = inputs.turretMotorPosition;
               }
             },
             () -> {
@@ -213,6 +215,7 @@ public class TurretIOTalonFX implements TurretIO {
     double rotations = positionDegrees / 360.0;
     double safePosition = MathUtil.clamp(rotations, -0.7, 0.7);
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
+    setpointDegrees = safePosition;
   }
 
   public CRTStatus getLastCRTStatus() {
@@ -228,7 +231,5 @@ public class TurretIOTalonFX implements TurretIO {
   }
 
   @Override
-  public void setTurretSetPoint(double value) {
-    setpointDegrees = value;
-  }
+  public void setTurretSetPoint(double value) {}
 }

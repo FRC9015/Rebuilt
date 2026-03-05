@@ -324,6 +324,10 @@ public class RobotContainer {
                 .alongWith(new WaitCommand(1 / 6.0))
                 .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
                 .repeatedly());
+    operatorController.pov(0).onTrue(turret.setTurretAngleFastestPathCommand(0));
+    operatorController.pov(90).onTrue(turret.setTurretAngleFastestPathCommand(90));
+    operatorController.pov(180).onTrue(turret.setTurretAngleFastestPathCommand(180));
+    operatorController.pov(270).onTrue(turret.setTurretAngleFastestPathCommand(270));
   }
 
   /**
