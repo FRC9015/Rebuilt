@@ -264,7 +264,7 @@ public final class Constants {
     public static final double SHOOTER_MIN_SPEED = 0.0;
     public static final double FLYWHEEL_ACCELERATION = 100;
     public static final double FEEDFORWARD_VOLTAGE = 12.0;
-    public static final double HOOD_MAX_POS = 0.0;
+    public static final double HOOD_MAX_POS = 1.87;
     public static final double HOOD_MIN_POS = 0.0;
     public static final double HOOD_DEPLOYED_POSITION = 0.0;
     public static final double HOOD_STOWED_POSITION = 0.0;
