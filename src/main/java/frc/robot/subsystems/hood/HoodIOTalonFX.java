@@ -81,8 +81,7 @@ public class HoodIOTalonFX implements HoodIO {
         MathUtil.clamp(
             position,
             Constants.ShooterConstants.HOOD_MIN_POS,
-            Constants.ShooterConstants
-                .HOOD_MAX_POS); // TODO figure out max and min position for Hood
+            Constants.ShooterConstants.HOOD_MAX_POS);
 
     hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
   }
