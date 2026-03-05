@@ -10,18 +10,17 @@ import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-  private InterpolatingTreeMap<Double,Double> hoodInterpolation = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
-
-
+  private InterpolatingTreeMap<Double, Double> hoodInterpolation =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
 
   private final HoodIO io;
 
   public Hood(HoodIO io) {
     this.io = io;
-    hoodInterpolation.put(0.0,0.0);
-    hoodInterpolation.put(0.24,0.4);
-    hoodInterpolation.put(0.48,1.0);
-    hoodInterpolation.put(1.3,2.8);
+    hoodInterpolation.put(0.0, 0.0);
+    hoodInterpolation.put(0.24, 0.4);
+    hoodInterpolation.put(0.48, 1.0);
+    hoodInterpolation.put(1.3, 2.8);
   }
 
   public Command stopHood() {
@@ -33,11 +32,12 @@ public class Hood extends SubsystemBase {
   }
 
   public Command setInterpolatedPosition(double distance) {
-    return this.runOnce(() -> {
-        double target = hoodInterpolation.get(distance);
-        io.setHoodPosition(target);
-        Logger.recordOutput("Hood/TargetPosition", target);
-    });
+    return this.runOnce(
+        () -> {
+          double target = hoodInterpolation.get(distance);
+          io.setHoodPosition(target);
+          Logger.recordOutput("Hood/TargetPosition", target);
+        });
   }
 
   @Override
@@ -52,5 +52,5 @@ public class Hood extends SubsystemBase {
 
   public double getInterpolatedPosition(double distance) {
     return hoodInterpolation.get(distance);
-}
+  }
 }
