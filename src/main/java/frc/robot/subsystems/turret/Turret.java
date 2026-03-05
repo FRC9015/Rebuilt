@@ -24,7 +24,7 @@ public class Turret extends SubsystemBase {
    *
    * @param targetAngleDegrees The target angle in a 0-360 circle.
    */
-  public void setTurretAngleFastestPath(double targetAngleDegrees) {
+  public double setTurretAngleFastestPath(double targetAngleDegrees) {
     // 1. Get bounds and current position in degrees
     double minDegrees = TurretConstants.MINROTATION * 360.0;
     double maxDegrees = TurretConstants.MAXROTATION * 360.0;
@@ -35,7 +35,7 @@ public class Turret extends SubsystemBase {
     if (target < 0) target = 0;
     // 3. Generate the two possible absolute destinations
     double option1 = target; // e.g. 90
-    double option2 = target - maxDegrees; // e.g. -270
+    double option2 = target - 360.0; // e.g. -270
 
     // 4. Check which options are physically reachable
     boolean opt1Valid = (option1 >= minDegrees && option1 <= maxDegrees);
@@ -63,14 +63,19 @@ public class Turret extends SubsystemBase {
     // 5. Send the safe, optimized position to the motor
     // (The setTurretPosition method in IO expects degrees based on your last file)
 
-    io.setTurretPosition(chosenDegrees);
     Logger.recordOutput("Turret/option1", option1);
     Logger.recordOutput("Turret/option2", option2);
-    Logger.recordOutput("Turret/chosenDegrees", chosenDegrees);
+
+    return chosenDegrees;
   }
 
   public Command setTurretAngleFastestPathCommand(double targetAngleDegrees) {
-    return this.run(() -> setTurretAngleFastestPath(targetAngleDegrees));
+    double setpoint = setTurretAngleFastestPath(targetAngleDegrees);
+    return this.run(
+        () -> {
+          io.setTurretPosition(setpoint);
+          Logger.recordOutput("Turret/chosenDegrees", setpoint);
+        });
   }
 
   public void setTurretSetPoint(double value) {
@@ -79,6 +84,10 @@ public class Turret extends SubsystemBase {
 
   public double getTurretPositionRadians() {
     return Units.degreesToRadians(inputs.turretSetpoint);
+  }
+
+  public void setPositionVoid(double angle) {
+    io.setTurretPosition(angle);
   }
 
   @Override

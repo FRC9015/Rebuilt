@@ -1,5 +1,6 @@
 package frc.robot.subsystems.hood;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
@@ -10,17 +11,23 @@ import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
-  private InterpolatingTreeMap<Double, Double> hoodInterpolation =
+  private final InterpolatingTreeMap<Double, Double> launchHoodAngleMap =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
 
   private final HoodIO io;
 
   public Hood(HoodIO io) {
     this.io = io;
-    hoodInterpolation.put(0.0, 0.0);
-    hoodInterpolation.put(0.24, 0.4);
-    hoodInterpolation.put(0.48, 1.0);
-    hoodInterpolation.put(1.3, 2.8);
+    launchHoodAngleMap.put(1.34, Rotation2d.fromDegrees(19.0).getRotations());
+    launchHoodAngleMap.put(1.78, Rotation2d.fromDegrees(19.0).getRotations());
+    launchHoodAngleMap.put(2.17, Rotation2d.fromDegrees(24.0).getRotations());
+    launchHoodAngleMap.put(2.81, Rotation2d.fromDegrees(27.0).getRotations());
+    launchHoodAngleMap.put(3.82, Rotation2d.fromDegrees(29.0).getRotations());
+    launchHoodAngleMap.put(4.09, Rotation2d.fromDegrees(30.0).getRotations());
+    launchHoodAngleMap.put(4.40, Rotation2d.fromDegrees(31.0).getRotations());
+    launchHoodAngleMap.put(4.77, Rotation2d.fromDegrees(32.0).getRotations());
+    launchHoodAngleMap.put(5.57, Rotation2d.fromDegrees(32.0).getRotations());
+    launchHoodAngleMap.put(5.60, Rotation2d.fromDegrees(35.0).getRotations());
   }
 
   public Command stopHood() {
@@ -32,9 +39,9 @@ public class Hood extends SubsystemBase {
   }
 
   public Command setInterpolatedPosition(double distance) {
-    return this.runOnce(
+    return this.run(
         () -> {
-          double target = hoodInterpolation.get(distance);
+          double target = launchHoodAngleMap.get(distance);
           io.setHoodPosition(target);
           Logger.recordOutput("Hood/TargetPosition", target);
         });
@@ -50,7 +57,11 @@ public class Hood extends SubsystemBase {
     return inputs.launchAngle;
   }
 
+  public double returnHoodSetpoint() {
+    return inputs.hoodTargetPosition;
+  }
+
   public double getInterpolatedPosition(double distance) {
-    return hoodInterpolation.get(distance);
+    return launchHoodAngleMap.get(distance);
   }
 }

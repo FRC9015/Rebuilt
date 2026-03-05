@@ -27,9 +27,9 @@ public class ShooterIOTalonFX implements ShooterIO {
   public StatusSignal<Angle> motorPosition;
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
-  private final MotionMagicVelocityVoltage flywheelMagicVelocityVoltage =
-      new MotionMagicVelocityVoltage(0.0);
-  private final MotionMagicVelocityVoltage kickerMagicVelocityVoltage =
+  private MotionMagicVelocityVoltage flywheelMagicVelocityVoltage =
+      new MotionMagicVelocityVoltage(00.);
+  private MotionMagicVelocityVoltage kickerMagicVelocityVoltage =
       new MotionMagicVelocityVoltage(0.0);
 
   private double lastFlywheelSetpointSpeed = 0.0;
@@ -42,17 +42,19 @@ public class ShooterIOTalonFX implements ShooterIO {
     // Configure motor
     TalonFXConfiguration flyWheelConfigLeft =
         new TalonFXConfiguration()
-            .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs);
+            .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs)
+            .withMotionMagic(Constants.ShooterConstants.flyWheelMagicConfligs);
 
-    flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     TalonFXConfiguration flyWheelConfigRight =
         new TalonFXConfiguration()
-            .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs);
+            .withSlot0(Constants.ShooterConstants.flyWheelSlotVelocityConfigs)
+            .withMotionMagic(Constants.ShooterConstants.flyWheelMagicConfligs);
 
-    flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    flyWheelConfigRight.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    flyWheelConfigRight.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
     TalonFXConfiguration kickerConfig =
         new TalonFXConfiguration()
@@ -126,7 +128,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   @Override
   public void setKickerSpeed(double speed) {
-    kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(speed));
+    kickerMotor.set(speed);
   }
 
   @Override

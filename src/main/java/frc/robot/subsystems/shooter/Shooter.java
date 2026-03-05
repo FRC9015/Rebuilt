@@ -1,12 +1,16 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.Interpolator;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+  private final InterpolatingTreeMap<Double, Double> shooterInterpolation =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
 
   private final ShooterIO io;
 
@@ -14,12 +18,25 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(ShooterIO io) {
     this.io = io;
+    shooterInterpolation.put(0.0, 0.0);
+    shooterInterpolation.put(0.24, 0.4);
+    shooterInterpolation.put(0.48, 1.0);
+    shooterInterpolation.put(1.3, 2.8);
+  }
+
+  public Command setInterpolatedSpeed(double distance) {
+    return this.run(
+        () -> {
+          double target = shooterInterpolation.get(distance);
+          io.setFlyWheelSpeed(target);
+          Logger.recordOutput("Shooter/FlywheelTarget", target);
+        });
   }
 
   // Minimum Value of speedValue: -100 RPS
   // Maximum Value of speedValue: 100 RPS
 
-  public void setShooterSpeed(double speedValue, double angleValue) {
+  public void setShooterSpeed(double speedValue) {
     io.setFlyWheelSpeed(speedValue);
   }
 
@@ -30,6 +47,10 @@ public class Shooter extends SubsystemBase {
 
   public void setKickerSpeed(double speedValue) {
     io.setKickerSpeed(speedValue);
+  }
+
+  public void stopKicker() {
+    io.stopKicker();
   }
 
   public void setKickerSpeedReverse(double speedValue) {
@@ -44,11 +65,16 @@ public class Shooter extends SubsystemBase {
     return this.run(() -> this.setKickerSpeedReverse(speedValue));
   }
 
-  public Command runShooterAtSpeedAngle(double speed, double angle, double kickerSpeed) {
-    return this.runOnce(() -> this.setShooterSpeed(speed, angle))
-        .alongWith(this.runOnce(() -> this.setKickerSpeed(kickerSpeed)))
-        .alongWith(new WaitCommand(1 / 6.0))
-        .repeatedly();
+  public Command runShooterAtSpeed(double speed) {
+    return this.startEnd(
+        () -> {
+          this.setShooterSpeed(speed);
+          this.setKickerSpeed(0.6);
+        },
+        () -> {
+          io.stopFlywheels();
+          io.stopKicker();
+        });
   }
 
   public Command runShooterAtReverseSpeed(double speed) {

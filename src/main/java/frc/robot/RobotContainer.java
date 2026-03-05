@@ -18,9 +18,10 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
@@ -96,6 +97,8 @@ public class RobotContainer {
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
   private ShootAtAngleSim simShooter;
+  private double hoodSetpoint = 0.0;
+  private double flywheelSetpoint = 50;
 
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -105,7 +108,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
-  private double indexerRollerValue = 0;
+  private double indexerRollerValue = 12;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
@@ -146,7 +149,11 @@ public class RobotContainer {
                     MotorIDConstants.TURRET_MOTOR_ID,
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
-        hood = new Hood(new HoodIOTalonFX(Constants.ShooterConstants.HOOD_ID));
+        hood =
+            new Hood(
+                new HoodIOTalonFX(
+                    Constants.ShooterConstants.HOOD_ID,
+                    Constants.ShooterConstants.HOOD_ENCODER_ID));
         poseSupplier = () -> drive.getPose();
         climb = new Climb(new ClimbIOTalonFX(0));
         break;
@@ -271,7 +278,8 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    turret.setDefaultCommand(new TurretAngleAim(poseSupplier, turret));
+    turret.setDefaultCommand(
+        new TurretAngleAim(poseSupplier, turret, FieldConstants.HUB_POSE_BLUE));
 
     driverController
         .leftBumper()
@@ -309,25 +317,45 @@ public class RobotContainer {
     // retracts climb fully in case a mistake was made
     driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
+    // driverController
+    //     .leftTrigger()
+    //     .whileTrue(intake.runIntakeSim().onlyIf(() -> Constants.currentMode !=
+    // Constants.Mode.SIM));
+    // runs intake in reverse
+
+    driverController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(flywheelSetpoint));
+
     driverController
         .leftTrigger()
-        .whileTrue(intake.runIntakeSim().onlyIf(() -> Constants.currentMode != Constants.Mode.SIM));
-    // runs intake in reverse
+        .onTrue(
+            new InstantCommand(
+                () -> System.out.println("Hood: " + hoodSetpoint + " RPM: " + flywheelSetpoint)));
+
     driverController
-        .rightTrigger()
-        .whileTrue(
-            Commands.runOnce(
-                    () ->
-                        simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
-                .andThen(() -> simShooter.shootBalls())
-                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
-                .alongWith(new WaitCommand(1 / 6.0))
-                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
-                .repeatedly());
-    operatorController.pov(0).onTrue(turret.setTurretAngleFastestPathCommand(0));
-    operatorController.pov(90).onTrue(turret.setTurretAngleFastestPathCommand(90));
-    operatorController.pov(180).onTrue(turret.setTurretAngleFastestPathCommand(180));
-    operatorController.pov(270).onTrue(turret.setTurretAngleFastestPathCommand(270));
+        .pov(90)
+        .onTrue(
+            Commands.run(
+                () -> {
+                  hoodSetpoint = hood.returnHoodSetpoint();
+                  hoodSetpoint += 0.05;
+                  hood.setHoodPosition(hoodSetpoint);
+                },
+                hood));
+
+    driverController
+        .pov(270)
+        .onTrue(
+            Commands.run(
+                () -> {
+                  hoodSetpoint = hood.returnHoodSetpoint();
+                  hoodSetpoint -= 0.05;
+                  hood.setHoodPosition(hoodSetpoint);
+                },
+                hood));
+
+    driverController.pov(0).onTrue(new InstantCommand(() -> flywheelSetpoint += 100));
+
+    driverController.pov(180).onTrue(new InstantCommand(() -> flywheelSetpoint -= 100));
   }
 
   /**

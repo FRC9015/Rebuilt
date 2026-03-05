@@ -78,13 +78,13 @@
 
 package frc.robot.commands;
 
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.turret.Turret;
 import java.util.function.Supplier;
@@ -94,13 +94,14 @@ public class TurretAngleAim extends Command {
 
   private final Supplier<Pose2d> poseSupplier;
   private final Turret turret;
+  private final Pose2d targetPose;
+  private final Pose2d filpedTargetPose;
 
-  // physical offset from robot center (in meters)
-  // Positive X is forward, Positive Y is left
-
-  public TurretAngleAim(Supplier<Pose2d> poseSupplier, Turret turret) {
+  public TurretAngleAim(Supplier<Pose2d> poseSupplier, Turret turret, Pose2d targetPose) {
     this.poseSupplier = poseSupplier;
     this.turret = turret;
+    this.targetPose = targetPose;
+    this.filpedTargetPose = FlippingUtil.flipFieldPose(targetPose);
     addRequirements(turret);
   }
 
@@ -123,9 +124,7 @@ public class TurretAngleAim extends Command {
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
 
     Translation2d targetPos =
-        isRed
-            ? FieldConstants.HUB_POSE_RED.getTranslation()
-            : FieldConstants.HUB_POSE_BLUE.getTranslation();
+        isRed ? filpedTargetPose.getTranslation() : targetPose.getTranslation();
 
     // 3. Calculate Angle from Turret to Target (Field Relative)
     Translation2d turretToTarget = targetPos.minus(turretFieldPos);
@@ -142,8 +141,9 @@ public class TurretAngleAim extends Command {
     // 6. Send to Subsystem
     // The fastestPath logic will take this 0-360 and decide if it's better
     // to go to the positive or negative version based on your -0.7 to 0.7 limit.
-    // turret.setTurretAngleFastestPath(headingSetpoint);
-
+    turret.setTurretSetPoint(headingSetpoint);
+    double directionSetpoint = turret.setTurretAngleFastestPath(headingSetpoint);
+    turret.setPositionVoid(directionSetpoint);
     // Logging for debugging
     Logger.recordOutput("Turret/HeadingSetpoint0to360", headingSetpoint);
     Logger.recordOutput("Turret/TurretFieldPos", new Pose2d(turretFieldPos, fieldAngleToHub));

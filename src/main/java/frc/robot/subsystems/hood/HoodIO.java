@@ -13,6 +13,7 @@ public interface HoodIO {
   public static class HoodIOInputs {
     // Fields representing the hood state and inputs
     public double hoodEncoderPosition = 0.0;
+    public double hoodMotorPosition = 0.0;
     public double hoodTargetPosition = 0.0;
     public boolean hoodEncoderConnected = false;
     public double hoodAppliedVolts = 0.0;

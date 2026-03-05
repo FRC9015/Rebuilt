@@ -222,18 +222,32 @@ public final class Constants {
 
   public static class ShooterConstants {
     //  Following naming scheme for subsystem motor and sensor ids
+    public static final int HOOD_ENCODER_ID = 55;
     public static final int FLY_WHEEL_LEFT_ID = 56;
     public static final int FLY_WHEEL_RIGHT_ID = 57;
     public static final int HOOD_ID = 58;
     public static final int KICKER_ID = 59;
     public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value
     public static final double HOOD_RESTING_ANGLE = 10.0;
+    public static final double HOOD_ENCODER_OFFSET = 0.0825;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
-        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+        new Slot0Configs()
+            .withKP(0.25)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0.08)
+            .withKV(0.13);
     // TODO: Tune kicker PID values
     public static final Slot0Configs kickerSlotVelocityConfigs =
         new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+
+    public static final MotionMagicConfigs flyWheelMagicConfligs =
+        new MotionMagicConfigs()
+            .withMotionMagicAcceleration(9999)
+            .withMotionMagicCruiseVelocity(50);
 
     public static final FeedbackConfigs kickerFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
@@ -243,10 +257,10 @@ public final class Constants {
 
     public static final Slot1Configs hoodSlotPositionConfigs =
         new Slot1Configs()
-            .withKP(0.0)
+            .withKP(40)
             .withKI(0)
             .withKD(0.0)
-            .withKG(0.0)
+            .withKG(0.02)
             .withKA(0)
             .withKS(0)
             .withKV(0);
@@ -257,8 +271,10 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
 
     public static final FeedbackConfigs hoodFeedbackConfigs =
-        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
-
+        new FeedbackConfigs()
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
+            .withFeedbackRemoteSensorID(HOOD_ENCODER_ID)
+            .withSensorToMechanismRatio(13.7);
     // TODO tune these values
     public static final double SHOOTER_MAX_SPEED = 100;
     public static final double SHOOTER_MIN_SPEED = 0.0;
@@ -304,6 +320,7 @@ public final class Constants {
     public static final int T_TEETH = 90; // Gear count on final turret gear
     public static final int E1_TEETH = 13; // Gear on Encoder 1
     public static final int E2_TEETH = 15; // Gear on Encoder 2
+    public static final int TOTAL_TEETH_LIMIT = 195;
 
     public static final int ENCODER_13_TOOTH = 61; // Encoder 13 motor id
     public static final int ENCODER_15_TOOTH = 62; // Encoder 15 motor id
@@ -336,9 +353,16 @@ public final class Constants {
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(25);
+        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
     public static final Slot0Configs SLOT0_CONFIGS =
-        new Slot0Configs().withKP(12).withKI(0.0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+        new Slot0Configs()
+            .withKP(26)
+            .withKI(0.0)
+            .withKD(0)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0.1)
+            .withKV(1);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)

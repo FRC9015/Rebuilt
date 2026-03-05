@@ -9,7 +9,6 @@ import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -48,7 +47,6 @@ public class TurretIOTalonFX implements TurretIO {
   private final StatusSignal<Angle> motorPositionSignal;
 
   private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
-  private final NeutralOut neutralOut = new NeutralOut();
   private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
 
   private Alert outofSyncAlert =
@@ -76,8 +74,8 @@ public class TurretIOTalonFX implements TurretIO {
             .withSlot0(TurretConstants.SLOT0_CONFIGS)
             .withFeedback(TurretConstants.FEEDBACK_CONFIGS)
             .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1));
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     turretMotor.getConfigurator().apply(motorConfig);
 
     CANcoderConfiguration encoderConfig13 = new CANcoderConfiguration();
@@ -162,6 +160,7 @@ public class TurretIOTalonFX implements TurretIO {
     inputs.turretCurrentAmps = motorCurrentSignal.getValueAsDouble();
     inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
     inputs.turretSetpoint = setpointDegrees;
+    inputs.turretError = Math.abs(inputs.turretResolvedPosition - inputs.turretSetpoint);
 
     // Resolve turret angle using CRT from two encoder readings
     easyCRT
@@ -169,18 +168,22 @@ public class TurretIOTalonFX implements TurretIO {
         .ifPresentOrElse(
             angle -> {
               inputs.turretResolvedValid = true;
-              double last = inputs.turretResolvedPosition;
               inputs.turretResolvedPosition = angle.in(Rotations);
               inputs.turretResolvedPositionDegrees = angle.in(Rotations) * 360.0;
+              double motorPositionWrapped =
+                  MathUtil.inputModulus(
+                      inputs.turretMotorPosition,
+                      TurretConstants.MINROTATION,
+                      TurretConstants.MAXROTATION);
 
-              if (Math.abs(inputs.turretResolvedPosition - last)
+              if (Math.abs(inputs.turretResolvedPosition - motorPositionWrapped)
                   > Constants.TurretConstants.SYNC_THRESHOLD) {
 
                 outofSyncAlert.set(
-                    Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
+                    Math.abs(inputs.turretResolvedPosition - motorPositionWrapped)
                         > Constants.TurretConstants.SYNC_THRESHOLD);
 
-                inputs.turretResolvedPosition = inputs.turretMotorPosition;
+                inputs.turretResolvedPosition = motorPositionWrapped;
               }
             },
             () -> {
@@ -231,5 +234,7 @@ public class TurretIOTalonFX implements TurretIO {
   }
 
   @Override
-  public void setTurretSetPoint(double value) {}
+  public void setTurretSetPoint(double value) {
+    setpointDegrees = value;
+  }
 }
