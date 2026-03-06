@@ -34,19 +34,7 @@ public class Turret extends SubsystemBase {
                 Volts.of(4),
                 Seconds.of(5),
                 (state) -> Logger.recordOutput("Turret/SysIdState", state.toString())),
-            new Mechanism(
-                (voltage) -> {
-                  // INTERNAL SAFETY CHECK:
-                  // If the turret is out of range, we override the SysId request
-                  // and force 0 volts, but we DON'T stop the command/logging.
-                  if (turretOutOfRange()) {
-                    io.setTurretVoltage(0.0);
-                  } else {
-                    io.setTurretVoltage(voltage.in(Volts));
-                  }
-                },
-                null,
-                this));
+            new Mechanism((voltage) -> io.setTurretVoltage(voltage.in(Volts)), null, this));
   }
 
   /**

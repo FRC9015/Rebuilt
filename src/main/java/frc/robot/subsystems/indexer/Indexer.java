@@ -53,9 +53,9 @@ public class Indexer extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Indexer", inputs);
 
-    highCurrent = inputs.indexerCurrentAmps >= jamCurrentAmps;
-    lowSpeed = Math.abs(inputs.indexerVelocity) <= jamRPMThreshold;
-    isRunning = Math.abs(inputs.indexerAppliedVolts) > 0.1;
+    highCurrent = inputs.indexerCurrentAmpsMotor1 >= jamCurrentAmps;
+    lowSpeed = Math.abs(inputs.indexerVelocityMotor1) <= jamRPMThreshold;
+    isRunning = Math.abs(inputs.indexerAppliedVoltsMotor1) > 0.1;
 
     if (highCurrent && lowSpeed && isRunning) {
       jamCycles++;
@@ -100,34 +100,7 @@ public class Indexer extends SubsystemBase {
   public boolean isJamDetected() {
     return jamCycles >= jamCyclesThreshold;
   }
-
-  /**
-   * Returns the current RPM of the indexer.
-   *
-   * @return The RPM of the indexer.
-   */
-  public double getRPM() {
-    return inputs.indexerVelocity;
-  }
-
-  /**
-   * Returns the current voltage applied to the indexer motors.
-   *
-   * @return The applied voltage.
-   */
-  public double getAppliedVolts() {
-    return inputs.indexerAppliedVolts;
-  }
-
-  /**
-   * Returns the current drawn by the indexer motors.
-   *
-   * @return The current in amps.
-   */
-  public double getCurrentAmps() {
-    return inputs.indexerCurrentAmps;
-  }
-
+  
   /**
    * Runs the indexer at the specified voltage.
    *

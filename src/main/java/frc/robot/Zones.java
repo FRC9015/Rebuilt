@@ -224,7 +224,9 @@ public class Zones {
   private static final PredictiveXBaseZone NEUTRAL_ZONE =
       new PredictiveXBaseZone(
           FieldConstants.ALLIANCE_ZONE,
-          FieldConstants.FIELD_LENGTH.minus(FieldConstants.ALLIANCE_ZONE),
+          FieldConstants.FIELD_LENGTH
+              .minus(FieldConstants.ALLIANCE_ZONE)
+              .minus(FieldConstants.TRENCH_WIDTH),
           Meters.of(0),
           FieldConstants.FIELD_WIDTH);
 

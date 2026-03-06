@@ -5,7 +5,6 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -21,12 +20,11 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class HoodIOTalonFX implements HoodIO {
   public final TalonFX hoodMotor;
-  public final CANcoder hoodEncoder;
 
   public StatusSignal<Voltage> motorVolts;
   public StatusSignal<Current> motorAmps;
   public StatusSignal<AngularVelocity> motorRPM;
-  public StatusSignal<Angle> motorPosition, encoderPosition;
+  public StatusSignal<Angle> motorPosition;
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private final MotionMagicVoltage hoodMagicVoltage =
@@ -36,7 +34,6 @@ public class HoodIOTalonFX implements HoodIO {
   public HoodIOTalonFX(int hoodID, int encoderID) {
 
     hoodMotor = new TalonFX(hoodID);
-    hoodEncoder = new CANcoder(encoderID);
 
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
@@ -54,13 +51,11 @@ public class HoodIOTalonFX implements HoodIO {
     hoodEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     hoodEncoderConfig.MagnetSensor.MagnetOffset = ShooterConstants.HOOD_ENCODER_OFFSET;
     hoodMotor.getConfigurator().apply(hoodConfig);
-    hoodEncoder.getConfigurator().apply(hoodEncoderConfig);
 
     motorVolts = hoodMotor.getMotorVoltage();
     motorAmps = hoodMotor.getStatorCurrent();
     motorRPM = hoodMotor.getVelocity();
     motorPosition = hoodMotor.getPosition();
-    encoderPosition = hoodEncoder.getPosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM, motorPosition);
 
@@ -69,10 +64,8 @@ public class HoodIOTalonFX implements HoodIO {
 
   @Override
   public void updateInputs(HoodIOInputs inputs) {
-    BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM, motorPosition, encoderPosition);
-    inputs.hoodEncoderPosition = encoderPosition.getValueAsDouble();
+    BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM, motorPosition);
     inputs.hoodMotorPosition = motorPosition.getValueAsDouble();
-    inputs.hoodEncoderConnected = hoodMotor.getPosition().isAllGood();
     inputs.hoodAppliedVolts = motorVolts.getValueAsDouble();
     inputs.hoodCurrentAmps = motorAmps.getValueAsDouble();
     inputs.hoodTargetPosition = target;

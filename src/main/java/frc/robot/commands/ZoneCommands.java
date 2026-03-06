@@ -8,6 +8,7 @@ import frc.robot.Zones;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class ZoneCommands extends Command {
   private final Drive drive;
@@ -22,26 +23,25 @@ public class ZoneCommands extends Command {
 
   @Override
   public void execute() {
-    if ((Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_BOTTOM_TRENCH_DUCK)
-        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_BOTTOM_TRENCH_DUCK)
-        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_TOP_TRENCH_DUCK)
-        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_TOP_TRENCH_DUCK)) {
+    if ((Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_BOTTOM_TRENCH)
+        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_BOTTOM_TRENCH)
+        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_TOP_TRENCH)
+        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_TOP_TRENCH)) {
+      System.out.println("here");
       hood.setHoodPosition(0.0);
-    }
-
-    if (DriverStation.getAlliance().get() == Alliance.Red) {
+    } else if (DriverStation.getAlliance().get() == Alliance.Red) {
       if (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_ALLIANCE) {
         // levi pass comman here
-        return;
-      }
-    }
 
-    if (DriverStation.getAlliance().get() == Alliance.Blue) {
+      }
+    } else if (DriverStation.getAlliance().get() == Alliance.Blue) {
       if (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_ALLIANCE) {
         // levi pass comman here
-        return;
+
       }
     }
+    Zones.logAllZones();
+    Logger.recordOutput("Zones/currentZone", Zones.getCurrentFieldZone(pose));
   }
   //   public Command hoodAngle(Supplier<Pose2d> pose) {
   //     if ((Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_BOTTOM_TRENCH_DUCK)

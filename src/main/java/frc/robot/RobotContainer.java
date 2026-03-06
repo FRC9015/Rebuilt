@@ -95,13 +95,13 @@ public class RobotContainer {
   private final Turret turret;
   private final Climb climb;
   private final Hood hood;
-  private final ZoneCommands zones;
   private final Supplier<Pose2d> poseSupplier;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
   private ShootAtAngleSim simShooter;
-  private double hoodSetpoint = 0.0;
-  private double flywheelSetpoint = 50;
+  private final InterpTables interpTables;
+  private final double hoodSetpoint = 0.0;
+  private final double flywheelSetpoint = 50;
 
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -110,7 +110,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private double intakeRollerValue = 0; // TODO FIX THESE NUMBERS
+  private double intakeRollerValue = 50; // TODO FIX THESE NUMBERS
   private double indexerRollerValue = 12;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -157,12 +157,10 @@ public class RobotContainer {
                 new HoodIOTalonFX(
                     Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
-        poseSupplier = () -> drive.getPose();
+        poseSupplier = () -> drive.getPredictedPose();
         climb = new Climb(new ClimbIOTalonFX(0));
-
-        // zones = new ZoneCommands(drive, hood, poseSupplier);
-        zones = new ZoneCommands(poseSupplier, drive, hood);
-
+        interpTables = new InterpTables();
+        
         break;
 
       case SIM:
@@ -209,7 +207,8 @@ public class RobotContainer {
                 simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         poseSupplier = () -> simDrive.getSimulatedDriveTrainPose();
         climb = new Climb(new ClimbIOSim());
-        zones = new ZoneCommands(poseSupplier, drive, hood);
+        interpTables = new InterpTables();
+
         break;
 
       case REPLAY:
@@ -240,9 +239,10 @@ public class RobotContainer {
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
-        poseSupplier = () -> drive.getPose();
+        poseSupplier = () -> drive.getPredictedPose();
         climb = new Climb(new ClimbIO() {});
-        zones = new ZoneCommands(poseSupplier, drive, hood);
+        interpTables = new InterpTables();
+
         break;
 
       default:
@@ -292,12 +292,15 @@ public class RobotContainer {
             () -> -driverController.getRightX()));
 
     turret.setDefaultCommand(
-        new TurretAngleAim(poseSupplier, turret, FieldConstants.HUB_POSE_BLUE));
+        new TurretAngleAim(poseSupplier, turret, FieldConstants.HUB_POSE_BLUE, drive, interpTables.timeOfFlightInterp));
+
+    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
 
     driverController
         .leftBumper()
         .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, PivotPositions.DEPLOYED));
 
+    driverController.rightBumper().whileTrue(intake.setPivotPosition(PivotPositions.DEPLOYED));
     // Lock to 0 degrees when A button is held
     driverController
         .a()
@@ -335,18 +338,33 @@ public class RobotContainer {
     //     .whileTrue(intake.runIntakeSim().onlyIf(() -> Constants.currentMode !=
     // Constants.Mode.SIM));
     // runs intake in reverse
-
+    driverController
+        .leftTrigger()
+        .whileTrue(
+            DriveCommands.joystickDrive(
+                drive,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> -driverController.getRightX(),
+                0.3));
     driverController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(flywheelSetpoint));
 
     // driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
-    driverController.pov(90).whileTrue(hood.setHoodPosition(0.1));
+    driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
+    driverController.pov(270).onTrue(hood.incrementhoodCommand(-1));
     // driverController.pov(270).onTrue(hood.incrementhoodCommand(-1));
-    zo
-    // driverController.pov(270).whileTrue(new InstantCommand(() -> zones.execute()));
-
     driverController.pov(0).onTrue(new InstantCommand((() -> shooter.incrementFlyWheelSpeed(1))));
 
     driverController.pov(180).onTrue(new InstantCommand(() -> shooter.incrementFlyWheelSpeed(-1)));
+
+    operatorController.a().whileTrue(turret.dynamic(Direction.kForward));
+    operatorController.b().whileTrue(turret.dynamic(Direction.kReverse));
+
+    operatorController.x().whileTrue(turret.quasistatic(Direction.kForward));
+
+    operatorController.y().whileTrue(turret.quasistatic(Direction.kReverse));
+
+    operatorController.povLeft().whileTrue(intake.runRollerAtSpeed(5));
   }
 
   /**

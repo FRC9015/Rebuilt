@@ -16,6 +16,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.util.FlippingUtil;
@@ -28,6 +29,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.Interpolator;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -131,29 +135,31 @@ public final class Constants {
   }
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
-    public static final Slot0Configs intakeSlotPositionConfigs =
-        new Slot0Configs()
-            .withKP(0.001)
-            .withKI(0)
-            .withKD(0.02)
-            .withKG(0.01)
-            .withKA(0)
-            .withKS(0)
-            .withKV(0);
     public static final Slot0Configs ROLLER_SLOT0_CONFIGS =
-        new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
+        new Slot0Configs().withKP(0.25).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
-        new Slot0Configs().withKP(2).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
+        new Slot0Configs()
+            .withKP(7)
+            .withKI(0)
+            .withKD(0.0)
+            .withKS(0.1)
+            .withKV(0.2)
+            .withKA(0)
+            .withGravityType(GravityTypeValue.Arm_Cosine)
+            .withKG(0.01);
 
     public static final MotionMagicConfigs PIVOT_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
 
     public static final MotionMagicConfigs ROLLER_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(5);
+        new MotionMagicConfigs().withMotionMagicAcceleration(75);
 
     public static final FeedbackConfigs PIVOT_FEEDBACK_CONFIGS =
-        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+        new FeedbackConfigs()
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
+            .withFeedbackRemoteSensorID(50)
+            .withRotorToSensorRatio(3 / 10);
 
     private static final MotorOutputConfigs rollerOutputLeftConfigs =
         new MotorOutputConfigs()
@@ -168,7 +174,7 @@ public final class Constants {
 
     private static final MotorOutputConfigs rollerOutputRightConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
+            .withInverted(InvertedValue.CounterClockwise_Positive)
             .withNeutralMode(NeutralModeValue.Brake);
 
     public static final TalonFXConfiguration rollerConfigRight =
@@ -179,7 +185,7 @@ public final class Constants {
 
     private static final MotorOutputConfigs pivotOutputLeftConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Brake);
     public static final TalonFXConfiguration pivotConfigLeft =
         new TalonFXConfiguration()
@@ -188,26 +194,15 @@ public final class Constants {
             .withMotionMagic(PIVOT_MAGIC_CONFIGS)
             .withMotorOutput(pivotOutputLeftConfigs);
 
-    private static final MotorOutputConfigs pivotOutputRightConfigs =
-        new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake);
-    public static final TalonFXConfiguration pivotConfigRight =
-        new TalonFXConfiguration()
-            .withSlot0(PIVOT_SLOT0_CONFIGS)
-            .withFeedback(PIVOT_FEEDBACK_CONFIGS)
-            .withMotionMagic(PIVOT_MAGIC_CONFIGS)
-            .withMotorOutput(pivotOutputRightConfigs);
-
     public static final double INTAKE_MAX_POS = 300.0;
     public static final double INTAKE_MIN_POS = 0.0;
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double PIVOT_MAX_POS = 300.0;
+    public static final double PIVOT_MAX_POS = 1.0;
     public static final double PIVOT_MIN_POS = 0.0;
-    public static final double PIVOT_DEPLOYED_POSITION = 100.0;
-    public static final double PIVOT_STOWED_POSITION = 10.0;
+    public static final double PIVOT_DEPLOYED_POSITION = 0.0;
+    public static final double PIVOT_STOWED_POSITION = 0.9;
   }
 
   public static class SimConstants {
@@ -270,15 +265,14 @@ public final class Constants {
 
     public static final FeedbackConfigs hoodFeedbackConfigs =
         new FeedbackConfigs()
-            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
-            .withFeedbackRemoteSensorID(HOOD_ENCODER_ID)
+            .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
             .withSensorToMechanismRatio(13.7);
     // TODO tune these values
     public static final double SHOOTER_MAX_SPEED = 100;
     public static final double SHOOTER_MIN_SPEED = 0.0;
     public static final double FLYWHEEL_ACCELERATION = 100;
     public static final double FEEDFORWARD_VOLTAGE = 12.0;
-    public static final double HOOD_MAX_POS = 1.87;
+    public static final double HOOD_MAX_POS = 1.38;
     public static final double HOOD_MIN_POS = 0.0;
     public static final double HOOD_DEPLOYED_POSITION = 0.0;
     public static final double HOOD_STOWED_POSITION = 0.0;
@@ -351,15 +345,15 @@ public final class Constants {
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
+        new MotionMagicConfigs().withMotionMagicAcceleration(125).withMotionMagicCruiseVelocity(25);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(62.623)
-            .withKI(0)
-            .withKD(10.508)
+            .withKP(40)
+            .withKI(0.0)
+            .withKD(0.03)
             .withKG(0)
             .withKA(0)
-            .withKS(0.15)
+            .withKS(0.13)
             .withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()

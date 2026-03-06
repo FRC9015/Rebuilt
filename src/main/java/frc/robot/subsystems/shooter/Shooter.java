@@ -9,8 +9,6 @@ import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
-  private final InterpolatingTreeMap<Double, Double> shooterInterpolation =
-      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
   private double setpoint = 0.0;
 
   private final ShooterIO io;
@@ -19,19 +17,6 @@ public class Shooter extends SubsystemBase {
 
   public Shooter(ShooterIO io) {
     this.io = io;
-    shooterInterpolation.put(0.0, 0.0);
-    shooterInterpolation.put(0.24, 0.4);
-    shooterInterpolation.put(0.48, 1.0);
-    shooterInterpolation.put(1.3, 2.8);
-  }
-
-  public Command setInterpolatedSpeed(double distance) {
-    return this.run(
-        () -> {
-          double target = shooterInterpolation.get(distance);
-          io.setFlyWheelSpeed(target);
-          Logger.recordOutput("Shooter/FlywheelTarget", target);
-        });
   }
 
   // Minimum Value of speedValue: -100 RPS
