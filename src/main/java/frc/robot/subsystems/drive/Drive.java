@@ -56,6 +56,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
@@ -290,6 +291,9 @@ public class Drive extends SubsystemBase {
     gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
 
     Logger.recordOutput("SwerveStates/SlipRatio", getSkiddingRatio(getModuleStates(), kinematics));
+    Logger.recordOutput(
+        "distance",
+        getPose().getTranslation().getDistance(FieldConstants.HUB_POSE_RED.getTranslation()));
   }
 
   /**

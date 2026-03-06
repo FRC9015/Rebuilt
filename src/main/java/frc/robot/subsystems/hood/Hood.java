@@ -13,6 +13,7 @@ public class Hood extends SubsystemBase {
   private final HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
   private final InterpolatingTreeMap<Double, Double> launchHoodAngleMap =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+  private double setpoint = 0.0;
 
   private final HoodIO io;
 
@@ -47,14 +48,28 @@ public class Hood extends SubsystemBase {
         });
   }
 
+  public Command incrementhoodCommand(double value) {
+    return run(() -> incrementHoodAngle(value));
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    io.setHoodPosition(setpoint);
     Logger.processInputs("Hood", inputs);
+    Logger.recordOutput("Hood/setpoint", setpoint);
   }
 
   public Angle getLaunchAngle() {
     return inputs.launchAngle;
+  }
+
+  public void setSetpoint(double setpoint) {
+    this.setpoint = setpoint;
+  }
+
+  public void incrementHoodAngle(double value) {
+    setpoint += (0.005 * value);
   }
 
   public double returnHoodSetpoint() {

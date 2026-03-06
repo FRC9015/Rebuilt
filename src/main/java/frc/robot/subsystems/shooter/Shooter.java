@@ -11,6 +11,7 @@ public class Shooter extends SubsystemBase {
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
   private final InterpolatingTreeMap<Double, Double> shooterInterpolation =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+  private double setpoint = 0.0;
 
   private final ShooterIO io;
 
@@ -40,6 +41,10 @@ public class Shooter extends SubsystemBase {
     io.setFlyWheelSpeed(speedValue);
   }
 
+  public void incrementFlyWheelSpeed(double value) {
+    setpoint += (5 * value);
+  }
+
   public void setShooterReverseSpeed(double speedValue) {
 
     io.setFlyWheelSpeed(-speedValue);
@@ -51,6 +56,10 @@ public class Shooter extends SubsystemBase {
 
   public void stopKicker() {
     io.stopKicker();
+  }
+
+  public void setSetpoint(double setpoint) {
+    this.setpoint = setpoint;
   }
 
   public void setKickerSpeedReverse(double speedValue) {
@@ -89,6 +98,7 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    io.setFlyWheelSpeed(setpoint);
     Logger.processInputs("Shooter", inputs);
   }
 }

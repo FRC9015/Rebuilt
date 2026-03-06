@@ -123,9 +123,7 @@ public final class Constants {
     public static final Transform3d FRONT_CAMERA =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(2.25),
-                Units.inchesToMeters(-15.25),
-                Units.inchesToMeters(7.25)),
+                Units.inchesToMeters(2.16), Units.inchesToMeters(-15.313), Units.inchesToMeters(7)),
             new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(270)));
 
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
@@ -229,7 +227,7 @@ public final class Constants {
     public static final int KICKER_ID = 59;
     public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value
     public static final double HOOD_RESTING_ANGLE = 10.0;
-    public static final double HOOD_ENCODER_OFFSET = 0.0825;
+    public static final double HOOD_ENCODER_OFFSET = 0.076416015625;
 
     public static final Slot0Configs flyWheelSlotVelocityConfigs =
         new Slot0Configs()
@@ -356,13 +354,13 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(26)
-            .withKI(0.0)
-            .withKD(0)
+            .withKP(35)
+            .withKI(0)
+            .withKD(0.4)
             .withKG(0)
             .withKA(0)
             .withKS(0.1)
-            .withKV(1);
+            .withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)

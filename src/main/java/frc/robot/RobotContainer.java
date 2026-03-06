@@ -325,37 +325,13 @@ public class RobotContainer {
 
     driverController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(flywheelSetpoint));
 
-    driverController
-        .leftTrigger()
-        .onTrue(
-            new InstantCommand(
-                () -> System.out.println("Hood: " + hoodSetpoint + " RPM: " + flywheelSetpoint)));
+    driverController.pov(90).whileTrue(hood.incrementhoodCommand(1));
 
-    driverController
-        .pov(90)
-        .onTrue(
-            Commands.run(
-                () -> {
-                  hoodSetpoint = hood.returnHoodSetpoint();
-                  hoodSetpoint += 0.05;
-                  hood.setHoodPosition(hoodSetpoint);
-                },
-                hood));
+    driverController.pov(270).whileTrue(hood.incrementhoodCommand(-1));
 
-    driverController
-        .pov(270)
-        .onTrue(
-            Commands.run(
-                () -> {
-                  hoodSetpoint = hood.returnHoodSetpoint();
-                  hoodSetpoint -= 0.05;
-                  hood.setHoodPosition(hoodSetpoint);
-                },
-                hood));
+    driverController.pov(0).onTrue(new InstantCommand((() -> shooter.incrementFlyWheelSpeed(1))));
 
-    driverController.pov(0).onTrue(new InstantCommand(() -> flywheelSetpoint += 100));
-
-    driverController.pov(180).onTrue(new InstantCommand(() -> flywheelSetpoint -= 100));
+    driverController.pov(180).onTrue(new InstantCommand(() -> shooter.incrementFlyWheelSpeed(-1)));
   }
 
   /**
