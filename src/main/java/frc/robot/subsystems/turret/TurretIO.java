@@ -39,4 +39,6 @@ public interface TurretIO {
   public default void seedMotorPosition(double positionRotations) {}
 
   public default void setTurretSetPoint(double value) {}
+
+  public default void setTurretVoltage(double voltage) {}
 }

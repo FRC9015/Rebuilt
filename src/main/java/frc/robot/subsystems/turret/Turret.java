@@ -1,9 +1,17 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Constants.TurretConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -14,8 +22,19 @@ public class Turret extends SubsystemBase {
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private final TurretIO io;
 
+  private final SysIdRoutine sysId;
+
   public Turret(TurretIO io) {
     this.io = io;
+
+    sysId =
+        new SysIdRoutine(
+            new Config(
+                Volts.of(0.25).per(Seconds),
+                Volts.of(2),
+                Seconds.of(5),
+                (state) -> Logger.recordOutput("Turret/SysIdState", state.toString())),
+            new Mechanism((voltage) -> this.setTurretVoltage(voltage.in(Volts)), null, this));
   }
 
   /**
@@ -78,8 +97,28 @@ public class Turret extends SubsystemBase {
         });
   }
 
+  private void setTurretVoltage(double voltage) {
+    io.setTurretVoltage(voltage);
+  }
+
+  public Command runSysId() {
+    return Commands.sequence(
+        sysId.quasistatic(Direction.kForward).until(() -> turretOutOfRange()),
+        Commands.waitSeconds(3),
+        sysId.quasistatic(Direction.kReverse).until(() -> turretOutOfRange()),
+        Commands.waitSeconds(3),
+        sysId.dynamic(Direction.kForward),
+        Commands.waitSeconds(3),
+        sysId.dynamic(Direction.kReverse));
+  }
+
   public void setTurretSetPoint(double value) {
     io.setTurretSetPoint(value);
+  }
+
+  public boolean turretOutOfRange() {
+    return (inputs.turretResolvedPositionDegrees > 0.65
+        || inputs.turretResolvedPositionDegrees < -0.65);
   }
 
   public double getTurretPositionRadians() {

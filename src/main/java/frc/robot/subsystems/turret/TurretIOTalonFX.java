@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -48,6 +49,7 @@ public class TurretIOTalonFX implements TurretIO {
 
   private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
   private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
+  private final VoltageOut voltageOut = new VoltageOut(0.0);
 
   private Alert outofSyncAlert =
       new Alert("CRT-Motor desync detected! Resyncing motor.", AlertType.kWarning);
@@ -219,6 +221,11 @@ public class TurretIOTalonFX implements TurretIO {
     double safePosition = MathUtil.clamp(rotations, -0.7, 0.7);
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
     setpointDegrees = safePosition;
+  }
+
+  @Override
+  public void setTurretVoltage(double voltage) {
+    turretMotor.setControl(voltageOut.withOutput(voltage));
   }
 
   public CRTStatus getLastCRTStatus() {
