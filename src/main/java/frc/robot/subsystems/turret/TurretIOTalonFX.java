@@ -76,7 +76,7 @@ public class TurretIOTalonFX implements TurretIO {
             .withSlot0(TurretConstants.SLOT0_CONFIGS)
             .withFeedback(TurretConstants.FEEDBACK_CONFIGS)
             .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1));
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     turretMotor.getConfigurator().apply(motorConfig);
 

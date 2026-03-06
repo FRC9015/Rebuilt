@@ -6,15 +6,15 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Zones;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.hood.HoodIOTalonFX;
+import frc.robot.subsystems.hood.Hood;
 import java.util.function.Supplier;
 
 public class ZoneCommands extends Command {
   private final Drive drive;
   private Supplier<Pose2d> pose;
-  private final HoodIOTalonFX hood;
+  private final Hood hood;
 
-  public ZoneCommands(Supplier<Pose2d> pose, Drive drive, HoodIOTalonFX hood) {
+  public ZoneCommands(Supplier<Pose2d> pose, Drive drive, Hood hood) {
     this.drive = drive;
     this.pose = pose;
     this.hood = hood;
@@ -52,5 +52,4 @@ public class ZoneCommands extends Command {
   //     }
   //     return Commands.none();
   //   }
-
 }

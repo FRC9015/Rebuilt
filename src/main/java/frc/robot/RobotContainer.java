@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.SimConstants;
@@ -29,6 +30,7 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.TurretAngleAim;
+import frc.robot.commands.ZoneCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.climb.ClimbIO;
@@ -93,6 +95,7 @@ public class RobotContainer {
   private final Turret turret;
   private final Climb climb;
   private final Hood hood;
+  private final ZoneCommands zones;
   private final Supplier<Pose2d> poseSupplier;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
@@ -156,6 +159,10 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
         poseSupplier = () -> drive.getPose();
         climb = new Climb(new ClimbIOTalonFX(0));
+
+        // zones = new ZoneCommands(drive, hood, poseSupplier);
+        zones = new ZoneCommands(poseSupplier, drive, hood);
+
         break;
 
       case SIM:
@@ -202,6 +209,7 @@ public class RobotContainer {
                 simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         poseSupplier = () -> simDrive.getSimulatedDriveTrainPose();
         climb = new Climb(new ClimbIOSim());
+        zones = new ZoneCommands(poseSupplier, drive, hood);
         break;
 
       case REPLAY:
@@ -234,6 +242,7 @@ public class RobotContainer {
         hood = new Hood(new HoodIO() {});
         poseSupplier = () -> drive.getPose();
         climb = new Climb(new ClimbIO() {});
+        zones = new ZoneCommands(poseSupplier, drive, hood);
         break;
 
       default:
@@ -258,7 +267,10 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption("Turret SysId", turret.runSysId());
+    autoChooser.addOption("Turret SysId QF", turret.quasistatic(Direction.kForward));
+    autoChooser.addOption("Turret SysId QR", turret.quasistatic(Direction.kReverse));
+    autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
+    autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -326,9 +338,11 @@ public class RobotContainer {
 
     driverController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(flywheelSetpoint));
 
-    driverController.pov(90).whileTrue(hood.incrementhoodCommand(1));
-
-    driverController.pov(270).whileTrue(hood.incrementhoodCommand(-1));
+    // driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
+    driverController.pov(90).whileTrue(hood.setHoodPosition(0.1));
+    // driverController.pov(270).onTrue(hood.incrementhoodCommand(-1));
+    zo
+    // driverController.pov(270).whileTrue(new InstantCommand(() -> zones.execute()));
 
     driverController.pov(0).onTrue(new InstantCommand((() -> shooter.incrementFlyWheelSpeed(1))));
 

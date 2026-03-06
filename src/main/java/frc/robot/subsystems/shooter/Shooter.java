@@ -42,7 +42,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void incrementFlyWheelSpeed(double value) {
-    setpoint += (5 * value);
+    setpoint += (1 * value);
   }
 
   public void setShooterReverseSpeed(double speedValue) {

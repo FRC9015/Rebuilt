@@ -49,13 +49,13 @@ public class Hood extends SubsystemBase {
   }
 
   public Command incrementhoodCommand(double value) {
-    return run(() -> incrementHoodAngle(value));
+    return runOnce(() -> incrementHoodAngle(value));
   }
 
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    io.setHoodPosition(setpoint);
+    // io.setHoodPosition(setpoint);
     Logger.processInputs("Hood", inputs);
     Logger.recordOutput("Hood/setpoint", setpoint);
   }

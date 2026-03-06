@@ -30,11 +30,23 @@ public class Turret extends SubsystemBase {
     sysId =
         new SysIdRoutine(
             new Config(
-                Volts.of(0.25).per(Seconds),
-                Volts.of(2),
+                Volts.of(0.5).per(Seconds),
+                Volts.of(4),
                 Seconds.of(5),
                 (state) -> Logger.recordOutput("Turret/SysIdState", state.toString())),
-            new Mechanism((voltage) -> this.setTurretVoltage(voltage.in(Volts)), null, this));
+            new Mechanism(
+                (voltage) -> {
+                  // INTERNAL SAFETY CHECK:
+                  // If the turret is out of range, we override the SysId request
+                  // and force 0 volts, but we DON'T stop the command/logging.
+                  if (turretOutOfRange()) {
+                    io.setTurretVoltage(0.0);
+                  } else {
+                    io.setTurretVoltage(voltage.in(Volts));
+                  }
+                },
+                null,
+                this));
   }
 
   /**
@@ -101,11 +113,18 @@ public class Turret extends SubsystemBase {
     io.setTurretVoltage(voltage);
   }
 
+  public Command quasistatic(Direction dir) {
+    return sysId.quasistatic(dir);
+  }
+
+  public Command dynamic(Direction dir) {
+    return sysId.dynamic(dir);
+  }
+
   public Command runSysId() {
     return Commands.sequence(
-        sysId.quasistatic(Direction.kForward).until(() -> turretOutOfRange()),
-        Commands.waitSeconds(3),
-        sysId.quasistatic(Direction.kReverse).until(() -> turretOutOfRange()),
+        sysId.quasistatic(Direction.kForward).withTimeout(4.5),
+        sysId.quasistatic(Direction.kReverse).withTimeout(4.5),
         Commands.waitSeconds(3),
         sysId.dynamic(Direction.kForward),
         Commands.waitSeconds(3),
@@ -117,8 +136,11 @@ public class Turret extends SubsystemBase {
   }
 
   public boolean turretOutOfRange() {
-    return (inputs.turretResolvedPositionDegrees > 0.65
-        || inputs.turretResolvedPositionDegrees < -0.65);
+    return (inputs.turretResolvedPosition > 0.68);
+  }
+
+  public boolean turretOutOfRangeneg() {
+    return (inputs.turretResolvedPosition < -0.68);
   }
 
   public double getTurretPositionRadians() {

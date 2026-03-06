@@ -142,8 +142,8 @@ public class TurretAngleAim extends Command {
     // The fastestPath logic will take this 0-360 and decide if it's better
     // to go to the positive or negative version based on your -0.7 to 0.7 limit.
     turret.setTurretSetPoint(headingSetpoint);
-    // double directionSetpoint = turret.setTurretAngleFastestPath(headingSetpoint);
-    // turret.setPositionVoid(directionSetpoint);
+    double directionSetpoint = turret.setTurretAngleFastestPath(headingSetpoint);
+    turret.setPositionVoid(directionSetpoint);
     // Logging for debugging
     Logger.recordOutput("Turret/HeadingSetpoint0to360", headingSetpoint);
     Logger.recordOutput("Turret/TurretFieldPos", new Pose2d(turretFieldPos, fieldAngleToHub));

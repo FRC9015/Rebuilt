@@ -354,12 +354,12 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(25);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(35)
+            .withKP(62.623)
             .withKI(0)
-            .withKD(0.4)
+            .withKD(10.508)
             .withKG(0)
             .withKA(0)
-            .withKS(0.1)
+            .withKS(0.15)
             .withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
