@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.MotorIDConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.VisionConstants;
@@ -34,7 +35,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
-import frc.robot.commands.ZoneCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -58,6 +58,7 @@ import frc.robot.subsystems.intake.PivotIOTalonFX;
 import frc.robot.subsystems.intake.RollerIO;
 import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.RollerIOTalonFX;
+import frc.robot.subsystems.shooter.Kicker;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -90,6 +91,7 @@ public class RobotContainer {
   private final Intake intake;
   private ObjectDetection objectDetection;
   private final Turret turret;
+  private final Kicker kicker;
   //   private final Climb climb;
   private final Hood hood;
   private SwerveDriveSimulation simDrive;
@@ -128,7 +130,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
+                // new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
                 new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
         indexer =
@@ -160,6 +162,7 @@ public class RobotContainer {
                 new HoodIOTalonFX(
                     Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
+        kicker = new Kicker(ShooterConstants.KICKER_ID);
         // climb = new Climb(new ClimbIOTalonFX(0));
         interpTables = new InterpTables();
 
@@ -186,7 +189,7 @@ public class RobotContainer {
                 IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
-
+        kicker = new Kicker(ShooterConstants.KICKER_ID);
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
@@ -216,6 +219,7 @@ public class RobotContainer {
 
       case REPLAY:
         // Replayed robot, disable IO implementations
+        kicker = new Kicker(ShooterConstants.KICKER_ID);
         drive =
             new Drive(
                 new GyroIO() {},
@@ -274,20 +278,20 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
-    Autos.populateChooser(
-        autoChooser2,
-        drive,
-        intake,
-        shooter,
-        indexer,
-        hood,
-        vision,
-        turret,
-        interpTables.shooterSpeedInterp,
-        interpTables.hoodAngleInterp);
+    // Autos.populateChooser(
+    //     autoChooser2,
+    //     drive,
+    //     intake,
+    //     shooter,
+    //     indexer,
+    //     hood,
+    //     vision,
+    //     turret,
+    //     interpTables.shooterSpeedInterp,
+    //     interpTables.hoodAngleInterp);
 
     autoChooser2.addRoutine(
-        "asdf",
+        "DepotLeftBlue",
         () ->
             Autos.AutonomousRoutines.depotLeftBlue(
                 drive,
@@ -299,7 +303,47 @@ public class RobotContainer {
                 turret,
                 interpTables.shooterSpeedInterp,
                 interpTables.hoodAngleInterp));
-    SmartDashboard.putData(autoChooser2);
+
+    autoChooser2.addRoutine(
+        "DepotCenterRed",
+        () ->
+            Autos.AutonomousRoutines.depotCenteRed(
+                drive,
+                intake,
+                shooter,
+                indexer,
+                hood,
+                vision,
+                turret,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp));
+    autoChooser2.addRoutine(
+        "CenterRushRightRed",
+        () ->
+            Autos.AutonomousRoutines.centerrushRightRed(
+                drive,
+                intake,
+                shooter,
+                indexer,
+                hood,
+                vision,
+                turret,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp));
+    autoChooser2.addRoutine(
+        "CenterRushLeftRed",
+        () ->
+            Autos.AutonomousRoutines.centerrushLeftRed(
+                drive,
+                intake,
+                shooter,
+                indexer,
+                hood,
+                vision,
+                turret,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp));
+    SmartDashboard.putData("Choreo Autos", autoChooser2);
 
     Trigger autoTrigger = new Trigger(() -> DriverStation.isAutonomous());
     autoTrigger.whileTrue(autoChooser2.selectedCommandScheduler());
@@ -363,41 +407,34 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(8.0));
 
-    operatorController.leftTrigger().whileTrue(
-                    new TurretAngleAim(
-                            () -> drive.getPose(),
-                            turret,
-                            FieldConstants.HUB_POSE_BLUE,
-                            drive,
-                            interpTables.timeOfFlightInterp));
+    operatorController
+        .leftTrigger()
+        .whileTrue(
+            new TurretAngleAim(
+                () -> drive.getPose(),
+                turret,
+                FieldConstants.HUB_POSE_BLUE,
+                drive,
+                interpTables.timeOfFlightInterp));
     operatorController
         .rightTrigger()
         .whileTrue(
-                    new ShooterAutoAimSequence(
-                            shooter,
-                            hood,
-                            interpTables.shooterSpeedInterp,
-                            interpTables.hoodAngleInterp,
-                            () -> drive.getPose(),
-                            FieldConstants.HUB_POSE_BLUE,
-                            drive));
-
+            new ShooterAutoAimSequence(
+                shooter,
+                hood,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp,
+                () -> drive.getPose(),
+                FieldConstants.HUB_POSE_BLUE,
+                drive));
+    operatorController.rightBumper().whileTrue(intake.runRollerAtVoltage(-6));
     operatorController.b().whileTrue(indexer.runIndexer(5));
-    operatorController.leftBumper().whileTrue(indexer.runIndexer(-5));
     operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
-
-    operatorController
-        .povUp()
-        .onTrue(turret.setTurretAngleFastestPathCommand(0));
-    operatorController
-        .povDown()
-        .onTrue(turret.setTurretAngleFastestPathCommand(180));
-    operatorController    
-        .povLeft()
-        .onTrue(turret.setTurretAngleFastestPathCommand(90));
-    operatorController
-        .povRight()
-        .onTrue(turret.setTurretAngleFastestPathCommand(270));
+    // operatorController.leftBumper().whileTrue(hood.setHoodPosition(1.3).alongWith(null));
+    operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
+    operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
+    operatorController.povLeft().onTrue(turret.setTurretAngleFastestPathCommand(90));
+    operatorController.povRight().onTrue(turret.setTurretAngleFastestPathCommand(270));
   }
 
   /**

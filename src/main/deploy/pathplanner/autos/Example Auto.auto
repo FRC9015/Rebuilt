@@ -9,6 +9,24 @@
           "data": {
             "pathName": "Example Path"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "turret"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "index"
+          }
         }
       ]
     }

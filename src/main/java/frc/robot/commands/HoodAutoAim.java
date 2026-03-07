@@ -59,13 +59,6 @@ public class HoodAutoAim extends Command {
 
   @Override
   public void end(boolean interrupted) {
-      // TODO Auto-generated method stub
-      super.end(interrupted);
-  }
-
-  @Override
-  public boolean isFinished() {
-      // TODO Auto-generated method stub
-      return super.isFinished();
+    hood.setHoodPos(0.0);
   }
 }

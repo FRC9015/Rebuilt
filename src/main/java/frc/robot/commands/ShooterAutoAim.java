@@ -58,4 +58,10 @@ public class ShooterAutoAim extends Command {
     Logger.recordOutput("Shooter/autoSetpoint", setpoint);
     Logger.recordOutput("DistanceEdit", botToTargetPoseDistance);
   }
+
+  @Override
+  public void end(boolean interrupted) {
+    shooter.stopKicker();
+    shooter.setShooterSpeed(0);
+  }
 }
