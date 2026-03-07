@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.RobotDimensionConstants;
@@ -15,7 +17,7 @@ import frc.robot.Constants.ZoneConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Zones {
+public class Zones extends SubsystemBase {
   public static interface Zone {
     public Trigger contains(Supplier<Pose2d> pose);
   }
@@ -250,7 +252,7 @@ public class Zones {
     BLUE_ALLIANCE,
     RED_ALLIANCE,
     NEUTRAL_ZONE_LEFT,
-    NUETRAL_ZONE_RIGHT,
+    NEUTRAL_ZONE_RIGHT,
 
     BLUE_BOTTOM_TRENCH,
     BLUE_TOP_TRENCH,
@@ -296,7 +298,7 @@ public class Zones {
     if (RED_ALLIANCE_ZONE.contains(pose).getAsBoolean()) return FieldZone.RED_ALLIANCE;
     // if (NEUTRAL_ZONE.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL;
     if (NEUTRAL_ZONE_LEFT.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL_ZONE_LEFT;
-    if (NEUTRAL_ZONE_LEFT.contains(pose).getAsBoolean()) return FieldZone.NUETRAL_ZONE_RIGHT;
+    if (NEUTRAL_ZONE_LEFT.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL_ZONE_RIGHT;
 
     return FieldZone.UNKNOWN;
   }
@@ -321,5 +323,32 @@ public class Zones {
     Logger.recordOutput("Zones/Field/Red Alliance", RED_ALLIANCE_ZONE.getCorners());
     Logger.recordOutput("Zones/Field/Neutral_LEFT", NEUTRAL_ZONE_LEFT.getCorners());
     Logger.recordOutput("Zones/Field/Neutral_RIGHT", NEUTRAL_ZONE_RIGHT.getCorners());
+  }
+
+  private boolean run = true;
+  private boolean override = false;
+
+  public void toggleRun() {
+    run = !run;
+  }
+
+  public boolean getRun() {
+    return run;
+  }
+
+  private void setOverride(boolean value) {
+    override = value;
+  }
+
+  public boolean getOverride() {
+    return override;
+  }
+
+  public Command override() {
+    return this.startEnd(() -> setOverride(true), () -> setOverride(false));
+  }
+
+  public Command runToggle() {
+    return this.runOnce(() -> toggleRun());
   }
 }

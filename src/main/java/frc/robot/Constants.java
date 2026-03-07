@@ -28,6 +28,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -106,6 +107,15 @@ public final class Constants {
     public static final Translation3d HUB_TARGET_TOLERANCE =
         new Translation3d(
             Units.inchesToMeters(24), Units.inchesToMeters(21), Units.inchesToMeters(0.02));
+
+    public static final Pose2d PASSING_POSE_LEFT_BLUE =
+        new Pose2d(new Translation2d(4.127, 5.495), new Rotation2d());
+    public static final Pose2d PASSING_POSE_RIGHT_BLUE =
+        new Pose2d(new Translation2d(4.127, 2.512), new Rotation2d());
+    public static final Pose2d PASSING_POSE_LEFT_RED =
+        new Pose2d(new Translation2d(12.536, 5.495), new Rotation2d());
+    public static final Pose2d PASSING_POSE_RIGHT_RED =
+        new Pose2d(new Translation2d(12.536, 2.512), new Rotation2d());
   }
 
   public static class ZoneConstants {

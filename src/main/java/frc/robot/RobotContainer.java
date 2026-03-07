@@ -14,11 +14,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -30,7 +30,6 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
-import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -49,7 +48,6 @@ import frc.robot.subsystems.indexer.IndexerIO;
 import frc.robot.subsystems.indexer.IndexerIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.PivotIO;
-import frc.robot.subsystems.intake.PivotIO.PivotPositions;
 import frc.robot.subsystems.intake.PivotIOSim;
 import frc.robot.subsystems.intake.PivotIOTalonFX;
 import frc.robot.subsystems.intake.RollerIO;
@@ -95,6 +93,7 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final double hoodSetpoint = 0.0;
   private final double flywheelSetpoint = 50;
+  private final Zones zones;
 
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -108,6 +107,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
+    zones = new Zones();
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -288,19 +288,6 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
-    turret.setDefaultCommand(
-        new TurretAngleAim(
-            () -> drive.getPose(),
-            turret,
-            FieldConstants.HUB_POSE_BLUE,
-            drive,
-            interpTables.timeOfFlightInterp));
-
-    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-
-    driverController.leftBumper().whileTrue(intake.runRollerAtSpeed(intakeRollerValue));
-
-    driverController.rightBumper().whileTrue(intake.setPivotPosition(PivotPositions.DEPLOYED));
     // Lock to 0 degrees when A button is held
     driverController
         .a()
@@ -313,26 +300,17 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    // driverController
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-    //                 drive)
-    //             .ignoringDisable(true));
+    driverController
+        .b()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        drive.setPose(
+                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                    drive)
+                .ignoringDisable(true));
     // lifts climb first time y pressed, lifts robot second time y pressed
-    // driverController
-    //     .y()
-    //     .onTrue(
-    //         Commands.either(
-    //             climb.setClimbPreset(ClimbPositions.ReadyToClimbL1),
-    //             climb.setClimbPreset(ClimbPositions.FullyClimbedL1),
-    //             () -> climb.readyToClimbL1()));
-    // // retracts climb fully in case a mistake was made
-    // driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
-    // runs intake normaly
+
     // driverController
     //     .leftTrigger()
     //     .whileTrue(intake.runIntakeSim().onlyIf(() -> Constants.currentMode !=
@@ -347,36 +325,100 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> -driverController.getRightX(),
                 0.3));
-    driverController.rightTrigger().whileTrue(shooter.setKickerSpeedCommand(1));
-    driverController.y().whileTrue(indexer.runIndexer(6));
-    // driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
-    driverController
-        .b()
+
+    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(50));
+
+    operatorController
+        .rightTrigger()
         .whileTrue(
-            new ShooterAutoAimSequence(
-                shooter,
-                hood,
-                interpTables.shooterSpeedInterp,
-                interpTables.hoodAngleInterp,
-                interpTables.timeOfFlightInterp,
-                () -> drive.getPose(),
-                FieldConstants.HUB_POSE_BLUE,
-                drive));
-    driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
-    driverController.pov(270).onTrue(hood.incrementhoodCommand(-1));
-    // driverController.pov(270).onTrue(hood.incrementhoodCommand(-1));
-    driverController.pov(0).onTrue(new InstantCommand((() -> shooter.incrementFlyWheelSpeed(1))));
+            (new ShooterAutoAimSequence(
+                        shooter,
+                        hood,
+                        interpTables.shooterSpeedInterp,
+                        interpTables.hoodAngleInterp,
+                        interpTables.timeOfFlightInterp,
+                        () -> drive.getPose(),
+                        FieldConstants.HUB_POSE_BLUE,
+                        drive)
+                    .alongWith(
+                        DriveCommands.joystickDrive(
+                            drive,
+                            () -> -driverController.getLeftY(),
+                            () -> -driverController.getLeftX(),
+                            () -> -driverController.getRightX(),
+                            0.1))
+                    .alongWith(indexer.runIndexer(6))
+                    .alongWith(shooter.setKickerSpeedCommand(1)))
+                .onlyIf(
+                    () ->
+                        (turret.getTurretError() < 12.0)
+                            && zones.getRun()
+                            && ((Zones.getCurrentFieldZone(() -> drive.getPose())
+                                        == Zones.FieldZone.BLUE_ALLIANCE
+                                    && DriverStation.getAlliance().get()
+                                        == DriverStation.Alliance.Blue)
+                                || (Zones.getCurrentFieldZone(() -> drive.getPose())
+                                        == Zones.FieldZone.RED_ALLIANCE
+                                    && DriverStation.getAlliance().get()
+                                        == DriverStation.Alliance.Red))));
 
-    driverController.pov(180).onTrue(new InstantCommand(() -> shooter.incrementFlyWheelSpeed(-1)));
+    operatorController
+        .rightTrigger()
+        .whileTrue(
+            (hood.setHoodPosition(1.3)
+                    .alongWith(shooter.setKickerSpeedCommand(1))
+                    .alongWith(shooter.runShooterAtSpeed(100)))
+                .onlyIf(
+                    () ->
+                        (turret.getTurretError() < 12.0)
+                            && ((Zones.getCurrentFieldZone(() -> drive.getPose())
+                                        == Zones.FieldZone.NEUTRAL_ZONE_LEFT
+                                    || Zones.getCurrentFieldZone(() -> drive.getPose())
+                                        == Zones.FieldZone.NEUTRAL_ZONE_RIGHT)
+                                || (Zones.getCurrentFieldZone(() -> drive.getPose())
+                                        == Zones.FieldZone.RED_ALLIANCE
+                                    && DriverStation.getAlliance().get()
+                                        != DriverStation.Alliance.Red)
+                                || (Zones.getCurrentFieldZone(() -> drive.getPose())
+                                        == Zones.FieldZone.BLUE_ALLIANCE
+                                    && DriverStation.getAlliance().get()
+                                        != DriverStation.Alliance.Blue))));
 
-    operatorController.a().whileTrue(turret.dynamic(Direction.kForward));
-    operatorController.b().whileTrue(turret.dynamic(Direction.kReverse));
+    operatorController
+        .rightTrigger()
+        .whileTrue(
+            (hood.setHoodPosition(0.0)
+                    .alongWith(shooter.setKickerSpeedCommand(1))
+                    .alongWith(shooter.runShooterAtSpeed(37)))
+                .onlyIf(
+                    () ->
+                        (turret.getTurretError() < 12.0)
+                            && !zones.getRun()
+                            && ((Zones.getCurrentFieldZone(() -> drive.getPose())
+                                        == Zones.FieldZone.BLUE_ALLIANCE
+                                    && DriverStation.getAlliance().get()
+                                        == DriverStation.Alliance.Blue)
+                                || (Zones.getCurrentFieldZone(() -> drive.getPose())
+                                        == Zones.FieldZone.RED_ALLIANCE
+                                    && DriverStation.getAlliance().get()
+                                        == DriverStation.Alliance.Red))));
 
-    operatorController.x().whileTrue(turret.quasistatic(Direction.kForward));
+    operatorController.y().whileTrue(zones.override());
+    operatorController.a().onTrue(zones.runToggle());
 
-    operatorController.y().whileTrue(turret.quasistatic(Direction.kReverse));
-
-    operatorController.povLeft().whileTrue(intake.runRollerAtSpeed(5));
+    operatorController
+        .povUp()
+        .onTrue(turret.setTurretAngleFastestPathCommand(0).onlyIf(() -> !zones.getRun()));
+    operatorController
+        .povDown()
+        .onTrue(turret.setTurretAngleFastestPathCommand(180).onlyIf(() -> !zones.getRun()));
+    operatorController
+        .povLeft()
+        .onTrue(turret.setTurretAngleFastestPathCommand(90).onlyIf(() -> !zones.getRun()));
+    operatorController
+        .povRight()
+        .onTrue(turret.setTurretAngleFastestPathCommand(270).onlyIf(() -> !zones.getRun()));
   }
 
   /**

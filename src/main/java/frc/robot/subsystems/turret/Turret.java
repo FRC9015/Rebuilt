@@ -140,6 +140,10 @@ public class Turret extends SubsystemBase {
     io.setTurretPosition(angle);
   }
 
+  public double getTurretError() {
+    return inputs.turretError;
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
