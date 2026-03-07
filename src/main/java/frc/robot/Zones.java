@@ -196,24 +196,25 @@ public class Zones {
           RED_BOTTOM_TRENCH_DUCK,
           RED_TOP_TRENCH_DUCK);
 
-  private static final PredictiveXBaseZone BLUE_BOTTOM_BUMP =
-      new PredictiveXBaseZone(
-          FieldConstants.TRENCH_BUMP_X
-              .minus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
-              .minus(RobotDimensionConstants.FULL_LENGTH.div(2)),
-          FieldConstants.TRENCH_BUMP_X
-              .plus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
-              .plus(RobotDimensionConstants.FULL_LENGTH.div(2)),
-          FieldConstants.TRENCH_WIDTH.plus(FieldConstants.TRENCH_BLOCK_WIDTH),
-          FieldConstants.TRENCH_WIDTH
-              .plus(FieldConstants.TRENCH_BLOCK_WIDTH)
-              .plus(FieldConstants.BUMP_WIDTH));
-  private static final PredictiveXBaseZone BLUE_TOP_BUMP = BLUE_BOTTOM_BUMP.mirroredY();
-  private static final PredictiveXBaseZone RED_BOTTOM_BUMP = BLUE_BOTTOM_BUMP.mirroredX();
-  private static final PredictiveXBaseZone RED_TOP_BUMP = BLUE_TOP_BUMP.mirroredX();
+  // private static final PredictiveXBaseZone BLUE_BOTTOM_BUMP =
+  //     new PredictiveXBaseZone(
+  //         FieldConstants.TRENCH_BUMP_X
+  //             .minus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
+  //             .minus(RobotDimensionConstants.FULL_LENGTH.div(2)),
+  //         FieldConstants.TRENCH_BUMP_X
+  //             .plus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
+  //             .plus(RobotDimensionConstants.FULL_LENGTH.div(2)),
+  //         FieldConstants.TRENCH_WIDTH.plus(FieldConstants.TRENCH_BLOCK_WIDTH),
+  //         FieldConstants.TRENCH_WIDTH
+  //             .plus(FieldConstants.TRENCH_BLOCK_WIDTH)
+  //             .plus(FieldConstants.BUMP_WIDTH));
+  // private static final PredictiveXBaseZone BLUE_TOP_BUMP = BLUE_BOTTOM_BUMP.mirroredY();
+  // private static final PredictiveXBaseZone RED_BOTTOM_BUMP = BLUE_BOTTOM_BUMP.mirroredX();
+  // private static final PredictiveXBaseZone RED_TOP_BUMP = BLUE_TOP_BUMP.mirroredX();
 
-  public static final PredictiveXZoneCollection BUMP_ZONES =
-      new PredictiveXZoneCollection(BLUE_BOTTOM_BUMP, BLUE_TOP_BUMP, RED_BOTTOM_BUMP, RED_TOP_BUMP);
+  // public static final PredictiveXZoneCollection BUMP_ZONES =
+  //     new PredictiveXZoneCollection(BLUE_BOTTOM_BUMP, BLUE_TOP_BUMP, RED_BOTTOM_BUMP,
+  // RED_TOP_BUMP);
 
   private static final PredictiveXBaseZone BLUE_ALLIANCE_ZONE =
       new PredictiveXBaseZone(
@@ -221,25 +222,35 @@ public class Zones {
 
   private static final PredictiveXBaseZone RED_ALLIANCE_ZONE = BLUE_ALLIANCE_ZONE.mirroredX();
 
-  private static final PredictiveXBaseZone NEUTRAL_ZONE =
+  private static final PredictiveXBaseZone NEUTRAL_ZONE_LEFT =
       new PredictiveXBaseZone(
-          FieldConstants.ALLIANCE_ZONE,
+          FieldConstants.ALLIANCE_ZONE.plus(FieldConstants.TRENCH_WIDTH),
           FieldConstants.FIELD_LENGTH
               .minus(FieldConstants.ALLIANCE_ZONE)
               .minus(FieldConstants.TRENCH_WIDTH),
           Meters.of(0),
+          FieldConstants.FIELD_WIDTH.div(2));
+
+  private static final PredictiveXBaseZone NEUTRAL_ZONE_RIGHT =
+      new PredictiveXBaseZone(
+          FieldConstants.ALLIANCE_ZONE.plus(FieldConstants.TRENCH_WIDTH),
+          FieldConstants.FIELD_LENGTH
+              .minus(FieldConstants.ALLIANCE_ZONE)
+              .minus(FieldConstants.TRENCH_WIDTH),
+          (FieldConstants.FIELD_WIDTH.div(2)),
           FieldConstants.FIELD_WIDTH);
 
   public static final PredictiveXZoneCollection FIELD_ALLIANCE_ZONES =
       new PredictiveXZoneCollection(BLUE_ALLIANCE_ZONE, RED_ALLIANCE_ZONE);
 
-  public static final PredictiveXZoneCollection FIELD_NEUTRAL_ZONE =
-      new PredictiveXZoneCollection(NEUTRAL_ZONE);
+  // public static final PredictiveXZoneCollection FIELD_NEUTRAL_ZONE =
+  //     new PredictiveXZoneCollection(NEUTRAL_ZONE);
 
   public enum FieldZone {
     BLUE_ALLIANCE,
     RED_ALLIANCE,
-    NEUTRAL,
+    NEUTRAL_ZONE_LEFT,
+    NUETRAL_ZONE_RIGHT,
 
     BLUE_BOTTOM_TRENCH,
     BLUE_TOP_TRENCH,
@@ -251,10 +262,10 @@ public class Zones {
     RED_BOTTOM_TRENCH_DUCK,
     RED_TOP_TRENCH_DUCK,
 
-    BLUE_BOTTOM_BUMP,
-    BLUE_TOP_BUMP,
-    RED_BOTTOM_BUMP,
-    RED_TOP_BUMP,
+    // BLUE_BOTTOM_BUMP,
+    // BLUE_TOP_BUMP,
+    // RED_BOTTOM_BUMP,
+    // RED_TOP_BUMP,
 
     UNKNOWN
   }
@@ -275,15 +286,17 @@ public class Zones {
     if (RED_TOP_TRENCH_DUCK.contains(pose).getAsBoolean()) return FieldZone.RED_TOP_TRENCH_DUCK;
 
     // --- Bumps ---
-    if (BLUE_BOTTOM_BUMP.contains(pose).getAsBoolean()) return FieldZone.BLUE_BOTTOM_BUMP;
-    if (BLUE_TOP_BUMP.contains(pose).getAsBoolean()) return FieldZone.BLUE_TOP_BUMP;
-    if (RED_BOTTOM_BUMP.contains(pose).getAsBoolean()) return FieldZone.RED_BOTTOM_BUMP;
-    if (RED_TOP_BUMP.contains(pose).getAsBoolean()) return FieldZone.RED_TOP_BUMP;
+    // if (BLUE_BOTTOM_BUMP.contains(pose).getAsBoolean()) return FieldZone.BLUE_BOTTOM_BUMP;
+    // if (BLUE_TOP_BUMP.contains(pose).getAsBoolean()) return FieldZone.BLUE_TOP_BUMP;
+    // if (RED_BOTTOM_BUMP.contains(pose).getAsBoolean()) return FieldZone.RED_BOTTOM_BUMP;
+    // if (RED_TOP_BUMP.contains(pose).getAsBoolean()) return FieldZone.RED_TOP_BUMP;
 
     // --- Field Sections ---
     if (BLUE_ALLIANCE_ZONE.contains(pose).getAsBoolean()) return FieldZone.BLUE_ALLIANCE;
     if (RED_ALLIANCE_ZONE.contains(pose).getAsBoolean()) return FieldZone.RED_ALLIANCE;
-    if (NEUTRAL_ZONE.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL;
+    // if (NEUTRAL_ZONE.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL;
+    if (NEUTRAL_ZONE_LEFT.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL_ZONE_LEFT;
+    if (NEUTRAL_ZONE_LEFT.contains(pose).getAsBoolean()) return FieldZone.NUETRAL_ZONE_RIGHT;
 
     return FieldZone.UNKNOWN;
   }
@@ -299,13 +312,14 @@ public class Zones {
     Logger.recordOutput("Zones/Trenches Duck/Red Bottom", RED_BOTTOM_TRENCH_DUCK.getCorners());
     Logger.recordOutput("Zones/Trenches Duck/Red Top", RED_TOP_TRENCH_DUCK.getCorners());
 
-    Logger.recordOutput("Zones/Bumps/Blue Bottom", BLUE_BOTTOM_BUMP.getCorners());
-    Logger.recordOutput("Zones/Bumps/Blue Top", BLUE_TOP_BUMP.getCorners());
-    Logger.recordOutput("Zones/Bumps/Red Bottom", RED_BOTTOM_BUMP.getCorners());
-    Logger.recordOutput("Zones/Bumps/Red Top", RED_TOP_BUMP.getCorners());
+    // Logger.recordOutput("Zones/Bumps/Blue Bottom", BLUE_BOTTOM_BUMP.getCorners());
+    // Logger.recordOutput("Zones/Bumps/Blue Top", BLUE_TOP_BUMP.getCorners());
+    // Logger.recordOutput("Zones/Bumps/Red Bottom", RED_BOTTOM_BUMP.getCorners());
+    // Logger.recordOutput("Zones/Bumps/Red Top", RED_TOP_BUMP.getCorners());
 
     Logger.recordOutput("Zones/Field/Blue Alliance", BLUE_ALLIANCE_ZONE.getCorners());
     Logger.recordOutput("Zones/Field/Red Alliance", RED_ALLIANCE_ZONE.getCorners());
-    Logger.recordOutput("Zones/Field/Neutral", NEUTRAL_ZONE.getCorners());
+    Logger.recordOutput("Zones/Field/Neutral_LEFT", NEUTRAL_ZONE_LEFT.getCorners());
+    Logger.recordOutput("Zones/Field/Neutral_RIGHT", NEUTRAL_ZONE_RIGHT.getCorners());
   }
 }

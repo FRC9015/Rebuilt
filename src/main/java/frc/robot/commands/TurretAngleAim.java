@@ -84,8 +84,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
-import edu.wpi.first.math.interpolation.Interpolator;
-import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.TurretConstants;
@@ -104,7 +102,11 @@ public class TurretAngleAim extends Command {
   private final InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
 
   public TurretAngleAim(
-      Supplier<Pose2d> poseSupplier, Turret turret, Pose2d targetPose, Drive drive, InterpolatingTreeMap<Double, Double> timeOfFlightInterp) {
+      Supplier<Pose2d> poseSupplier,
+      Turret turret,
+      Pose2d targetPose,
+      Drive drive,
+      InterpolatingTreeMap<Double, Double> timeOfFlightInterp) {
     this.poseSupplier = poseSupplier;
     this.turret = turret;
     this.targetPose = targetPose;
@@ -134,11 +136,12 @@ public class TurretAngleAim extends Command {
 
     Translation2d targetPos =
         isRed ? filpedTargetPose.getTranslation() : targetPose.getTranslation();
+    double distance = robotPose.getTranslation().getDistance(targetPos);
     targetPos =
         targetPos.minus(
             new Translation2d(
-                drive.getChassisSpeeds().vxMetersPerSecond,
-                drive.getChassisSpeeds().vyMetersPerSecond));
+                drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
+                drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
     // 3. Calculate Angle from Turret to Target (Field Relative)
     Translation2d turretToTarget = targetPos.minus(turretFieldPos);
     Rotation2d fieldAngleToHub = turretToTarget.getAngle();

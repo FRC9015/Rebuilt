@@ -1,12 +1,17 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.Interpolator;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Zones;
+import frc.robot.Zones.FieldZone;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.turret.Turret;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -14,42 +19,46 @@ public class ZoneCommands extends Command {
   private final Drive drive;
   private Supplier<Pose2d> pose;
   private final Hood hood;
+  private Supplier<Boolean> run;
+  private final DriverStation.Alliance allaince;
+  private final Turret turret;
+  private InterpolatingTreeMap<Double, Double> interp =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
 
-  public ZoneCommands(Supplier<Pose2d> pose, Drive drive, Hood hood) {
+  public ZoneCommands(
+      Supplier<Pose2d> pose, Drive drive, Hood hood, Supplier<Boolean> run, Turret turret) {
     this.drive = drive;
     this.pose = pose;
     this.hood = hood;
+    this.run = run;
+    this.allaince = DriverStation.getAlliance().get();
+    this.turret = turret;
+    interp.put(0.0, 0.0);
   }
 
   @Override
   public void execute() {
-    if ((Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_BOTTOM_TRENCH)
-        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_BOTTOM_TRENCH)
-        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_TOP_TRENCH)
-        || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_TOP_TRENCH)) {
+    boolean runGet = run.get();
+    FieldZone currentZone = Zones.getCurrentFieldZone(pose);
+    if ((currentZone == Zones.FieldZone.BLUE_BOTTOM_TRENCH_DUCK)
+        || (currentZone == Zones.FieldZone.RED_BOTTOM_TRENCH_DUCK)
+        || (currentZone == Zones.FieldZone.RED_TOP_TRENCH_DUCK)
+        || (currentZone == Zones.FieldZone.BLUE_TOP_TRENCH_DUCK)) {
       System.out.println("here");
-      hood.setHoodPosition(0.0);
-    } else if (DriverStation.getAlliance().get() == Alliance.Red) {
-      if (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_ALLIANCE) {
-        // levi pass comman here
+      // hood.setHoodPosition(0.0);
+    } else if (runGet) {
+      if (allaince == Alliance.Red) {
+        if (currentZone == Zones.FieldZone.BLUE_ALLIANCE) {
+          new TurretAngleAim(pose, turret, null, drive, interp);
+        }
+        // } else if (DriverStation.getAlliance().get() == Alliance.Blue) {
+        //   if (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_ALLIANCE) {
+        //     // levi pass comman here
 
-      }
-    } else if (DriverStation.getAlliance().get() == Alliance.Blue) {
-      if (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_ALLIANCE) {
-        // levi pass comman here
-
+        //   }
       }
     }
     Zones.logAllZones();
     Logger.recordOutput("Zones/currentZone", Zones.getCurrentFieldZone(pose));
   }
-  //   public Command hoodAngle(Supplier<Pose2d> pose) {
-  //     if ((Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_BOTTOM_TRENCH_DUCK)
-  //         || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_BOTTOM_TRENCH_DUCK)
-  //         || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.RED_TOP_TRENCH_DUCK)
-  //         || (Zones.getCurrentFieldZone(pose) == Zones.FieldZone.BLUE_TOP_TRENCH_DUCK)) {
-  //       return Commands.runOnce(() -> hood.setHoodPosition(0.0));
-  //     }
-  //     return Commands.none();
-  //   }
 }

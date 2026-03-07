@@ -51,7 +51,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command runRollerAtSpeed(double speed) {
-    return this.startEnd(() -> this.setRollerSpeed(speed), () -> this.stopRoller());
+    return this.startEnd(() -> this.setRollerSpeed(speed), () -> roller.stop());
   }
 
   public Command stopRoller() {

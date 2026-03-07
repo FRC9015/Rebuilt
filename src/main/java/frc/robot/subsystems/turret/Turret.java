@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.Zones;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -144,5 +145,6 @@ public class Turret extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Turret", inputs);
     Logger.recordOutput("Turret/setpoint", inputs.turretSetpoint);
+    Zones.logAllZones();
   }
 }

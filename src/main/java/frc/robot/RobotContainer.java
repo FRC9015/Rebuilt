@@ -30,13 +30,7 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.TurretAngleAim;
-import frc.robot.commands.ZoneCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.climb.Climb;
-import frc.robot.subsystems.climb.ClimbIO;
-import frc.robot.subsystems.climb.ClimbIO.ClimbIOInputs.ClimbPositions;
-import frc.robot.subsystems.climb.ClimbIOSim;
-import frc.robot.subsystems.climb.ClimbIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -51,7 +45,7 @@ import frc.robot.subsystems.hood.HoodIOSim;
 import frc.robot.subsystems.hood.HoodIOTalonFX;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.indexer.IndexerIO;
-import frc.robot.subsystems.indexer.IndexerIOSparkFlex;
+import frc.robot.subsystems.indexer.IndexerIOTalonFX;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.PivotIO;
 import frc.robot.subsystems.intake.PivotIO.PivotPositions;
@@ -93,7 +87,7 @@ public class RobotContainer {
   private final Intake intake;
   private ObjectDetection objectDetection;
   private final Turret turret;
-  private final Climb climb;
+  //   private final Climb climb;
   private final Hood hood;
   private final Supplier<Pose2d> poseSupplier;
   private SwerveDriveSimulation simDrive;
@@ -110,7 +104,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private double intakeRollerValue = 50; // TODO FIX THESE NUMBERS
+  private double intakeRollerValue = 50;
   private double indexerRollerValue = 12;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -130,8 +124,13 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("CAM", VisionConstants.FRONT_CAMERA));
-        indexer = new Indexer(new IndexerIOSparkFlex(Constants.MotorIDConstants.INDEXER1_MOTOR_ID));
+                new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
+                new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE),
+                new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
+        indexer =
+            new Indexer(
+                new IndexerIOTalonFX(
+                    MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.INDEXER2_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
@@ -158,9 +157,9 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
         poseSupplier = () -> drive.getPredictedPose();
-        climb = new Climb(new ClimbIOTalonFX(0));
+        // climb = new Climb(new ClimbIOTalonFX(0));
         interpTables = new InterpTables();
-        
+
         break;
 
       case SIM:
@@ -200,13 +199,15 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOSim(
-                    "Camera", VisionConstants.FRONT_CAMERA, simDrive::getSimulatedDriveTrainPose));
+                    "Camera",
+                    VisionConstants.PORT_CAMERA_POSE,
+                    simDrive::getSimulatedDriveTrainPose));
         turret = new Turret(new TurretIOSim());
         simShooter =
             new ShootAtAngleSim(
                 simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         poseSupplier = () -> simDrive.getSimulatedDriveTrainPose();
-        climb = new Climb(new ClimbIOSim());
+        // climb = new Climb(new ClimbIOSim());
         interpTables = new InterpTables();
 
         break;
@@ -223,7 +224,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", VisionConstants.FRONT_CAMERA));
+                new VisionIOPhotonVision("placeholder", VisionConstants.PORT_CAMERA_POSE));
         intake = new Intake(new RollerIO() {}, new PivotIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
@@ -240,7 +241,7 @@ public class RobotContainer {
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
         poseSupplier = () -> drive.getPredictedPose();
-        climb = new Climb(new ClimbIO() {});
+        // climb = new Climb(new ClimbIO() {});
         interpTables = new InterpTables();
 
         break;
@@ -292,13 +293,16 @@ public class RobotContainer {
             () -> -driverController.getRightX()));
 
     turret.setDefaultCommand(
-        new TurretAngleAim(poseSupplier, turret, FieldConstants.HUB_POSE_BLUE, drive, interpTables.timeOfFlightInterp));
+        new TurretAngleAim(
+            poseSupplier,
+            turret,
+            FieldConstants.HUB_POSE_BLUE,
+            drive,
+            interpTables.timeOfFlightInterp));
 
-    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
+    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
 
-    driverController
-        .leftBumper()
-        .whileTrue(intake.runIntakeAtSpeed(intakeRollerValue, PivotPositions.DEPLOYED));
+    driverController.leftBumper().whileTrue(intake.runRollerAtSpeed(intakeRollerValue));
 
     driverController.rightBumper().whileTrue(intake.setPivotPosition(PivotPositions.DEPLOYED));
     // Lock to 0 degrees when A button is held
@@ -323,15 +327,15 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     // lifts climb first time y pressed, lifts robot second time y pressed
-    driverController
-        .y()
-        .onTrue(
-            Commands.either(
-                climb.setClimbPreset(ClimbPositions.ReadyToClimbL1),
-                climb.setClimbPreset(ClimbPositions.FullyClimbedL1),
-                () -> climb.readyToClimbL1()));
-    // retracts climb fully in case a mistake was made
-    driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
+    // driverController
+    //     .y()
+    //     .onTrue(
+    //         Commands.either(
+    //             climb.setClimbPreset(ClimbPositions.ReadyToClimbL1),
+    //             climb.setClimbPreset(ClimbPositions.FullyClimbedL1),
+    //             () -> climb.readyToClimbL1()));
+    // // retracts climb fully in case a mistake was made
+    // driverController.back().onTrue(climb.setClimbPreset(ClimbPositions.Retracted));
     // runs intake normaly
     // driverController
     //     .leftTrigger()
@@ -348,7 +352,7 @@ public class RobotContainer {
                 () -> -driverController.getRightX(),
                 0.3));
     driverController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(flywheelSetpoint));
-
+    driverController.y().whileTrue(indexer.runIndexer(6));
     // driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
     driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
     driverController.pov(270).onTrue(hood.incrementhoodCommand(-1));

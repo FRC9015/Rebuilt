@@ -29,9 +29,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
-import edu.wpi.first.math.interpolation.Interpolator;
-import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -124,11 +121,28 @@ public final class Constants {
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
     public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
-    public static final Transform3d FRONT_CAMERA =
+    public static final Transform3d STARBOARD_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
                 Units.inchesToMeters(2.16), Units.inchesToMeters(-15.313), Units.inchesToMeters(7)),
             new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(270)));
+    public static final Transform3d STERN_CAMERA_POSE =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(-11.5812),
+                Units.inchesToMeters(5.657),
+                Units.inchesToMeters(10.25)),
+            new Rotation3d(
+                Units.degreesToRadians(2),
+                Units.degreesToRadians(15),
+                Units.degreesToRadians(180)));
+    public static final Transform3d PORT_CAMERA_POSE =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(-8.86),
+                Units.inchesToMeters(14.886),
+                Units.inchesToMeters(10.737)),
+            new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(90)));
 
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
@@ -136,7 +150,7 @@ public final class Constants {
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
     public static final Slot0Configs ROLLER_SLOT0_CONFIGS =
-        new Slot0Configs().withKP(0.25).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
+        new Slot0Configs().withKP(0.7).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
@@ -153,7 +167,7 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
 
     public static final MotionMagicConfigs ROLLER_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(75);
+        new MotionMagicConfigs().withMotionMagicAcceleration(125).withMotionMagicCruiseVelocity(25);
 
     public static final FeedbackConfigs PIVOT_FEEDBACK_CONFIGS =
         new FeedbackConfigs()
@@ -186,7 +200,7 @@ public final class Constants {
     private static final MotorOutputConfigs pivotOutputLeftConfigs =
         new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake);
+            .withNeutralMode(NeutralModeValue.Coast);
     public static final TalonFXConfiguration pivotConfigLeft =
         new TalonFXConfiguration()
             .withSlot0(PIVOT_SLOT0_CONFIGS)
@@ -348,7 +362,7 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(125).withMotionMagicCruiseVelocity(25);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(40)
+            .withKP(45)
             .withKI(0.0)
             .withKD(0.03)
             .withKG(0)

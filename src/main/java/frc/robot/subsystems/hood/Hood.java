@@ -1,9 +1,5 @@
 package frc.robot.subsystems.hood;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
-import edu.wpi.first.math.interpolation.Interpolator;
-import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,7 +13,6 @@ public class Hood extends SubsystemBase {
 
   public Hood(HoodIO io) {
     this.io = io;
-    
   }
 
   public Command stopHood() {

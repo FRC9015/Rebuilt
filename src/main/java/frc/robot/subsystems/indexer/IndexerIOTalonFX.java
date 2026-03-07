@@ -28,19 +28,20 @@ public class IndexerIOTalonFX implements IndexerIO {
 
   private final TalonFX motor1, motor2;
   private final StatusSignal<Voltage> appliedVoltsSignalMotor1, appliedVoltsSignalMotor2;
-  private final StatusSignal<Current> currentSignalMotor1,currentSignalMotor2;
+  private final StatusSignal<Current> currentSignalMotor1, currentSignalMotor2;
 
   private final double defaultCurrentLimit = 45.0;
   private final double maxVoltage = 12.0;
 
-  public IndexerIOTalonFX(int motorId1, int motorid2) { // , int canRangeID1, int canRangeID2, int canRangeID3
+  public IndexerIOTalonFX(
+      int motorId1, int motorid2) { // , int canRangeID1, int canRangeID2, int canRangeID3
     motor1 = new TalonFX(motorId1);
     motor2 = new TalonFX(motorid2);
 
     // Configure motor
     TalonFXConfiguration motorConfig = new TalonFXConfiguration();
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     motorConfig.CurrentLimits.StatorCurrentLimit = defaultCurrentLimit;
     motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
@@ -59,7 +60,11 @@ public class IndexerIOTalonFX implements IndexerIO {
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     // Refresh signals
-    BaseStatusSignal.refreshAll(appliedVoltsSignalMotor1, currentSignalMotor1, appliedVoltsSignalMotor2, currentSignalMotor2);
+    BaseStatusSignal.refreshAll(
+        appliedVoltsSignalMotor1,
+        currentSignalMotor1,
+        appliedVoltsSignalMotor2,
+        currentSignalMotor2);
     // Update inputs
     inputs.indexerAppliedVoltsMotor1 = appliedVoltsSignalMotor1.getValueAsDouble();
     inputs.indexerCurrentAmpsMotor1 = currentSignalMotor1.getValueAsDouble();
@@ -71,19 +76,17 @@ public class IndexerIOTalonFX implements IndexerIO {
   public void stop() {
     motor1.stopMotor();
     motor2.stopMotor();
-
   }
 
   @Override
   public void setBrakeMode(boolean enable) {
     motor1.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
     motor2.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
-
   }
 
   @Override
   public void setVoltage(double voltage) {
     motor1.setVoltage(MathUtil.clamp(voltage, -maxVoltage, maxVoltage));
-    motor1.setVoltage(MathUtil.clamp(voltage, -maxVoltage, maxVoltage));
+    motor2.setVoltage(MathUtil.clamp(voltage, -maxVoltage, maxVoltage));
   }
 }

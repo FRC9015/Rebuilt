@@ -100,7 +100,7 @@ public class Indexer extends SubsystemBase {
   public boolean isJamDetected() {
     return jamCycles >= jamCyclesThreshold;
   }
-  
+
   /**
    * Runs the indexer at the specified voltage.
    *

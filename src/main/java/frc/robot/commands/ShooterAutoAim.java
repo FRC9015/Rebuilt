@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
 import java.util.function.Supplier;
 
@@ -14,18 +15,24 @@ public class ShooterAutoAim extends Command {
   private Pose2d pose;
   private Pose2d targetPose;
   private Pose2d flippedTargetPose;
-  private InterpolatingTreeMap<Double, Double> interpTable;
+  private InterpolatingTreeMap<Double, Double> hoodInterpTable;
+  private InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
+  private final Drive drive;
 
   public ShooterAutoAim(
       Shooter shooter,
       Supplier<Pose2d> poseSupplier,
       Pose2d targetPose,
-      InterpolatingTreeMap<Double, Double> interp) {
+      InterpolatingTreeMap<Double, Double> shooterInterp,
+      InterpolatingTreeMap<Double, Double> timeOfFlightInterp,
+      Drive drive) {
     this.shooter = shooter;
     this.pose = poseSupplier.get();
     this.targetPose = targetPose;
     this.flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
-    this.interpTable = interp;
+    this.hoodInterpTable = shooterInterp;
+    this.timeOfFlightInterp = timeOfFlightInterp;
+    this.drive = drive;
     addRequirements(shooter);
   }
 
@@ -39,9 +46,15 @@ public class ShooterAutoAim extends Command {
 
     Translation2d targetPos =
         isRed ? flippedTargetPose.getTranslation() : targetPose.getTranslation();
+    double distance = currentRobotPose.getTranslation().getDistance(targetPos);
+    targetPos =
+        targetPos.minus(
+            new Translation2d(
+                drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
+                drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
 
     double botToTargetPoseDistance = currentRobotPose.getTranslation().getDistance(targetPos);
-    double setpoint = interpTable.get(botToTargetPoseDistance);
+    double setpoint = hoodInterpTable.get(botToTargetPoseDistance);
     shooter.setShooterSpeed(setpoint);
   }
 }
