@@ -150,7 +150,7 @@ public final class Constants {
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
     public static final Slot0Configs ROLLER_SLOT0_CONFIGS =
-        new Slot0Configs().withKP(0.7).withKI(0).withKD(0).withKS(0).withKV(0).withKA(0);
+        new Slot0Configs().withKP(0.5).withKI(0).withKD(0).withKS(0.1).withKV(0).withKA(0);
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
@@ -167,7 +167,7 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
 
     public static final MotionMagicConfigs ROLLER_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(125).withMotionMagicCruiseVelocity(25);
+        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
 
     public static final FeedbackConfigs PIVOT_FEEDBACK_CONFIGS =
         new FeedbackConfigs()
@@ -178,7 +178,7 @@ public final class Constants {
     private static final MotorOutputConfigs rollerOutputLeftConfigs =
         new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake);
+            .withNeutralMode(NeutralModeValue.Coast);
 
     public static final TalonFXConfiguration rollerConfigLeft =
         new TalonFXConfiguration()

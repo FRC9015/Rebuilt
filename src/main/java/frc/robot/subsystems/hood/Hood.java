@@ -23,6 +23,10 @@ public class Hood extends SubsystemBase {
     return this.run(() -> io.setHoodPosition(position));
   }
 
+  public void setHoodPos(double value) {
+    io.setHoodPosition(value);
+  }
+
   public Command incrementhoodCommand(double value) {
     return runOnce(() -> incrementHoodAngle(value));
   }
@@ -30,7 +34,7 @@ public class Hood extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    io.setHoodPosition(this.setpoint);
+    // io.setHoodPosition(this.setpoint);
     Logger.processInputs("Hood", inputs);
     Logger.recordOutput("Hood/setpoint", setpoint);
   }

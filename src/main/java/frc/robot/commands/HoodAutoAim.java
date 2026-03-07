@@ -9,10 +9,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 public class HoodAutoAim extends Command {
   private final Hood hood;
-  private Pose2d pose;
+  private Supplier<Pose2d> pose;
   private Pose2d targetPose;
   private Pose2d flippedTargetPose;
   private InterpolatingTreeMap<Double, Double> hoodInterpTable;
@@ -27,7 +28,7 @@ public class HoodAutoAim extends Command {
       InterpolatingTreeMap<Double, Double> timeOfFlightInterp,
       Drive drive) {
     this.hood = hood;
-    this.pose = poseSupplier.get();
+    this.pose = poseSupplier;
     this.targetPose = targetPose;
     this.flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
     this.hoodInterpTable = hoodInterp;
@@ -38,7 +39,7 @@ public class HoodAutoAim extends Command {
 
   @Override
   public void execute() {
-    Pose2d currentRobotPose = pose;
+    Pose2d currentRobotPose = pose.get();
 
     boolean isRed =
         DriverStation.getAlliance().isPresent()
@@ -47,14 +48,16 @@ public class HoodAutoAim extends Command {
     Translation2d targetPos =
         isRed ? flippedTargetPose.getTranslation() : targetPose.getTranslation();
     double distance = currentRobotPose.getTranslation().getDistance(targetPos);
-    targetPos =
-        targetPos.minus(
-            new Translation2d(
-                drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
-                drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
+    // targetPos =
+    //     targetPos.minus(
+    //         new Translation2d(
+    //             drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
+    //             drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
 
     double botToTargetPoseDistance = currentRobotPose.getTranslation().getDistance(targetPos);
     double setpoint = hoodInterpTable.get(botToTargetPoseDistance);
-    hood.setHoodPosition(setpoint);
+    hood.setHoodPos(setpoint);
+    Logger.recordOutput("Hood/setpointauto", setpoint);
+    Logger.recordOutput("TOF", timeOfFlightInterp.get(distance));
   }
 }

@@ -21,6 +21,6 @@ public class ShooterAutoAimSequence extends ParallelCommandGroup {
     addCommands(
         new HoodAutoAim(hood, poseSupplier, targetPose, hoodInterp, timeOfFlightInterp, drive),
         new ShooterAutoAim(
-            shooter, poseSupplier, targetPose, hoodInterp, timeOfFlightInterp, drive));
+            shooter, poseSupplier, targetPose, shooterInterp, timeOfFlightInterp, drive));
   }
 }

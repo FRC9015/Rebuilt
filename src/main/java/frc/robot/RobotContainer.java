@@ -29,6 +29,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
+import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -64,7 +65,6 @@ import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
-import java.util.function.Supplier;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -89,7 +89,6 @@ public class RobotContainer {
   private final Turret turret;
   //   private final Climb climb;
   private final Hood hood;
-  private final Supplier<Pose2d> poseSupplier;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
   private ShootAtAngleSim simShooter;
@@ -104,7 +103,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  private double intakeRollerValue = 50;
+  private double intakeRollerValue = 30;
   private double indexerRollerValue = 12;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -156,7 +155,6 @@ public class RobotContainer {
                 new HoodIOTalonFX(
                     Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
-        poseSupplier = () -> drive.getPredictedPose();
         // climb = new Climb(new ClimbIOTalonFX(0));
         interpTables = new InterpTables();
 
@@ -206,7 +204,6 @@ public class RobotContainer {
         simShooter =
             new ShootAtAngleSim(
                 simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
-        poseSupplier = () -> simDrive.getSimulatedDriveTrainPose();
         // climb = new Climb(new ClimbIOSim());
         interpTables = new InterpTables();
 
@@ -240,7 +237,6 @@ public class RobotContainer {
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
-        poseSupplier = () -> drive.getPredictedPose();
         // climb = new Climb(new ClimbIO() {});
         interpTables = new InterpTables();
 
@@ -294,7 +290,7 @@ public class RobotContainer {
 
     turret.setDefaultCommand(
         new TurretAngleAim(
-            poseSupplier,
+            () -> drive.getPose(),
             turret,
             FieldConstants.HUB_POSE_BLUE,
             drive,
@@ -317,15 +313,15 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    driverController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+    // driverController
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+    //                 drive)
+    //             .ignoringDisable(true));
     // lifts climb first time y pressed, lifts robot second time y pressed
     // driverController
     //     .y()
@@ -351,9 +347,21 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> -driverController.getRightX(),
                 0.3));
-    driverController.rightTrigger().whileTrue(shooter.runShooterAtSpeed(flywheelSetpoint));
+    driverController.rightTrigger().whileTrue(shooter.setKickerSpeedCommand(1));
     driverController.y().whileTrue(indexer.runIndexer(6));
     // driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
+    driverController
+        .b()
+        .whileTrue(
+            new ShooterAutoAimSequence(
+                shooter,
+                hood,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp,
+                interpTables.timeOfFlightInterp,
+                () -> drive.getPose(),
+                FieldConstants.HUB_POSE_BLUE,
+                drive));
     driverController.pov(90).onTrue(hood.incrementhoodCommand(1));
     driverController.pov(270).onTrue(hood.incrementhoodCommand(-1));
     // driverController.pov(270).onTrue(hood.incrementhoodCommand(-1));

@@ -80,7 +80,7 @@ public class Shooter extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    io.setFlyWheelSpeed(setpoint);
+    // io.setFlyWheelSpeed(setpoint);
     Logger.processInputs("Shooter", inputs);
     Logger.recordOutput("Shooter/setpoint", setpoint);
   }
