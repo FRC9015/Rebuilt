@@ -5,15 +5,23 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.Interpolator;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.RobotDimensionConstants;
 import frc.robot.Constants.ZoneConstants;
+import frc.robot.commands.TurretAngleAim;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.turret.Turret;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -328,6 +336,25 @@ public class Zones extends SubsystemBase {
   private boolean run = true;
   private boolean override = false;
 
+  private boolean button = true;
+  private boolean the = true;
+
+  public void setButton(boolean t) {
+    button = t;
+  }
+
+  public void setthe(boolean t) {
+    the = t;
+  }
+
+  public boolean getbut() {
+    return button;
+  }
+
+  public boolean getthe() {
+    return the;
+  }
+
   public void toggleRun() {
     run = !run;
   }
@@ -350,5 +377,60 @@ public class Zones extends SubsystemBase {
 
   public Command runToggle() {
     return this.runOnce(() -> toggleRun());
+  }
+
+  private final Drive drive;
+  private Supplier<Pose2d> pose;
+  private final Hood hood;
+  private final DriverStation.Alliance alliance;
+  private final Turret turret;
+  private InterpolatingTreeMap<Double, Double> interp =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+
+  public Zones(Supplier<Pose2d> pose, Drive drive, Hood hood, Turret turret) {
+    this.drive = drive;
+    this.pose = pose;
+    this.hood = hood;
+    this.alliance = DriverStation.getAlliance().get();
+    this.turret = turret;
+    interp.put(0.0, 0.0);
+  }
+
+  @Override
+  public void periodic() {
+    boolean runGet = run;
+    boolean overrideGet = override;
+    FieldZone currentZone = Zones.getCurrentFieldZone(pose);
+    if (!overrideGet) {
+      if ((currentZone == Zones.FieldZone.BLUE_BOTTOM_TRENCH_DUCK)
+          || (currentZone == Zones.FieldZone.RED_BOTTOM_TRENCH_DUCK)
+          || (currentZone == Zones.FieldZone.RED_TOP_TRENCH_DUCK)
+          || (currentZone == Zones.FieldZone.BLUE_TOP_TRENCH_DUCK)) {
+        hood.setHoodPos(0.0);
+        if (runGet) {
+          if (currentZone == Zones.FieldZone.BLUE_ALLIANCE
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.HUB_POSE_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.RED_ALLIANCE
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.HUB_POSE_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_LEFT
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_LEFT_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_RIGHT
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_RIGHT_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_LEFT
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_LEFT_RED, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_RIGHT
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_RIGHT_RED, drive, interp);
+          }
+        }
+      }
+      Zones.logAllZones();
+      Logger.recordOutput("Zones/currentZone", Zones.getCurrentFieldZone(pose));
+    }
   }
 }

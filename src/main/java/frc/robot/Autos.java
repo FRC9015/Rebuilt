@@ -445,7 +445,7 @@ public class Autos {
       InterpolatingTreeMap<Double, Double> hoodInterp) {
     drive.autoFactory.bind(
         "Intake",
-        intake.runRollerAtSpeed(50).alongWith(intake.setPivotPosition(PivotPositions.DEPLOYED)));
+        intake.runRollerAtVoltage(8).alongWith(intake.setPivotPosition(PivotPositions.DEPLOYED)));
     drive.autoFactory.bind(
         "ShooterSpeed",
         new ShooterAutoAimSequence(

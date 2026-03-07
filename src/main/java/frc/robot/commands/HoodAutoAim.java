@@ -56,4 +56,16 @@ public class HoodAutoAim extends Command {
     hood.setHoodPos(setpoint);
     Logger.recordOutput("Hood/setpointauto", setpoint);
   }
+
+  @Override
+  public void end(boolean interrupted) {
+      // TODO Auto-generated method stub
+      super.end(interrupted);
+  }
+
+  @Override
+  public boolean isFinished() {
+      // TODO Auto-generated method stub
+      return super.isFinished();
+  }
 }

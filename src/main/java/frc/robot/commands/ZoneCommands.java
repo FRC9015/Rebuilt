@@ -24,6 +24,7 @@ public class ZoneCommands extends Command {
   private final Turret turret;
   private InterpolatingTreeMap<Double, Double> interp =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+  private final Zones zones;
 
   public ZoneCommands(
       Supplier<Pose2d> pose,
@@ -31,7 +32,8 @@ public class ZoneCommands extends Command {
       Hood hood,
       Supplier<Boolean> run,
       Supplier<Boolean> override,
-      Turret turret) {
+      Turret turret,
+      Zones zones) {
     this.drive = drive;
     this.pose = pose;
     this.hood = hood;
@@ -39,7 +41,9 @@ public class ZoneCommands extends Command {
     this.alliance = DriverStation.getAlliance().get();
     this.turret = turret;
     this.override = override;
+    this.zones = zones;
     interp.put(0.0, 0.0);
+    addRequirements(zones);
   }
 
   @Override
@@ -53,30 +57,30 @@ public class ZoneCommands extends Command {
           || (currentZone == Zones.FieldZone.RED_TOP_TRENCH_DUCK)
           || (currentZone == Zones.FieldZone.BLUE_TOP_TRENCH_DUCK)) {
         hood.setHoodPos(0.0);
-      }
-      if (runGet) {
-        if (currentZone == Zones.FieldZone.BLUE_ALLIANCE
-            && alliance.equals(DriverStation.Alliance.Blue)) {
-          new TurretAngleAim(pose, turret, FieldConstants.HUB_POSE_BLUE, drive, interp);
-        } else if (currentZone == Zones.FieldZone.RED_ALLIANCE
-            && alliance.equals(DriverStation.Alliance.Red)) {
-          new TurretAngleAim(pose, turret, FieldConstants.HUB_POSE_BLUE, drive, interp);
-        } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_LEFT
-            && alliance.equals(DriverStation.Alliance.Blue)) {
-          new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_LEFT_BLUE, drive, interp);
-        } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_RIGHT
-            && alliance.equals(DriverStation.Alliance.Blue)) {
-          new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_RIGHT_BLUE, drive, interp);
-        } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_LEFT
-            && alliance.equals(DriverStation.Alliance.Red)) {
-          new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_LEFT_RED, drive, interp);
-        } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_RIGHT
-            && alliance.equals(DriverStation.Alliance.Red)) {
-          new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_RIGHT_RED, drive, interp);
+        if (runGet) {
+          if (currentZone == Zones.FieldZone.BLUE_ALLIANCE
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.HUB_POSE_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.RED_ALLIANCE
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.HUB_POSE_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_LEFT
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_LEFT_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_RIGHT
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_RIGHT_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_LEFT
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_LEFT_RED, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_RIGHT
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_RIGHT_RED, drive, interp);
+          }
         }
       }
+      Zones.logAllZones();
+      Logger.recordOutput("Zones/currentZone", Zones.getCurrentFieldZone(pose));
     }
-    Zones.logAllZones();
-    Logger.recordOutput("Zones/currentZone", Zones.getCurrentFieldZone(pose));
   }
 }

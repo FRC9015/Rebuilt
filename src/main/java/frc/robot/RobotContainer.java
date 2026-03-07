@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FieldConstants;
@@ -32,6 +33,7 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
+import frc.robot.commands.TurretAngleAim;
 import frc.robot.commands.ZoneCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -96,7 +98,6 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final double hoodSetpoint = 0.0;
   private final double flywheelSetpoint = 50;
-  private final Zones zones;
 
   private final AutoChooser autoChooser2;
   // Controller
@@ -111,7 +112,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
-    zones = new Zones();
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -243,7 +244,6 @@ public class RobotContainer {
         hood = new Hood(new HoodIO() {});
         // climb = new Climb(new ClimbIO() {});
         interpTables = new InterpTables();
-
         break;
 
       default:
@@ -286,7 +286,23 @@ public class RobotContainer {
         interpTables.shooterSpeedInterp,
         interpTables.hoodAngleInterp);
 
+    autoChooser2.addRoutine(
+        "asdf",
+        () ->
+            Autos.AutonomousRoutines.depotLeftBlue(
+                drive,
+                intake,
+                shooter,
+                indexer,
+                hood,
+                vision,
+                turret,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp));
     SmartDashboard.putData(autoChooser2);
+
+    Trigger autoTrigger = new Trigger(() -> DriverStation.isAutonomous());
+    autoTrigger.whileTrue(autoChooser2.selectedCommandScheduler());
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -345,99 +361,43 @@ public class RobotContainer {
                 0.3));
 
     intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(50));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(8.0));
 
-    operatorController
-        .rightTrigger()
-        .whileTrue(
-            (new ShooterAutoAimSequence(
-                        shooter,
-                        hood,
-                        interpTables.shooterSpeedInterp,
-                        interpTables.hoodAngleInterp,
-                        () -> drive.getPose(),
-                        FieldConstants.HUB_POSE_BLUE,
-                        drive)
-                    .alongWith(
-                        DriveCommands.joystickDrive(
+    operatorController.leftTrigger().whileTrue(
+                    new TurretAngleAim(
+                            () -> drive.getPose(),
+                            turret,
+                            FieldConstants.HUB_POSE_BLUE,
                             drive,
-                            () -> -driverController.getLeftY(),
-                            () -> -driverController.getLeftX(),
-                            () -> -driverController.getRightX(),
-                            0.1))
-                    .alongWith(indexer.runIndexer(6))
-                    .alongWith(shooter.setKickerSpeedCommand(1)))
-                .onlyIf(
-                    () ->
-                        (turret.getTurretError() < 12.0)
-                            && zones.getRun()
-                            && ((Zones.getCurrentFieldZone(() -> drive.getPose())
-                                        == Zones.FieldZone.BLUE_ALLIANCE
-                                    && DriverStation.getAlliance().get()
-                                        == DriverStation.Alliance.Blue)
-                                || (Zones.getCurrentFieldZone(() -> drive.getPose())
-                                        == Zones.FieldZone.RED_ALLIANCE
-                                    && DriverStation.getAlliance().get()
-                                        == DriverStation.Alliance.Red))));
-
+                            interpTables.timeOfFlightInterp));
     operatorController
         .rightTrigger()
         .whileTrue(
-            (hood.setHoodPosition(1.3)
-                    .alongWith(shooter.setKickerSpeedCommand(1))
-                    .alongWith(shooter.runShooterAtSpeed(100)))
-                .onlyIf(
-                    () ->
-                        (turret.getTurretError() < 12.0)
-                            && ((Zones.getCurrentFieldZone(() -> drive.getPose())
-                                        == Zones.FieldZone.NEUTRAL_ZONE_LEFT
-                                    || Zones.getCurrentFieldZone(() -> drive.getPose())
-                                        == Zones.FieldZone.NEUTRAL_ZONE_RIGHT)
-                                || (Zones.getCurrentFieldZone(() -> drive.getPose())
-                                        == Zones.FieldZone.RED_ALLIANCE
-                                    && DriverStation.getAlliance().get()
-                                        != DriverStation.Alliance.Red)
-                                || (Zones.getCurrentFieldZone(() -> drive.getPose())
-                                        == Zones.FieldZone.BLUE_ALLIANCE
-                                    && DriverStation.getAlliance().get()
-                                        != DriverStation.Alliance.Blue))));
+                    new ShooterAutoAimSequence(
+                            shooter,
+                            hood,
+                            interpTables.shooterSpeedInterp,
+                            interpTables.hoodAngleInterp,
+                            () -> drive.getPose(),
+                            FieldConstants.HUB_POSE_BLUE,
+                            drive));
 
-    operatorController
-        .rightTrigger()
-        .whileTrue(
-            (hood.setHoodPosition(0.0)
-                    .alongWith(shooter.setKickerSpeedCommand(1))
-                    .alongWith(shooter.runShooterAtSpeed(37)))
-                .onlyIf(
-                    () ->
-                        (turret.getTurretError() < 12.0)
-                            && !zones.getRun()
-                            && ((Zones.getCurrentFieldZone(() -> drive.getPose())
-                                        == Zones.FieldZone.BLUE_ALLIANCE
-                                    && DriverStation.getAlliance().get()
-                                        == DriverStation.Alliance.Blue)
-                                || (Zones.getCurrentFieldZone(() -> drive.getPose())
-                                        == Zones.FieldZone.RED_ALLIANCE
-                                    && DriverStation.getAlliance().get()
-                                        == DriverStation.Alliance.Red))));
-
-    operatorController.y().whileTrue(zones.override());
-    operatorController.a().onTrue(zones.runToggle());
+    operatorController.b().whileTrue(indexer.runIndexer(5));
+    operatorController.leftBumper().whileTrue(indexer.runIndexer(-5));
+    operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
 
     operatorController
         .povUp()
-        .onTrue(turret.setTurretAngleFastestPathCommand(0).onlyIf(() -> !zones.getRun()));
+        .onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController
         .povDown()
-        .onTrue(turret.setTurretAngleFastestPathCommand(180).onlyIf(() -> !zones.getRun()));
-    operatorController
+        .onTrue(turret.setTurretAngleFastestPathCommand(180));
+    operatorController    
         .povLeft()
-        .onTrue(turret.setTurretAngleFastestPathCommand(90).onlyIf(() -> !zones.getRun()));
+        .onTrue(turret.setTurretAngleFastestPathCommand(90));
     operatorController
         .povRight()
-        .onTrue(turret.setTurretAngleFastestPathCommand(270).onlyIf(() -> !zones.getRun()));
-    
-    zones.setDefaultCommand(new ZoneCommands(() -> drive.getPose(), drive, hood, () -> zones.getRun(), () -> zones.getOverride(), turret));
+        .onTrue(turret.setTurretAngleFastestPathCommand(270));
   }
 
   /**

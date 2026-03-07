@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -27,6 +28,7 @@ public class RollerIOTalonFX implements RollerIO {
 
   private final MotionMagicVelocityVoltage intakeVelocityVoltage =
       new MotionMagicVelocityVoltage(0.0);
+  private final VoltageOut intakeVoltageOut = new VoltageOut(0.0);
 
   public RollerIOTalonFX(int rollerIDLeft, int rollerIDRight) {
     rollerMotorLeft = new TalonFX(rollerIDLeft);
@@ -87,5 +89,11 @@ public class RollerIOTalonFX implements RollerIO {
         intakeVelocityVoltage.withVelocity(
             MathUtil.clamp(
                 speed, IntakeConstants.INTAKE_MIN_SPEED, IntakeConstants.INTAKE_MAX_SPEED)));
+  }
+
+  @Override
+  public void setRollerVolts(double voltage) {
+    rollerMotorLeft.setControl(intakeVoltageOut.withOutput(voltage));
+    rollerMotorRight.setControl(intakeVoltageOut.withOutput(voltage));
   }
 }
