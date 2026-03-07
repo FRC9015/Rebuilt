@@ -17,7 +17,6 @@ public class HoodAutoAim extends Command {
   private Pose2d targetPose;
   private Pose2d flippedTargetPose;
   private InterpolatingTreeMap<Double, Double> hoodInterpTable;
-  private InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
   private final Drive drive;
 
   public HoodAutoAim(
@@ -25,14 +24,12 @@ public class HoodAutoAim extends Command {
       Supplier<Pose2d> poseSupplier,
       Pose2d targetPose,
       InterpolatingTreeMap<Double, Double> hoodInterp,
-      InterpolatingTreeMap<Double, Double> timeOfFlightInterp,
       Drive drive) {
     this.hood = hood;
     this.pose = poseSupplier;
     this.targetPose = targetPose;
     this.flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
     this.hoodInterpTable = hoodInterp;
-    this.timeOfFlightInterp = timeOfFlightInterp;
     this.drive = drive;
     addRequirements(hood);
   }
@@ -58,6 +55,5 @@ public class HoodAutoAim extends Command {
     double setpoint = hoodInterpTable.get(botToTargetPoseDistance);
     hood.setHoodPos(setpoint);
     Logger.recordOutput("Hood/setpointauto", setpoint);
-    Logger.recordOutput("TOF", timeOfFlightInterp.get(distance));
   }
 }

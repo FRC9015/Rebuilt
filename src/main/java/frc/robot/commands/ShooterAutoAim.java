@@ -17,7 +17,6 @@ public class ShooterAutoAim extends Command {
   private Pose2d targetPose;
   private Pose2d flippedTargetPose;
   private InterpolatingTreeMap<Double, Double> shooterInterpTable;
-  private InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
   private final Drive drive;
 
   public ShooterAutoAim(
@@ -25,14 +24,12 @@ public class ShooterAutoAim extends Command {
       Supplier<Pose2d> poseSupplier,
       Pose2d targetPose,
       InterpolatingTreeMap<Double, Double> shooterInterp,
-      InterpolatingTreeMap<Double, Double> timeOfFlightInterp,
       Drive drive) {
     this.shooter = shooter;
     this.pose = poseSupplier;
     this.targetPose = targetPose;
     this.flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
     this.shooterInterpTable = shooterInterp;
-    this.timeOfFlightInterp = timeOfFlightInterp;
     this.drive = drive;
     addRequirements(shooter);
   }

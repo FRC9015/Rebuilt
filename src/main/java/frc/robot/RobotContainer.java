@@ -9,6 +9,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import choreo.auto.AutoChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -96,6 +98,7 @@ public class RobotContainer {
   private final double flywheelSetpoint = 50;
   private final Zones zones;
 
+  private final AutoChooser autoChooser2;
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -250,6 +253,7 @@ public class RobotContainer {
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
+    autoChooser2 = new AutoChooser();
     // Set up SysId routines
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
@@ -270,6 +274,19 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
+    Autos.populateChooser(
+        autoChooser2,
+        drive,
+        intake,
+        shooter,
+        indexer,
+        hood,
+        vision,
+        turret,
+        interpTables.shooterSpeedInterp,
+        interpTables.hoodAngleInterp);
+
+    SmartDashboard.putData(autoChooser2);
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -338,7 +355,6 @@ public class RobotContainer {
                         hood,
                         interpTables.shooterSpeedInterp,
                         interpTables.hoodAngleInterp,
-                        interpTables.timeOfFlightInterp,
                         () -> drive.getPose(),
                         FieldConstants.HUB_POSE_BLUE,
                         drive)

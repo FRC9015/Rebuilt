@@ -14,13 +14,11 @@ public class ShooterAutoAimSequence extends ParallelCommandGroup {
       Hood hood,
       InterpolatingTreeMap<Double, Double> shooterInterp,
       InterpolatingTreeMap<Double, Double> hoodInterp,
-      InterpolatingTreeMap<Double, Double> timeOfFlightInterp,
       Supplier<Pose2d> poseSupplier,
       Pose2d targetPose,
       Drive drive) {
     addCommands(
-        new HoodAutoAim(hood, poseSupplier, targetPose, hoodInterp, timeOfFlightInterp, drive),
-        new ShooterAutoAim(
-            shooter, poseSupplier, targetPose, shooterInterp, timeOfFlightInterp, drive));
+        new HoodAutoAim(hood, poseSupplier, targetPose, hoodInterp, drive),
+        new ShooterAutoAim(shooter, poseSupplier, targetPose, shooterInterp, drive));
   }
 }
