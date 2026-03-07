@@ -30,6 +30,7 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
+import frc.robot.commands.ZoneCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -419,6 +420,8 @@ public class RobotContainer {
     operatorController
         .povRight()
         .onTrue(turret.setTurretAngleFastestPathCommand(270).onlyIf(() -> !zones.getRun()));
+    
+    zones.setDefaultCommand(new ZoneCommands(() -> drive.getPose(), drive, hood, () -> zones.getRun(), () -> zones.getOverride(), turret));
   }
 
   /**
