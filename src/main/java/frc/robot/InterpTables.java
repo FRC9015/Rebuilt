@@ -7,9 +7,9 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 public class InterpTables {
   public InterpolatingTreeMap<Double, Double> timeOfFlightInterp =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
-  public InterpolatingTreeMap<Double, Double> HoodAngleInterp =
+  public InterpolatingTreeMap<Double, Double> hoodAngleInterp =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
-  public InterpolatingTreeMap<Double, Double> ShooterSpeedInterp =
+  public InterpolatingTreeMap<Double, Double> shooterSpeedInterp =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
 
   public InterpTables() {
@@ -28,8 +28,29 @@ public class InterpTables {
     
     
     
-    HoodAngleInterp.put(., 0.0);
+    hoodAngleInterp.put(2.38, 0.38);
+    hoodAngleInterp.put(1.68, 0.115);
+    hoodAngleInterp.put(3.31, 0.474);
+    hoodAngleInterp.put(4.14, 0.62);
+    hoodAngleInterp.put(3.07, 0.38);
+    hoodAngleInterp.put(3.16, 0.4);
+    hoodAngleInterp.put(1.37, 0.0);
+    hoodAngleInterp.put(2.78, 0.32);
+    hoodAngleInterp.put(2.85, 0.29);
+    hoodAngleInterp.put(1.18, 0.0);
+    hoodAngleInterp.put(2.01, 0.1);
+    hoodAngleInterp.put(4.40, 0.61);
 
-    ShooterSpeedInterp.put(0.0, 0.0);
-  }
+    shooterSpeedInterp.put(2.38, 31.0);
+    shooterSpeedInterp.put(1.68, 32.0);
+    shooterSpeedInterp.put(3.31, 34.0);
+    shooterSpeedInterp.put(4.14, 37.0);
+    shooterSpeedInterp.put(3.07, 34.0);
+    shooterSpeedInterp.put(3.16, 37.0);
+    shooterSpeedInterp.put(1.37, 32.0);
+    shooterSpeedInterp.put(2.78, 33.0);
+    shooterSpeedInterp.put(2.85, 34.0);
+    shooterSpeedInterp.put(1.18, 31.0);
+    shooterSpeedInterp.put(2.01, 33.0);
+    shooterSpeedInterp.put(4.40, 37.0);  }
 }
