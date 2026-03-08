@@ -24,7 +24,7 @@ public class Intake extends SubsystemBase {
   }
 
   public void setRollerVoltage(double voltage) {
-    roller.setRollerSpeed(voltage);
+    roller.setRollerVolts(voltage);
   }
 
   public void setRollerReverseSpeed(double speedValue) {

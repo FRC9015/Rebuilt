@@ -1,0 +1,50 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "deploy"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "DepotLeft"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "turret"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shooter"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "indexer"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

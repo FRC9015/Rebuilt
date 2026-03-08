@@ -43,6 +43,8 @@ public class HoodIOTalonFX implements HoodIO {
 
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    hoodConfig.CurrentLimits.StatorCurrentLimit = 60;
+    hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     // hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
     // hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition.get();
     // hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
@@ -50,6 +52,7 @@ public class HoodIOTalonFX implements HoodIO {
     CANcoderConfiguration hoodEncoderConfig = new CANcoderConfiguration();
     hoodEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
     hoodEncoderConfig.MagnetSensor.MagnetOffset = ShooterConstants.HOOD_ENCODER_OFFSET;
+
     hoodMotor.getConfigurator().apply(hoodConfig);
 
     motorVolts = hoodMotor.getMotorVoltage();

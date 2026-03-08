@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Meters;
 
 import choreo.auto.AutoChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -255,6 +256,28 @@ public class RobotContainer {
     }
 
     // Set up auto routines
+    NamedCommands.registerCommand("intake", intake.runRollerAtVoltage(6.0));
+    NamedCommands.registerCommand(
+        "shooter",
+        new ShooterAutoAimSequence(
+            shooter,
+            hood,
+            interpTables.shooterSpeedInterp,
+            interpTables.hoodAngleInterp,
+            () -> drive.getPose(),
+            FieldConstants.HUB_POSE_BLUE,
+            drive));
+    NamedCommands.registerCommand(
+        "turret",
+        new TurretAngleAim(
+            () -> drive.getPose(),
+            turret,
+            FieldConstants.HUB_POSE_BLUE,
+            drive,
+            interpTables.timeOfFlightInterp));
+    NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setVoltage(5)));
+    NamedCommands.registerCommand(
+        "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
     autoChooser2 = new AutoChooser();
@@ -405,7 +428,8 @@ public class RobotContainer {
                 0.3));
 
     intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(8.0));
+    driverController.povDown().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
 
     operatorController
         .leftTrigger()
@@ -435,6 +459,8 @@ public class RobotContainer {
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.povLeft().onTrue(turret.setTurretAngleFastestPathCommand(90));
     operatorController.povRight().onTrue(turret.setTurretAngleFastestPathCommand(270));
+
+    operatorController.a().onTrue(hood.setHoodPosition(0.0));
   }
 
   /**

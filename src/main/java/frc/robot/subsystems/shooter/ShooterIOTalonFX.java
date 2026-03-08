@@ -47,6 +47,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     flyWheelConfigLeft.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    flyWheelConfigLeft.CurrentLimits.StatorCurrentLimit = 60;
+    flyWheelConfigLeft.CurrentLimits.StatorCurrentLimitEnable = true;
 
     TalonFXConfiguration flyWheelConfigRight =
         new TalonFXConfiguration()
@@ -55,6 +57,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     flyWheelConfigRight.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     flyWheelConfigRight.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    flyWheelConfigRight.CurrentLimits.StatorCurrentLimit = 60;
+    flyWheelConfigRight.CurrentLimits.StatorCurrentLimitEnable = true;
 
     TalonFXConfiguration kickerConfig =
         new TalonFXConfiguration()
@@ -63,6 +67,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     kickerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    kickerConfig.CurrentLimits.StatorCurrentLimit = 60;
+    kickerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
