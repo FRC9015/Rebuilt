@@ -46,7 +46,13 @@ public class RollerIOTalonFX implements RollerIO {
     rollerRightSpeed = rollerMotorRight.getVelocity();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, rollerLeftVolts, rollerLeftAmps, rollerLeftspeed);
+        50.0,
+        rollerLeftVolts,
+        rollerLeftAmps,
+        rollerLeftspeed,
+        rollerRightVolts,
+        rollerRightAmps,
+        rollerRightSpeed);
 
     ParentDevice.optimizeBusUtilizationForAll(rollerMotorLeft, rollerMotorRight);
   }
@@ -54,7 +60,13 @@ public class RollerIOTalonFX implements RollerIO {
   @Override
   public void updateInputs(RollerIOInputs inputs) {
 
-    BaseStatusSignal.refreshAll(rollerLeftVolts, rollerLeftAmps, rollerLeftspeed);
+    BaseStatusSignal.refreshAll(
+        rollerLeftVolts,
+        rollerLeftAmps,
+        rollerLeftspeed,
+        rollerRightVolts,
+        rollerRightAmps,
+        rollerRightSpeed);
 
     inputs.rollerLeftAppliedVolts = rollerLeftVolts.getValueAsDouble();
     inputs.rollerLeftCurrentSpeed = rollerLeftspeed.getValueAsDouble();

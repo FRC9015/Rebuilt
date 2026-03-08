@@ -131,9 +131,9 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                // new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
-                new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
+                new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
+                new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE));
+        // new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -274,7 +274,7 @@ public class RobotContainer {
             turret,
             FieldConstants.HUB_POSE_BLUE,
             drive,
-            interpTables.timeOfFlightInterp));
+            interpTables.timeOfFlightInterp).withTimeout(2).andThen( Commands.runOnce(() -> indexer.setVoltage(5))));
     NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setVoltage(5)));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
@@ -454,11 +454,11 @@ public class RobotContainer {
     operatorController.rightBumper().whileTrue(intake.runRollerAtVoltage(-6));
     operatorController.b().whileTrue(indexer.runIndexer(5));
     operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
-    // operatorController.leftBumper().whileTrue(hood.setHoodPosition(1.3).alongWith(null));
+    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(35));
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
-    operatorController.povLeft().onTrue(turret.setTurretAngleFastestPathCommand(90));
-    operatorController.povRight().onTrue(turret.setTurretAngleFastestPathCommand(270));
+    operatorController.povLeft().onTrue(turret.setTurretVoltageCommand(2));
+    operatorController.povRight().onTrue(turret.setTurretVoltageCommand(-2));
 
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
   }

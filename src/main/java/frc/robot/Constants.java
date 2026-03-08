@@ -9,6 +9,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -149,9 +150,9 @@ public final class Constants {
     public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-8.86),
-                Units.inchesToMeters(14.886),
-                Units.inchesToMeters(10.737)),
+                Units.inchesToMeters(-9.096),
+                Units.inchesToMeters(15.284),
+                Units.inchesToMeters(10.67)),
             new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(90)));
 
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
@@ -194,7 +195,11 @@ public final class Constants {
         new TalonFXConfiguration()
             .withMotorOutput(rollerOutputLeftConfigs)
             .withSlot0(ROLLER_SLOT0_CONFIGS)
-            .withMotionMagic(ROLLER_MAGIC_CONFIGS);
+            .withMotionMagic(ROLLER_MAGIC_CONFIGS)
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(60.0)
+                    .withStatorCurrentLimitEnable(true));
 
     private static final MotorOutputConfigs rollerOutputRightConfigs =
         new MotorOutputConfigs()
@@ -205,7 +210,11 @@ public final class Constants {
         new TalonFXConfiguration()
             .withMotorOutput(rollerOutputRightConfigs)
             .withSlot0(ROLLER_SLOT0_CONFIGS)
-            .withMotionMagic(ROLLER_MAGIC_CONFIGS);
+            .withMotionMagic(ROLLER_MAGIC_CONFIGS)
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(60.0)
+                    .withStatorCurrentLimitEnable(true));
 
     private static final MotorOutputConfigs pivotOutputLeftConfigs =
         new MotorOutputConfigs()
@@ -216,7 +225,11 @@ public final class Constants {
             .withSlot0(PIVOT_SLOT0_CONFIGS)
             .withFeedback(PIVOT_FEEDBACK_CONFIGS)
             .withMotionMagic(PIVOT_MAGIC_CONFIGS)
-            .withMotorOutput(pivotOutputLeftConfigs);
+            .withMotorOutput(pivotOutputLeftConfigs)
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(60.0)
+                    .withStatorCurrentLimitEnable(true));
 
     public static final double INTAKE_MAX_POS = 300.0;
     public static final double INTAKE_MIN_POS = 0.0;

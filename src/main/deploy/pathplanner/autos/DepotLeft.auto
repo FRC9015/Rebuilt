@@ -31,12 +31,6 @@
                 "data": {
                   "name": "shooter"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "indexer"
-                }
               }
             ]
           }

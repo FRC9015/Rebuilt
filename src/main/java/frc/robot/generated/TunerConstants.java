@@ -51,14 +51,18 @@ public class TunerConstants {
   // The remote sensor feedback type to use for the steer motors;
   // When not Pro-licensed, Fused*/Sync* automatically fall back to Remote*
   private static final SteerFeedbackType kSteerFeedbackType = SteerFeedbackType.FusedCANcoder;
-
   // The stator current at which the wheels start to slip;
   // This needs to be tuned to your individual robot
   private static final Current kSlipCurrent = Amps.of(120);
 
   // Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
   // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
-  private static final TalonFXConfiguration driveInitialConfigs = new TalonFXConfiguration();
+  private static final TalonFXConfiguration driveInitialConfigs =
+      new TalonFXConfiguration()
+          .withCurrentLimits(
+              new CurrentLimitsConfigs()
+                  .withStatorCurrentLimit(Amps.of(80))
+                  .withStatorCurrentLimitEnable(true));
   private static final TalonFXConfiguration steerInitialConfigs =
       new TalonFXConfiguration()
           .withCurrentLimits(
@@ -83,7 +87,6 @@ public class TunerConstants {
   // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
   // This may need to be tuned to your individual robot
   private static final double kCoupleRatio = 3.5714285714285716;
-
   private static final double kDriveGearRatio = 6.122448979591837;
   private static final double kSteerGearRatio = 21.428571428571427;
   private static final Distance kWheelRadius = Inches.of(1.94);

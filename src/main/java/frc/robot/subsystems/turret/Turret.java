@@ -98,7 +98,11 @@ public class Turret extends SubsystemBase {
         });
   }
 
-  private void setTurretVoltage(double voltage) {
+  public Command setTurretVoltageCommand(double voltage) {
+    return this.startEnd(() -> setTurretVoltage(voltage), () -> io.stop());
+  }
+
+  public void setTurretVoltage(double voltage) {
     io.setTurretVoltage(voltage);
   }
 
