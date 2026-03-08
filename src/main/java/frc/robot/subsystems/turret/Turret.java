@@ -1,10 +1,19 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.Zones;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -14,8 +23,19 @@ public class Turret extends SubsystemBase {
   private final TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
   private final TurretIO io;
 
+  private final SysIdRoutine sysId;
+
   public Turret(TurretIO io) {
     this.io = io;
+
+    sysId =
+        new SysIdRoutine(
+            new Config(
+                Volts.of(0.5).per(Seconds),
+                Volts.of(4),
+                Seconds.of(5),
+                (state) -> Logger.recordOutput("Turret/SysIdState", state.toString())),
+            new Mechanism((voltage) -> io.setTurretVoltage(voltage.in(Volts)), null, this));
   }
 
   /**
@@ -24,15 +44,15 @@ public class Turret extends SubsystemBase {
    *
    * @param targetAngleDegrees The target angle in a 0-360 circle.
    */
-  public void setTurretAngleFastestPath(double targetAngleDegrees) {
+  public double setTurretAngleFastestPath(double targetAngleDegrees) {
     // 1. Get bounds and current position in degrees
     double minDegrees = TurretConstants.MINROTATION * 360.0;
     double maxDegrees = TurretConstants.MAXROTATION * 360.0;
-    double currentPosDegrees = inputs.turretResolvedPosition * 360.0;
+    double currentPosDegrees = inputs.turretResolvedPositionDegrees;
 
     // 2. Normalize user input to [0, 360)
     double target = targetAngleDegrees % 360.0;
-    if (target < 0) target += 360.0;
+    if (target < 0) target = 0;
     // 3. Generate the two possible absolute destinations
     double option1 = target; // e.g. 90
     double option2 = target - 360.0; // e.g. -270
@@ -63,19 +83,69 @@ public class Turret extends SubsystemBase {
     // 5. Send the safe, optimized position to the motor
     // (The setTurretPosition method in IO expects degrees based on your last file)
 
-    io.setTurretPosition(chosenDegrees);
+    Logger.recordOutput("Turret/option1", option1);
+    Logger.recordOutput("Turret/option2", option2);
+
+    return chosenDegrees;
   }
 
   public Command setTurretAngleFastestPathCommand(double targetAngleDegrees) {
-    return this.run(() -> setTurretAngleFastestPath(targetAngleDegrees));
+    double setpoint = setTurretAngleFastestPath(targetAngleDegrees);
+    return this.run(
+        () -> {
+          io.setTurretPosition(setpoint);
+          Logger.recordOutput("Turret/chosenDegrees", setpoint);
+        });
+  }
+
+  public Command setTurretVoltageCommand(double voltage) {
+    return this.startEnd(() -> setTurretVoltage(voltage), () -> io.stop());
+  }
+
+  public void setTurretVoltage(double voltage) {
+    io.setTurretVoltage(voltage);
+  }
+
+  public Command quasistatic(Direction dir) {
+    return sysId.quasistatic(dir);
+  }
+
+  public Command dynamic(Direction dir) {
+    return sysId.dynamic(dir);
+  }
+
+  public Command runSysId() {
+    return Commands.sequence(
+        sysId.quasistatic(Direction.kForward).withTimeout(4.5),
+        sysId.quasistatic(Direction.kReverse).withTimeout(4.5),
+        Commands.waitSeconds(3),
+        sysId.dynamic(Direction.kForward),
+        Commands.waitSeconds(3),
+        sysId.dynamic(Direction.kReverse));
   }
 
   public void setTurretSetPoint(double value) {
     io.setTurretSetPoint(value);
   }
 
+  public boolean turretOutOfRange() {
+    return (inputs.turretResolvedPosition > 0.68);
+  }
+
+  public boolean turretOutOfRangeneg() {
+    return (inputs.turretResolvedPosition < -0.68);
+  }
+
   public double getTurretPositionRadians() {
     return Units.degreesToRadians(inputs.turretSetpoint);
+  }
+
+  public void setPositionVoid(double angle) {
+    io.setTurretPosition(angle);
+  }
+
+  public double getTurretError() {
+    return inputs.turretError;
   }
 
   @Override
@@ -83,5 +153,6 @@ public class Turret extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Turret", inputs);
     Logger.recordOutput("Turret/setpoint", inputs.turretSetpoint);
+    Zones.logAllZones();
   }
 }

@@ -5,17 +5,27 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.Interpolator;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.RobotDimensionConstants;
 import frc.robot.Constants.ZoneConstants;
+import frc.robot.commands.TurretAngleAim;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.turret.Turret;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class Zones {
+public class Zones extends SubsystemBase {
   public static interface Zone {
     public Trigger contains(Supplier<Pose2d> pose);
   }
@@ -196,24 +206,110 @@ public class Zones {
           RED_BOTTOM_TRENCH_DUCK,
           RED_TOP_TRENCH_DUCK);
 
-  private static final PredictiveXBaseZone BLUE_BOTTOM_BUMP =
-      new PredictiveXBaseZone(
-          FieldConstants.TRENCH_BUMP_X
-              .minus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
-              .minus(RobotDimensionConstants.FULL_LENGTH.div(2)),
-          FieldConstants.TRENCH_BUMP_X
-              .plus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
-              .plus(RobotDimensionConstants.FULL_LENGTH.div(2)),
-          FieldConstants.TRENCH_WIDTH.plus(FieldConstants.TRENCH_BLOCK_WIDTH),
-          FieldConstants.TRENCH_WIDTH
-              .plus(FieldConstants.TRENCH_BLOCK_WIDTH)
-              .plus(FieldConstants.BUMP_WIDTH));
-  private static final PredictiveXBaseZone BLUE_TOP_BUMP = BLUE_BOTTOM_BUMP.mirroredY();
-  private static final PredictiveXBaseZone RED_BOTTOM_BUMP = BLUE_BOTTOM_BUMP.mirroredX();
-  private static final PredictiveXBaseZone RED_TOP_BUMP = BLUE_TOP_BUMP.mirroredX();
+  // private static final PredictiveXBaseZone BLUE_BOTTOM_BUMP =
+  //     new PredictiveXBaseZone(
+  //         FieldConstants.TRENCH_BUMP_X
+  //             .minus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
+  //             .minus(RobotDimensionConstants.FULL_LENGTH.div(2)),
+  //         FieldConstants.TRENCH_BUMP_X
+  //             .plus(FieldConstants.TRENCH_BUMP_LENGTH.div(2))
+  //             .plus(RobotDimensionConstants.FULL_LENGTH.div(2)),
+  //         FieldConstants.TRENCH_WIDTH.plus(FieldConstants.TRENCH_BLOCK_WIDTH),
+  //         FieldConstants.TRENCH_WIDTH
+  //             .plus(FieldConstants.TRENCH_BLOCK_WIDTH)
+  //             .plus(FieldConstants.BUMP_WIDTH));
+  // private static final PredictiveXBaseZone BLUE_TOP_BUMP = BLUE_BOTTOM_BUMP.mirroredY();
+  // private static final PredictiveXBaseZone RED_BOTTOM_BUMP = BLUE_BOTTOM_BUMP.mirroredX();
+  // private static final PredictiveXBaseZone RED_TOP_BUMP = BLUE_TOP_BUMP.mirroredX();
 
-  public static final PredictiveXZoneCollection BUMP_ZONES =
-      new PredictiveXZoneCollection(BLUE_BOTTOM_BUMP, BLUE_TOP_BUMP, RED_BOTTOM_BUMP, RED_TOP_BUMP);
+  // public static final PredictiveXZoneCollection BUMP_ZONES =
+  //     new PredictiveXZoneCollection(BLUE_BOTTOM_BUMP, BLUE_TOP_BUMP, RED_BOTTOM_BUMP,
+  // RED_TOP_BUMP);
+
+  private static final PredictiveXBaseZone BLUE_ALLIANCE_ZONE =
+      new PredictiveXBaseZone(
+          Meters.of(0), FieldConstants.ALLIANCE_ZONE, Meters.of(0), FieldConstants.FIELD_WIDTH);
+
+  private static final PredictiveXBaseZone RED_ALLIANCE_ZONE = BLUE_ALLIANCE_ZONE.mirroredX();
+
+  private static final PredictiveXBaseZone NEUTRAL_ZONE_LEFT =
+      new PredictiveXBaseZone(
+          FieldConstants.ALLIANCE_ZONE.plus(FieldConstants.TRENCH_WIDTH),
+          FieldConstants.FIELD_LENGTH
+              .minus(FieldConstants.ALLIANCE_ZONE)
+              .minus(FieldConstants.TRENCH_WIDTH),
+          Meters.of(0),
+          FieldConstants.FIELD_WIDTH.div(2));
+
+  private static final PredictiveXBaseZone NEUTRAL_ZONE_RIGHT =
+      new PredictiveXBaseZone(
+          FieldConstants.ALLIANCE_ZONE.plus(FieldConstants.TRENCH_WIDTH),
+          FieldConstants.FIELD_LENGTH
+              .minus(FieldConstants.ALLIANCE_ZONE)
+              .minus(FieldConstants.TRENCH_WIDTH),
+          (FieldConstants.FIELD_WIDTH.div(2)),
+          FieldConstants.FIELD_WIDTH);
+
+  public static final PredictiveXZoneCollection FIELD_ALLIANCE_ZONES =
+      new PredictiveXZoneCollection(BLUE_ALLIANCE_ZONE, RED_ALLIANCE_ZONE);
+
+  // public static final PredictiveXZoneCollection FIELD_NEUTRAL_ZONE =
+  //     new PredictiveXZoneCollection(NEUTRAL_ZONE);
+
+  public enum FieldZone {
+    BLUE_ALLIANCE,
+    RED_ALLIANCE,
+    NEUTRAL_ZONE_LEFT,
+    NEUTRAL_ZONE_RIGHT,
+
+    BLUE_BOTTOM_TRENCH,
+    BLUE_TOP_TRENCH,
+    RED_BOTTOM_TRENCH,
+    RED_TOP_TRENCH,
+
+    BLUE_BOTTOM_TRENCH_DUCK,
+    BLUE_TOP_TRENCH_DUCK,
+    RED_BOTTOM_TRENCH_DUCK,
+    RED_TOP_TRENCH_DUCK,
+
+    // BLUE_BOTTOM_BUMP,
+    // BLUE_TOP_BUMP,
+    // RED_BOTTOM_BUMP,
+    // RED_TOP_BUMP,
+
+    UNKNOWN
+  }
+
+  public static FieldZone getCurrentFieldZone(Supplier<Pose2d> pose) {
+    // --- Trenches ---
+    if (BLUE_BOTTOM_TRENCH.contains(pose).getAsBoolean()) return FieldZone.BLUE_BOTTOM_TRENCH;
+    if (BLUE_TOP_TRENCH.contains(pose).getAsBoolean()) return FieldZone.BLUE_TOP_TRENCH;
+    if (RED_BOTTOM_TRENCH.contains(pose).getAsBoolean()) return FieldZone.RED_BOTTOM_TRENCH;
+    if (RED_TOP_TRENCH.contains(pose).getAsBoolean()) return FieldZone.RED_TOP_TRENCH;
+
+    // --- Trench Duck ---
+    if (BLUE_BOTTOM_TRENCH_DUCK.contains(pose).getAsBoolean())
+      return FieldZone.BLUE_BOTTOM_TRENCH_DUCK;
+    if (BLUE_TOP_TRENCH_DUCK.contains(pose).getAsBoolean()) return FieldZone.BLUE_TOP_TRENCH_DUCK;
+    if (RED_BOTTOM_TRENCH_DUCK.contains(pose).getAsBoolean())
+      return FieldZone.RED_BOTTOM_TRENCH_DUCK;
+    if (RED_TOP_TRENCH_DUCK.contains(pose).getAsBoolean()) return FieldZone.RED_TOP_TRENCH_DUCK;
+
+    // --- Bumps ---
+    // if (BLUE_BOTTOM_BUMP.contains(pose).getAsBoolean()) return FieldZone.BLUE_BOTTOM_BUMP;
+    // if (BLUE_TOP_BUMP.contains(pose).getAsBoolean()) return FieldZone.BLUE_TOP_BUMP;
+    // if (RED_BOTTOM_BUMP.contains(pose).getAsBoolean()) return FieldZone.RED_BOTTOM_BUMP;
+    // if (RED_TOP_BUMP.contains(pose).getAsBoolean()) return FieldZone.RED_TOP_BUMP;
+
+    // --- Field Sections ---
+    if (BLUE_ALLIANCE_ZONE.contains(pose).getAsBoolean()) return FieldZone.BLUE_ALLIANCE;
+    if (RED_ALLIANCE_ZONE.contains(pose).getAsBoolean()) return FieldZone.RED_ALLIANCE;
+    // if (NEUTRAL_ZONE.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL;
+    if (NEUTRAL_ZONE_LEFT.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL_ZONE_LEFT;
+    if (NEUTRAL_ZONE_LEFT.contains(pose).getAsBoolean()) return FieldZone.NEUTRAL_ZONE_RIGHT;
+
+    return FieldZone.UNKNOWN;
+  }
 
   public static void logAllZones() {
     Logger.recordOutput("Zones/Trenches/Blue Bottom", BLUE_BOTTOM_TRENCH.getCorners());
@@ -226,9 +322,115 @@ public class Zones {
     Logger.recordOutput("Zones/Trenches Duck/Red Bottom", RED_BOTTOM_TRENCH_DUCK.getCorners());
     Logger.recordOutput("Zones/Trenches Duck/Red Top", RED_TOP_TRENCH_DUCK.getCorners());
 
-    Logger.recordOutput("Zones/Bumps/Blue Bottom", BLUE_BOTTOM_BUMP.getCorners());
-    Logger.recordOutput("Zones/Bumps/Blue Top", BLUE_TOP_BUMP.getCorners());
-    Logger.recordOutput("Zones/Bumps/Red Bottom", RED_BOTTOM_BUMP.getCorners());
-    Logger.recordOutput("Zones/Bumps/Red Top", RED_TOP_BUMP.getCorners());
+    // Logger.recordOutput("Zones/Bumps/Blue Bottom", BLUE_BOTTOM_BUMP.getCorners());
+    // Logger.recordOutput("Zones/Bumps/Blue Top", BLUE_TOP_BUMP.getCorners());
+    // Logger.recordOutput("Zones/Bumps/Red Bottom", RED_BOTTOM_BUMP.getCorners());
+    // Logger.recordOutput("Zones/Bumps/Red Top", RED_TOP_BUMP.getCorners());
+
+    Logger.recordOutput("Zones/Field/Blue Alliance", BLUE_ALLIANCE_ZONE.getCorners());
+    Logger.recordOutput("Zones/Field/Red Alliance", RED_ALLIANCE_ZONE.getCorners());
+    Logger.recordOutput("Zones/Field/Neutral_LEFT", NEUTRAL_ZONE_LEFT.getCorners());
+    Logger.recordOutput("Zones/Field/Neutral_RIGHT", NEUTRAL_ZONE_RIGHT.getCorners());
+  }
+
+  private boolean run = true;
+  private boolean override = false;
+
+  private boolean button = true;
+  private boolean the = true;
+
+  public void setButton(boolean t) {
+    button = t;
+  }
+
+  public void setthe(boolean t) {
+    the = t;
+  }
+
+  public boolean getbut() {
+    return button;
+  }
+
+  public boolean getthe() {
+    return the;
+  }
+
+  public void toggleRun() {
+    run = !run;
+  }
+
+  public boolean getRun() {
+    return run;
+  }
+
+  private void setOverride(boolean value) {
+    override = value;
+  }
+
+  public boolean getOverride() {
+    return override;
+  }
+
+  public Command override() {
+    return this.startEnd(() -> setOverride(true), () -> setOverride(false));
+  }
+
+  public Command runToggle() {
+    return this.runOnce(() -> toggleRun());
+  }
+
+  private final Drive drive;
+  private Supplier<Pose2d> pose;
+  private final Hood hood;
+  private final DriverStation.Alliance alliance;
+  private final Turret turret;
+  private InterpolatingTreeMap<Double, Double> interp =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+
+  public Zones(Supplier<Pose2d> pose, Drive drive, Hood hood, Turret turret) {
+    this.drive = drive;
+    this.pose = pose;
+    this.hood = hood;
+    this.alliance = DriverStation.getAlliance().get();
+    this.turret = turret;
+    interp.put(0.0, 0.0);
+  }
+
+  @Override
+  public void periodic() {
+    boolean runGet = run;
+    boolean overrideGet = override;
+    FieldZone currentZone = Zones.getCurrentFieldZone(pose);
+    if (!overrideGet) {
+      if ((currentZone == Zones.FieldZone.BLUE_BOTTOM_TRENCH_DUCK)
+          || (currentZone == Zones.FieldZone.RED_BOTTOM_TRENCH_DUCK)
+          || (currentZone == Zones.FieldZone.RED_TOP_TRENCH_DUCK)
+          || (currentZone == Zones.FieldZone.BLUE_TOP_TRENCH_DUCK)) {
+        hood.setHoodPos(0.0);
+        if (runGet) {
+          if (currentZone == Zones.FieldZone.BLUE_ALLIANCE
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.HUB_POSE_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.RED_ALLIANCE
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.HUB_POSE_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_LEFT
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_LEFT_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_RIGHT
+              && alliance.equals(DriverStation.Alliance.Blue)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_RIGHT_BLUE, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_LEFT
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_LEFT_RED, drive, interp);
+          } else if (currentZone == Zones.FieldZone.NEUTRAL_ZONE_RIGHT
+              && alliance.equals(DriverStation.Alliance.Red)) {
+            new TurretAngleAim(pose, turret, FieldConstants.PASSING_POSE_RIGHT_RED, drive, interp);
+          }
+        }
+      }
+      Zones.logAllZones();
+      Logger.recordOutput("Zones/currentZone", Zones.getCurrentFieldZone(pose));
+    }
   }
 }

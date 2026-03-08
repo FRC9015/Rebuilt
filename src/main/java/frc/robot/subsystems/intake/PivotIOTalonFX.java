@@ -12,7 +12,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.generated.TunerConstants;
 
 public class PivotIOTalonFX implements PivotIO {
   public final TalonFX pivotMotor;
@@ -30,14 +29,14 @@ public class PivotIOTalonFX implements PivotIO {
 
   public PivotIOTalonFX(int pivotIDLeft, int encoderID) {
     pivotMotor = new TalonFX(pivotIDLeft);
-    pivotEncoder = new CANcoder(encoderID, TunerConstants.kCANBus);
+    pivotEncoder = new CANcoder(encoderID);
 
     pivotMotor.getConfigurator().apply(IntakeConstants.pivotConfigLeft);
 
     pivotLeftVolts = pivotMotor.getMotorVoltage();
     pivotLeftAmps = pivotMotor.getStatorCurrent();
     pivotLeftVelocity = pivotMotor.getVelocity();
-    pivotPosition = pivotEncoder.getPosition();
+    pivotPosition = pivotEncoder.getAbsolutePosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, pivotLeftVolts, pivotLeftAmps, pivotLeftVelocity, pivotPosition);

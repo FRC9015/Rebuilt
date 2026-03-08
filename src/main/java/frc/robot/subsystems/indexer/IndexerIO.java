@@ -22,9 +22,12 @@ public interface IndexerIO {
   public static class IndexerIOInputs {
 
     // Fields representing the end effector state and inputs
-    public double indexerVelocity = 0.0;
-    public double indexerAppliedVolts = 0.0;
-    public double indexerCurrentAmps = 0.0;
+    public double indexerVelocityMotor1 = 0.0;
+    public double indexerAppliedVoltsMotor1 = 0.0;
+    public double indexerCurrentAmpsMotor1 = 0.0;
+    public double indexerVelocityMotor2 = 0.0;
+    public double indexerAppliedVoltsMotor2 = 0.0;
+    public double indexerCurrentAmpsMotor2 = 0.0;
   }
 
   /** Updates the set of loggable inputs. */

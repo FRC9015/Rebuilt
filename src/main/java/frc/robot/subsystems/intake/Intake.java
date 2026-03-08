@@ -23,7 +23,11 @@ public class Intake extends SubsystemBase {
     roller.setRollerSpeed(speedValue);
   }
 
-  public void setIntakeReverseSpeed(double speedValue) {
+  public void setRollerVoltage(double voltage) {
+    roller.setRollerVolts(voltage);
+  }
+
+  public void setRollerReverseSpeed(double speedValue) {
     roller.setRollerSpeed(-speedValue);
   }
 
@@ -50,8 +54,12 @@ public class Intake extends SubsystemBase {
         });
   }
 
-  public Command runIntakeAtReverseSpeed(double speed) {
-    return this.startEnd(() -> this.setIntakeReverseSpeed(speed), () -> this.stopRoller());
+  public Command runRollerAtSpeed(double speed) {
+    return this.startEnd(() -> this.setRollerSpeed(speed), () -> roller.stop());
+  }
+
+  public Command runRollerAtVoltage(double voltage) {
+    return this.startEnd(() -> this.setRollerVoltage(voltage), () -> roller.stop());
   }
 
   public Command stopRoller() {

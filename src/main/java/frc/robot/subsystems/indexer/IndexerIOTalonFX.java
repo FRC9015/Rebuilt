@@ -26,52 +26,67 @@ import edu.wpi.first.units.measure.Voltage;
 /** IO implementation for the Indexer subsystem using a TalonFX motor controller. */
 public class IndexerIOTalonFX implements IndexerIO {
 
-  private final TalonFX motor1;
-  private final StatusSignal<Voltage> appliedVoltsSignal;
-  private final StatusSignal<Current> currentSignal;
+  private final TalonFX motor1, motor2;
+  private final StatusSignal<Voltage> appliedVoltsSignalMotor1, appliedVoltsSignalMotor2;
+  private final StatusSignal<Current> currentSignalMotor1, currentSignalMotor2;
 
   private final double defaultCurrentLimit = 45.0;
   private final double maxVoltage = 12.0;
 
-  public IndexerIOTalonFX(int motorId1) { // , int canRangeID1, int canRangeID2, int canRangeID3
+  public IndexerIOTalonFX(
+      int motorId1, int motorid2) { // , int canRangeID1, int canRangeID2, int canRangeID3
     motor1 = new TalonFX(motorId1);
+    motor2 = new TalonFX(motorid2);
 
     // Configure motor
     TalonFXConfiguration motorConfig = new TalonFXConfiguration();
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     motorConfig.CurrentLimits.StatorCurrentLimit = defaultCurrentLimit;
     motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
 
     // Configure the integrated encoder (default settings should work)
     motor1.getConfigurator().apply(motorConfig);
+    motor2.getConfigurator().apply(motorConfig);
 
     // Use the built-in relative encoder of the TalonFX
-    appliedVoltsSignal = motor1.getMotorVoltage();
-    currentSignal = motor1.getStatorCurrent();
+    appliedVoltsSignalMotor1 = motor1.getMotorVoltage();
+    currentSignalMotor1 = motor1.getStatorCurrent();
+
+    appliedVoltsSignalMotor2 = motor2.getMotorVoltage();
+    currentSignalMotor2 = motor2.getStatorCurrent();
   }
 
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     // Refresh signals
-    BaseStatusSignal.refreshAll(appliedVoltsSignal, currentSignal);
+    BaseStatusSignal.refreshAll(
+        appliedVoltsSignalMotor1,
+        currentSignalMotor1,
+        appliedVoltsSignalMotor2,
+        currentSignalMotor2);
     // Update inputs
-    inputs.indexerAppliedVolts = appliedVoltsSignal.getValueAsDouble();
-    inputs.indexerCurrentAmps = currentSignal.getValueAsDouble();
+    inputs.indexerAppliedVoltsMotor1 = appliedVoltsSignalMotor1.getValueAsDouble();
+    inputs.indexerCurrentAmpsMotor1 = currentSignalMotor1.getValueAsDouble();
+    inputs.indexerAppliedVoltsMotor2 = appliedVoltsSignalMotor2.getValueAsDouble();
+    inputs.indexerCurrentAmpsMotor2 = currentSignalMotor2.getValueAsDouble();
   }
 
   @Override
   public void stop() {
     motor1.stopMotor();
+    motor2.stopMotor();
   }
 
   @Override
   public void setBrakeMode(boolean enable) {
     motor1.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    motor2.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
   @Override
   public void setVoltage(double voltage) {
     motor1.setVoltage(MathUtil.clamp(voltage, -maxVoltage, maxVoltage));
+    motor2.setVoltage(MathUtil.clamp(voltage, -maxVoltage, maxVoltage));
   }
 }

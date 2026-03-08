@@ -59,13 +59,13 @@ public class IndexerIOSparkFlex implements IndexerIO {
   @Override
   public void updateInputs(IndexerIOInputs inputs) {
     // REV RelativeEncoder velocity is RPM by default
-    inputs.indexerVelocity = encoder.getVelocity();
+    inputs.indexerVelocityMotor1 = encoder.getVelocity();
 
     // Applied volts = applied output (-1..1) * bus voltage
-    inputs.indexerAppliedVolts = motor1.getAppliedOutput() * motor1.getBusVoltage();
+    inputs.indexerAppliedVoltsMotor1 = motor1.getAppliedOutput() * motor1.getBusVoltage();
 
     // Output current in amps
-    inputs.indexerCurrentAmps = motor1.getOutputCurrent();
+    inputs.indexerCurrentAmpsMotor1 = motor1.getOutputCurrent();
   }
 
   @Override
