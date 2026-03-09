@@ -59,7 +59,6 @@ import frc.robot.subsystems.intake.PivotIOTalonFX;
 import frc.robot.subsystems.intake.RollerIO;
 import frc.robot.subsystems.intake.RollerIOSim;
 import frc.robot.subsystems.intake.RollerIOTalonFX;
-import frc.robot.subsystems.shooter.Kicker;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOSim;
 import frc.robot.subsystems.shooter.ShooterIOTalonFX;
@@ -92,8 +91,6 @@ public class RobotContainer {
   private final Intake intake;
   private ObjectDetection objectDetection;
   private final Turret turret;
-  private final Kicker kicker;
-  //   private final Climb climb;
   private final Hood hood;
   private SwerveDriveSimulation simDrive;
   private IntakeSimulation simIntake;
@@ -109,9 +106,6 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-
-  private double intakeRollerValue = 30;
-  private double indexerRollerValue = 12;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
@@ -163,8 +157,6 @@ public class RobotContainer {
                 new HoodIOTalonFX(
                     Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
-        kicker = new Kicker(ShooterConstants.KICKER_ID);
-        // climb = new Climb(new ClimbIOTalonFX(0));
         interpTables = new InterpTables();
 
         break;
@@ -190,7 +182,6 @@ public class RobotContainer {
                 IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
-        kicker = new Kicker(ShooterConstants.KICKER_ID);
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
@@ -220,7 +211,6 @@ public class RobotContainer {
 
       case REPLAY:
         // Replayed robot, disable IO implementations
-        kicker = new Kicker(ShooterConstants.KICKER_ID);
         drive =
             new Drive(
                 new GyroIO() {},
@@ -428,7 +418,6 @@ public class RobotContainer {
                 0.3));
 
     intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    driverController.povDown().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
 
     operatorController
@@ -457,10 +446,15 @@ public class RobotContainer {
     operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(35));
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
-    operatorController.povLeft().onTrue(turret.setTurretVoltageCommand(2));
-    operatorController.povRight().onTrue(turret.setTurretVoltageCommand(-2));
-
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
+
+
+    driverController.povUp().onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController.povDown().onTrue(hood.incrementhoodCommand(-1).onlyIf(() -> DriverStation.isTest()));
+    driverController.povLeft().onTrue(shooter.incrementShooterCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController.povRight().onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
+    driverController.rightBumper().whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController.leftBumper().whileTrue(indexer.runIndexer(5).onlyIf(() -> DriverStation.isTest()));
   }
 
   /**
