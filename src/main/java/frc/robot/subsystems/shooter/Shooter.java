@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -77,11 +78,19 @@ public class Shooter extends SubsystemBase {
     return this.run(() -> io.stopFlywheels());
   }
 
+  public Command incrementShooterCommand(double value){
+    return this.runOnce( () -> incrementFlyWheelSpeed(value));
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
-    // io.setFlyWheelSpeed(setpoint);
     Logger.processInputs("Shooter", inputs);
-    Logger.recordOutput("Shooter/setpoint", setpoint);
+
+    
+    if(DriverStation.isTest()){
+      io.setFlyWheelSpeed(setpoint);
+      Logger.recordOutput("ShooterTest/setpoint", setpoint);
+    }
   }
 }

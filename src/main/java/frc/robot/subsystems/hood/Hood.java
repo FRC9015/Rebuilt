@@ -1,6 +1,7 @@
 package frc.robot.subsystems.hood;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -31,14 +32,6 @@ public class Hood extends SubsystemBase {
     return runOnce(() -> incrementHoodAngle(value));
   }
 
-  @Override
-  public void periodic() {
-    io.updateInputs(inputs);
-    // io.setHoodPosition(this.setpoint);
-    Logger.processInputs("Hood", inputs);
-    Logger.recordOutput("Hood/setpoint", setpoint);
-  }
-
   public Angle getLaunchAngle() {
     return inputs.launchAngle;
   }
@@ -53,5 +46,16 @@ public class Hood extends SubsystemBase {
 
   public double returnHoodSetpoint() {
     return inputs.hoodTargetPosition;
+  }
+
+  @Override
+  public void periodic() {
+    io.updateInputs(inputs);
+    Logger.processInputs("Hood", inputs);
+
+    if(DriverStation.isTest()){
+      io.setHoodPosition(this.setpoint);
+      Logger.recordOutput("HoodTest/setpoint", setpoint);
+    }
   }
 }
