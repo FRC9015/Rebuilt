@@ -78,8 +78,8 @@ public class Shooter extends SubsystemBase {
     return this.run(() -> io.stopFlywheels());
   }
 
-  public Command incrementShooterCommand(double value){
-    return this.runOnce( () -> incrementFlyWheelSpeed(value));
+  public Command incrementShooterCommand(double value) {
+    return this.runOnce(() -> incrementFlyWheelSpeed(value));
   }
 
   @Override
@@ -87,8 +87,7 @@ public class Shooter extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
 
-    
-    if(DriverStation.isTest()){
+    if (DriverStation.isTest()) {
       io.setFlyWheelSpeed(setpoint);
       Logger.recordOutput("ShooterTest/setpoint", setpoint);
     }

@@ -53,7 +53,7 @@ public class Hood extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
 
-    if(DriverStation.isTest()){
+    if (DriverStation.isTest()) {
       io.setHoodPosition(this.setpoint);
       Logger.recordOutput("HoodTest/setpoint", setpoint);
     }

@@ -28,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.MotorIDConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.VisionConstants;
@@ -36,6 +35,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
+import frc.robot.commands.ZoneCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -98,6 +98,9 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final double hoodSetpoint = 0.0;
   private final double flywheelSetpoint = 50;
+  private boolean hubLock = false;
+
+  private Trigger desireHubLock;
 
   private final AutoChooser autoChooser2;
   // Controller
@@ -159,6 +162,8 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
         interpTables = new InterpTables();
 
+        desireHubLock = new Trigger(() -> hubLock);
+
         break;
 
       case SIM:
@@ -206,6 +211,7 @@ public class RobotContainer {
                 simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
         // climb = new Climb(new ClimbIOSim());
         interpTables = new InterpTables();
+        desireHubLock = new Trigger(() -> hubLock);
 
         break;
 
@@ -239,6 +245,8 @@ public class RobotContainer {
         hood = new Hood(new HoodIO() {});
         // climb = new Climb(new ClimbIO() {});
         interpTables = new InterpTables();
+        desireHubLock = new Trigger(() -> hubLock);
+
         break;
 
       default:
@@ -260,11 +268,13 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "turret",
         new TurretAngleAim(
-            () -> drive.getPose(),
-            turret,
-            FieldConstants.HUB_POSE_BLUE,
-            drive,
-            interpTables.timeOfFlightInterp).withTimeout(2).andThen( Commands.runOnce(() -> indexer.setVoltage(5))));
+                () -> drive.getPose(),
+                turret,
+                FieldConstants.HUB_POSE_BLUE,
+                drive,
+                interpTables.timeOfFlightInterp)
+            .withTimeout(2)
+            .andThen(Commands.runOnce(() -> indexer.setVoltage(5))));
     NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setVoltage(5)));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
@@ -379,6 +389,18 @@ public class RobotContainer {
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
 
+    driverController
+        .leftBumper()
+        .whileTrue(new ZoneCommands(() -> drive.getPose(), drive, hood))
+        .and(desireHubLock)
+        .whileTrue(
+            new TurretAngleAim(
+                () -> drive.getPose(),
+                turret,
+                FieldConstants.HUB_POSE_BLUE,
+                drive,
+                interpTables.timeOfFlightInterp));
+    driverController.x().onTrue(Commands.runOnce(() -> hubLock = !hubLock));
     // Lock to 0 degrees when A button is held
     driverController
         .a()
@@ -390,7 +412,7 @@ public class RobotContainer {
                 () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
-    driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
     driverController
         .b()
         .onTrue(
@@ -448,13 +470,24 @@ public class RobotContainer {
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
 
-
-    driverController.povUp().onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController.povDown().onTrue(hood.incrementhoodCommand(-1).onlyIf(() -> DriverStation.isTest()));
-    driverController.povLeft().onTrue(shooter.incrementShooterCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController.povRight().onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
-    driverController.rightBumper().whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController.leftBumper().whileTrue(indexer.runIndexer(5).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .povUp()
+        .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .povDown()
+        .onTrue(hood.incrementhoodCommand(-1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .povLeft()
+        .onTrue(shooter.incrementShooterCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .povRight()
+        .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .rightBumper()
+        .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .leftBumper()
+        .whileTrue(indexer.runIndexer(5).onlyIf(() -> DriverStation.isTest()));
   }
 
   /**
