@@ -15,6 +15,8 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import choreo.auto.AutoFactory;
+import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
@@ -25,7 +27,6 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.DriveFeedforwards;
-import com.pathplanner.lib.util.FlippingUtil;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
@@ -34,6 +35,7 @@ import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -59,7 +61,6 @@ import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
-import frc.robot.util.PhoenixUtil;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
@@ -73,7 +74,7 @@ import org.littletonrobotics.junction.Logger;
 public class Drive extends SubsystemBase {
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY =
-      new CANBus(TunerConstants.swerveDrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
+      new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
   public static final double DRIVE_BASE_RADIUS =
       Math.max(
           Math.max(
@@ -91,6 +92,15 @@ public class Drive extends SubsystemBase {
   private static final double ROBOT_MASS_KG = 59.90;
   private static final double ROBOT_MOI = 6.554;
   private static final double WHEEL_COF = 1.19;
+
+  private final PIDController choreoXController = new PIDController(7, 0, 0);
+  private final PIDController choreoYController = new PIDController(7, 0, 0);
+  private final PIDController choreoThetaController = new PIDController(7, 0, 0);
+
+  public final AutoFactory autoFactory;
+
+  private static final PathConstraints PP_CONSTRAINTS =
+      new PathConstraints(3.0, 3.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
           ROBOT_MASS_KG,
@@ -103,8 +113,7 @@ public class Drive extends SubsystemBase {
               TunerConstants.FrontLeft.SlipCurrent,
               1),
           getModuleTranslations());
-  private static final PathConstraints PP_CONSTRAINTS =
-      new PathConstraints(3.0, 3.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+
   public static final DriveTrainSimulationConfig mapleSimConfig =
       DriveTrainSimulationConfig.Default()
           .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
@@ -220,6 +229,8 @@ public class Drive extends SubsystemBase {
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
+    choreoThetaController.enableContinuousInput(-Math.PI, Math.PI);
+    autoFactory = new AutoFactory(this::getPose, this::setPose, this::choreoDrive, true, this);
     prevSetpoint =
         new SwerveSetpoint(
             getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(MODULE_COUNT));
@@ -491,26 +502,6 @@ public class Drive extends SubsystemBase {
     return getPose().getTranslation().getDistance(targetpose);
   }
 
-  // change this to whatever color we are playing for ther match flipled is for red
-  public Command pathfindToPose(
-      Pose2d targetpose, double endVelocity, DriverStation.Alliance alliance) {
-    Logger.recordOutput("isRed?", PhoenixUtil.isRed());
-    // if (alliance == DriverStation.Alliance.Red) {
-    return this.pathfindToPoseFlipped(targetpose, endVelocity);
-    // } else {
-    //   return this.pfToPose(targetpose, endVelocity);
-    // }
-  }
-
-  public Command pfToPose(Pose2d targetpose, double endVelocity) {
-    return AutoBuilder.pathfindToPose(targetpose, PP_CONSTRAINTS, endVelocity);
-  }
-
-  public Command pathfindToPoseFlipped(Pose2d targetPose, double endVelocity) {
-    Pose2d tp = FlippingUtil.flipFieldPose(targetPose);
-    return AutoBuilder.pathfindToPose(tp, PP_CONSTRAINTS, endVelocity);
-  }
-
   public static double getSkiddingRatio(
       SwerveModuleState[] swerveStatesMeasured, SwerveDriveKinematics swerveDriveKinematics) {
     final double rotationalVelocityMeasured =
@@ -580,5 +571,27 @@ public class Drive extends SubsystemBase {
 
   public Command orbitSafeFalse() {
     return runOnce(this::setOrbitSafeFalse);
+  }
+
+  public void choreoDrive(SwerveSample sample) {
+    Pose2d pose = this.getPose();
+    double xFF = sample.vx;
+    double yFF = sample.vy;
+    double rotationFF = sample.omega;
+
+    double xFeedback = choreoXController.calculate(pose.getX(), sample.x);
+    double yFeedback = choreoYController.calculate(pose.getY(), sample.y);
+    double rotationFeedback =
+        choreoThetaController.calculate(pose.getRotation().getRadians(), sample.heading);
+
+    ChassisSpeeds velocity =
+        ChassisSpeeds.fromFieldRelativeSpeeds(
+            xFF + xFeedback,
+            yFF + yFeedback,
+            rotationFF + rotationFeedback,
+            Rotation2d.fromRadians(sample.heading));
+
+    runVelocity(velocity);
+    Logger.recordOutput("Auto/Setpoint", sample.getPose());
   }
 }

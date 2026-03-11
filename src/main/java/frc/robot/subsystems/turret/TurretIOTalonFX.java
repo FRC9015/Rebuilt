@@ -6,10 +6,11 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -39,6 +40,7 @@ public class TurretIOTalonFX implements TurretIO {
   private final CANcoder encoder13;
   private final CANcoder encoder15;
   private final EasyCRT easyCRT;
+  private double setpointDegrees = 0.0;
 
   private final StatusSignal<Angle> encoder13PosSignal;
   private final StatusSignal<Angle> encoder15PosSignal;
@@ -47,8 +49,8 @@ public class TurretIOTalonFX implements TurretIO {
   private final StatusSignal<Angle> motorPositionSignal;
 
   private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
-  private final NeutralOut neutralOut = new NeutralOut();
   private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
+  private final VoltageOut voltageOut = new VoltageOut(0.0);
 
   private Alert outofSyncAlert =
       new Alert("CRT-Motor desync detected! Resyncing motor.", AlertType.kWarning);
@@ -74,17 +76,22 @@ public class TurretIOTalonFX implements TurretIO {
             .withMotionMagic(TurretConstants.MOTION_MAGIC_CONFIGS)
             .withSlot0(TurretConstants.SLOT0_CONFIGS)
             .withFeedback(TurretConstants.FEEDBACK_CONFIGS)
-            .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1));
-    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+            .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1))
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(60.0)
+                    .withStatorCurrentLimitEnable(true));
+
+    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     turretMotor.getConfigurator().apply(motorConfig);
 
     CANcoderConfiguration encoderConfig13 = new CANcoderConfiguration();
-    encoderConfig13.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig13.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     encoderConfig13.MagnetSensor.MagnetOffset = TurretConstants.ENCODER13_MAGNET_OFFSET;
 
     CANcoderConfiguration encoderConfig15 = new CANcoderConfiguration();
-    encoderConfig15.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    encoderConfig15.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
     encoderConfig15.MagnetSensor.MagnetOffset = TurretConstants.ENCODER15_MAGNET_OFFSET;
 
     encoder13.getConfigurator().apply(encoderConfig13);
@@ -160,6 +167,8 @@ public class TurretIOTalonFX implements TurretIO {
     inputs.turretAppliedVolts = motorAppliedVoltsSignal.getValueAsDouble();
     inputs.turretCurrentAmps = motorCurrentSignal.getValueAsDouble();
     inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
+    inputs.turretSetpoint = setpointDegrees;
+    inputs.turretError = (Math.abs(inputs.turretResolvedPosition - inputs.turretSetpoint)) * 360;
 
     // Resolve turret angle using CRT from two encoder readings
     easyCRT
@@ -169,14 +178,20 @@ public class TurretIOTalonFX implements TurretIO {
               inputs.turretResolvedValid = true;
               inputs.turretResolvedPosition = angle.in(Rotations);
               inputs.turretResolvedPositionDegrees = angle.in(Rotations) * 360.0;
-              if (Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
+              double motorPositionWrapped =
+                  MathUtil.inputModulus(
+                      inputs.turretMotorPosition,
+                      TurretConstants.MINROTATION,
+                      TurretConstants.MAXROTATION);
+
+              if (Math.abs(inputs.turretResolvedPosition - motorPositionWrapped)
                   > Constants.TurretConstants.SYNC_THRESHOLD) {
 
                 outofSyncAlert.set(
-                    Math.abs(inputs.turretResolvedPosition - inputs.turretMotorPosition)
+                    Math.abs(inputs.turretResolvedPosition - motorPositionWrapped)
                         > Constants.TurretConstants.SYNC_THRESHOLD);
 
-                this.seedMotorPosition(angle.in(Rotations));
+                inputs.turretResolvedPosition = motorPositionWrapped;
               }
             },
             () -> {
@@ -209,8 +224,14 @@ public class TurretIOTalonFX implements TurretIO {
   public void setTurretPosition(double positionDegrees) {
     // Convert degrees to rotations and clamp between -1.0 and 1.0
     double rotations = positionDegrees / 360.0;
-    double safePosition = MathUtil.clamp(rotations, -1.0, 1.0);
+    double safePosition = MathUtil.clamp(rotations, -0.7, 0.7);
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
+    setpointDegrees = safePosition;
+  }
+
+  @Override
+  public void setTurretVoltage(double voltage) {
+    turretMotor.setControl(voltageOut.withOutput(voltage));
   }
 
   public CRTStatus getLastCRTStatus() {
@@ -223,5 +244,10 @@ public class TurretIOTalonFX implements TurretIO {
 
   public int getLastCRTIterations() {
     return easyCRT.getLastIterations();
+  }
+
+  @Override
+  public void setTurretSetPoint(double value) {
+    setpointDegrees = value;
   }
 }

@@ -23,6 +23,8 @@ public interface RollerIO {
 
   public default void setRollerSpeed(boolean runIntake) {}
 
+  public default void setRollerVolts(double voltage) {}
+
   default void stop() {}
 
   default void setBrakeMode(boolean enable) {}

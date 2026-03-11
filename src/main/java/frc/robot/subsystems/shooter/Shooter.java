@@ -1,12 +1,13 @@
 package frc.robot.subsystems.shooter;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+  private double setpoint = 0.0;
 
   private final ShooterIO io;
 
@@ -19,8 +20,12 @@ public class Shooter extends SubsystemBase {
   // Minimum Value of speedValue: -100 RPS
   // Maximum Value of speedValue: 100 RPS
 
-  public void setShooterSpeed(double speedValue, double angleValue) {
+  public void setShooterSpeed(double speedValue) {
     io.setFlyWheelSpeed(speedValue);
+  }
+
+  public void incrementFlyWheelSpeed(double value) {
+    setpoint += (1 * value);
   }
 
   public void setShooterReverseSpeed(double speedValue) {
@@ -30,6 +35,14 @@ public class Shooter extends SubsystemBase {
 
   public void setKickerSpeed(double speedValue) {
     io.setKickerSpeed(speedValue);
+  }
+
+  public void stopKicker() {
+    io.stopKicker();
+  }
+
+  public void setSetpoint(double setpoint) {
+    this.setpoint = setpoint;
   }
 
   public void setKickerSpeedReverse(double speedValue) {
@@ -44,10 +57,16 @@ public class Shooter extends SubsystemBase {
     return this.run(() -> this.setKickerSpeedReverse(speedValue));
   }
 
-  public Command runShooterAtSpeedAngle(double speed, double angle) {
-    return this.runOnce(() -> this.setShooterSpeed(speed, angle))
-        .alongWith(new WaitCommand(1 / 6.0))
-        .repeatedly();
+  public Command runShooterAtSpeed(double speed) {
+    return this.startEnd(
+        () -> {
+          this.setShooterSpeed(speed);
+          this.setKickerSpeed(1);
+        },
+        () -> {
+          io.stopFlywheels();
+          io.stopKicker();
+        });
   }
 
   public Command runShooterAtReverseSpeed(double speed) {
@@ -59,9 +78,19 @@ public class Shooter extends SubsystemBase {
     return this.run(() -> io.stopFlywheels());
   }
 
+  public Command incrementShooterCommand(double value){
+    return this.runOnce( () -> incrementFlyWheelSpeed(value));
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
     Logger.processInputs("Shooter", inputs);
+
+    
+    if(DriverStation.isTest()){
+      io.setFlyWheelSpeed(setpoint);
+      Logger.recordOutput("ShooterTest/setpoint", setpoint);
+    }
   }
 }
