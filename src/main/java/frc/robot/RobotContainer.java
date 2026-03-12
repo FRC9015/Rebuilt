@@ -96,6 +96,8 @@ public class RobotContainer {
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
 
+  private Trigger shooterIsAtSetpoint;
+
   // Dashboard inputs
 
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -149,6 +151,8 @@ public class RobotContainer {
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
 
+        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
+
         break;
 
       case SIM:
@@ -195,6 +199,8 @@ public class RobotContainer {
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
 
+        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
+
         break;
 
       case REPLAY:
@@ -228,6 +234,8 @@ public class RobotContainer {
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
 
+
+        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
       default:
@@ -419,12 +427,14 @@ public class RobotContainer {
                 FieldConstants.HUB_POSE_BLUE,
                 drive));
     operatorController.rightBumper().whileTrue(intake.runRollerAtVoltage(-6));
-    operatorController
-        .b()
-        .whileTrue(indexer.runIndexer(100).alongWith(shooter.runShooterAtSpeed(38)));
+
+    shooterIsAtSetpoint.whileTrue(
+        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(85))
+            .onlyIf(() -> !DriverStation.isTest()));
 
     operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
-    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(35));
+    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(65));
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));

@@ -203,9 +203,9 @@ public final class Constants {
     public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-9.096),
-                Units.inchesToMeters(15.284),
-                Units.inchesToMeters(10.67)),
+                Units.inchesToMeters(-8.86),
+                Units.inchesToMeters(14.886),
+                Units.inchesToMeters(10.737)),
             new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(90)));
 
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
