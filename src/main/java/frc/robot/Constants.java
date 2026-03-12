@@ -450,4 +450,23 @@ public final class Constants {
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
   }
+
+  public static class IndexerConstants {
+    public static final FeedbackConfigs FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(125).withMotionMagicCruiseVelocity(25);
+
+    // TODO TUNE THESE PID VALUES
+    public static final Slot0Configs SLOT0_CONFIGS =
+        new Slot0Configs()
+            .withKP(0.5)
+            .withKI(0.0)
+            .withKD(0.00)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0.08)
+            .withKV(0.13);
+  }
 }
