@@ -28,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.MotorIDConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.VisionConstants;
@@ -260,12 +259,14 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "turret",
         new TurretAngleAim(
-            () -> drive.getPose(),
-            turret,
-            FieldConstants.HUB_POSE_BLUE,
-            drive,
-            interpTables.timeOfFlightInterp).withTimeout(2).andThen( Commands.runOnce(() -> indexer.setVoltage(5))));
-    NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setVoltage(5)));
+                () -> drive.getPose(),
+                turret,
+                FieldConstants.HUB_POSE_BLUE,
+                drive,
+                interpTables.timeOfFlightInterp)
+            .withTimeout(2)
+            .andThen(Commands.runOnce(() -> indexer.setIndexerSpeed(50))));
+    NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setIndexerSpeed(50)));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -417,7 +418,7 @@ public class RobotContainer {
                 () -> -driverController.getRightX(),
                 0.3));
 
-    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    // intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
 
     operatorController
@@ -441,20 +442,34 @@ public class RobotContainer {
                 FieldConstants.HUB_POSE_BLUE,
                 drive));
     operatorController.rightBumper().whileTrue(intake.runRollerAtVoltage(-6));
-    operatorController.b().whileTrue(indexer.runIndexer(5));
+    operatorController
+        .b()
+        .whileTrue(indexer.runIndexer(100).alongWith(shooter.runShooterAtSpeed(38)));
+
     operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
     operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(35));
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
 
-
-    driverController.povUp().onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController.povDown().onTrue(hood.incrementhoodCommand(-1).onlyIf(() -> DriverStation.isTest()));
-    driverController.povLeft().onTrue(shooter.incrementShooterCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController.povRight().onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
-    driverController.rightBumper().whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController.leftBumper().whileTrue(indexer.runIndexer(5).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .povUp()
+        .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .povDown()
+        .onTrue(hood.incrementhoodCommand(-1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .povLeft()
+        .onTrue(shooter.incrementShooterCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .povRight()
+        .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .rightBumper()
+        .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .leftBumper()
+        .whileTrue(indexer.runIndexer(5 / 12 * 50).onlyIf(() -> DriverStation.isTest()));
   }
 
   /**

@@ -34,6 +34,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   private double lastFlywheelSetpointSpeed = 0.0;
 
+  private boolean shooterAtSpeed = false;
+
   public ShooterIOTalonFX(int flywheelID1, int flywheelID2, int kickerID) {
     flywheelMotorLeft = new TalonFX(flywheelID1);
     flywheelMotorRight = new TalonFX(flywheelID2);
@@ -97,6 +99,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     } else {
       inputs.flywheelAtSpeed = false;
     }
+
+    shooterAtSpeed = inputs.flywheelAtSpeed;
   }
 
   @Override
@@ -134,6 +138,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   @Override
   public void setKickerSpeed(double speed) {
+
     kickerMotor.set(speed);
   }
 

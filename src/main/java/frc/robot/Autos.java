@@ -457,6 +457,6 @@ public class Autos {
             PhoenixUtil.isRed() ? FieldConstants.HUB_POSE_RED : FieldConstants.HUB_POSE_BLUE,
             drive));
     drive.autoFactory.bind(
-        "ShootBall", shooter.setKickerSpeedCommand(1).alongWith(indexer.runIndexer(6.0)));
+        "ShootBall", shooter.setKickerSpeedCommand(1).alongWith(indexer.runIndexer(50)));
   }
 }

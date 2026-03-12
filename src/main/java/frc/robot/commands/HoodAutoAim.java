@@ -45,8 +45,8 @@ public class HoodAutoAim extends Command {
     Translation2d targetPos =
         isRed ? flippedTargetPose.getTranslation() : targetPose.getTranslation();
     double distance = currentRobotPose.getTranslation().getDistance(targetPos);
-    
-    //CODE FOR SHOOT ON THE MOVE, NEEDS TO BE FINALIZED AND TESTED WITH PROPER INTERP TABLES
+
+    // CODE FOR SHOOT ON THE MOVE, NEEDS TO BE FINALIZED AND TESTED WITH PROPER INTERP TABLES
     // targetPos =
     //     targetPos.minus(
     //         new Translation2d(
