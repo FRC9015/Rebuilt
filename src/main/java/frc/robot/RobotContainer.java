@@ -457,7 +457,7 @@ public class RobotContainer {
             .onlyIf(() -> !DriverStation.isTest()));
 
     operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
-    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(65));
+    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(50));
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
