@@ -18,21 +18,19 @@ public class TurretAngleAim extends Command {
 
   private final Supplier<Pose2d> poseSupplier;
   private final Turret turret;
-  private final Pose2d targetPose;
-  private final Pose2d filpedTargetPose;
+  private final Supplier<Pose2d> targetPoseSupplier;
   private final Drive drive;
   private final InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
 
   public TurretAngleAim(
       Supplier<Pose2d> poseSupplier,
       Turret turret,
-      Pose2d targetPose,
+      Supplier<Pose2d> targetPose,
       Drive drive,
       InterpolatingTreeMap<Double, Double> timeOfFlightInterp) {
     this.poseSupplier = poseSupplier;
     this.turret = turret;
-    this.targetPose = targetPose;
-    this.filpedTargetPose = FlippingUtil.flipFieldPose(targetPose);
+    this.targetPoseSupplier = targetPose;
     this.drive = drive;
     this.timeOfFlightInterp = timeOfFlightInterp;
     addRequirements(turret);
@@ -41,7 +39,8 @@ public class TurretAngleAim extends Command {
   @Override
   public void execute() {
     Pose2d robotPose = poseSupplier.get();
-
+    Pose2d targetPose = targetPoseSupplier.get();
+    Pose2d filpedTargetPose = FlippingUtil.flipFieldPose(targetPose);
     // 1. Calculate Turret Position on the Field
     // Rotate the offset vector by the robot's current heading
     Translation2d turretOffset =

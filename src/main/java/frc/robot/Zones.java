@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.RobotDimensionConstants;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Zones {
@@ -56,14 +57,12 @@ public class Zones {
   public static boolean isInRedBottomTrench(double x, double y) {
     double min = FIELD_LENGTH - TRENCH_X_MAX;
     double max = FIELD_LENGTH - TRENCH_X_MIN;
-
     return x >= min && x <= max && y >= TRENCH_Y_MIN && y <= TRENCH_Y_MAX;
   }
 
   public static boolean isInRedTopTrench(double x, double y) {
     double min = FIELD_LENGTH - TRENCH_X_MAX;
     double max = FIELD_LENGTH - TRENCH_X_MIN;
-
     return x >= min
         && x <= max
         && y >= FIELD_WIDTH - TRENCH_Y_MAX
@@ -71,108 +70,44 @@ public class Zones {
   }
 
   public enum FieldZone {
-    BLUE_ALLIANCE,
-    RED_ALLIANCE,
+    BLUE_ALLIANCE_LEFT,
+    BLUE_ALLIANCE_RIGHT,
+    RED_ALLIANCE_LEFT,
+    RED_ALLIANCE_RIGHT,
     NEUTRAL_ZONE_LEFT,
     NEUTRAL_ZONE_RIGHT,
-
     BLUE_BOTTOM_TRENCH,
     BLUE_TOP_TRENCH,
     RED_BOTTOM_TRENCH,
     RED_TOP_TRENCH,
-
     UNKNOWN
   }
 
   public static FieldZone getCurrentFieldZone(double x, double y) {
-
     if (isInBlueBottomTrench(x, y)) return FieldZone.BLUE_BOTTOM_TRENCH;
     if (isInBlueTopTrench(x, y)) return FieldZone.BLUE_TOP_TRENCH;
     if (isInRedBottomTrench(x, y)) return FieldZone.RED_BOTTOM_TRENCH;
     if (isInRedTopTrench(x, y)) return FieldZone.RED_TOP_TRENCH;
 
-    if (isInBlueAllianceZone(x)) return FieldZone.BLUE_ALLIANCE;
-    if (isInRedAllianceZone(x)) return FieldZone.RED_ALLIANCE;
+    if (isInBlueAllianceZone(x)) {
+      return (y < FIELD_WIDTH / 2.0) ? FieldZone.RED_ALLIANCE_LEFT : FieldZone.RED_ALLIANCE_RIGHT;
+    }
+    if (isInRedAllianceZone(y)) {
+      return (y < FIELD_WIDTH / 2.0) ? FieldZone.BLUE_ALLIANCE_LEFT : FieldZone.BLUE_ALLIANCE_RIGHT;
+    }
 
-    if (isInNeutralZone(x)) {
-      if (y < FIELD_WIDTH / 2.0) {
-        return FieldZone.NEUTRAL_ZONE_LEFT;
-      } else {
-        return FieldZone.NEUTRAL_ZONE_RIGHT;
-      }
+    if (isInNeutralZone(y)) {
+      return (y < FIELD_WIDTH / 2.0) ? FieldZone.NEUTRAL_ZONE_LEFT : FieldZone.NEUTRAL_ZONE_RIGHT;
     }
 
     return FieldZone.UNKNOWN;
   }
 
-  public static FieldZone getCurrentFieldZone(Pose2d pose) {
-    return getCurrentFieldZone(pose.getX(), pose.getY());
+  public static FieldZone getCurrentFieldZone(Supplier<Pose2d> pose) {
+    return getCurrentFieldZone(pose.get().getX(), pose.get().getY());
   }
 
-  // public static void logAllZones() {
-
-  //   Logger.recordOutput(
-  //       "Zones/Trenches/Blue Bottom",
-  //       new double[][] {
-  //         {TRENCH_X_MIN, TRENCH_Y_MIN},
-  //         {TRENCH_X_MAX, TRENCH_Y_MIN},
-  //         {TRENCH_X_MAX, TRENCH_Y_MAX},
-  //         {TRENCH_X_MIN, TRENCH_Y_MAX},
-  //         {TRENCH_X_MIN, TRENCH_Y_MIN}
-  //       });
-
-  //   Logger.recordOutput(
-  //       "Zones/Trenches/Blue Top",
-  //       new double[][] {
-  //         {TRENCH_X_MIN, FIELD_WIDTH - TRENCH_Y_MAX},
-  //         {TRENCH_X_MAX, FIELD_WIDTH - TRENCH_Y_MAX},
-  //         {TRENCH_X_MAX, FIELD_WIDTH - TRENCH_Y_MIN},
-  //         {TRENCH_X_MIN, FIELD_WIDTH - TRENCH_Y_MIN},
-  //         {TRENCH_X_MIN, FIELD_WIDTH - TRENCH_Y_MAX}
-  //       });
-
-  //   Logger.recordOutput(
-  //       "Zones/Trenches/Red Bottom",
-  //       new double[][] {
-  //         {FIELD_LENGTH - TRENCH_X_MAX, TRENCH_Y_MIN},
-  //         {FIELD_LENGTH - TRENCH_X_MIN, TRENCH_Y_MIN},
-  //         {FIELD_LENGTH - TRENCH_X_MIN, TRENCH_Y_MAX},
-  //         {FIELD_LENGTH - TRENCH_X_MAX, TRENCH_Y_MAX},
-  //         {FIELD_LENGTH - TRENCH_X_MAX, TRENCH_Y_MIN}
-  //       });
-
-  //   Logger.recordOutput(
-  //       "Zones/Trenches/Red Top",
-  //       new double[][] {
-  //         {FIELD_LENGTH - TRENCH_X_MAX, FIELD_WIDTH - TRENCH_Y_MAX},
-  //         {FIELD_LENGTH - TRENCH_X_MIN, FIELD_WIDTH - TRENCH_Y_MAX},
-  //         {FIELD_LENGTH - TRENCH_X_MIN, FIELD_WIDTH - TRENCH_Y_MIN},
-  //         {FIELD_LENGTH - TRENCH_X_MAX, FIELD_WIDTH - TRENCH_Y_MIN},
-  //         {FIELD_LENGTH - TRENCH_X_MAX, FIELD_WIDTH - TRENCH_Y_MAX}
-  //       });
-
-  //   Logger.recordOutput(
-  //       "Zones/Field/Blue Alliance",
-  //       new double[][] {
-  //         {0, 0},
-  //         {ALLIANCE_BLUE, 0},
-  //         {ALLIANCE_BLUE, FIELD_WIDTH},
-  //         {0, FIELD_WIDTH},
-  //         {0, 0}
-  //       });
-
-  //   Logger.recordOutput(
-  //       "Zones/Field/Red Alliance",
-  //       new double[][] {
-  //         {ALLIANCE_RED, 0},
-  //         {FIELD_LENGTH, 0},
-  //         {FIELD_LENGTH, FIELD_WIDTH},
-  //         {ALLIANCE_RED, FIELD_WIDTH},
-  //         {ALLIANCE_RED, 0}
-  //       });
-  // }
   private static void logRectangle(String key, double xMin, double xMax, double yMin, double yMax) {
-
     Logger.recordOutput(
         key,
         new Pose2d[] {
@@ -185,33 +120,27 @@ public class Zones {
   }
 
   public static void logAllZones() {
-
     logRectangle(
         "Zones/Trenches/Blue Bottom", TRENCH_X_MIN, TRENCH_X_MAX, TRENCH_Y_MIN, TRENCH_Y_MAX);
-
     logRectangle(
         "Zones/Trenches/Blue Top",
         TRENCH_X_MIN,
         TRENCH_X_MAX,
         FIELD_WIDTH - TRENCH_Y_MAX,
         FIELD_WIDTH - TRENCH_Y_MIN);
-
     logRectangle(
         "Zones/Trenches/Red Bottom",
         FIELD_LENGTH - TRENCH_X_MAX,
         FIELD_LENGTH - TRENCH_X_MIN,
         TRENCH_Y_MIN,
         TRENCH_Y_MAX);
-
     logRectangle(
         "Zones/Trenches/Red Top",
         FIELD_LENGTH - TRENCH_X_MAX,
         FIELD_LENGTH - TRENCH_X_MIN,
         FIELD_WIDTH - TRENCH_Y_MAX,
         FIELD_WIDTH - TRENCH_Y_MIN);
-
     logRectangle("Zones/Field/Blue Alliance", 0, ALLIANCE_BLUE, 0, FIELD_WIDTH);
-
     logRectangle("Zones/Field/Red Alliance", ALLIANCE_RED, FIELD_LENGTH, 0, FIELD_WIDTH);
   }
 }

@@ -84,6 +84,9 @@ public final class Constants {
 
     public static final Distance ALLIANCE_ZONE = Inches.of(156.06);
 
+    /** The Y-coordinate that splits the field into Left and Right zones. */
+    public static final Distance MIDLINE_Y = FIELD_WIDTH.div(2);
+
     public static final Distance FUNNEL_RADIUS = Inches.of(24);
     public static final Distance FUNNEL_HEIGHT = Inches.of(72 - 56.4);
 

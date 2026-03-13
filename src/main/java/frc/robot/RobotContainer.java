@@ -1,10 +1,4 @@
-// Copyright (c) 2021-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
-
+// [Existing Imports...]
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -15,10 +9,9 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -31,11 +24,11 @@ import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.Zones.FieldZone;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
-import frc.robot.commands.ZoneCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -75,12 +68,6 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
- */
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
@@ -99,6 +86,7 @@ public class RobotContainer {
   private final double hoodSetpoint = 0.0;
   private final double flywheelSetpoint = 50;
   private boolean hubLock = false;
+  private Trigger zoneTrigger;
 
   private Trigger desireHubLock;
 
@@ -109,15 +97,11 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+
   public RobotContainer() {
     gamestate = new GameState();
-
     switch (Constants.currentMode) {
       case REAL:
-        // Real robot, instantiate hardware IO implementations
-        // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
-        // a CANcoder
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -130,7 +114,6 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
                 new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE));
-        // new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -142,7 +125,6 @@ public class RobotContainer {
                     MotorIDConstants.INTAKE_ROLLER_RIGHT_ID),
                 new PivotIOTalonFX(
                     MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
-
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -161,31 +143,25 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
         interpTables = new InterpTables();
-
-        desireHubLock = new Trigger(() -> hubLock);
-
+        zoneTrigger =
+            new Trigger(
+                () -> {
+                  return !DriverStation.isTest();
+                });
         break;
 
       case SIM:
-        // Sim robot, instantiate physics sim IO implementations1
         simDrive =
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
-
         simIntake =
             IntakeSimulation.OverTheBumperIntake(
-                // Specify the type of game pieces that the intake can collect
                 SimConstants.GAMEPIECE,
-                // Specify the drivetrain to which this intake is attached
                 simDrive,
-                // Width of the intake
                 Meters.of(SimConstants.INTAKE_WIDTH),
-                // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
-                // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
-                // The intake can hold up to 50 Fuel
+                IntakeSimulation.IntakeSide.BACK,
                 SimConstants.HOPPER_CAPACITY);
         drive =
             new Drive(
@@ -207,16 +183,18 @@ public class RobotContainer {
                     simDrive::getSimulatedDriveTrainPose));
         turret = new Turret(new TurretIOSim());
         simShooter =
-            new ShootAtAngleSim(
-                simIntake, simDrive, turret, 6000, Units.degreesToRadians(45)); // TODO add hood sim
-        // climb = new Climb(new ClimbIOSim());
+            new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
         desireHubLock = new Trigger(() -> hubLock);
+        zoneTrigger =
+            new Trigger(
+                () -> {
+                  return !DriverStation.isTest();
+                });
 
         break;
 
       case REPLAY:
-        // Replayed robot, disable IO implementations
         drive =
             new Drive(
                 new GyroIO() {},
@@ -243,9 +221,9 @@ public class RobotContainer {
                     TurretConstants.ENCODER_13_TOOTH,
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
-        // climb = new Climb(new ClimbIO() {});
         interpTables = new InterpTables();
         desireHubLock = new Trigger(() -> hubLock);
+        zoneTrigger = new Trigger(() -> !DriverStation.isTest());
 
         break;
 
@@ -253,7 +231,6 @@ public class RobotContainer {
         throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
 
-    // Set up auto routines
     NamedCommands.registerCommand("intake", intake.runRollerAtVoltage(6.0));
     NamedCommands.registerCommand(
         "shooter",
@@ -270,7 +247,7 @@ public class RobotContainer {
         new TurretAngleAim(
                 () -> drive.getPose(),
                 turret,
-                FieldConstants.HUB_POSE_BLUE,
+                () -> FieldConstants.HUB_POSE_BLUE,
                 drive,
                 interpTables.timeOfFlightInterp)
             .withTimeout(2)
@@ -279,9 +256,7 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
     autoChooser2 = new AutoChooser();
-    // Set up SysId routines
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -300,19 +275,6 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId QR", turret.quasistatic(Direction.kReverse));
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
-
-    // Autos.populateChooser(
-    //     autoChooser2,
-    //     drive,
-    //     intake,
-    //     shooter,
-    //     indexer,
-    //     hood,
-    //     vision,
-    //     turret,
-    //     interpTables.shooterSpeedInterp,
-    //     interpTables.hoodAngleInterp);
-
     autoChooser2.addRoutine(
         "DepotLeftBlue",
         () ->
@@ -326,7 +288,6 @@ public class RobotContainer {
                 turret,
                 interpTables.shooterSpeedInterp,
                 interpTables.hoodAngleInterp));
-
     autoChooser2.addRoutine(
         "DepotCenterRed",
         () ->
@@ -367,52 +328,42 @@ public class RobotContainer {
                 interpTables.shooterSpeedInterp,
                 interpTables.hoodAngleInterp));
     SmartDashboard.putData("Choreo Autos", autoChooser2);
-
     Trigger autoTrigger = new Trigger(() -> DriverStation.isAutonomous());
     autoTrigger.whileTrue(autoChooser2.selectedCommandScheduler());
-    // Configure the button bindings
     configureButtonBindings();
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}. TODO set values for motors
-   */
   private void configureButtonBindings() {
-    // Default command, normal field-relative drive
+    // BACKGROUND ZONE LOGIC: Runs constantly when NOT in test mode
+
+    driverController
+        .x()
+        .whileTrue(
+            Commands.startEnd(
+                    () -> {
+                      FieldZone zone = Zones.getCurrentFieldZone(() -> drive.getPose());
+                      Logger.recordOutput("Zones/curret", zone.toString());
+                      if (zone == FieldZone.BLUE_BOTTOM_TRENCH
+                          || zone == FieldZone.BLUE_TOP_TRENCH
+                          || zone == FieldZone.RED_BOTTOM_TRENCH
+                          || zone == FieldZone.RED_TOP_TRENCH) {
+                        hood.setHoodPos(0.0);
+                      }
+                    },
+                    () -> {})
+                .alongWith(
+                    new TurretAngleAim(
+                        () -> drive.getPose(),
+                        turret,
+                        () -> getZoneTargetPose(),
+                        drive,
+                        interpTables.timeOfFlightInterp)));
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
-
-    driverController
-        .leftBumper()
-        .whileTrue(new ZoneCommands(() -> drive.getPose(), drive, hood))
-        .and(desireHubLock)
-        .whileTrue(
-            new TurretAngleAim(
-                () -> drive.getPose(),
-                turret,
-                FieldConstants.HUB_POSE_BLUE,
-                drive,
-                interpTables.timeOfFlightInterp));
-    driverController.x().onTrue(Commands.runOnce(() -> hubLock = !hubLock));
-    // Lock to 0 degrees when A button is held
-    driverController
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> Rotation2d.kZero));
-
-    // Switch to X pattern when X button is pressed
-    // driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
     driverController
         .b()
         .onTrue(
@@ -422,13 +373,6 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    // lifts climb first time y pressed, lifts robot second time y pressed
-
-    // driverController
-    //     .leftTrigger()
-    //     .whileTrue(intake.runIntakeSim().onlyIf(() -> Constants.currentMode !=
-    // Constants.Mode.SIM));
-    // runs intake in reverse
     driverController
         .leftTrigger()
         .whileTrue(
@@ -438,17 +382,15 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> -driverController.getRightX(),
                 0.3));
-
-    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    // intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
-
     operatorController
         .leftTrigger()
         .whileTrue(
             new TurretAngleAim(
                 () -> drive.getPose(),
                 turret,
-                FieldConstants.HUB_POSE_BLUE,
+                () -> FieldConstants.HUB_POSE_BLUE,
                 drive,
                 interpTables.timeOfFlightInterp));
     operatorController
@@ -469,7 +411,6 @@ public class RobotContainer {
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
-
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
@@ -490,18 +431,52 @@ public class RobotContainer {
         .whileTrue(indexer.runIndexer(5).onlyIf(() -> DriverStation.isTest()));
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
+  private Pose2d getZoneTargetPose() {
+    DriverStation.Alliance alliance =
+        DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    FieldZone zone = Zones.getCurrentFieldZone(() -> drive.getPose());
+    boolean isRed = (alliance == DriverStation.Alliance.Red);
+
+    // Own Alliance Zone -> Aim at Hub
+    if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
+        || (!isRed
+            && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))) {
+      return FieldConstants.HUB_POSE_BLUE; // TurretAngleAim handles the flip to Red Hub
+    }
+
+    if (zone == FieldZone.NEUTRAL_ZONE_LEFT
+        || zone == FieldZone.BLUE_ALLIANCE_LEFT
+        || zone == FieldZone.RED_ALLIANCE_LEFT) {
+      // Red Robot on the physical Left side needs to hit Red-Left, but FlippingUtil means
+      // we feed the "Blue-Right" pose to get "Red-Left" after rotation.
+      return isRed ? FieldConstants.PASSING_POSE_RIGHT_BLUE : FieldConstants.PASSING_POSE_LEFT_BLUE;
+    } else {
+      return isRed ? FieldConstants.PASSING_POSE_LEFT_BLUE : FieldConstants.PASSING_POSE_RIGHT_BLUE;
+    }
+  }
+
+  private InterpolatingTreeMap<Double, Double> getZoneInterpTable() {
+    DriverStation.Alliance alliance =
+        DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    FieldZone zone = Zones.getCurrentFieldZone(() -> drive.getPose());
+    boolean isRed = (alliance == DriverStation.Alliance.Red);
+
+    // If in own alliance zone, we are shooting at hub (use standard TOF table)
+    if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
+        || (!isRed
+            && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))) {
+      return interpTables.timeOfFlightInterp;
+    }
+    // If passing, you could return a separate passing table here if you had one.
+    return interpTables.emptyInterp;
+  }
+
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
 
   public void displaySimFieldToAdvantageScope() {
     if (Constants.currentMode != Constants.Mode.SIM) return;
-
     Logger.recordOutput("FieldSimulation/RobotPosition", simDrive.getSimulatedDriveTrainPose());
     Logger.recordOutput(
         "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
