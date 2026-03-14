@@ -9,7 +9,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,12 +23,13 @@ import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.Zones.FieldZone;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ZoneLogic;
+import frc.robot.subsystems.ZoneLogic.FieldZone;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -87,6 +87,7 @@ public class RobotContainer {
   private final double flywheelSetpoint = 50;
   private boolean hubLock = false;
   private Trigger zoneTrigger;
+  private final ZoneLogic zones;
 
   private Trigger desireHubLock;
 
@@ -148,6 +149,8 @@ public class RobotContainer {
                 () -> {
                   return !DriverStation.isTest();
                 });
+        zones = new ZoneLogic(drive);
+
         break;
 
       case SIM:
@@ -191,6 +194,7 @@ public class RobotContainer {
                 () -> {
                   return !DriverStation.isTest();
                 });
+        zones = new ZoneLogic(drive);
 
         break;
 
@@ -224,6 +228,7 @@ public class RobotContainer {
         interpTables = new InterpTables();
         desireHubLock = new Trigger(() -> hubLock);
         zoneTrigger = new Trigger(() -> !DriverStation.isTest());
+        zones = new ZoneLogic(drive);
 
         break;
 
@@ -339,23 +344,21 @@ public class RobotContainer {
     driverController
         .x()
         .whileTrue(
-            Commands.startEnd(
+            Commands.run(
                     () -> {
-                      FieldZone zone = Zones.getCurrentFieldZone(() -> drive.getPose());
-                      Logger.recordOutput("Zones/curret", zone.toString());
+                      FieldZone zone = zones.getCurrentFieldZone(() -> drive.getPose());
                       if (zone == FieldZone.BLUE_BOTTOM_TRENCH
                           || zone == FieldZone.BLUE_TOP_TRENCH
                           || zone == FieldZone.RED_BOTTOM_TRENCH
                           || zone == FieldZone.RED_TOP_TRENCH) {
                         hood.setHoodPos(0.0);
                       }
-                    },
-                    () -> {})
+                    })
                 .alongWith(
                     new TurretAngleAim(
                         () -> drive.getPose(),
                         turret,
-                        () -> getZoneTargetPose(),
+                        () -> zones.getZoneTargetPose(),
                         drive,
                         interpTables.timeOfFlightInterp)));
     drive.setDefaultCommand(
@@ -429,46 +432,6 @@ public class RobotContainer {
     driverController
         .leftBumper()
         .whileTrue(indexer.runIndexer(5).onlyIf(() -> DriverStation.isTest()));
-  }
-
-  private Pose2d getZoneTargetPose() {
-    DriverStation.Alliance alliance =
-        DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
-    FieldZone zone = Zones.getCurrentFieldZone(() -> drive.getPose());
-    boolean isRed = (alliance == DriverStation.Alliance.Red);
-
-    // Own Alliance Zone -> Aim at Hub
-    if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
-        || (!isRed
-            && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))) {
-      return FieldConstants.HUB_POSE_BLUE; // TurretAngleAim handles the flip to Red Hub
-    }
-
-    if (zone == FieldZone.NEUTRAL_ZONE_LEFT
-        || zone == FieldZone.BLUE_ALLIANCE_LEFT
-        || zone == FieldZone.RED_ALLIANCE_LEFT) {
-      // Red Robot on the physical Left side needs to hit Red-Left, but FlippingUtil means
-      // we feed the "Blue-Right" pose to get "Red-Left" after rotation.
-      return isRed ? FieldConstants.PASSING_POSE_RIGHT_BLUE : FieldConstants.PASSING_POSE_LEFT_BLUE;
-    } else {
-      return isRed ? FieldConstants.PASSING_POSE_LEFT_BLUE : FieldConstants.PASSING_POSE_RIGHT_BLUE;
-    }
-  }
-
-  private InterpolatingTreeMap<Double, Double> getZoneInterpTable() {
-    DriverStation.Alliance alliance =
-        DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
-    FieldZone zone = Zones.getCurrentFieldZone(() -> drive.getPose());
-    boolean isRed = (alliance == DriverStation.Alliance.Red);
-
-    // If in own alliance zone, we are shooting at hub (use standard TOF table)
-    if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
-        || (!isRed
-            && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))) {
-      return interpTables.timeOfFlightInterp;
-    }
-    // If passing, you could return a separate passing table here if you had one.
-    return interpTables.emptyInterp;
   }
 
   public Command getAutonomousCommand() {

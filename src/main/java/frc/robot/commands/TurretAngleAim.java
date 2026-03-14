@@ -87,5 +87,6 @@ public class TurretAngleAim extends Command {
     // Logging for debugging
     Logger.recordOutput("Turret/HeadingSetpoint0to360", headingSetpoint);
     Logger.recordOutput("Turret/TurretFieldPos", new Pose2d(turretFieldPos, fieldAngleToHub));
+    Logger.recordOutput("Turret/Targetpose", targetPos);
   }
 }
