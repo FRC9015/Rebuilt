@@ -34,7 +34,7 @@ public class ZoneLogic extends SubsystemBase {
     Logger.recordOutput("Zones/BLUE_ALLAINCE_TOP", ZoneConstants.BLUE_ALLIANCE_TOP);
     Logger.recordOutput("Zones/BLUE_ALLAINCE_BOTTOM", ZoneConstants.BLUE_ALLIANCE_BOTTOM);
     Logger.recordOutput("Zones/RED_ALLAINCE_TOP", ZoneConstants.RED_ALLIANCE_TOP);
-    Logger.recordOutput("Zones/RED_ALLAINCE_TOP", ZoneConstants.RED_ALLIANCE_BOTTOM);
+    Logger.recordOutput("Zones/RED_ALLAINCE_BOTTOM", ZoneConstants.RED_ALLIANCE_BOTTOM);
     Logger.recordOutput("Zones/NEUTRAL_ZONE_TOP", ZoneConstants.NEUTRAL_ZONE_TOP);
     Logger.recordOutput("Zones/NEUTRAL_ZONE_BOTTOM", ZoneConstants.NEUTRAL_ZONE_BOTTOM);
     Logger.recordOutput("Zones/BLUE_BOTTOM_TRENCH", ZoneConstants.BLUE_BOTTOM_TRENCH);
