@@ -347,10 +347,10 @@ public class RobotContainer {
             Commands.run(
                     () -> {
                       FieldZone zone = zones.getCurrentFieldZone(() -> drive.getPose());
-                      if (zone == FieldZone.BLUE_BOTTOM_TRENCH
-                          || zone == FieldZone.BLUE_TOP_TRENCH
-                          || zone == FieldZone.RED_BOTTOM_TRENCH
-                          || zone == FieldZone.RED_TOP_TRENCH) {
+                      if (zone == FieldZone.BLUE_RIGHT_TRENCH
+                          || zone == FieldZone.BLUE_LEFT_TRENCH
+                          || zone == FieldZone.RED_RIGHT_TRENCH
+                          || zone == FieldZone.RED_LEFT_TRENCH) {
                         hood.setHoodPos(0.0);
                       }
                     })

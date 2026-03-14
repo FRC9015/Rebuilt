@@ -14,16 +14,16 @@ public class ZoneLogic extends SubsystemBase {
   private Drive drive;
 
   public enum FieldZone {
-    BLUE_ALLIANCE_TOP,
-    BLUE_ALLIANCE_BOTTOM,
-    RED_ALLIANCE_TOP,
-    RED_ALLIANCE_BOTTOM,
-    NEUTRAL_ZONE_TOP,
-    NEUTRAL_ZONE_BOTTOM,
-    BLUE_BOTTOM_TRENCH,
-    BLUE_TOP_TRENCH,
-    RED_BOTTOM_TRENCH,
-    RED_TOP_TRENCH,
+    BLUE_ALLIANCE_LEFT,
+    BLUE_ALLIANCE_RIGHT,
+    RED_ALLIANCE_LEFT,
+    RED_ALLIANCE_RIGHT,
+    NEUTRAL_ZONE_LEFT,
+    NEUTRAL_ZONE_RIGHT,
+    BLUE_RIGHT_TRENCH,
+    BLUE_LEFT_TRENCH,
+    RED_RIGHT_TRENCH,
+    RED_LEFT_TRENCH,
     UNKNOWN
   }
 
@@ -31,49 +31,49 @@ public class ZoneLogic extends SubsystemBase {
     this.drive = drive;
 
     // LOGS ALL THE ZONES
-    Logger.recordOutput("Zones/BLUE_ALLIANCE_TOP", ZoneConstants.BLUE_ALLIANCE_TOP);
-    Logger.recordOutput("Zones/BLUE_ALLIANCE_BOTTOM", ZoneConstants.BLUE_ALLIANCE_BOTTOM);
-    Logger.recordOutput("Zones/RED_ALLIANCE_TOP", ZoneConstants.RED_ALLIANCE_TOP);
-    Logger.recordOutput("Zones/RED_ALLIANCE_BOTTOM", ZoneConstants.RED_ALLIANCE_BOTTOM);
-    Logger.recordOutput("Zones/NEUTRAL_ZONE_TOP", ZoneConstants.NEUTRAL_ZONE_TOP);
-    Logger.recordOutput("Zones/NEUTRAL_ZONE_BOTTOM", ZoneConstants.NEUTRAL_ZONE_BOTTOM);
-    Logger.recordOutput("Zones/BLUE_BOTTOM_TRENCH", ZoneConstants.BLUE_BOTTOM_TRENCH);
-    Logger.recordOutput("Zones/BLUE_TOP_TRENCH", ZoneConstants.BLUE_TOP_TRENCH);
-    Logger.recordOutput("Zones/RED_BOTTOM_TRENCH", ZoneConstants.RED_BOTTOM_TRENCH);
-    Logger.recordOutput("Zones/RED_TOP_TRENCH", ZoneConstants.RED_TOP_TRENCH);
+    Logger.recordOutput("Zones/BLUE_ALLIANCE_LEFT", ZoneConstants.BLUE_ALLIANCE_LEFT);
+    Logger.recordOutput("Zones/BLUE_ALLIANCE_RIGHT", ZoneConstants.BLUE_ALLIANCE_RIGHT);
+    Logger.recordOutput("Zones/RED_ALLIANCE_LEFT", ZoneConstants.RED_ALLIANCE_LEFT);
+    Logger.recordOutput("Zones/RED_ALLIANCE_RIGHT", ZoneConstants.RED_ALLIANCE_RIGHT);
+    Logger.recordOutput("Zones/NEUTRAL_ZONE_LEFT", ZoneConstants.NEUTRAL_ZONE_LEFT);
+    Logger.recordOutput("Zones/NEUTRAL_ZONE_RIGHT", ZoneConstants.NEUTRAL_ZONE_RIGHT);
+    Logger.recordOutput("Zones/BLUE_RIGHT_TRENCH", ZoneConstants.BLUE_RIGHT_TRENCH);
+    Logger.recordOutput("Zones/BLUE_LEFT_TRENCH", ZoneConstants.BLUE_LEFT_TRENCH);
+    Logger.recordOutput("Zones/RED_RIGHT_TRENCH", ZoneConstants.RED_RIGHT_TRENCH);
+    Logger.recordOutput("Zones/RED_LEFT_TRENCH", ZoneConstants.RED_LEFT_TRENCH);
   }
 
   public FieldZone getCurrentFieldZone(Supplier<Pose2d> pose) {
     Translation2d translationPose = pose.get().getTranslation();
-    if (ZoneConstants.BLUE_ALLIANCE_TOP.contains(translationPose)) {
-      return FieldZone.BLUE_ALLIANCE_TOP;
+    if (ZoneConstants.BLUE_ALLIANCE_LEFT.contains(translationPose)) {
+      return FieldZone.BLUE_ALLIANCE_LEFT;
     }
-    if (ZoneConstants.BLUE_ALLIANCE_BOTTOM.contains(translationPose)) {
-      return FieldZone.BLUE_ALLIANCE_BOTTOM;
+    if (ZoneConstants.BLUE_ALLIANCE_RIGHT.contains(translationPose)) {
+      return FieldZone.BLUE_ALLIANCE_RIGHT;
     }
-    if (ZoneConstants.RED_ALLIANCE_TOP.contains(translationPose)) {
-      return FieldZone.RED_ALLIANCE_TOP;
+    if (ZoneConstants.RED_ALLIANCE_LEFT.contains(translationPose)) {
+      return FieldZone.RED_ALLIANCE_LEFT;
     }
-    if (ZoneConstants.RED_ALLIANCE_BOTTOM.contains(translationPose)) {
-      return FieldZone.RED_ALLIANCE_BOTTOM;
+    if (ZoneConstants.RED_ALLIANCE_RIGHT.contains(translationPose)) {
+      return FieldZone.RED_ALLIANCE_RIGHT;
     }
-    if (ZoneConstants.NEUTRAL_ZONE_TOP.contains(translationPose)) {
-      return FieldZone.NEUTRAL_ZONE_TOP;
+    if (ZoneConstants.NEUTRAL_ZONE_LEFT.contains(translationPose)) {
+      return FieldZone.NEUTRAL_ZONE_LEFT;
     }
-    if (ZoneConstants.NEUTRAL_ZONE_BOTTOM.contains(translationPose)) {
-      return FieldZone.NEUTRAL_ZONE_BOTTOM;
+    if (ZoneConstants.NEUTRAL_ZONE_RIGHT.contains(translationPose)) {
+      return FieldZone.NEUTRAL_ZONE_RIGHT;
     }
-    if (ZoneConstants.BLUE_BOTTOM_TRENCH.contains(translationPose)) {
-      return FieldZone.BLUE_BOTTOM_TRENCH;
+    if (ZoneConstants.BLUE_RIGHT_TRENCH.contains(translationPose)) {
+      return FieldZone.BLUE_RIGHT_TRENCH;
     }
-    if (ZoneConstants.BLUE_TOP_TRENCH.contains(translationPose)) {
-      return FieldZone.BLUE_TOP_TRENCH;
+    if (ZoneConstants.BLUE_LEFT_TRENCH.contains(translationPose)) {
+      return FieldZone.BLUE_LEFT_TRENCH;
     }
-    if (ZoneConstants.RED_BOTTOM_TRENCH.contains(translationPose)) {
-      return FieldZone.RED_BOTTOM_TRENCH;
+    if (ZoneConstants.RED_RIGHT_TRENCH.contains(translationPose)) {
+      return FieldZone.RED_RIGHT_TRENCH;
     }
-    if (ZoneConstants.RED_TOP_TRENCH.contains(translationPose)) {
-      return FieldZone.RED_TOP_TRENCH;
+    if (ZoneConstants.RED_LEFT_TRENCH.contains(translationPose)) {
+      return FieldZone.RED_LEFT_TRENCH;
     }
     return FieldZone.UNKNOWN;
   }
@@ -85,20 +85,20 @@ public class ZoneLogic extends SubsystemBase {
     boolean isRed = (alliance == DriverStation.Alliance.Red);
 
     // Own Alliance Zone -> Aim at Hub
-    if ((isRed && (zone == FieldZone.RED_ALLIANCE_TOP || zone == FieldZone.RED_ALLIANCE_BOTTOM))
+    if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
         || (!isRed
-            && (zone == FieldZone.BLUE_ALLIANCE_TOP || zone == FieldZone.BLUE_ALLIANCE_BOTTOM))) {
+            && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))) {
       return FieldConstants.HUB_POSE_BLUE; // TurretAngleAim handles the flip to Red Hub
     }
 
-    if (zone == FieldZone.NEUTRAL_ZONE_TOP
-        || zone == FieldZone.BLUE_ALLIANCE_TOP
-        || zone == FieldZone.RED_ALLIANCE_TOP) {
+    if (zone == FieldZone.NEUTRAL_ZONE_LEFT
+        || zone == FieldZone.BLUE_ALLIANCE_LEFT
+        || zone == FieldZone.RED_ALLIANCE_LEFT) {
       // Red Robot on the physical TOP side needs to hit Red-TOP, but FlippingUtil means
       // we feed the "Blue-BOTTOM" pose to get "Red-TOP" after rotation.
-      return FieldConstants.PASSING_POSE_TOP_BLUE;
+      return FieldConstants.PASSING_POSE_LEFT_BLUE;
     } else {
-      return FieldConstants.PASSING_POSE_BOTTOM_BLUE;
+      return FieldConstants.PASSING_POSE_RIGHT_BLUE;
     }
   }
 
