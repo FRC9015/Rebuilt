@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2026 Littleton Robotics
+// CopyBOTTOM (c) 2021-2026 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
 // Use of this source code is governed by a BSD
@@ -62,9 +62,9 @@ public final class Constants {
   public static class MotorIDConstants {
     public static final int TURRET_MOTOR_ID = 60;
 
-    public static final int INTAKE_ROLLER_LEFT_ID = 51;
-    public static final int INTAKE_ROLLER_RIGHT_ID = 52;
-    public static final int INTAKE_PIVOT_LEFT_ID = 53;
+    public static final int INTAKE_ROLLER_TOP_ID = 51;
+    public static final int INTAKE_ROLLER_BOTTOM_ID = 52;
+    public static final int INTAKE_PIVOT_TOP_ID = 53;
     public static final int INTAKE_ENCODER_ID = 50;
     public static final int INDEXER1_MOTOR_ID = 5;
     public static final int INDEXER2_MOTOR_ID = 6;
@@ -100,33 +100,33 @@ public final class Constants {
         new Translation3d(
             Units.inchesToMeters(24), Units.inchesToMeters(21), Units.inchesToMeters(0.02));
 
-    public static final Pose2d PASSING_POSE_LEFT_BLUE =
+    public static final Pose2d PASSING_POSE_TOP_BLUE =
         new Pose2d(new Translation2d(4.127, 5.495), new Rotation2d());
-    public static final Pose2d PASSING_POSE_RIGHT_BLUE =
+    public static final Pose2d PASSING_POSE_BOTTOM_BLUE =
         new Pose2d(new Translation2d(4.127, 2.512), new Rotation2d());
-    public static final Pose2d PASSING_POSE_LEFT_RED =
+    public static final Pose2d PASSING_POSE_TOP_RED =
         new Pose2d(new Translation2d(12.536, 5.495), new Rotation2d());
-    public static final Pose2d PASSING_POSE_RIGHT_RED =
+    public static final Pose2d PASSING_POSE_BOTTOM_RED =
         new Pose2d(new Translation2d(12.536, 2.512), new Rotation2d());
   }
 
   public static class ZoneConstants {
-    public static final Rectangle2d RED_ALLIANCE_LEFT =
+    public static final Rectangle2d RED_ALLIANCE_TOP =
         new Rectangle2d(
             new Translation2d(FieldConstants.ALLIANCE_RED, 0.0),
             new Translation2d(FieldConstants.FIELD_LENGTH, FieldConstants.FIELD_WIDTH / 2.0));
 
-    public static final Rectangle2d RED_ALLIANCE_RIGHT =
+    public static final Rectangle2d RED_ALLIANCE_BOTTOM =
         new Rectangle2d(
             new Translation2d(FieldConstants.ALLIANCE_RED, FieldConstants.FIELD_WIDTH / 2.0),
             new Translation2d(FieldConstants.FIELD_LENGTH, FieldConstants.FIELD_WIDTH));
 
-    public static final Rectangle2d BLUE_ALLIANCE_LEFT =
+    public static final Rectangle2d BLUE_ALLIANCE_TOP =
         new Rectangle2d(
             new Translation2d(0.0, 0.0),
             new Translation2d(FieldConstants.ALLIANCE_BLUE, FieldConstants.FIELD_WIDTH / 2.0));
 
-    public static final Rectangle2d BLUE_ALLIANCE_RIGHT =
+    public static final Rectangle2d BLUE_ALLIANCE_BOTTOM =
         new Rectangle2d(
             new Translation2d(0.0, FieldConstants.FIELD_WIDTH / 2.0),
             new Translation2d(FieldConstants.ALLIANCE_BLUE, FieldConstants.FIELD_WIDTH));
@@ -163,14 +163,14 @@ public final class Constants {
                 FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MIN,
                 FieldConstants.FIELD_WIDTH - FieldConstants.TRENCH_Y_MIN));
 
-    public static final Rectangle2d NEUTRAL_ZONE_LEFT =
+    public static final Rectangle2d NEUTRAL_ZONE_TOP =
         new Rectangle2d(
             new Translation2d(FieldConstants.TRENCH_X_MAX, 0.0),
             new Translation2d(
                 FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
                 FieldConstants.FIELD_WIDTH / 2.0));
 
-    public static final Rectangle2d NEUTRAL_ZONE_RIGHT =
+    public static final Rectangle2d NEUTRAL_ZONE_BOTTOM =
         new Rectangle2d(
             new Translation2d(FieldConstants.TRENCH_X_MAX, FieldConstants.FIELD_WIDTH / 2.0),
             new Translation2d(
@@ -241,14 +241,14 @@ public final class Constants {
             .withFeedbackRemoteSensorID(50)
             .withRotorToSensorRatio(3 / 10);
 
-    private static final MotorOutputConfigs rollerOutputLeftConfigs =
+    private static final MotorOutputConfigs rollerOutputTOPConfigs =
         new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
 
-    public static final TalonFXConfiguration rollerConfigLeft =
+    public static final TalonFXConfiguration rollerConfigTOP =
         new TalonFXConfiguration()
-            .withMotorOutput(rollerOutputLeftConfigs)
+            .withMotorOutput(rollerOutputTOPConfigs)
             .withSlot0(ROLLER_SLOT0_CONFIGS)
             .withMotionMagic(ROLLER_MAGIC_CONFIGS)
             .withCurrentLimits(
@@ -256,14 +256,14 @@ public final class Constants {
                     .withStatorCurrentLimit(60.0)
                     .withStatorCurrentLimitEnable(true));
 
-    private static final MotorOutputConfigs rollerOutputRightConfigs =
+    private static final MotorOutputConfigs rollerOutputBOTTOMConfigs =
         new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
             .withNeutralMode(NeutralModeValue.Brake);
 
-    public static final TalonFXConfiguration rollerConfigRight =
+    public static final TalonFXConfiguration rollerConfigBOTTOM =
         new TalonFXConfiguration()
-            .withMotorOutput(rollerOutputRightConfigs)
+            .withMotorOutput(rollerOutputBOTTOMConfigs)
             .withSlot0(ROLLER_SLOT0_CONFIGS)
             .withMotionMagic(ROLLER_MAGIC_CONFIGS)
             .withCurrentLimits(
@@ -271,16 +271,16 @@ public final class Constants {
                     .withStatorCurrentLimit(60.0)
                     .withStatorCurrentLimitEnable(true));
 
-    private static final MotorOutputConfigs pivotOutputLeftConfigs =
+    private static final MotorOutputConfigs pivotOutputTOPConfigs =
         new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
-    public static final TalonFXConfiguration pivotConfigLeft =
+    public static final TalonFXConfiguration pivotConfigTOP =
         new TalonFXConfiguration()
             .withSlot0(PIVOT_SLOT0_CONFIGS)
             .withFeedback(PIVOT_FEEDBACK_CONFIGS)
             .withMotionMagic(PIVOT_MAGIC_CONFIGS)
-            .withMotorOutput(pivotOutputLeftConfigs)
+            .withMotorOutput(pivotOutputTOPConfigs)
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(60.0)
@@ -308,8 +308,8 @@ public final class Constants {
   public static class ShooterConstants {
     //  Following naming scheme for subsystem motor and sensor ids
     public static final int HOOD_ENCODER_ID = 55;
-    public static final int FLY_WHEEL_LEFT_ID = 56;
-    public static final int FLY_WHEEL_RIGHT_ID = 57;
+    public static final int FLY_WHEEL_TOP_ID = 56;
+    public static final int FLY_WHEEL_BOTTOM_ID = 57;
     public static final int HOOD_ID = 58;
     public static final int KICKER_ID = 59;
     public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value

@@ -14,12 +14,12 @@ public class ZoneLogic extends SubsystemBase {
   private Drive drive;
 
   public enum FieldZone {
-    BLUE_ALLIANCE_LEFT,
-    BLUE_ALLIANCE_RIGHT,
-    RED_ALLIANCE_LEFT,
-    RED_ALLIANCE_RIGHT,
-    NEUTRAL_ZONE_LEFT,
-    NEUTRAL_ZONE_RIGHT,
+    BLUE_ALLIANCE_TOP,
+    BLUE_ALLIANCE_BOTTOM,
+    RED_ALLIANCE_TOP,
+    RED_ALLIANCE_BOTTOM,
+    NEUTRAL_ZONE_TOP,
+    NEUTRAL_ZONE_BOTTOM,
     BLUE_BOTTOM_TRENCH,
     BLUE_TOP_TRENCH,
     RED_BOTTOM_TRENCH,
@@ -31,12 +31,12 @@ public class ZoneLogic extends SubsystemBase {
     this.drive = drive;
 
     // LOGS ALL THE ZONES
-    Logger.recordOutput("Zones/BLUE_ALLAINCE_LEFT", ZoneConstants.BLUE_ALLIANCE_LEFT);
-    Logger.recordOutput("Zones/BLUE_ALLAINCE_RIGHT", ZoneConstants.BLUE_ALLIANCE_RIGHT);
-    Logger.recordOutput("Zones/RED_ALLAINCE_LEFT", ZoneConstants.RED_ALLIANCE_LEFT);
-    Logger.recordOutput("Zones/RED_ALLAINCE_LEFT", ZoneConstants.RED_ALLIANCE_RIGHT);
-    Logger.recordOutput("Zones/NEUTRAL_ZONE_LEFT", ZoneConstants.NEUTRAL_ZONE_LEFT);
-    Logger.recordOutput("Zones/NEUTRAL_ZONE_RIGHT", ZoneConstants.NEUTRAL_ZONE_RIGHT);
+    Logger.recordOutput("Zones/BLUE_ALLAINCE_TOP", ZoneConstants.BLUE_ALLIANCE_TOP);
+    Logger.recordOutput("Zones/BLUE_ALLAINCE_BOTTOM", ZoneConstants.BLUE_ALLIANCE_BOTTOM);
+    Logger.recordOutput("Zones/RED_ALLAINCE_TOP", ZoneConstants.RED_ALLIANCE_TOP);
+    Logger.recordOutput("Zones/RED_ALLAINCE_TOP", ZoneConstants.RED_ALLIANCE_BOTTOM);
+    Logger.recordOutput("Zones/NEUTRAL_ZONE_TOP", ZoneConstants.NEUTRAL_ZONE_TOP);
+    Logger.recordOutput("Zones/NEUTRAL_ZONE_BOTTOM", ZoneConstants.NEUTRAL_ZONE_BOTTOM);
     Logger.recordOutput("Zones/BLUE_BOTTOM_TRENCH", ZoneConstants.BLUE_BOTTOM_TRENCH);
     Logger.recordOutput("Zones/BLUE_TOP_TRENCH", ZoneConstants.BLUE_TOP_TRENCH);
     Logger.recordOutput("Zones/RED_BOTTOM_TRENCH", ZoneConstants.RED_BOTTOM_TRENCH);
@@ -45,23 +45,23 @@ public class ZoneLogic extends SubsystemBase {
 
   public FieldZone getCurrentFieldZone(Supplier<Pose2d> pose) {
     Translation2d translationPose = pose.get().getTranslation();
-    if (ZoneConstants.BLUE_ALLIANCE_LEFT.contains(translationPose)) {
-      return FieldZone.BLUE_ALLIANCE_LEFT;
+    if (ZoneConstants.BLUE_ALLIANCE_TOP.contains(translationPose)) {
+      return FieldZone.BLUE_ALLIANCE_TOP;
     }
-    if (ZoneConstants.BLUE_ALLIANCE_RIGHT.contains(translationPose)) {
-      return FieldZone.BLUE_ALLIANCE_RIGHT;
+    if (ZoneConstants.BLUE_ALLIANCE_BOTTOM.contains(translationPose)) {
+      return FieldZone.BLUE_ALLIANCE_BOTTOM;
     }
-    if (ZoneConstants.RED_ALLIANCE_LEFT.contains(translationPose)) {
-      return FieldZone.RED_ALLIANCE_LEFT;
+    if (ZoneConstants.RED_ALLIANCE_TOP.contains(translationPose)) {
+      return FieldZone.RED_ALLIANCE_TOP;
     }
-    if (ZoneConstants.RED_ALLIANCE_RIGHT.contains(translationPose)) {
-      return FieldZone.RED_ALLIANCE_RIGHT;
+    if (ZoneConstants.RED_ALLIANCE_BOTTOM.contains(translationPose)) {
+      return FieldZone.RED_ALLIANCE_BOTTOM;
     }
-    if (ZoneConstants.NEUTRAL_ZONE_LEFT.contains(translationPose)) {
-      return FieldZone.NEUTRAL_ZONE_LEFT;
+    if (ZoneConstants.NEUTRAL_ZONE_TOP.contains(translationPose)) {
+      return FieldZone.NEUTRAL_ZONE_TOP;
     }
-    if (ZoneConstants.NEUTRAL_ZONE_RIGHT.contains(translationPose)) {
-      return FieldZone.NEUTRAL_ZONE_RIGHT;
+    if (ZoneConstants.NEUTRAL_ZONE_BOTTOM.contains(translationPose)) {
+      return FieldZone.NEUTRAL_ZONE_BOTTOM;
     }
     if (ZoneConstants.BLUE_BOTTOM_TRENCH.contains(translationPose)) {
       return FieldZone.BLUE_BOTTOM_TRENCH;
@@ -85,20 +85,20 @@ public class ZoneLogic extends SubsystemBase {
     boolean isRed = (alliance == DriverStation.Alliance.Red);
 
     // Own Alliance Zone -> Aim at Hub
-    if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
+    if ((isRed && (zone == FieldZone.RED_ALLIANCE_TOP || zone == FieldZone.RED_ALLIANCE_BOTTOM))
         || (!isRed
-            && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))) {
+            && (zone == FieldZone.BLUE_ALLIANCE_TOP || zone == FieldZone.BLUE_ALLIANCE_BOTTOM))) {
       return FieldConstants.HUB_POSE_BLUE; // TurretAngleAim handles the flip to Red Hub
     }
 
-    if (zone == FieldZone.NEUTRAL_ZONE_LEFT
-        || zone == FieldZone.BLUE_ALLIANCE_LEFT
-        || zone == FieldZone.RED_ALLIANCE_LEFT) {
-      // Red Robot on the physical Left side needs to hit Red-Left, but FlippingUtil means
-      // we feed the "Blue-Right" pose to get "Red-Left" after rotation.
-      return FieldConstants.PASSING_POSE_LEFT_BLUE;
+    if (zone == FieldZone.NEUTRAL_ZONE_TOP
+        || zone == FieldZone.BLUE_ALLIANCE_TOP
+        || zone == FieldZone.RED_ALLIANCE_TOP) {
+      // Red Robot on the physical TOP side needs to hit Red-TOP, but FlippingUtil means
+      // we feed the "Blue-BOTTOM" pose to get "Red-TOP" after rotation.
+      return FieldConstants.PASSING_POSE_TOP_BLUE;
     } else {
-      return FieldConstants.PASSING_POSE_RIGHT_BLUE;
+      return FieldConstants.PASSING_POSE_BOTTOM_BLUE;
     }
   }
 
