@@ -88,8 +88,6 @@ public final class Constants {
     private static final double TRENCH_Y_MIN = 0;
     private static final double TRENCH_Y_MAX = Units.inchesToMeters(49.86);
 
-    public static final double TRENCH_WIDTH = Units.inchesToMeters(49.86); // y width of the trench
-
     public static final Pose2d HUB_POSE_BLUE =
         new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), new Rotation2d());
     public static final Pose2d HUB_POSE_RED = FlippingUtil.flipFieldPose(HUB_POSE_BLUE);
