@@ -26,6 +26,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -34,8 +35,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.Constants.FieldConstants;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -69,35 +70,23 @@ public final class Constants {
     public static final int INDEXER2_MOTOR_ID = 6;
   }
 
-  public static class RobotDimensionConstants {
-    public static final Distance BUMPER_THICKNESS = Inches.of(5.9375); // frame to edge of bumper
-    public static final Distance FRAME_SIZE_Y = Inches.of(30.5); // left to right (y-axis)
-    public static final Distance FRAME_SIZE_X = Inches.of(23.5); // front to back (x-axis)
-
-    public static final Distance FULL_WIDTH = FRAME_SIZE_Y.plus(BUMPER_THICKNESS.times(2));
-    public static final Distance FULL_LENGTH = FRAME_SIZE_X.plus(BUMPER_THICKNESS.times(2));
-  }
-
   public static class FieldConstants {
-    public static final Distance FIELD_LENGTH = Inches.of(650.12);
-    public static final Distance FIELD_WIDTH = Inches.of(316.64);
+    public static final double FIELD_LENGTH = Units.inchesToMeters(650.12);
+    public static final double FIELD_WIDTH = Units.inchesToMeters(316.64);
 
-    public static final Distance ALLIANCE_ZONE = Inches.of(156.06);
+    public static final double ALLIANCE_BLUE = Units.inchesToMeters(156.06);
+    public static final double ALLIANCE_RED = FIELD_LENGTH - ALLIANCE_BLUE;
 
-    public static final Distance FUNNEL_RADIUS = Inches.of(24);
-    public static final Distance FUNNEL_HEIGHT = Inches.of(72 - 56.4);
+    public static final double TRENCH_BUMP_X =
+        Units.inchesToMeters(181.56); // x position of the center of the trench and bump
+    public static final double TRENCH_BUMP_LENGTH =
+        Units.inchesToMeters(47); // x length of the trench and bump
+    public static final double TRENCH_X_MIN = TRENCH_BUMP_X - FieldConstants.TRENCH_BUMP_LENGTH;
 
-    public static final Distance TRENCH_BUMP_X =
-        Inches.of(181.56); // x position of the center of the trench and bump
-    public static final Distance TRENCH_WIDTH = Inches.of(49.86); // y width of the trench
-    public static final Distance TRENCH_BUMP_LENGTH =
-        Inches.of(47); // x length of the trench and bump
-    public static final Distance TRENCH_BAR_WIDTH = Inches.of(4); // x width of the trench bar
-    public static final Distance TRENCH_BLOCK_WIDTH =
-        Inches.of(12); // y width of block separating bump and trench
-    public static final Distance BUMP_WIDTH = Inches.of(73); // y width of bump
+    public static final double TRENCH_X_MAX = TRENCH_BUMP_X + FieldConstants.TRENCH_BUMP_LENGTH;
 
-    public static final Distance TRENCH_CENTER = TRENCH_WIDTH.div(2);
+    private static final double TRENCH_Y_MIN = 0;
+    private static final double TRENCH_Y_MAX = Units.inchesToMeters(49.86);
 
     public static final Pose2d HUB_POSE_BLUE =
         new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.845), new Rotation2d());
@@ -120,7 +109,71 @@ public final class Constants {
   }
 
   public static class ZoneConstants {
-    public static final Distance EXTRA_DUCK_DISTANCE = Meters.of(0.5);
+    public static final Rectangle2d RED_ALLIANCE_LEFT =
+        new Rectangle2d(
+            new Translation2d(FieldConstants.ALLIANCE_RED, 0.0),
+            new Translation2d(FieldConstants.FIELD_LENGTH, FieldConstants.FIELD_WIDTH / 2.0));
+
+    public static final Rectangle2d RED_ALLIANCE_RIGHT =
+        new Rectangle2d(
+            new Translation2d(FieldConstants.ALLIANCE_RED, FieldConstants.FIELD_WIDTH / 2.0),
+            new Translation2d(FieldConstants.FIELD_LENGTH, FieldConstants.FIELD_WIDTH));
+
+    public static final Rectangle2d BLUE_ALLIANCE_LEFT =
+        new Rectangle2d(
+            new Translation2d(0.0, 0.0),
+            new Translation2d(FieldConstants.ALLIANCE_BLUE, FieldConstants.FIELD_WIDTH / 2.0));
+
+    public static final Rectangle2d BLUE_ALLIANCE_RIGHT =
+        new Rectangle2d(
+            new Translation2d(0.0, FieldConstants.FIELD_WIDTH / 2.0),
+            new Translation2d(FieldConstants.ALLIANCE_BLUE, FieldConstants.FIELD_WIDTH));
+
+    public static final Rectangle2d BLUE_RIGHT_TRENCH =
+        new Rectangle2d(
+            new Translation2d(FieldConstants.TRENCH_X_MIN, FieldConstants.TRENCH_Y_MIN),
+            new Translation2d(FieldConstants.TRENCH_X_MAX, FieldConstants.TRENCH_Y_MAX));
+
+    public static final Rectangle2d BLUE_LEFT_TRENCH =
+        new Rectangle2d(
+            new Translation2d(
+                FieldConstants.TRENCH_X_MIN,
+                FieldConstants.FIELD_WIDTH - FieldConstants.TRENCH_Y_MAX),
+            new Translation2d(
+                FieldConstants.TRENCH_X_MAX,
+                FieldConstants.FIELD_WIDTH - FieldConstants.TRENCH_Y_MIN));
+
+    public static final Rectangle2d RED_RIGHT_TRENCH =
+        new Rectangle2d(
+            new Translation2d(
+                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
+                FieldConstants.TRENCH_Y_MIN),
+            new Translation2d(
+                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MIN,
+                FieldConstants.TRENCH_Y_MAX));
+
+    public static final Rectangle2d RED_LEFT_TRENCH =
+        new Rectangle2d(
+            new Translation2d(
+                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
+                FieldConstants.FIELD_WIDTH - FieldConstants.TRENCH_Y_MAX),
+            new Translation2d(
+                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MIN,
+                FieldConstants.FIELD_WIDTH - FieldConstants.TRENCH_Y_MIN));
+
+    public static final Rectangle2d NEUTRAL_ZONE_LEFT =
+        new Rectangle2d(
+            new Translation2d(FieldConstants.TRENCH_X_MAX, 0.0),
+            new Translation2d(
+                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
+                FieldConstants.FIELD_WIDTH / 2.0));
+
+    public static final Rectangle2d NEUTRAL_ZONE_RIGHT =
+        new Rectangle2d(
+            new Translation2d(FieldConstants.TRENCH_X_MAX, FieldConstants.FIELD_WIDTH / 2.0),
+            new Translation2d(
+                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
+                FieldConstants.FIELD_WIDTH));
   }
 
   public static class VisionConstants {
