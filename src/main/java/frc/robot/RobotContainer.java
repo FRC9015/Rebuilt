@@ -236,7 +236,6 @@ public class RobotContainer {
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
 
-
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
@@ -260,7 +259,6 @@ public class RobotContainer {
         new TurretAngleAim(
                 () -> drive.getPose(),
                 turret,
-
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive,
                 interpTables.timeOfFlightInterp)
@@ -440,7 +438,7 @@ public class RobotContainer {
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
-    
+
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
