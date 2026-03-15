@@ -130,7 +130,9 @@ public class RobotContainer {
                     MotorIDConstants.INTAKE_ROLLER_LEFT_ID,
                     MotorIDConstants.INTAKE_ROLLER_RIGHT_ID),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
+                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
+                    MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(

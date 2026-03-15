@@ -8,9 +8,12 @@ public interface PivotIO {
   /** Class representing the inputs for the intake pivot. */
   @AutoLog
   public static class PivotIOInputs {
-    public double pivotLeftApppliedVolts = 0.0;
+    public double pivotLeftAppliedVolts = 0.0;
+    public double pivotRightAppliedVolts = 0.0;
     public double pivotLeftCurrentAmps = 0.0;
+    public double pivotRightCurrentAmps = 0.0;
     public double pivotLeftCurrentSpeed = 0.0;
+    public double pivotRightCurrentSpeed = 0.0;
     public double pivotPosition = 0.0;
   }
 

@@ -64,7 +64,7 @@ public class PivotIOSparkFlex implements PivotIO {
 
   @Override
   public void updateInputs(PivotIOInputs inputs) {
-    inputs.pivotLeftApppliedVolts = pivotMotor.getAppliedOutput() * pivotMotor.getBusVoltage();
+    inputs.pivotLeftAppliedVolts = pivotMotor.getAppliedOutput() * pivotMotor.getBusVoltage();
     inputs.pivotLeftCurrentAmps = pivotMotor.getOutputCurrent();
     inputs.pivotLeftCurrentSpeed = pivotLeftEncoder.getVelocity();
     inputs.pivotPosition = pivotLeftEncoder.getPosition();
