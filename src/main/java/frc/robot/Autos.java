@@ -1,6 +1,7 @@
 package frc.robot;
 
 import choreo.Choreo;
+import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
