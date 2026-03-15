@@ -232,6 +232,8 @@ public class RobotContainer {
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
         interpTables = new InterpTables();
+
+        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
 
 
