@@ -95,8 +95,7 @@ public class RobotContainer {
   private IntakeSimulation simIntake;
   private ShootAtAngleSim simShooter;
   private final InterpTables interpTables;
-  private final double hoodSetpoint = 0.0;
-  private final double flywheelSetpoint = 50;
+
 
   private final AutoChooser autoChooser2;
   // Controller
