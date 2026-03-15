@@ -458,7 +458,7 @@ public class RobotContainer {
         .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(indexer.runIndexer(5 / 12 * 50).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(indexer.runIndexer(50).onlyIf(() -> DriverStation.isTest()));
   }
 
   /**
