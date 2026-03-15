@@ -130,7 +130,9 @@ public class RobotContainer {
                     MotorIDConstants.INTAKE_ROLLER_LEFT_ID,
                     MotorIDConstants.INTAKE_ROLLER_RIGHT_ID),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
+                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
+                    MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -236,7 +238,6 @@ public class RobotContainer {
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
 
-
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
@@ -260,7 +261,6 @@ public class RobotContainer {
         new TurretAngleAim(
                 () -> drive.getPose(),
                 turret,
-
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive,
                 interpTables.timeOfFlightInterp)
@@ -440,7 +440,7 @@ public class RobotContainer {
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
-    
+
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));

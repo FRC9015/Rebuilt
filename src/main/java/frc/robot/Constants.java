@@ -65,6 +65,7 @@ public final class Constants {
     public static final int INTAKE_ROLLER_LEFT_ID = 51;
     public static final int INTAKE_ROLLER_RIGHT_ID = 52;
     public static final int INTAKE_PIVOT_LEFT_ID = 53;
+    public static final int INTAKE_PIVOT_RIGHT_ID = 54;
     public static final int INTAKE_ENCODER_ID = 50;
     public static final int INDEXER1_MOTOR_ID = 5;
     public static final int INDEXER2_MOTOR_ID = 6;
@@ -273,12 +274,29 @@ public final class Constants {
         new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
+
+    public static final MotorOutputConfigs pivotOutputRightConfigs =
+        new MotorOutputConfigs()
+            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Coast);
+
     public static final TalonFXConfiguration pivotConfigLeft =
         new TalonFXConfiguration()
             .withSlot0(PIVOT_SLOT0_CONFIGS)
             .withFeedback(PIVOT_FEEDBACK_CONFIGS)
             .withMotionMagic(PIVOT_MAGIC_CONFIGS)
             .withMotorOutput(pivotOutputLeftConfigs)
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(60.0)
+                    .withStatorCurrentLimitEnable(true));
+
+    public static final TalonFXConfiguration pivotConfigRight =
+        new TalonFXConfiguration()
+            .withSlot0(PIVOT_SLOT0_CONFIGS)
+            .withFeedback(PIVOT_FEEDBACK_CONFIGS)
+            .withMotionMagic(PIVOT_MAGIC_CONFIGS)
+            .withMotorOutput(pivotOutputRightConfigs)
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(60.0)
