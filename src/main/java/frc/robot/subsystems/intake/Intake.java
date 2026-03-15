@@ -16,8 +16,6 @@ public class Intake extends SubsystemBase {
     this.pivot = pivot;
   }
 
-
-
   public void setRollerSpeed(double speedValue) {
     roller.setRollerSpeed(speedValue);
   }
