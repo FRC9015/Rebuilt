@@ -1,5 +1,5 @@
 {
- "name":"CenterRush_Left",
+ "name":"AutonomousPaths",
  "version":2,
  "type":"Swerve",
  "variables":{
@@ -76,9 +76,9 @@
  },
  "generationFeatures":[],
  "codegen":{
-  "root":"home/arya/Documents/QE/Rebuilt/src/main/java/frc/robot",
-  "genVars":true,
-  "genTrajData":true,
-  "useChoreoLib":true
+  "root":"../../java/frc/robot",
+  "genVars":false,
+  "genTrajData":false,
+  "useChoreoLib":false
  }
 }

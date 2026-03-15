@@ -2,6 +2,7 @@ package frc.robot;
 
 import choreo.Choreo;
 import choreo.auto.AutoChooser;
+import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import choreo.trajectory.Trajectory;
@@ -20,50 +21,32 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.PhoenixUtil;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Autos {
-    private Drive drive;
-    private Intake intake;
-    private Shooter shooter;
-    private Indexer indexer;
-    private Hood hood;
-    private Vision vision;
-    private Turret turret;
-    private InterpolatingTreeMap<Double, Double> shooterInterp;
-    private InterpolatingTreeMap<Double, Double> hoodInterp;
   public enum AutoChoices {
-    TEST_PATH(Choreo.loadTrajectory("TestPath").get()),
-    CENTER_RUSH_LEFT(Choreo.loadTrajectory("CenterRush_Left").get()),
-    CENTER_RUSH_RIGHT(Choreo.loadTrajectory("CenterRush_Right").get()),
-    DEPOT_LEFT(Choreo.loadTrajectory("Depot_Left").get()),
-    DEPOT_CENTER(Choreo.loadTrajectory("Depot_Center").get()),
-    HP_CENTER(Choreo.loadTrajectory("HP_Right").get());
+    TEST,
+    CENTER_RUSH_LEFT,
+    CENTER_RUSH_RIGHT,
+    DEPOT_LEFT,
+    DEPOT_CENTER,
+    HP_RIGHT;
 
-    private final Trajectory<?> traj;
+    private static final Map<AutoChoices, Trajectory<?>> trajMap;
 
-    private AutoChoices(Trajectory<?> traj) {
-      this.traj = traj;
+    static {
+      trajMap = new HashMap<AutoChoices, Trajectory<?>>();
+      for (AutoChoices auto : EnumSet.allOf(AutoChoices.class)) {
+        trajMap.put(auto, Choreo.loadTrajectory(auto.name()).get());
+      }
     }
-
-    public Trajectory<?> getTrajectory() {
-      return traj;
-    }
-  }
-  public Autos(Drive drive, Intake intake, Shooter shooter, Indexer indexer, Hood hood, Vision vision, Turret turret, InterpolatingTreeMap<Double, Double> shooterInterp,
-        InterpolatingTreeMap<Double, Double> hoodInterp){
-        this.drive = drive;
-        this.intake = intake;
-        this.shooter = shooter;
-        this.indexer = indexer;
-        this.hood = hood;
-        this.vision = vision;
-        this.turret = turret;
-        this.shooterInterp = shooterInterp;
-        this.hoodInterp = hoodInterp;
   }
 
   public class AutonomousRoutines {
-    public static final AutoRoutine testAuto(
+    public static final AutoRoutine TestAuto(
+        AutoFactory autoFactory,
         Drive drive,
         Intake intake,
         Shooter shooter,
@@ -73,8 +56,8 @@ public class Autos {
         Turret turret,
         InterpolatingTreeMap<Double, Double> shooterInterp,
         InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("TEST_AUTO");
-      AutoTrajectory testPath = routine.trajectory(AutoChoices.TEST_PATH.getTrajectory());
+      AutoRoutine routine = autoFactory.newRoutine("TEST_AUTO");
+      AutoTrajectory testPath = routine.trajectory(AutoChoices.trajMap.get(AutoChoices.TEST));
 
       routine
           .active()
@@ -83,20 +66,19 @@ public class Autos {
                   testPath.resetOdometry(),
                   testPath.cmd(),
                   Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_BLUE,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
+                  new ShooterAutoAimSequence(
+                      shooter,
+                      hood,
+                      shooterInterp,
+                      hoodInterp,
+                      () -> drive.getPose(),
+                      FieldConstants.HUB_POSE_BLUE,
+                      drive)));
       return routine;
     }
 
-    public static final AutoRoutine centerrushLeftBlue(
+    public static final AutoRoutine CenterRushLeft(
+        AutoFactory autoFactory,
         Drive drive,
         Intake intake,
         Shooter shooter,
@@ -106,8 +88,9 @@ public class Autos {
         Turret turret,
         InterpolatingTreeMap<Double, Double> shooterInterp,
         InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("CENTER_RUSH_LEFT");
-      AutoTrajectory centerRush = routine.trajectory(AutoChoices.CENTER_RUSH_LEFT.getTrajectory());
+      AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_LEFT");
+      AutoTrajectory centerRush =
+          routine.trajectory(AutoChoices.trajMap.get(AutoChoices.CENTER_RUSH_LEFT));
       routine
           .active()
           .onTrue(
@@ -115,21 +98,20 @@ public class Autos {
                   centerRush.resetOdometry(),
                   centerRush.cmd(),
                   Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_BLUE,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
+                  new ShooterAutoAimSequence(
+                      shooter,
+                      hood,
+                      shooterInterp,
+                      hoodInterp,
+                      () -> drive.getPose(),
+                      FieldConstants.HUB_POSE_BLUE,
+                      drive)));
 
       return routine;
     }
 
-    public static final AutoRoutine centerrushRightBlue(
+    public static final AutoRoutine CenterRushRight(
+        AutoFactory autoFactory,
         Drive drive,
         Intake intake,
         Shooter shooter,
@@ -139,8 +121,9 @@ public class Autos {
         Turret turret,
         InterpolatingTreeMap<Double, Double> shooterInterp,
         InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("CENTER_RUSH_RIGHT");
-      AutoTrajectory centerRush = routine.trajectory(AutoChoices.CENTER_RUSH_RIGHT.getTrajectory());
+      AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_RIGHT");
+      AutoTrajectory centerRush =
+          routine.trajectory(AutoChoices.trajMap.get(AutoChoices.CENTER_RUSH_RIGHT));
 
       routine
           .active()
@@ -149,20 +132,19 @@ public class Autos {
                   centerRush.resetOdometry(),
                   centerRush.cmd(),
                   Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_BLUE,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
+                  new ShooterAutoAimSequence(
+                      shooter,
+                      hood,
+                      shooterInterp,
+                      hoodInterp,
+                      () -> drive.getPose(),
+                      FieldConstants.HUB_POSE_BLUE,
+                      drive)));
       return routine;
     }
 
-    public static final AutoRoutine depotLeftBlue(
+    public static final AutoRoutine DepotLeft(
+        AutoFactory autoFactory,
         Drive drive,
         Intake intake,
         Shooter shooter,
@@ -172,8 +154,9 @@ public class Autos {
         Turret turret,
         InterpolatingTreeMap<Double, Double> shooterInterp,
         InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("DEPOT_LEFT");
-      AutoTrajectory depotTraj = routine.trajectory(AutoChoices.DEPOT_LEFT.getTrajectory());
+      AutoRoutine routine = autoFactory.newRoutine("DEPOT_LEFT");
+      AutoTrajectory depotTraj =
+          routine.trajectory(AutoChoices.trajMap.get(AutoChoices.DEPOT_LEFT));
 
       routine
           .active()
@@ -182,20 +165,19 @@ public class Autos {
                   depotTraj.resetOdometry(),
                   depotTraj.cmd(),
                   Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_BLUE,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
+                  new ShooterAutoAimSequence(
+                      shooter,
+                      hood,
+                      shooterInterp,
+                      hoodInterp,
+                      () -> drive.getPose(),
+                      FieldConstants.HUB_POSE_BLUE,
+                      drive)));
       return routine;
     }
 
-    public static final AutoRoutine depotCenterBlue(
+    public static final AutoRoutine DepotCenter(
+        AutoFactory autoFactory,
         Drive drive,
         Intake intake,
         Shooter shooter,
@@ -205,8 +187,8 @@ public class Autos {
         Turret turret,
         InterpolatingTreeMap<Double, Double> shooterInterp,
         InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("DEPOT_CENTER");
-      AutoTrajectory depot = routine.trajectory(AutoChoices.DEPOT_CENTER.getTrajectory());
+      AutoRoutine routine = autoFactory.newRoutine("DEPOT_CENTER");
+      AutoTrajectory depot = routine.trajectory(AutoChoices.trajMap.get(AutoChoices.DEPOT_CENTER));
       routine
           .active()
           .onTrue(
@@ -214,20 +196,19 @@ public class Autos {
                   depot.resetOdometry(),
                   depot.cmd(),
                   Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_BLUE,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
+                  new ShooterAutoAimSequence(
+                      shooter,
+                      hood,
+                      shooterInterp,
+                      hoodInterp,
+                      () -> drive.getPose(),
+                      FieldConstants.HUB_POSE_BLUE,
+                      drive)));
       return routine;
     }
 
-    public static final AutoRoutine hpRightBlue(
+    public static final AutoRoutine HPRight(
+        AutoFactory autoFactory,
         Drive drive,
         Intake intake,
         Shooter shooter,
@@ -237,8 +218,8 @@ public class Autos {
         Turret turret,
         InterpolatingTreeMap<Double, Double> shooterInterp,
         InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("HP_RIGHT");
-      AutoTrajectory hp = routine.trajectory("HP_RIGHT");
+      AutoRoutine routine = autoFactory.newRoutine("HP_RIGHT");
+      AutoTrajectory hp = routine.trajectory(AutoChoices.trajMap.get(AutoChoices.HP_RIGHT));
       routine
           .active()
           .onTrue(
@@ -246,184 +227,182 @@ public class Autos {
                   hp.resetOdometry(),
                   hp.cmd(),
                   Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_BLUE,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
+                  new ShooterAutoAimSequence(
+                      shooter,
+                      hood,
+                      shooterInterp,
+                      hoodInterp,
+                      () -> drive.getPose(),
+                      FieldConstants.HUB_POSE_BLUE,
+                      drive)));
       return routine;
     }
 
-    public static final AutoRoutine centerrushLeftRed(
-        Drive drive,
-        Intake intake,
-        Shooter shooter,
-        Indexer indexer,
-        Hood hood,
-        Vision vision,
-        Turret turret,
-        InterpolatingTreeMap<Double, Double> shooterInterp,
-        InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("CENTER_RUSH_LEFT");
-      AutoTrajectory centerRush = routine.trajectory(AutoChoices.CENTER_RUSH_LEFT.getTrajectory());
-      routine
-          .active()
-          .onTrue(
-              Commands.sequence(
-                  centerRush.resetOdometry(),
-                  centerRush.cmd(),
-                  Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_BLUE,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
+    //     public static final AutoRoutine centerrushLeftRed(
+    //         AutoFactory autoFactory,
+    //         Drive drive,
+    //         Intake intake,
+    //         Shooter shooter,
+    //         Indexer indexer,
+    //         Hood hood,
+    //         Vision vision,
+    //         Turret turret,
+    //         InterpolatingTreeMap<Double, Double> shooterInterp,
+    //         InterpolatingTreeMap<Double, Double> hoodInterp) {
+    //       AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_LEFT");
+    //       //   AutoTrajectory centerRush =
+    //       // routine.trajectory(AutoChoices.CENTER_RUSH_LEFT.getTrajectory());
+    //       AutoTrajectory centerRush = routine.trajectory(CRL);
 
-      return routine;
-    }
+    //       routine
+    //           .active()
+    //           .onTrue(
+    //               Commands.sequence(
+    //                   centerRush.resetOdometry(),
+    //                   centerRush.cmd(),
+    //                   Commands.runOnce(() -> drive.stop()),
+    //                   new ShooterAutoAimSequence(
+    //                       shooter,
+    //                       hood,
+    //                       shooterInterp,
+    //                       hoodInterp,
+    //                       () -> drive.getPose(),
+    //                       FieldConstants.HUB_POSE_BLUE,
+    //                       drive)));
 
-    public static final AutoRoutine centerrushRightRed(
-        Drive drive,
-        Intake intake,
-        Shooter shooter,
-        Indexer indexer,
-        Hood hood,
-        Vision vision,
-        Turret turret,
-        InterpolatingTreeMap<Double, Double> shooterInterp,
-        InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("CENTER_RUSH_RIGHT");
-      AutoTrajectory centerRush = routine.trajectory(AutoChoices.CENTER_RUSH_RIGHT.getTrajectory());
+    //       return routine;
+    //     }
 
-      routine
-          .active()
-          .onTrue(
-              Commands.sequence(
-                  centerRush.resetOdometry(),
-                  centerRush.cmd(),
-                  Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_RED,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
-      return routine;
-    }
+    //     public static final AutoRoutine centerrushRightRed(
+    //         AutoFactory autoFactory,
+    //         Drive drive,
+    //         Intake intake,
+    //         Shooter shooter,
+    //         Indexer indexer,
+    //         Hood hood,
+    //         Vision vision,
+    //         Turret turret,
+    //         InterpolatingTreeMap<Double, Double> shooterInterp,
+    //         InterpolatingTreeMap<Double, Double> hoodInterp) {
+    //       AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_RIGHT");
+    //       AutoTrajectory centerRush =
+    // routine.trajectory(AutoChoices.CENTER_RUSH_RIGHT.getTrajectory());
 
-    public static final AutoRoutine depotLeftRed(
-        Drive drive,
-        Intake intake,
-        Shooter shooter,
-        Indexer indexer,
-        Hood hood,
-        Vision vision,
-        Turret turret,
-        InterpolatingTreeMap<Double, Double> shooterInterp,
-        InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("DEPOT_LEFT");
-      AutoTrajectory depotTraj = routine.trajectory(AutoChoices.DEPOT_LEFT.getTrajectory());
+    //       routine
+    //           .active()
+    //           .onTrue(
+    //               Commands.sequence(
+    //                   centerRush.resetOdometry(),
+    //                   centerRush.cmd(),
+    //                   Commands.runOnce(() -> drive.stop()),
+    //                   new ShooterAutoAimSequence(
+    //                       shooter,
+    //                       hood,
+    //                       shooterInterp,
+    //                       hoodInterp,
+    //                       () -> drive.getPose(),
+    //                       FieldConstants.HUB_POSE_BLUE,
+    //                       drive)));
+    //       return routine;
+    //     }
 
-      routine
-          .active()
-          .onTrue(
-              Commands.sequence(
-                  depotTraj.resetOdometry(),
-                  depotTraj.cmd(),
-                  Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_RED,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
-      return routine;
-    }
+    //     public static final AutoRoutine depotLeftRed(
+    //         AutoFactory autoFactory,
+    //         Drive drive,
+    //         Intake intake,
+    //         Shooter shooter,
+    //         Indexer indexer,
+    //         Hood hood,
+    //         Vision vision,
+    //         Turret turret,
+    //         InterpolatingTreeMap<Double, Double> shooterInterp,
+    //         InterpolatingTreeMap<Double, Double> hoodInterp) {
+    //       AutoRoutine routine = autoFactory.newRoutine("DEPOT_LEFT");
+    //       AutoTrajectory depotTraj = routine.trajectory(AutoChoices.DEPOT_LEFT.getTrajectory());
 
-    public static final AutoRoutine depotCenteRed(
-        Drive drive,
-        Intake intake,
-        Shooter shooter,
-        Indexer indexer,
-        Hood hood,
-        Vision vision,
-        Turret turret,
-        InterpolatingTreeMap<Double, Double> shooterInterp,
-        InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("DEPOT_CENTER");
-      AutoTrajectory depot = routine.trajectory(AutoChoices.DEPOT_CENTER.getTrajectory());
-      routine
-          .active()
-          .onTrue(
-              Commands.sequence(
-                  depot.resetOdometry(),
-                  depot.cmd(),
-                  Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_RED,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
-      return routine;
-    }
+    //       routine
+    //           .active()
+    //           .onTrue(
+    //               Commands.sequence(
+    //                   depotTraj.resetOdometry(),
+    //                   depotTraj.cmd(),
+    //                   Commands.runOnce(() -> drive.stop()),
+    //                   new ShooterAutoAimSequence(
+    //                       shooter,
+    //                       hood,
+    //                       shooterInterp,
+    //                       hoodInterp,
+    //                       () -> drive.getPose(),
+    //                       FieldConstants.HUB_POSE_BLUE,
+    //                       drive)));
+    //       return routine;
+    //     }
 
-    public static final AutoRoutine hpRightRed(
-        Drive drive,
-        Intake intake,
-        Shooter shooter,
-        Indexer indexer,
-        Hood hood,
-        Vision vision,
-        Turret turret,
-        InterpolatingTreeMap<Double, Double> shooterInterp,
-        InterpolatingTreeMap<Double, Double> hoodInterp) {
-      AutoRoutine routine = drive.autoFactory.newRoutine("HP_RIGHT");
-      AutoTrajectory hp = routine.trajectory("HP_RIGHT");
-      routine
-          .active()
-          .onTrue(
-              Commands.sequence(
-                  hp.resetOdometry(),
-                  hp.cmd(),
-                  Commands.runOnce(() -> drive.stop()),
-                  Commands.parallel(
-                      new ShooterAutoAimSequence(
-                          shooter,
-                          hood,
-                          shooterInterp,
-                          hoodInterp,
-                          () -> drive.getPose(),
-                          FieldConstants.HUB_POSE_RED,
-                          drive),
-                      shooter.setKickerSpeedCommand(1))));
-      return routine;
-    }
+    //     public static final AutoRoutine depotCenteRed(
+    //         AutoFactory autoFactory,
+    //         Drive drive,
+    //         Intake intake,
+    //         Shooter shooter,
+    //         Indexer indexer,
+    //         Hood hood,
+    //         Vision vision,
+    //         Turret turret,
+    //         InterpolatingTreeMap<Double, Double> shooterInterp,
+    //         InterpolatingTreeMap<Double, Double> hoodInterp) {
+    //       AutoRoutine routine = autoFactory.newRoutine("DEPOT_CENTER");
+    //       AutoTrajectory depot = routine.trajectory(AutoChoices.DEPOT_CENTER.getTrajectory());
+    //       routine
+    //           .active()
+    //           .onTrue(
+    //               Commands.sequence(
+    //                   depot.resetOdometry(),
+    //                   depot.cmd(),
+    //                   Commands.runOnce(() -> drive.stop()),
+    //                   new ShooterAutoAimSequence(
+    //                       shooter,
+    //                       hood,
+    //                       shooterInterp,
+    //                       hoodInterp,
+    //                       () -> drive.getPose(),
+    //                       FieldConstants.HUB_POSE_BLUE,
+    //                       drive)));
+    //       return routine;
+    //     }
+
+    //     public static final AutoRoutine hpRightRed(
+    //         AutoFactory autoFactory,
+    //         Drive drive,
+    //         Intake intake,
+    //         Shooter shooter,
+    //         Indexer indexer,
+    //         Hood hood,
+    //         Vision vision,
+    //         Turret turret,
+    //         InterpolatingTreeMap<Double, Double> shooterInterp,
+    //         InterpolatingTreeMap<Double, Double> hoodInterp) {
+    //       AutoRoutine routine = autoFactory.newRoutine("HP_RIGHT");
+    //       AutoTrajectory hp = routine.trajectory("HP_RIGHT");
+    //       routine
+    //           .active()
+    //           .onTrue(
+    //               Commands.sequence(
+    //                   hp.resetOdometry(),
+    //                   hp.cmd(),
+    //                   Commands.runOnce(() -> drive.stop()),
+    //                   new ShooterAutoAimSequence(
+    //                       shooter,
+    //                       hood,
+    //                       shooterInterp,
+    //                       hoodInterp,
+    //                       () -> drive.getPose(),
+    //                       FieldConstants.HUB_POSE_BLUE,
+    //                       drive)));
+    //       return routine;
+    //     }
   }
 
   public static void populateChooser(
+      AutoFactory autoFactory,
       AutoChooser chooser,
       Drive drive,
       Intake intake,
@@ -436,8 +415,8 @@ public class Autos {
       InterpolatingTreeMap<Double, Double> hoodInterp) {
     for (Method method : AutonomousRoutines.class.getDeclaredMethods()) {
 
-      if (!Modifier.isStatic(method.getModifiers())) continue;
-
+      if (!Modifier.isStatic(method.getModifiers()) || method.isSynthetic()) continue;
+      System.out.println(method.getName());
       String name = method.getName();
 
       chooser.addRoutine(
@@ -445,7 +424,17 @@ public class Autos {
           () -> {
             try {
               return (AutoRoutine)
-                  method.invoke(null, drive, intake, shooter, indexer, vision, turret);
+                  method.invoke(
+                      null,
+                      autoFactory,
+                      drive,
+                      intake,
+                      shooter,
+                      indexer,
+                      vision,
+                      turret,
+                      shooterInterp,
+                      hoodInterp);
             } catch (Exception e) {
               throw new RuntimeException(e);
             }
@@ -454,6 +443,7 @@ public class Autos {
   }
 
   public static void buildAutoChooser(
+      AutoFactory autoFactory,
       AutoChooser chooser,
       Drive drive,
       Intake intake,
@@ -464,10 +454,10 @@ public class Autos {
       Turret turret,
       InterpolatingTreeMap<Double, Double> shooterInterp,
       InterpolatingTreeMap<Double, Double> hoodInterp) {
-    drive.autoFactory.bind(
+    autoFactory.bind(
         "Intake",
         intake.runRollerAtVoltage(8).alongWith(intake.setPivotPosition(PivotPositions.DEPLOYED)));
-    drive.autoFactory.bind(
+    autoFactory.bind(
         "ShooterSpeed",
         new ShooterAutoAimSequence(
             shooter,
@@ -477,7 +467,7 @@ public class Autos {
             () -> drive.getPose(),
             PhoenixUtil.isRed() ? FieldConstants.HUB_POSE_RED : FieldConstants.HUB_POSE_BLUE,
             drive));
-    drive.autoFactory.bind(
+    autoFactory.bind(
         "ShootBall", shooter.setKickerSpeedCommand(1).alongWith(indexer.runIndexer(6.0)));
   }
 }
