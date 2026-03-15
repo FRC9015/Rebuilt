@@ -456,7 +456,7 @@ public class RobotContainer {
     driverController
         .leftBumper()
         .whileTrue(indexer.runIndexer(5 / 12 * 50).onlyIf(() -> DriverStation.isTest()));
-  }
+        .whileTrue(indexer.runIndexer(5.0 / 12.0 * 50.0).onlyIf(() -> DriverStation.isTest()));
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
