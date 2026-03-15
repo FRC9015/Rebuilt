@@ -203,9 +203,9 @@ public final class Constants {
     public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-9.096),
-                Units.inchesToMeters(15.284),
-                Units.inchesToMeters(10.67)),
+                Units.inchesToMeters(-8.86),
+                Units.inchesToMeters(14.886),
+                Units.inchesToMeters(10.737)),
             new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(90)));
 
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
@@ -449,5 +449,24 @@ public final class Constants {
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+  }
+
+  public static class IndexerConstants {
+    public static final FeedbackConfigs FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(125).withMotionMagicCruiseVelocity(25);
+
+    // TODO TUNE THESE PID VALUES
+    public static final Slot0Configs SLOT0_CONFIGS =
+        new Slot0Configs()
+            .withKP(0.5)
+            .withKI(0.0)
+            .withKD(0.00)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0.08)
+            .withKV(0.13);
   }
 }

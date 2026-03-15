@@ -80,7 +80,7 @@ public class IndexerIOSparkFlex implements IndexerIO {
   }
 
   @Override
-  public void setVoltage(double percent) {
+  public void setIndexerSpeed(double percent) {
     closedLoop.setSetpoint(percent, ControlType.kVoltage);
   }
 }

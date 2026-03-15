@@ -50,7 +50,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command setKickerSpeedCommand(double speedValue) {
-    return this.run(() -> this.setKickerSpeed(speedValue));
+    return this.startEnd(() -> this.setKickerSpeed(speedValue), () -> io.stopKicker());
   }
 
   public Command setKickerSpeedReverseCommand(double speedValue) {
@@ -61,11 +61,9 @@ public class Shooter extends SubsystemBase {
     return this.startEnd(
         () -> {
           this.setShooterSpeed(speed);
-          this.setKickerSpeed(1);
         },
         () -> {
           io.stopFlywheels();
-          io.stopKicker();
         });
   }
 
@@ -80,6 +78,10 @@ public class Shooter extends SubsystemBase {
 
   public Command incrementShooterCommand(double value) {
     return this.runOnce(() -> incrementFlyWheelSpeed(value));
+  }
+
+  public boolean returnShooterAtSetpoint() {
+    return inputs.flywheelAtSpeed;
   }
 
   @Override
