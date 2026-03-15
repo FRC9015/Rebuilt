@@ -10,6 +10,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -103,6 +105,7 @@ public class RobotContainer {
     gamestate = new GameState();
     switch (Constants.currentMode) {
       case REAL:
+        // Real robot, instantiate hardware IO implementations
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -149,17 +152,24 @@ public class RobotContainer {
         break;
 
       case SIM:
+        // Sim robot, instantiate physics sim IO implementations1
         simDrive =
             new SwerveDriveSimulation(
                 Drive.mapleSimConfig, new Pose2d(new Translation2d(3, 3), new Rotation2d()));
         SimulatedArena.getInstance().addDriveTrainSimulation(simDrive);
         simIntake =
             IntakeSimulation.OverTheBumperIntake(
+                // Specify the type of game pieces that the intake can collect
                 SimConstants.GAMEPIECE,
+                // Specify the drivetrain to which this intake is attached
                 simDrive,
+                // Width of the intake
                 Meters.of(SimConstants.INTAKE_WIDTH),
+                // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
-                IntakeSimulation.IntakeSide.BACK,
+                // The intake is mounted on the back side of the chassis
+                IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
+                // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
         drive =
             new Drive(
@@ -188,6 +198,7 @@ public class RobotContainer {
         break;
 
       case REPLAY:
+        // Replayed robot, disable IO implementations
         drive =
             new Drive(
                 new GyroIO() {},
@@ -222,7 +233,7 @@ public class RobotContainer {
       default:
         throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
-
+    // Set up auto routines
     NamedCommands.registerCommand("intake", intake.runRollerAtVoltage(6.0));
     NamedCommands.registerCommand(
         "shooter",
@@ -267,6 +278,19 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId QR", turret.quasistatic(Direction.kReverse));
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
+
+    // Autos.populateChooser(
+    //     autoChooser2,
+    //     drive,
+    //     intake,
+    //     shooter,
+    //     indexer,
+    //     hood,
+    //     vision,
+    //     turret,
+    //     interpTables.shooterSpeedInterp,
+    //     interpTables.hoodAngleInterp);
+
     autoChooser2.addRoutine(
         "DepotLeftBlue",
         () ->
@@ -324,7 +348,12 @@ public class RobotContainer {
     autoTrigger.whileTrue(autoChooser2.selectedCommandScheduler());
     configureButtonBindings();
   }
-
+  /**
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}. TODO set values for motors
+   */
   private void configureButtonBindings() {
     driverController
         .x()
@@ -415,6 +444,11 @@ public class RobotContainer {
         .whileTrue(indexer.runIndexer(5).onlyIf(() -> DriverStation.isTest()));
   }
 
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
