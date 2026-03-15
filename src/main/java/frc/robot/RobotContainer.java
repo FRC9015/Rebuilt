@@ -1,4 +1,3 @@
-// [Existing Imports...]
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
@@ -29,7 +28,6 @@ import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ZoneLogic;
-import frc.robot.subsystems.ZoneLogic.FieldZone;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -68,6 +66,12 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+/*
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * subsystems, commands, and button mappings) should be declared here.
+ */
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
@@ -83,13 +87,7 @@ public class RobotContainer {
   private IntakeSimulation simIntake;
   private ShootAtAngleSim simShooter;
   private final InterpTables interpTables;
-  private final double hoodSetpoint = 0.0;
-  private final double flywheelSetpoint = 50;
-  private boolean hubLock = false;
-  private Trigger zoneTrigger;
   private final ZoneLogic zones;
-
-  private Trigger desireHubLock;
 
   private final AutoChooser autoChooser2;
   // Controller
@@ -97,8 +95,10 @@ public class RobotContainer {
   private final CommandXboxController driverController = new CommandXboxController(0);
 
   // Dashboard inputs
+
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
     switch (Constants.currentMode) {
@@ -144,11 +144,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ID,
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
         interpTables = new InterpTables();
-        zoneTrigger =
-            new Trigger(
-                () -> {
-                  return !DriverStation.isTest();
-                });
         zones = new ZoneLogic(drive);
 
         break;
@@ -188,12 +183,6 @@ public class RobotContainer {
         simShooter =
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
-        desireHubLock = new Trigger(() -> hubLock);
-        zoneTrigger =
-            new Trigger(
-                () -> {
-                  return !DriverStation.isTest();
-                });
         zones = new ZoneLogic(drive);
 
         break;
@@ -226,8 +215,6 @@ public class RobotContainer {
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
         interpTables = new InterpTables();
-        desireHubLock = new Trigger(() -> hubLock);
-        zoneTrigger = new Trigger(() -> !DriverStation.isTest());
         zones = new ZoneLogic(drive);
 
         break;
@@ -339,18 +326,12 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    // BACKGROUND ZONE LOGIC: Runs constantly when NOT in test mode
-
     driverController
         .x()
         .whileTrue(
             Commands.run(
                     () -> {
-                      FieldZone zone = zones.getCurrentFieldZone(() -> drive.getPose());
-                      if (zone == FieldZone.BLUE_RIGHT_TRENCH
-                          || zone == FieldZone.BLUE_LEFT_TRENCH
-                          || zone == FieldZone.RED_RIGHT_TRENCH
-                          || zone == FieldZone.RED_LEFT_TRENCH) {
+                      if (zones.isInTrench(() -> drive.getPose())) {
                         hood.setHoodPos(0.0);
                       }
                     })
@@ -385,7 +366,7 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> -driverController.getRightX(),
                 0.3));
-    // intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
     operatorController
         .leftTrigger()

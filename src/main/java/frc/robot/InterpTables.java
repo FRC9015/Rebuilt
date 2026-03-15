@@ -7,8 +7,6 @@ import edu.wpi.first.math.interpolation.InverseInterpolator;
 public class InterpTables {
   public InterpolatingTreeMap<Double, Double> timeOfFlightInterp =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
-  public InterpolatingTreeMap<Double, Double> emptyInterp =
-      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
   public InterpolatingTreeMap<Double, Double> hoodAngleInterp =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
   public InterpolatingTreeMap<Double, Double> shooterSpeedInterp =
@@ -69,7 +67,5 @@ public class InterpTables {
     shooterSpeedInterp.put(3.25, 34.0);
     shooterSpeedInterp.put(4.4, 38.0);
     shooterSpeedInterp.put(2.64, 33.0);
-
-    emptyInterp.put(0.0, 0.0);
   }
 }

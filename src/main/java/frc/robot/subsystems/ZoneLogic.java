@@ -102,6 +102,23 @@ public class ZoneLogic extends SubsystemBase {
     }
   }
 
+  public boolean isInTrench(Supplier<Pose2d> currentPoseSupplier) {
+    Translation2d translationPose = currentPoseSupplier.get().getTranslation();
+    if (ZoneConstants.BLUE_RIGHT_TRENCH.contains(translationPose)) {
+      return true;
+    }
+    if (ZoneConstants.BLUE_LEFT_TRENCH.contains(translationPose)) {
+      return true;
+    }
+    if (ZoneConstants.RED_RIGHT_TRENCH.contains(translationPose)) {
+      return true;
+    }
+    if (ZoneConstants.RED_LEFT_TRENCH.contains(translationPose)) {
+      return true;
+    }
+    return false;
+  }
+
   @Override
   public void periodic() {
     Logger.recordOutput("Zones/current", getCurrentFieldZone(() -> drive.getPose()));
