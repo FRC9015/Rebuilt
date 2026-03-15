@@ -22,6 +22,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 public class Autos {
+    private Drive drive;
+    private Intake intake;
+    private Shooter shooter;
+    private Indexer indexer;
+    private Hood hood;
+    private Vision vision;
+    private Turret turret;
+    private InterpolatingTreeMap<Double, Double> shooterInterp;
+    private InterpolatingTreeMap<Double, Double> hoodInterp;
   public enum AutoChoices {
     TEST_PATH(Choreo.loadTrajectory("TestPath").get()),
     CENTER_RUSH_LEFT(Choreo.loadTrajectory("CenterRush_Left").get()),
@@ -39,6 +48,18 @@ public class Autos {
     public Trajectory<?> getTrajectory() {
       return traj;
     }
+  }
+  public Autos(Drive drive, Intake intake, Shooter shooter, Indexer indexer, Hood hood, Vision vision, Turret turret, InterpolatingTreeMap<Double, Double> shooterInterp,
+        InterpolatingTreeMap<Double, Double> hoodInterp){
+        this.drive = drive;
+        this.intake = intake;
+        this.shooter = shooter;
+        this.indexer = indexer;
+        this.hood = hood;
+        this.vision = vision;
+        this.turret = turret;
+        this.shooterInterp = shooterInterp;
+        this.hoodInterp = hoodInterp;
   }
 
   public class AutonomousRoutines {

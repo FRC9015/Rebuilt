@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -278,6 +279,74 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId QR", turret.quasistatic(Direction.kReverse));
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
+
+    // Autos.populateChooser(
+    //     autoChooser2,
+    //     drive,
+    //     intake,
+    //     shooter,
+    //     indexer,
+    //     hood,
+    //     vision,
+    //     turret,
+    //     interpTables.shooterSpeedInterp,
+    //     interpTables.hoodAngleInterp);
+
+    autoChooser2.addRoutine(
+        "DepotLeftBlue",
+        () ->
+            Autos.AutonomousRoutines.depotLeftBlue(
+                drive,
+                intake,
+                shooter,
+                indexer,
+                hood,
+                vision,
+                turret,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp));
+
+    autoChooser2.addRoutine(
+        "DepotCenterRed",
+        () ->
+            Autos.AutonomousRoutines.depotCenteRed(
+                drive,
+                intake,
+                shooter,
+                indexer,
+                hood,
+                vision,
+                turret,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp));
+    autoChooser2.addRoutine(
+        "CenterRushRightRed",
+        () ->
+            Autos.AutonomousRoutines.centerrushRightRed(
+                drive,
+                intake,
+                shooter,
+                indexer,
+                hood,
+                vision,
+                turret,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp));
+    autoChooser2.addRoutine(
+        "CenterRushLeftRed",
+        () ->
+            Autos.AutonomousRoutines.centerrushLeftRed(
+                drive,
+                intake,
+                shooter,
+                indexer,
+                hood,
+                vision,
+                turret,
+                interpTables.shooterSpeedInterp,
+                interpTables.hoodAngleInterp));
+    SmartDashboard.putData("Choreo Autos", autoChooser2);
+    RobotModeTriggers.autonomous().whileTrue(autoChooser2.selectedCommandScheduler());
 
     // Autos.populateChooser(
     //     autoChooser2,
