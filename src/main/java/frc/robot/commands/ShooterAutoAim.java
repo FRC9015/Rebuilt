@@ -14,21 +14,19 @@ import org.littletonrobotics.junction.Logger;
 public class ShooterAutoAim extends Command {
   private final Shooter shooter;
   private Supplier<Pose2d> pose;
-  private Pose2d targetPose;
-  private Pose2d flippedTargetPose;
+  private Supplier<Pose2d> targetPoseSupplier;
   private InterpolatingTreeMap<Double, Double> shooterInterpTable;
   private final Drive drive;
 
   public ShooterAutoAim(
       Shooter shooter,
       Supplier<Pose2d> poseSupplier,
-      Pose2d targetPose,
+      Supplier<Pose2d> targetPoseSupplier,
       InterpolatingTreeMap<Double, Double> shooterInterp,
       Drive drive) {
     this.shooter = shooter;
     this.pose = poseSupplier;
-    this.targetPose = targetPose;
-    this.flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
+    this.targetPoseSupplier = targetPoseSupplier;
     this.shooterInterpTable = shooterInterp;
     this.drive = drive;
     addRequirements(shooter);
@@ -37,7 +35,8 @@ public class ShooterAutoAim extends Command {
   @Override
   public void execute() {
     Pose2d currentRobotPose = pose.get();
-
+    Pose2d targetPose = targetPoseSupplier.get();
+    Pose2d flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
     boolean isRed =
         DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
