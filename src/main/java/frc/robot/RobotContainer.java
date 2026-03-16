@@ -126,7 +126,7 @@ public class RobotContainer {
                     MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.INDEXER2_MOTOR_ID));
         intake =
             new Intake(
-                new RollerIOTalonFX(MotorIDConstants.INTAKE_ROLLER_LEFT_ID),
+                new RollerIOTalonFX(MotorIDConstants.INTAKE_ROLLER_ID),
                 new PivotIOTalonFX(
                     MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
                     MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,

@@ -15,48 +15,47 @@ import frc.robot.Constants.IntakeConstants;
 
 public class RollerIOTalonFX implements RollerIO {
 
-  public final TalonFX rollerMotorLeft;
+  public final TalonFX rollerMotor;
 
-  public StatusSignal<Voltage> rollerLeftVolts;
-  public StatusSignal<Current> rollerLeftAmps;
-  public StatusSignal<AngularVelocity> rollerLeftspeed;
+  public StatusSignal<Voltage> rollerVolts;
+  public StatusSignal<Current> rollerAmps;
+  public StatusSignal<AngularVelocity> rollerSpeed;
 
   private final MotionMagicVelocityVoltage intakeVelocityVoltage =
       new MotionMagicVelocityVoltage(0.0);
   private final VoltageOut intakeVoltageOut = new VoltageOut(0.0);
 
-  public RollerIOTalonFX(int rollerIDLeft) {
-    rollerMotorLeft = new TalonFX(rollerIDLeft);
+  public RollerIOTalonFX(int rollerID) {
+    rollerMotor = new TalonFX(rollerID);
 
-    rollerMotorLeft.getConfigurator().apply(IntakeConstants.rollerConfigLeft);
-    rollerLeftVolts = rollerMotorLeft.getMotorVoltage();
-    rollerLeftAmps = rollerMotorLeft.getStatorCurrent();
-    rollerLeftspeed = rollerMotorLeft.getVelocity();
+    rollerMotor.getConfigurator().apply(IntakeConstants.rollerConfigLeft);
+    rollerVolts = rollerMotor.getMotorVoltage();
+    rollerAmps = rollerMotor.getStatorCurrent();
+    rollerSpeed = rollerMotor.getVelocity();
 
-    BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, rollerLeftVolts, rollerLeftAmps, rollerLeftspeed);
+    BaseStatusSignal.setUpdateFrequencyForAll(50.0, rollerVolts, rollerAmps, rollerSpeed);
 
-    ParentDevice.optimizeBusUtilizationForAll(rollerMotorLeft);
+    ParentDevice.optimizeBusUtilizationForAll(rollerMotor);
   }
 
   @Override
   public void updateInputs(RollerIOInputs inputs) {
 
-    BaseStatusSignal.refreshAll(rollerLeftVolts, rollerLeftAmps, rollerLeftspeed);
+    BaseStatusSignal.refreshAll(rollerVolts, rollerAmps, rollerSpeed);
 
-    inputs.rollerLeftAppliedVolts = rollerLeftVolts.getValueAsDouble();
-    inputs.rollerLeftCurrentSpeed = rollerLeftspeed.getValueAsDouble();
-    inputs.rollerLeftCurentAmps = rollerLeftAmps.getValueAsDouble();
+    inputs.rollerLeftAppliedVolts = rollerVolts.getValueAsDouble();
+    inputs.rollerLeftCurrentSpeed = rollerSpeed.getValueAsDouble();
+    inputs.rollerLeftCurentAmps = rollerAmps.getValueAsDouble();
   }
 
   @Override
   public void stop() {
-    rollerMotorLeft.stopMotor();
+    rollerMotor.stopMotor();
   }
 
   @Override
   public void setBrakeMode(boolean enable) {
-    rollerMotorLeft.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    rollerMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
   // Minimum Value of speedValue: -512.0
@@ -64,7 +63,7 @@ public class RollerIOTalonFX implements RollerIO {
   // Unit of output: RPS
   @Override
   public void setRollerSpeed(double speed) {
-    rollerMotorLeft.setControl(
+    rollerMotor.setControl(
         intakeVelocityVoltage.withVelocity(
             MathUtil.clamp(
                 speed, IntakeConstants.INTAKE_MIN_SPEED, IntakeConstants.INTAKE_MAX_SPEED)));
@@ -72,6 +71,6 @@ public class RollerIOTalonFX implements RollerIO {
 
   @Override
   public void setRollerVolts(double voltage) {
-    rollerMotorLeft.setControl(intakeVoltageOut.withOutput(voltage));
+    rollerMotor.setControl(intakeVoltageOut.withOutput(voltage));
   }
 }

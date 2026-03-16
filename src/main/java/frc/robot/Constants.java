@@ -62,7 +62,7 @@ public final class Constants {
   public static class MotorIDConstants {
     public static final int TURRET_MOTOR_ID = 60;
 
-    public static final int INTAKE_ROLLER_LEFT_ID = 51;
+    public static final int INTAKE_ROLLER_ID = 51;
     // If a right roller is added back to the Intake, set it to ID 52.
     public static final int INTAKE_PIVOT_LEFT_ID = 53;
     public static final int INTAKE_PIVOT_RIGHT_ID = 54;
