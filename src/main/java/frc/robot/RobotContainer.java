@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Meters;
 
 import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
+import choreo.auto.AutoRoutine;
+import choreo.auto.AutoTrajectory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -105,6 +107,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -261,11 +264,7 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
 
-    autoFactory =
-        new AutoFactory(
-            () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true, drive);
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    autoChooser2 = new AutoChooser();
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -285,23 +284,38 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
-    Autos.populateChooser(
-        autoFactory,
-        autoChooser2,
-        drive,
-        intake,
-        shooter,
-        indexer,
-        hood,
-        vision,
-        turret,
-        interpTables.shooterSpeedInterp,
-        interpTables.hoodAngleInterp);
+    autoFactory =
+        new AutoFactory(
+            () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true, drive);
+
+    Autos autoRoutines =
+        new Autos(
+            autoFactory,
+            drive,
+            intake,
+            shooter,
+            indexer,
+            hood,
+            vision,
+            turret,
+            interpTables.shooterSpeedInterp,
+            interpTables.hoodAngleInterp);
+
+    // AdKit Chooser
+    autoChooser.addOption(
+        "TEST AUTO1 choreo", Commands.deferredProxy(() -> autoRoutines.testAuto().cmd()));
+    autoChooser.addOption("TEST AUTO2 choreo", Commands.deferredProxy(() -> this.testAuto().cmd()));
+
+    // Choreo Chooser
+    autoChooser2 = new AutoChooser();
+    // Routine on main like example
+    autoChooser2.addRoutine("TEST_AUTO2", this::testAuto);
 
     SmartDashboard.putData("Choreo Autos", autoChooser2);
     RobotModeTriggers.autonomous().whileTrue(autoChooser2.selectedCommandScheduler());
     configureButtonBindings();
   }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -412,5 +426,27 @@ public class RobotContainer {
     Logger.recordOutput("FieldSimulation/RobotPosition", simDrive.getSimulatedDriveTrainPose());
     Logger.recordOutput(
         "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
+  }
+
+  AutoRoutine testAuto() {
+    AutoRoutine routine = autoFactory.newRoutine("TEST_AUTO2");
+    AutoTrajectory testPath = routine.trajectory("TEST");
+
+    routine
+        .active()
+        .onTrue(
+            Commands.sequence(
+                testPath.resetOdometry(),
+                testPath.cmd(),
+                Commands.runOnce(() -> drive.stop()),
+                new ShooterAutoAimSequence(
+                    shooter,
+                    hood,
+                    interpTables.shooterSpeedInterp,
+                    interpTables.hoodAngleInterp,
+                    () -> drive.getPose(),
+                    FieldConstants.HUB_POSE_BLUE,
+                    drive)));
+    return routine;
   }
 }
