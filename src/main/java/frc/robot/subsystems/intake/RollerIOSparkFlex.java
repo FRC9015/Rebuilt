@@ -87,12 +87,12 @@ public class RollerIOSparkFlex implements RollerIO {
 
   @Override
   public void updateInputs(RollerIOInputs inputs) {
-    inputs.rollerLeftAppliedVolts = rollerLeft.getAppliedOutput() * rollerLeft.getBusVoltage();
-    inputs.rollerLeftCurrentSpeed = rollerLeftEncoder.getVelocity();
-    inputs.rollerLeftCurentAmps = rollerLeft.getOutputCurrent();
-    inputs.rollerRightAppliedVolts = rollerRight.getAppliedOutput() * rollerRight.getBusVoltage();
-    inputs.rollerRightCurrentSpeed = rollerRightEncoder.getVelocity();
-    inputs.rollerRightCurentAmps = rollerRight.getOutputCurrent();
+    inputs.rollerAppliedVolts = rollerLeft.getAppliedOutput() * rollerLeft.getBusVoltage();
+    inputs.rollerCurrentSpeed = rollerLeftEncoder.getVelocity();
+    inputs.rollerCurrentAmps = rollerLeft.getOutputCurrent();
+    inputs.rollerAppliedVolts = rollerRight.getAppliedOutput() * rollerRight.getBusVoltage();
+    inputs.rollerCurrentSpeed = rollerRightEncoder.getVelocity();
+    inputs.rollerCurrentAmps = rollerRight.getOutputCurrent();
   }
 
   @Override
