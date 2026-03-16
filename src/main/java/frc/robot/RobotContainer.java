@@ -303,7 +303,7 @@ public class RobotContainer {
 
     // AdKit Chooser
     autoChooser.addOption(
-        "TEST AUTO1 choreo", Commands.deferredProxy(() -> autoRoutines.testAuto().cmd()));
+        "TEST AUTO1 choreo", Commands.deferredProxy(() -> autoRoutines.testAuto()));
     autoChooser.addOption("TEST AUTO2 choreo", Commands.deferredProxy(() -> this.testAuto().cmd()));
 
     // Choreo Chooser
