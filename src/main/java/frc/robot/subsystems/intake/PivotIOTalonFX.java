@@ -42,10 +42,17 @@ public class PivotIOTalonFX implements PivotIO {
     pivotRightAmps = pivotMotorRight.getStatorCurrent();
     pivotLeftVelocity = pivotMotorLeft.getVelocity();
     pivotRightVelocity = pivotMotorRight.getVelocity();
-    pivotPosition = pivotEncoder.getAbsolutePosition();
+    pivotPosition = pivotEncoder.getPosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0, pivotLeftVolts, pivotLeftAmps, pivotLeftVelocity, pivotRightVolts, pivotRightAmps, pivotRightVelocity, pivotPosition);
+        50.0,
+        pivotLeftVolts,
+        pivotLeftAmps,
+        pivotLeftVelocity,
+        pivotRightVolts,
+        pivotRightAmps,
+        pivotRightVelocity,
+        pivotPosition);
   }
 
   @Override
