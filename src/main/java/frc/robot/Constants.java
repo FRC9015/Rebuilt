@@ -272,12 +272,12 @@ public final class Constants {
 
     private static final MotorOutputConfigs pivotOutputLeftConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
+            .withInverted(InvertedValue.CounterClockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
 
     public static final MotorOutputConfigs pivotOutputRightConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
 
     public static final TalonFXConfiguration pivotConfigLeft =
@@ -309,8 +309,8 @@ public final class Constants {
 
     public static final double PIVOT_MAX_POS = 1.0;
     public static final double PIVOT_MIN_POS = 0.0;
-    public static final double PIVOT_DEPLOYED_POSITION = 0.0;
-    public static final double PIVOT_STOWED_POSITION = 0.9;
+    public static final double PIVOT_DEPLOYED_POSITION = 0.95;
+    public static final double PIVOT_STOWED_POSITION = 0;
   }
 
   public static class SimConstants {

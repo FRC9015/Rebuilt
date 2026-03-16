@@ -405,7 +405,7 @@ public class RobotContainer {
                 () -> -driverController.getRightX(),
                 0.3));
     intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
     operatorController
         .leftTrigger()
         .whileTrue(
