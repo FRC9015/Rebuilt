@@ -27,8 +27,10 @@ public class ZoneLogic extends SubsystemBase {
     UNKNOWN
   }
 
-  private boolean runMainZoneLogic = true;
-  private boolean overrideZones = false;
+  private boolean runMainZoneLogic = false;
+  private boolean zoneControl = true;
+  private boolean overrideZones = true;
+  private boolean overrideControl = false;
 
   public ZoneLogic(Drive drive) {
     this.drive = drive;
@@ -144,11 +146,11 @@ public class ZoneLogic extends SubsystemBase {
   }
 
   public void toggleRunMainZoneLogic() {
-    runMainZoneLogic = !runMainZoneLogic;
+    zoneControl = !zoneControl;
   }
 
   private void setOverrideZone(boolean override) {
-    overrideZones = override;
+    overrideControl = override;
   }
 
   public Command override() {
@@ -157,6 +159,8 @@ public class ZoneLogic extends SubsystemBase {
 
   @Override
   public void periodic() {
+    runMainZoneLogic = zoneControl;
+    overrideZones = overrideControl;
     Logger.recordOutput("Zones/current", getCurrentFieldZone());
     Logger.recordOutput("Zones/runMainZoneLogic", runMainZoneLogic);
     Logger.recordOutput("zones", overrideZones);
