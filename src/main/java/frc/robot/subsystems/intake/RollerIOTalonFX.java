@@ -43,9 +43,9 @@ public class RollerIOTalonFX implements RollerIO {
 
     BaseStatusSignal.refreshAll(rollerVolts, rollerAmps, rollerSpeed);
 
-    inputs.rollerLeftAppliedVolts = rollerVolts.getValueAsDouble();
-    inputs.rollerLeftCurrentSpeed = rollerSpeed.getValueAsDouble();
-    inputs.rollerLeftCurentAmps = rollerAmps.getValueAsDouble();
+    inputs.rollerAppliedVolts = rollerVolts.getValueAsDouble();
+    inputs.rollerCurrentSpeed = rollerSpeed.getValueAsDouble();
+    inputs.rollerCurrentAmps = rollerAmps.getValueAsDouble();
   }
 
   @Override
