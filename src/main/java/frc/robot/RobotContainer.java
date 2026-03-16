@@ -108,6 +108,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -157,7 +158,6 @@ public class RobotContainer {
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
         overrideZone = new Trigger(() -> zones.getOverrideZone());
-
         break;
 
       case SIM:
@@ -499,7 +499,7 @@ public class RobotContainer {
         "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
   }
 
-  public void setupZonesLogic(){
+  public void setupZonesLogic() {
     zones.toggleRunMainZoneLogic();
     zones.toggleRunMainZoneLogic();
     zones.override().withTimeout(0.04);
