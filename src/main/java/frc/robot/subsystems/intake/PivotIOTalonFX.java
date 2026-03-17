@@ -2,9 +2,11 @@ package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.Follower; // Added Import
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
@@ -35,6 +37,9 @@ public class PivotIOTalonFX implements PivotIO {
 
     pivotMotorLeft.getConfigurator().apply(IntakeConstants.pivotConfigLeft);
     pivotMotorRight.getConfigurator().apply(IntakeConstants.pivotConfigRight);
+
+    // Set the Right motor to follow the Left motor and spin in the opposite direction
+    pivotMotorRight.setControl(new Follower(pivotIDLeft, MotorAlignmentValue.Opposed));
 
     pivotLeftVolts = pivotMotorLeft.getMotorVoltage();
     pivotRightVolts = pivotMotorRight.getMotorVoltage();
@@ -76,8 +81,8 @@ public class PivotIOTalonFX implements PivotIO {
 
   @Override
   public void stop() {
+    // Only need to stop the master; the follower will follow
     pivotMotorLeft.stopMotor();
-    pivotMotorRight.stopMotor();
   }
 
   @Override
@@ -88,17 +93,16 @@ public class PivotIOTalonFX implements PivotIO {
 
   @Override
   public void setPivotPosition(double position) {
-
     final double clampedPosition =
         MathUtil.clamp(position, IntakeConstants.INTAKE_MIN_POS, IntakeConstants.INTAKE_MAX_POS);
 
+    // Only set control on the master; the follower handles the rest
     pivotMotorLeft.setControl(pivotMagicVoltage.withPosition(clampedPosition));
-    pivotMotorRight.setControl(pivotMagicVoltage.withPosition(clampedPosition));
   }
 
   @Override
   public void setPivotPosition(PivotPositions position) {
+    // Only set control on the master; the follower handles the rest
     pivotMotorLeft.setControl(pivotMagicVoltage.withPosition(position.getPivotPosition()));
-    pivotMotorRight.setControl(pivotMagicVoltage.withPosition(position.getPivotPosition()));
   }
 }
