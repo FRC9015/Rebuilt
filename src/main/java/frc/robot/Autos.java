@@ -27,23 +27,23 @@ import java.util.Map;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Autos {
-  public enum TrajChoices {
-    Test,
-    Center_Rush_Left,
-    Center_Rush_Right,
-    Depot_Left,
-    Depot_Center,
-    Hp_Right;
+  // public enum TrajChoices {
+  //   TEST,
+  //   CENTER_RUSH_LEFT,
+  //   CENTER_RUSH_RIGHT,
+  //   DEPOT_LEFT,
+  //   DEPOT_CENTER,
+  //   HP_RIGHT;
 
-    private static final Map<TrajChoices, Trajectory<?>> trajMap;
+  //   private static final Map<TrajChoices, Trajectory<?>> trajMap;
 
-    static {
-      trajMap = new HashMap<TrajChoices, Trajectory<?>>();
-      for (TrajChoices auto : EnumSet.allOf(TrajChoices.class)) {
-        trajMap.put(auto, Choreo.loadTrajectory(auto.name()).get());
-      }
-    }
-  }
+  //   static {
+  //     trajMap = new HashMap<TrajChoices, Trajectory<?>>();
+  //     for (TrajChoices auto : EnumSet.allOf(TrajChoices.class)) {
+  //       trajMap.put(auto, Choreo.loadTrajectory(auto.name()).get());
+  //     }
+  //   }
+  // }
 
   // public class AutonomousRoutines {
   private final AutoFactory autoFactory;
@@ -96,12 +96,13 @@ public class Autos {
 
   /**
    * Auto for testing purposes
+   *
    * @return Routine Command
    * @see AutoRoutine
    */
   public Command testAuto() {
     AutoRoutine routine = autoFactory.newRoutine("TEST_AUTO");
-    AutoTrajectory testPath = routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Test));
+    AutoTrajectory testPath = routine.trajectory(Choreo.loadTrajectory("TEST").get());
 
     routine
         .active()
@@ -123,13 +124,14 @@ public class Autos {
 
   /**
    * Center Rush Left Auto
+   *
    * @return Routine Command
    * @see AutoRoutine
    */
   public Command CenterRushLeft() {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_LEFT");
     AutoTrajectory centerRush =
-        routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Center_Rush_Left));
+        routine.trajectory(Choreo.loadTrajectory("CENTER_RUSH_LEFT").get());
     routine
         .active()
         .onTrue(
@@ -151,13 +153,14 @@ public class Autos {
 
   /**
    * Center Rush Right Auto
+   *
    * @return Routine Command
    * @see AutoRoutine
    */
   public Command CenterRushRight() {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_RIGHT");
     AutoTrajectory centerRush =
-        routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Center_Rush_Right));
+        routine.trajectory(Choreo.loadTrajectory("CENTER_RUSH_RIGHT").get());
 
     routine
         .active()
@@ -179,12 +182,13 @@ public class Autos {
 
   /**
    * Depot Left Auto
+   *
    * @return Routine Command
    * @see AutoRoutine
    */
   public Command DepotLeft() {
     AutoRoutine routine = autoFactory.newRoutine("DEPOT_LEFT");
-    AutoTrajectory depotTraj = routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Depot_Left));
+    AutoTrajectory depotTraj = routine.trajectory(Choreo.loadTrajectory("DEPOT_LEFT").get());
 
     routine
         .active()
@@ -194,24 +198,26 @@ public class Autos {
                 depotTraj.cmd(),
                 Commands.runOnce(() -> drive.stop()),
                 new ShooterAutoAimSequence(
-                    shooter,
-                    hood,
-                    shooterInterp,
-                    hoodInterp,
-                    () -> drive.getPose(),
-                    FieldConstants.HUB_POSE_BLUE,
-                    drive)));
+                        shooter,
+                        hood,
+                        shooterInterp,
+                        hoodInterp,
+                        () -> drive.getPose(),
+                        FieldConstants.HUB_POSE_BLUE,
+                        drive)
+                    .alongWith(indexer.runIndexer(6.0))));
     return routine.cmd();
   }
 
   /**
    * Depot Center Auto
+   *
    * @return Routine Command
    * @see AutoRoutine
    */
   public Command DepotCenter() {
     AutoRoutine routine = autoFactory.newRoutine("DEPOT_CENTER");
-    AutoTrajectory depot = routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Depot_Center));
+    AutoTrajectory depot = routine.trajectory(Choreo.loadTrajectory("DEPOT_CENTER").get());
     routine
         .active()
         .onTrue(
@@ -232,12 +238,13 @@ public class Autos {
 
   /**
    * HP Right (Outpost) Auto
+   *
    * @return Routine Command
    * @see AutoRoutine
    */
   public Command HPRight() {
     AutoRoutine routine = autoFactory.newRoutine("HP_RIGHT");
-    AutoTrajectory hp = routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Hp_Right));
+    AutoTrajectory hp = routine.trajectory(Choreo.loadTrajectory("HP_RIGHT").get());
     routine
         .active()
         .onTrue(
@@ -258,6 +265,7 @@ public class Autos {
 
   /**
    * Populates a given dashboard chooser with the choreo autos.
+   *
    * @param chooser The dashboard chooser to populate.
    * @see LoggedDashboardChooser
    */
@@ -297,6 +305,7 @@ public class Autos {
 
   /**
    * Builds the AutoFactory using needed named commands. Should be ran before populating.
+   *
    * @see AutoFactory
    */
   public void buildAutoChooser() {
