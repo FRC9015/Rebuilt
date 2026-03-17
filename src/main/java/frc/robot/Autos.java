@@ -124,7 +124,7 @@ public class Autos {
    * @return Routine Command
    * @see AutoRoutine
    */
-  public Command CenterRushLeft() {
+  public Command centerrushLeft() {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_LEFT");
     AutoTrajectory centerRush = routine.trajectory(Choreo.loadTrajectory("CENTER_RUSH_LEFT").get());
     routine
@@ -152,7 +152,7 @@ public class Autos {
    * @return Routine Command
    * @see AutoRoutine
    */
-  public Command CenterRushRight() {
+  public Command centerrushRight() {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_RIGHT");
     AutoTrajectory centerRush =
         routine.trajectory(Choreo.loadTrajectory("CENTER_RUSH_RIGHT").get());
@@ -181,7 +181,7 @@ public class Autos {
    * @return Routine Command
    * @see AutoRoutine
    */
-  public Command DepotLeft() {
+  public Command depotLeft() {
     AutoRoutine routine = autoFactory.newRoutine("DEPOT_LEFT");
     AutoTrajectory depotTraj = routine.trajectory(Choreo.loadTrajectory("DEPOT_LEFT").get());
 
@@ -210,7 +210,7 @@ public class Autos {
    * @return Routine Command
    * @see AutoRoutine
    */
-  public Command DepotCenter() {
+  public Command depotCenter() {
     AutoRoutine routine = autoFactory.newRoutine("DEPOT_CENTER");
     AutoTrajectory depot = routine.trajectory(Choreo.loadTrajectory("DEPOT_CENTER").get());
     routine
@@ -237,7 +237,7 @@ public class Autos {
    * @return Routine Command
    * @see AutoRoutine
    */
-  public Command HPRight() {
+  public Command hpRight() {
     AutoRoutine routine = autoFactory.newRoutine("HP_RIGHT");
     AutoTrajectory hp = routine.trajectory(Choreo.loadTrajectory("HP_RIGHT").get());
     routine
