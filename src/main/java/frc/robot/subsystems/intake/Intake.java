@@ -77,17 +77,26 @@ public class Intake extends SubsystemBase {
     return rollerInputs.fuelInside;
   }
 
-  public Command ajitateIntake() {
-    return new SequentialCommandGroup(
-        setPivotPosition(PivotIO.PivotPositions.AGITATE)
-            .withTimeout(0.5)
-            .andThen(setPivotPosition(PivotIO.PivotPositions.AGITATE_MIDDLE).withTimeout(0.3)));
-  }
-
   public Command ajitateIntakeCommand() {
-    return startEnd(
-        () -> ajitateIntake().alongWith(runRollerAtSpeed(100)),
-        () -> setPivotPosition(PivotIO.PivotPositions.DEPLOYED).alongWith(runRollerAtSpeed(0)));
+    return new SequentialCommandGroup(
+            this.run(
+                    () -> {
+                      setPivotPosition(PivotIO.PivotPositions.AGITATE.getPivotPosition());
+                      setRollerSpeed(50);
+                    })
+                .withTimeout(0.2),
+            this.run(
+                    () -> {
+                      setPivotPosition(PivotIO.PivotPositions.AGITATE_MIDDLE.getPivotPosition());
+                      setRollerSpeed(50);
+                    })
+                .withTimeout(0.2))
+        .repeatedly()
+        .finallyDo(
+            (interrupted) -> {
+              setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(0.5);
+              this.setRollerVoltage(0);
+            });
   }
 
   @Override

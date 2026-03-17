@@ -427,7 +427,7 @@ public class RobotContainer {
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(85))
+            .alongWith(indexer.runIndexer(80))
             .onlyIf(() -> !DriverStation.isTest()));
 
     operatorController.x().whileTrue(intake.ajitateIntakeCommand());
