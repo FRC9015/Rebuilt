@@ -125,11 +125,11 @@ public class RobotContainer {
                     MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.INDEXER2_MOTOR_ID));
         intake =
             new Intake(
-                new RollerIOTalonFX(
-                    MotorIDConstants.INTAKE_ROLLER_LEFT_ID,
-                    MotorIDConstants.INTAKE_ROLLER_RIGHT_ID),
+                new RollerIOTalonFX(MotorIDConstants.INTAKE_ROLLER_ID),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
+                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
+                    MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -149,7 +149,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
-
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
 
         break;
@@ -234,8 +233,6 @@ public class RobotContainer {
 
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
-
-        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
       default:
@@ -357,8 +354,8 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> -driverController.getRightX(),
                 0.3));
-    // intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
+    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
     operatorController
         .leftTrigger()
         .whileTrue(
@@ -379,14 +376,14 @@ public class RobotContainer {
                 () -> drive.getPose(),
                 FieldConstants.HUB_POSE_BLUE,
                 drive));
-    operatorController.rightBumper().whileTrue(intake.runRollerAtVoltage(-6));
+    operatorController.rightBumper().whileTrue(intake.runRollerAtSpeed(-50));
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(85))
+            .alongWith(indexer.runIndexer(80))
             .onlyIf(() -> !DriverStation.isTest()));
 
-    operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
+    operatorController.x().whileTrue(intake.ajitateIntakeCommand());
     operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(50));
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
