@@ -402,7 +402,7 @@ public class RobotContainer {
                 () -> -driverController.getRightX(),
                 0.3));
     intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(12));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
     operatorController
         .leftTrigger()
         .whileTrue(
@@ -423,7 +423,7 @@ public class RobotContainer {
                 () -> drive.getPose(),
                 FieldConstants.HUB_POSE_BLUE,
                 drive));
-    operatorController.rightBumper().whileTrue(intake.runRollerAtVoltage(-6));
+    operatorController.rightBumper().whileTrue(intake.runRollerAtSpeed(-50));
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
