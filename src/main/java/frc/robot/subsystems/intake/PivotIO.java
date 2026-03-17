@@ -20,7 +20,8 @@ public interface PivotIO {
   public enum PivotPositions {
     STOWED(Constants.IntakeConstants.PIVOT_STOWED_POSITION),
     DEPLOYED(Constants.IntakeConstants.PIVOT_DEPLOYED_POSITION),
-    DONTBREAK(0.25);
+    AGITATE(0.25),
+    AGITATE_MIDDLE(0.75);
 
     private final double position;
 

@@ -310,7 +310,7 @@ public final class Constants {
     public static final double PIVOT_MAX_POS = 1.0;
     public static final double PIVOT_MIN_POS = 0.0;
     public static final double PIVOT_DEPLOYED_POSITION = 0.95;
-    public static final double PIVOT_STOWED_POSITION = 0;
+    public static final double PIVOT_STOWED_POSITION = 0.05;
   }
 
   public static class SimConstants {
