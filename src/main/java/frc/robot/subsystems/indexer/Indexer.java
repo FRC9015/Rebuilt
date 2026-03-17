@@ -71,9 +71,9 @@ public class Indexer extends SubsystemBase {
    *
    * @param voltage The desired voltage for the indexer.
    */
-  public void setVoltage(double voltage) {
-    io.setVoltage(voltage);
-    Logger.recordOutput("Indexer/setVoltage", voltage);
+  public void setIndexerSpeed(double speed) {
+    io.setIndexerSpeed(speed);
+    Logger.recordOutput("Indexer/setVoltage", speed);
   }
 
   /** Stops the indexer. */
@@ -104,11 +104,11 @@ public class Indexer extends SubsystemBase {
   /**
    * Runs the indexer at the specified voltage.
    *
-   * @param voltage Voltage provided to the motor.
+   * @param speed speed provided to the motor (-100 to 100).
    * @return A command that runs the indexer.
    */
-  public Command runIndexer(double voltage) {
-    return this.startEnd(() -> io.setVoltage(voltage), () -> stop());
+  public Command runIndexer(double speed) {
+    return this.startEnd(() -> io.setIndexerSpeed(speed), () -> stop());
   }
 
   /**
@@ -117,7 +117,7 @@ public class Indexer extends SubsystemBase {
    * @return A command that unjams the indexer.
    */
   public Command unjam() {
-    return this.runEnd(() -> io.setVoltage(-4.0), () -> stop()).withTimeout(0.5);
+    return this.runEnd(() -> io.setIndexerSpeed(-34), () -> stop()).withTimeout(0.5);
   }
 
   /**

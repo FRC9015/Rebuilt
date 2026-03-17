@@ -92,7 +92,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     inputs.flywheelTargetSpeed = lastFlywheelSetpointSpeed;
 
     if (Math.abs(inputs.flywheelCurrentSpeed - inputs.flywheelTargetSpeed)
-        < Constants.ShooterConstants.FLYWHEEL_RPM_TOLERANCE) {
+            < Constants.ShooterConstants.FLYWHEEL_RPM_TOLERANCE
+        && inputs.flywheelTargetSpeed != 0.0) {
       inputs.flywheelAtSpeed = true;
     } else {
       inputs.flywheelAtSpeed = false;

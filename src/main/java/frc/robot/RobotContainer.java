@@ -95,6 +95,8 @@ public class RobotContainer {
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
 
+  private Trigger shooterIsAtSetpoint;
+
   // Dashboard inputs
 
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -149,6 +151,8 @@ public class RobotContainer {
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
 
+        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
+
         break;
 
       case SIM:
@@ -195,6 +199,8 @@ public class RobotContainer {
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
 
+        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
+
         break;
 
       case REPLAY:
@@ -226,8 +232,12 @@ public class RobotContainer {
                     TurretConstants.ENCODER_15_TOOTH));
         hood = new Hood(new HoodIO() {});
         interpTables = new InterpTables();
+
+        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
 
+
+        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
       default:
@@ -250,12 +260,13 @@ public class RobotContainer {
         new TurretAngleAim(
                 () -> drive.getPose(),
                 turret,
+
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive,
                 interpTables.timeOfFlightInterp)
             .withTimeout(2)
-            .andThen(Commands.runOnce(() -> indexer.setVoltage(5))));
-    NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setVoltage(5)));
+            .andThen(Commands.runOnce(() -> indexer.setIndexerSpeed(50))));
+    NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setIndexerSpeed(50)));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
 
@@ -372,12 +383,18 @@ public class RobotContainer {
                 FieldConstants.HUB_POSE_BLUE,
                 drive));
     operatorController.rightBumper().whileTrue(intake.runRollerAtVoltage(-6));
-    operatorController.b().whileTrue(indexer.runIndexer(5));
+
+    shooterIsAtSetpoint.whileTrue(
+        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(85))
+            .onlyIf(() -> !DriverStation.isTest()));
+
     operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
-    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(35));
+    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(50));
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
+    
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
@@ -395,7 +412,7 @@ public class RobotContainer {
         .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(indexer.runIndexer(5).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(indexer.runIndexer(50).onlyIf(() -> DriverStation.isTest()));
   }
 
   /**
