@@ -2,8 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import choreo.auto.AutoChooser;
-import com.pathplanner.lib.auto.AutoBuilder;
+import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,7 +11,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -91,7 +89,7 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final ZoneLogic zones;
 
-  private final AutoChooser autoChooser2;
+  private final AutoFactory autoFactory;
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -105,6 +103,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -236,7 +235,6 @@ public class RobotContainer {
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
 
-
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
@@ -260,7 +258,6 @@ public class RobotContainer {
         new TurretAngleAim(
                 () -> drive.getPose(),
                 turret,
-
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive,
                 interpTables.timeOfFlightInterp)
@@ -269,8 +266,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setIndexerSpeed(50)));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    autoChooser2 = new AutoChooser();
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -290,75 +287,29 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
-    // Autos.populateChooser(
-    //     autoChooser2,
-    //     drive,
-    //     intake,
-    //     shooter,
-    //     indexer,
-    //     hood,
-    //     vision,
-    //     turret,
-    //     interpTables.shooterSpeedInterp,
-    //     interpTables.hoodAngleInterp);
+    autoFactory =
+        new AutoFactory(
+            () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true, drive);
 
-    autoChooser2.addRoutine(
-        "DepotLeftBlue",
-        () ->
-            Autos.AutonomousRoutines.depotLeftBlue(
-                drive,
-                intake,
-                shooter,
-                indexer,
-                hood,
-                vision,
-                turret,
-                interpTables.shooterSpeedInterp,
-                interpTables.hoodAngleInterp));
-    autoChooser2.addRoutine(
-        "DepotCenterRed",
-        () ->
-            Autos.AutonomousRoutines.depotCenteRed(
-                drive,
-                intake,
-                shooter,
-                indexer,
-                hood,
-                vision,
-                turret,
-                interpTables.shooterSpeedInterp,
-                interpTables.hoodAngleInterp));
-    autoChooser2.addRoutine(
-        "CenterRushRightRed",
-        () ->
-            Autos.AutonomousRoutines.centerrushRightRed(
-                drive,
-                intake,
-                shooter,
-                indexer,
-                hood,
-                vision,
-                turret,
-                interpTables.shooterSpeedInterp,
-                interpTables.hoodAngleInterp));
-    autoChooser2.addRoutine(
-        "CenterRushLeftRed",
-        () ->
-            Autos.AutonomousRoutines.centerrushLeftRed(
-                drive,
-                intake,
-                shooter,
-                indexer,
-                hood,
-                vision,
-                turret,
-                interpTables.shooterSpeedInterp,
-                interpTables.hoodAngleInterp));
-    SmartDashboard.putData("Choreo Autos", autoChooser2);
-    Trigger autoTrigger = new Trigger(() -> DriverStation.isAutonomous());
-    autoTrigger.whileTrue(autoChooser2.selectedCommandScheduler());
+    Autos autoRoutines =
+        new Autos(
+            autoFactory,
+            drive,
+            intake,
+            shooter,
+            indexer,
+            hood,
+            vision,
+            turret,
+            interpTables.shooterSpeedInterp,
+            interpTables.hoodAngleInterp);
+
+    autoRoutines.buildAutoChooser();
+    autoRoutines.populateChooser(autoChooser);
+
     configureButtonBindings();
   }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -406,7 +357,7 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> -driverController.getRightX(),
                 0.3));
-    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    // intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
     operatorController
         .leftTrigger()
@@ -440,7 +391,7 @@ public class RobotContainer {
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
-    
+
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
