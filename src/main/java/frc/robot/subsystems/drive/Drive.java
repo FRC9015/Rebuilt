@@ -15,7 +15,6 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
-import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -96,8 +95,6 @@ public class Drive extends SubsystemBase {
   private final PIDController choreoXController = new PIDController(7, 0, 0);
   private final PIDController choreoYController = new PIDController(7, 0, 0);
   private final PIDController choreoThetaController = new PIDController(7, 0, 0);
-
-  public final AutoFactory autoFactory;
 
   private static final PathConstraints PP_CONSTRAINTS =
       new PathConstraints(3.0, 3.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
@@ -230,7 +227,6 @@ public class Drive extends SubsystemBase {
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
     choreoThetaController.enableContinuousInput(-Math.PI, Math.PI);
-    autoFactory = new AutoFactory(this::getPose, this::setPose, this::choreoDrive, true, this);
     prevSetpoint =
         new SwerveSetpoint(
             getChassisSpeeds(), getModuleStates(), DriveFeedforwards.zeros(MODULE_COUNT));

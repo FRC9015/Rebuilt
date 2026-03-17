@@ -1,5 +1,5 @@
 {
- "name":"CenterRush_Left",
+ "name":"AutonomousPaths",
  "version":2,
  "type":"Swerve",
  "variables":{
@@ -28,8 +28,8 @@
    }
   },
   "mass":{
-   "exp":"150 lbs",
-   "val":68.0388555
+   "exp":"143.5 lbs",
+   "val":65.090505095
   },
   "inertia":{
    "exp":"6 kg m ^ 2",
@@ -76,9 +76,9 @@
  },
  "generationFeatures":[],
  "codegen":{
-  "root":"home/arya/Documents/QE/Rebuilt/src/main/java/frc/robot",
-  "genVars":true,
-  "genTrajData":true,
-  "useChoreoLib":true
+  "root":"../../java/frc/robot",
+  "genVars":false,
+  "genTrajData":false,
+  "useChoreoLib":false
  }
 }
