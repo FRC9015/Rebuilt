@@ -63,6 +63,7 @@ import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import java.util.function.Supplier;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -384,7 +385,16 @@ public class RobotContainer {
                 drive,
                 interpTables.timeOfFlightInterp)
             .alongWith(
-                Commands.run(() -> Logger.recordOutput("current", zones.getCurrentFieldZone()))));
+                Commands.run(
+                    () -> {
+                      Supplier<Pose2d> g = () -> drive.getPose();
+                      Logger.recordOutput(
+                          "DistanceToTHING",
+                          zones
+                              .getZoneTargetPose()
+                              .getTranslation()
+                              .getDistance(g.get().getTranslation()));
+                    })));
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,

@@ -99,9 +99,9 @@ public final class Constants {
     public static final Translation3d HUB_TARGET_TOLERANCE =
         new Translation3d(
             Units.inchesToMeters(24), Units.inchesToMeters(21), Units.inchesToMeters(0.02));
-
+    // TODO FIX THESE BAD.
     public static final Pose2d PASSING_POSE_LEFT_BLUE =
-        new Pose2d(new Translation2d(4.127, 5.495), new Rotation2d());
+        new Pose2d(new Translation2d(2.686, 6.569), new Rotation2d());
     public static final Pose2d PASSING_POSE_RIGHT_BLUE =
         new Pose2d(new Translation2d(4.127, 2.512), new Rotation2d());
     public static final Pose2d PASSING_POSE_LEFT_RED =

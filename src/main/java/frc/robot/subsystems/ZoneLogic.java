@@ -169,6 +169,7 @@ public class ZoneLogic extends SubsystemBase {
       overrideZones = true;
     }
     Logger.recordOutput("Zones/current", getCurrentFieldZone());
+
     Logger.recordOutput("Zones/runMainZoneLogic", runMainZoneLogic);
     Logger.recordOutput("zones", overrideZones);
   }
