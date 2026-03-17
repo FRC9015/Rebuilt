@@ -19,29 +19,27 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.PhoenixUtil;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Autos {
-  public enum AutoChoices {
-    TEST,
-    CENTER_RUSH_LEFT,
-    CENTER_RUSH_RIGHT,
-    DEPOT_LEFT,
-    DEPOT_CENTER,
-    HP_RIGHT;
+  public enum TrajChoices {
+    Test,
+    Center_Rush_Left,
+    Center_Rush_Right,
+    Depot_Left,
+    Depot_Center,
+    Hp_Right;
 
-    private static final Map<AutoChoices, Trajectory<?>> trajMap;
+    private static final Map<TrajChoices, Trajectory<?>> trajMap;
 
     static {
-      trajMap = new HashMap<AutoChoices, Trajectory<?>>();
-      for (AutoChoices auto : EnumSet.allOf(AutoChoices.class)) {
+      trajMap = new HashMap<TrajChoices, Trajectory<?>>();
+      for (TrajChoices auto : EnumSet.allOf(TrajChoices.class)) {
         trajMap.put(auto, Choreo.loadTrajectory(auto.name()).get());
       }
     }
@@ -96,9 +94,14 @@ public class Autos {
     this.hoodInterp = hoodInterp;
   }
 
+  /**
+   * Auto for testing purposes
+   * @return Routine Command
+   * @see AutoRoutine
+   */
   public Command testAuto() {
     AutoRoutine routine = autoFactory.newRoutine("TEST_AUTO");
-    AutoTrajectory testPath = routine.trajectory("TEST");
+    AutoTrajectory testPath = routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Test));
 
     routine
         .active()
@@ -118,10 +121,15 @@ public class Autos {
     return routine.cmd();
   }
 
+  /**
+   * Center Rush Left Auto
+   * @return Routine Command
+   * @see AutoRoutine
+   */
   public Command CenterRushLeft() {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_LEFT");
     AutoTrajectory centerRush =
-        routine.trajectory(AutoChoices.trajMap.get(AutoChoices.CENTER_RUSH_LEFT));
+        routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Center_Rush_Left));
     routine
         .active()
         .onTrue(
@@ -141,10 +149,15 @@ public class Autos {
     return routine.cmd();
   }
 
+  /**
+   * Center Rush Right Auto
+   * @return Routine Command
+   * @see AutoRoutine
+   */
   public Command CenterRushRight() {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_RIGHT");
     AutoTrajectory centerRush =
-        routine.trajectory(AutoChoices.trajMap.get(AutoChoices.CENTER_RUSH_RIGHT));
+        routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Center_Rush_Right));
 
     routine
         .active()
@@ -164,10 +177,14 @@ public class Autos {
     return routine.cmd();
   }
 
+  /**
+   * Depot Left Auto
+   * @return Routine Command
+   * @see AutoRoutine
+   */
   public Command DepotLeft() {
     AutoRoutine routine = autoFactory.newRoutine("DEPOT_LEFT");
-    AutoTrajectory depotTraj =
-        routine.trajectory(AutoChoices.trajMap.get(AutoChoices.DEPOT_LEFT));
+    AutoTrajectory depotTraj = routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Depot_Left));
 
     routine
         .active()
@@ -187,10 +204,14 @@ public class Autos {
     return routine.cmd();
   }
 
+  /**
+   * Depot Center Auto
+   * @return Routine Command
+   * @see AutoRoutine
+   */
   public Command DepotCenter() {
     AutoRoutine routine = autoFactory.newRoutine("DEPOT_CENTER");
-    AutoTrajectory depot =
-  routine.trajectory(AutoChoices.trajMap.get(AutoChoices.DEPOT_CENTER));
+    AutoTrajectory depot = routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Depot_Center));
     routine
         .active()
         .onTrue(
@@ -209,9 +230,14 @@ public class Autos {
     return routine.cmd();
   }
 
+  /**
+   * HP Right (Outpost) Auto
+   * @return Routine Command
+   * @see AutoRoutine
+   */
   public Command HPRight() {
     AutoRoutine routine = autoFactory.newRoutine("HP_RIGHT");
-    AutoTrajectory hp = routine.trajectory(AutoChoices.trajMap.get(AutoChoices.HP_RIGHT));
+    AutoTrajectory hp = routine.trajectory(TrajChoices.trajMap.get(TrajChoices.Hp_Right));
     routine
         .active()
         .onTrue(
@@ -230,29 +256,51 @@ public class Autos {
     return routine.cmd();
   }
 
-  public static void populateChooser(LoggedDashboardChooser<Command> chooser) {
-    for (Method method : Autos.class.getDeclaredMethods()) {
+  /**
+   * Populates a given dashboard chooser with the choreo autos.
+   * @param chooser The dashboard chooser to populate.
+   * @see LoggedDashboardChooser
+   */
+  public void populateChooser(LoggedDashboardChooser<Command> chooser) {
+    // Get all methods in this class
+    for (Method method : this.getClass().getDeclaredMethods()) {
 
-      if (method.isSynthetic()) continue;
-      System.out.println(method.getName());
-      String name = method.getName();
-      Method methodCall = () -> {
-        try {
-          return (Command)method.invoke(null);
-        } catch (Exception e){
-          return e;
+      // Filter: Must return Command, must have 0 parameters, and must be public
+      if (method.getReturnType().equals(Command.class)
+          && method.getParameterCount() == 0
+          && Modifier.isPublic(method.getModifiers())) {
+
+        // Optional: Skip the populateChooser method itself if it matched
+        if (method.getName().equals("populateChooser")
+            || method.getName().equals("buildAutoChooser")) {
+          continue;
         }
-      };
-      chooser.addOption(
-          name, Commands.deferredProxy(() -> (Command)method.invoke(null)));
+
+        String name = method.getName();
+
+        // Add to the chooser using deferredProxy
+        // This ensures the method is called ONLY when the auto starts
+        chooser.addOption(
+            name,
+            Commands.deferredProxy(
+                () -> {
+                  try {
+                    return (Command) method.invoke(this);
+                  } catch (Exception e) {
+                    System.err.println("Could not invoke auto method: " + name);
+                    return Commands.none();
+                  }
+                }));
+      }
     }
   }
 
+  /**
+   * Builds the AutoFactory using needed named commands. Should be ran before populating.
+   * @see AutoFactory
+   */
   public void buildAutoChooser() {
-    autoFactory.bind(
-        "Intake",
-  
-  intake.runRollerAtVoltage(8).alongWith(intake.setPivotPosition(PivotPositions.DEPLOYED)));
+    autoFactory.bind("Intake", intake.runIntakeAtSpeed(50, PivotPositions.DEPLOYED));
     autoFactory.bind(
         "ShooterSpeed",
         new ShooterAutoAimSequence(
@@ -263,7 +311,6 @@ public class Autos {
             () -> drive.getPose(),
             PhoenixUtil.isRed() ? FieldConstants.HUB_POSE_RED : FieldConstants.HUB_POSE_BLUE,
             drive));
-    autoFactory.bind(
-        "ShootBall", shooter.setKickerSpeedCommand(1).alongWith(indexer.runIndexer(6.0)));
+    autoFactory.bind("ShootBall", indexer.runIndexer(6.0));
   }
 }

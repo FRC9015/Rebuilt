@@ -2,11 +2,9 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,11 +13,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FieldConstants;
@@ -94,7 +90,6 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final ZoneLogic zones;
 
-  private final AutoChooser autoChooser2;
   private final AutoFactory autoFactory;
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
@@ -264,7 +259,7 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
 
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -301,18 +296,9 @@ public class RobotContainer {
             interpTables.shooterSpeedInterp,
             interpTables.hoodAngleInterp);
 
-    // AdKit Chooser
-    autoChooser.addOption(
-        "TEST AUTO1 choreo", Commands.deferredProxy(() -> autoRoutines.testAuto()));
-    autoChooser.addOption("TEST AUTO2 choreo", Commands.deferredProxy(() -> this.testAuto().cmd()));
+    autoRoutines.buildAutoChooser();
+    autoRoutines.populateChooser(autoChooser);
 
-    // Choreo Chooser
-    autoChooser2 = new AutoChooser();
-    // Routine on main like example
-    autoChooser2.addRoutine("TEST_AUTO2", this::testAuto);
-
-    SmartDashboard.putData("Choreo Autos", autoChooser2);
-    RobotModeTriggers.autonomous().whileTrue(autoChooser2.selectedCommandScheduler());
     configureButtonBindings();
   }
 
