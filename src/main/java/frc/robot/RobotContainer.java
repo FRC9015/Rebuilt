@@ -3,8 +3,6 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Meters;
 
 import choreo.auto.AutoFactory;
-import choreo.auto.AutoRoutine;
-import choreo.auto.AutoTrajectory;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,6 +14,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FieldConstants;
@@ -236,7 +235,6 @@ public class RobotContainer {
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
 
-
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
@@ -260,7 +258,6 @@ public class RobotContainer {
         new TurretAngleAim(
                 () -> drive.getPose(),
                 turret,
-
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive,
                 interpTables.timeOfFlightInterp)
@@ -394,7 +391,7 @@ public class RobotContainer {
     operatorController.povUp().onTrue(turret.setTurretAngleFastestPathCommand(0));
     operatorController.povDown().onTrue(turret.setTurretAngleFastestPathCommand(180));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
-    
+
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
@@ -430,5 +427,4 @@ public class RobotContainer {
     Logger.recordOutput(
         "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
   }
-
 }

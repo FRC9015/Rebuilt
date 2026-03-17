@@ -4,7 +4,6 @@ import choreo.Choreo;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
-import choreo.trajectory.Trajectory;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -21,9 +20,6 @@ import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.PhoenixUtil;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Autos {
@@ -130,8 +126,7 @@ public class Autos {
    */
   public Command CenterRushLeft() {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_LEFT");
-    AutoTrajectory centerRush =
-        routine.trajectory(Choreo.loadTrajectory("CENTER_RUSH_LEFT").get());
+    AutoTrajectory centerRush = routine.trajectory(Choreo.loadTrajectory("CENTER_RUSH_LEFT").get());
     routine
         .active()
         .onTrue(
