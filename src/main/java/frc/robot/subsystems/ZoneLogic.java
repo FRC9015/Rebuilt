@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.ZoneConstants;
-import frc.robot.commands.TurretAngleAim;
 import frc.robot.subsystems.drive.Drive;
 import org.littletonrobotics.junction.Logger;
 
@@ -160,10 +159,10 @@ public class ZoneLogic extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if(DriverStation.isEnabled()){
+    if (DriverStation.isEnabled()) {
       runMainZoneLogic = zoneControl;
       overrideZones = overrideControl;
-    }else{
+    } else {
       overrideControl = false;
       zoneControl = true;
       runMainZoneLogic = false;

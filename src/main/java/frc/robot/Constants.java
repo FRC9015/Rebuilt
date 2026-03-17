@@ -80,10 +80,12 @@ public final class Constants {
     public static final double TRENCH_BUMP_X =
         Units.inchesToMeters(181.56); // x position of the center of the trench and bump
     public static final double TRENCH_BUMP_LENGTH =
-        Units.inchesToMeters(47); // x length of the trench and bump
-    public static final double TRENCH_X_MIN = TRENCH_BUMP_X - FieldConstants.TRENCH_BUMP_LENGTH;
+        Units.inchesToMeters(47) / 2.0; // x length of the trench and bump
+    public static final double TRENCH_X_MIN =
+        TRENCH_BUMP_X - FieldConstants.TRENCH_BUMP_LENGTH * 2.0;
 
-    public static final double TRENCH_X_MAX = TRENCH_BUMP_X + FieldConstants.TRENCH_BUMP_LENGTH;
+    public static final double TRENCH_X_MAX =
+        TRENCH_BUMP_X + FieldConstants.TRENCH_BUMP_LENGTH * 2.0;
 
     private static final double TRENCH_Y_MIN = 0;
     private static final double TRENCH_Y_MAX = Units.inchesToMeters(49.86);
@@ -163,16 +165,22 @@ public final class Constants {
 
     public static final Rectangle2d NEUTRAL_ZONE_LEFT =
         new Rectangle2d(
-            new Translation2d(FieldConstants.TRENCH_X_MAX, 0.0),
+            new Translation2d(FieldConstants.TRENCH_X_MAX - FieldConstants.TRENCH_BUMP_LENGTH, 0.0),
             new Translation2d(
-                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
+                FieldConstants.FIELD_LENGTH
+                    - FieldConstants.TRENCH_X_MAX
+                    + FieldConstants.TRENCH_BUMP_LENGTH,
                 FieldConstants.FIELD_WIDTH / 2.0));
 
     public static final Rectangle2d NEUTRAL_ZONE_RIGHT =
         new Rectangle2d(
-            new Translation2d(FieldConstants.TRENCH_X_MAX, FieldConstants.FIELD_WIDTH / 2.0),
             new Translation2d(
-                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
+                FieldConstants.TRENCH_X_MAX - FieldConstants.TRENCH_BUMP_LENGTH,
+                FieldConstants.FIELD_WIDTH / 2.0),
+            new Translation2d(
+                FieldConstants.FIELD_LENGTH
+                    - FieldConstants.TRENCH_X_MAX
+                    + FieldConstants.TRENCH_BUMP_LENGTH,
                 FieldConstants.FIELD_WIDTH));
   }
 
