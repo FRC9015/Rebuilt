@@ -2,8 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import choreo.auto.AutoChooser;
-import com.pathplanner.lib.auto.AutoBuilder;
+import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,7 +11,6 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -93,7 +91,7 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final ZoneLogic zones;
 
-  private final AutoChooser autoChooser2;
+  private final AutoFactory autoFactory;
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -131,11 +129,11 @@ public class RobotContainer {
                     MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.INDEXER2_MOTOR_ID));
         intake =
             new Intake(
-                new RollerIOTalonFX(
-                    MotorIDConstants.INTAKE_ROLLER_LEFT_ID,
-                    MotorIDConstants.INTAKE_ROLLER_RIGHT_ID),
+                new RollerIOTalonFX(MotorIDConstants.INTAKE_ROLLER_ID),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
+                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
+                    MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -155,7 +153,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
-
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
         overrideZone = new Trigger(() -> zones.getOverrideZone());
@@ -241,8 +238,6 @@ public class RobotContainer {
 
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
-
-        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
       default:
@@ -273,8 +268,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("indexer", Commands.runOnce(() -> indexer.setIndexerSpeed(50)));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.5));
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    autoChooser2 = new AutoChooser();
+
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices");
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -294,75 +289,29 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
-    // Autos.populateChooser(
-    //     autoChooser2,
-    //     drive,
-    //     intake,
-    //     shooter,
-    //     indexer,
-    //     hood,
-    //     vision,
-    //     turret,
-    //     interpTables.shooterSpeedInterp,
-    //     interpTables.hoodAngleInterp);
+    autoFactory =
+        new AutoFactory(
+            () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true, drive);
 
-    // autoChooser2.addRoutine(
-    //     "DepotLeftBlue",
-    //     () ->
-    //         Autos.AutonomousRoutines.depotLeftBlue(
-    //             drive,
-    //             intake,
-    //             shooter,
-    //             indexer,
-    //             hood,
-    //             vision,
-    //             turret,
-    //             interpTables.shooterSpeedHubInterp,
-    //             interpTables.hoodAngleHubInterp));
-    // autoChooser2.addRoutine(
-    //     "DepotCenterRed",
-    //     () ->
-    //         Autos.AutonomousRoutines.depotCenteRed(
-    //             drive,
-    //             intake,
-    //             shooter,
-    //             indexer,
-    //             hood,
-    //             vision,
-    //             turret,
-    //             interpTables.shooterSpeedHubInterp,
-    //             interpTables.hoodAngleHubInterp));
-    // autoChooser2.addRoutine(
-    //     "CenterRushRightRed",
-    //     () ->
-    //         Autos.AutonomousRoutines.centerrushRightRed(
-    //             drive,
-    //             intake,
-    //             shooter,
-    //             indexer,
-    //             hood,
-    //             vision,
-    //             turret,
-    //             interpTables.shooterSpeedHubInterp,
-    //             interpTables.hoodAngleHubInterp));
-    // autoChooser2.addRoutine(
-    //     "CenterRushLeftRed",
-    //     () ->
-    //         Autos.AutonomousRoutines.centerrushLeftRed(
-    //             drive,
-    //             intake,
-    //             shooter,
-    //             indexer,
-    //             hood,
-    //             vision,
-    //             turret,
-    //             interpTables.shooterSpeedHubInterp,
-    //             interpTables.hoodAngleHubInterp));
-    SmartDashboard.putData("Choreo Autos", autoChooser2);
-    Trigger autoTrigger = new Trigger(() -> DriverStation.isAutonomous());
-    autoTrigger.whileTrue(autoChooser2.selectedCommandScheduler());
+    Autos autoRoutines =
+        new Autos(
+            autoFactory,
+            drive,
+            intake,
+            shooter,
+            indexer,
+            hood,
+            vision,
+            turret,
+            interpTables.shooterSpeedInterp,
+            interpTables.hoodAngleInterp);
+
+    autoRoutines.buildAutoChooser();
+    autoRoutines.populateChooser(autoChooser);
+
     configureButtonBindings();
   }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -448,7 +397,7 @@ public class RobotContainer {
             .alongWith(indexer.runIndexer(35))
             .onlyIf(() -> !DriverStation.isTest()));
 
-    operatorController.x().whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DONTBREAK));
+    operatorController.x().whileTrue(intake.ajitateIntakeCommand());
     operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(50));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
