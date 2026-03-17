@@ -414,25 +414,4 @@ public class RobotContainer {
         "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
   }
 
-  AutoRoutine testAuto() {
-    AutoRoutine routine = autoFactory.newRoutine("TEST_AUTO2");
-    AutoTrajectory testPath = routine.trajectory("TEST");
-
-    routine
-        .active()
-        .onTrue(
-            Commands.sequence(
-                testPath.resetOdometry(),
-                testPath.cmd(),
-                Commands.runOnce(() -> drive.stop()),
-                new ShooterAutoAimSequence(
-                    shooter,
-                    hood,
-                    interpTables.shooterSpeedInterp,
-                    interpTables.hoodAngleInterp,
-                    () -> drive.getPose(),
-                    FieldConstants.HUB_POSE_BLUE,
-                    drive)));
-    return routine;
-  }
 }
