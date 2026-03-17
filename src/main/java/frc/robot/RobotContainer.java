@@ -150,7 +150,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.HOOD_ENCODER_ID));
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
-
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
 
         break;
@@ -235,8 +234,6 @@ public class RobotContainer {
 
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         zones = new ZoneLogic(drive);
-
-        shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         break;
 
       default:
