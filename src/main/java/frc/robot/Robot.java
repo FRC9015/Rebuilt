@@ -41,7 +41,6 @@ public class Robot extends LoggedRobot {
           case 1 -> "Uncommitted changes";
           default -> "Unknown";
         });
-
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
       case REAL:

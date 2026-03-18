@@ -41,7 +41,6 @@ public class IndexerIOTalonFX implements IndexerIO {
       int motorId1, int motorid2) { // , int canRangeID1, int canRangeID2, int canRangeID3
     motor1 = new TalonFX(motorId1);
     motor2 = new TalonFX(motorid2);
-
     // Configure motor
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()

@@ -14,21 +14,20 @@ import org.littletonrobotics.junction.Logger;
 public class HoodAutoAim extends Command {
   private final Hood hood;
   private Supplier<Pose2d> pose;
-  private Pose2d targetPose;
-  private Pose2d flippedTargetPose;
+  private Supplier<Pose2d> targetPoseSupplier;
   private InterpolatingTreeMap<Double, Double> hoodInterpTable;
   private final Drive drive;
 
   public HoodAutoAim(
       Hood hood,
       Supplier<Pose2d> poseSupplier,
-      Pose2d targetPose,
+      Supplier<Pose2d> targetPosesSupplier,
       InterpolatingTreeMap<Double, Double> hoodInterp,
       Drive drive) {
     this.hood = hood;
     this.pose = poseSupplier;
-    this.targetPose = targetPose;
-    this.flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
+    this.targetPoseSupplier = targetPosesSupplier;
+
     this.hoodInterpTable = hoodInterp;
     this.drive = drive;
     addRequirements(hood);
@@ -37,6 +36,8 @@ public class HoodAutoAim extends Command {
   @Override
   public void execute() {
     Pose2d currentRobotPose = pose.get();
+    Pose2d targetPose = targetPoseSupplier.get();
+    Pose2d flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
 
     boolean isRed =
         DriverStation.getAlliance().isPresent()

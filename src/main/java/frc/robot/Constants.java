@@ -82,9 +82,12 @@ public final class Constants {
         Units.inchesToMeters(181.56); // x position of the center of the trench and bump
     public static final double TRENCH_BUMP_LENGTH =
         Units.inchesToMeters(47); // x length of the trench and bump
+    public static final double NEUTRAL_ZONE_BUMP = Units.inchesToMeters(47) / 2.0;
     public static final double TRENCH_X_MIN = TRENCH_BUMP_X - FieldConstants.TRENCH_BUMP_LENGTH;
 
     public static final double TRENCH_X_MAX = TRENCH_BUMP_X + FieldConstants.TRENCH_BUMP_LENGTH;
+
+    public static final double NEUTRAL_X_MAX = TRENCH_BUMP_X + FieldConstants.NEUTRAL_ZONE_BUMP;
 
     private static final double TRENCH_Y_MIN = 0;
     private static final double TRENCH_Y_MAX = Units.inchesToMeters(49.86);
@@ -98,9 +101,9 @@ public final class Constants {
     public static final Translation3d HUB_TARGET_TOLERANCE =
         new Translation3d(
             Units.inchesToMeters(24), Units.inchesToMeters(21), Units.inchesToMeters(0.02));
-
+    // TODO FIX THESE BAD.
     public static final Pose2d PASSING_POSE_LEFT_BLUE =
-        new Pose2d(new Translation2d(4.127, 5.495), new Rotation2d());
+        new Pose2d(new Translation2d(2.686, 6.569), new Rotation2d());
     public static final Pose2d PASSING_POSE_RIGHT_BLUE =
         new Pose2d(new Translation2d(4.127, 2.512), new Rotation2d());
     public static final Pose2d PASSING_POSE_LEFT_RED =
@@ -164,16 +167,16 @@ public final class Constants {
 
     public static final Rectangle2d NEUTRAL_ZONE_LEFT =
         new Rectangle2d(
-            new Translation2d(FieldConstants.TRENCH_X_MAX, 0.0),
+            new Translation2d(FieldConstants.NEUTRAL_X_MAX, 0.0),
             new Translation2d(
-                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
+                FieldConstants.FIELD_LENGTH - FieldConstants.NEUTRAL_X_MAX,
                 FieldConstants.FIELD_WIDTH / 2.0));
 
     public static final Rectangle2d NEUTRAL_ZONE_RIGHT =
         new Rectangle2d(
-            new Translation2d(FieldConstants.TRENCH_X_MAX, FieldConstants.FIELD_WIDTH / 2.0),
+            new Translation2d(FieldConstants.NEUTRAL_X_MAX, FieldConstants.FIELD_WIDTH / 2.0),
             new Translation2d(
-                FieldConstants.FIELD_LENGTH - FieldConstants.TRENCH_X_MAX,
+                FieldConstants.FIELD_LENGTH - FieldConstants.NEUTRAL_X_MAX,
                 FieldConstants.FIELD_WIDTH));
   }
 
