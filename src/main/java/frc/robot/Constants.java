@@ -9,8 +9,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.lang.reflect.Field;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -85,11 +83,9 @@ public final class Constants {
     public static final double TRENCH_BUMP_LENGTH =
         Units.inchesToMeters(47); // x length of the trench and bump
     public static final double NEUTRAL_ZONE_BUMP = Units.inchesToMeters(47) / 2.0;
-    public static final double TRENCH_X_MIN =
-        TRENCH_BUMP_X - FieldConstants.TRENCH_BUMP_LENGTH;
+    public static final double TRENCH_X_MIN = TRENCH_BUMP_X - FieldConstants.TRENCH_BUMP_LENGTH;
 
-    public static final double TRENCH_X_MAX =
-        TRENCH_BUMP_X + FieldConstants.TRENCH_BUMP_LENGTH;
+    public static final double TRENCH_X_MAX = TRENCH_BUMP_X + FieldConstants.TRENCH_BUMP_LENGTH;
 
     public static final double NEUTRAL_X_MAX = TRENCH_BUMP_X + FieldConstants.NEUTRAL_ZONE_BUMP;
 
@@ -173,18 +169,14 @@ public final class Constants {
         new Rectangle2d(
             new Translation2d(FieldConstants.NEUTRAL_X_MAX, 0.0),
             new Translation2d(
-                FieldConstants.FIELD_LENGTH
-                    - FieldConstants.NEUTRAL_X_MAX,
+                FieldConstants.FIELD_LENGTH - FieldConstants.NEUTRAL_X_MAX,
                 FieldConstants.FIELD_WIDTH / 2.0));
 
     public static final Rectangle2d NEUTRAL_ZONE_RIGHT =
         new Rectangle2d(
+            new Translation2d(FieldConstants.NEUTRAL_X_MAX, FieldConstants.FIELD_WIDTH / 2.0),
             new Translation2d(
-                FieldConstants.NEUTRAL_X_MAX,
-                FieldConstants.FIELD_WIDTH / 2.0),
-            new Translation2d(
-                FieldConstants.FIELD_LENGTH
-                    - FieldConstants.NEUTRAL_X_MAX,
+                FieldConstants.FIELD_LENGTH - FieldConstants.NEUTRAL_X_MAX,
                 FieldConstants.FIELD_WIDTH));
   }
 

@@ -303,8 +303,8 @@ public class RobotContainer {
             hood,
             vision,
             turret,
-            interpTables.shooterSpeedInterp,
-            interpTables.hoodAngleInterp);
+            interpTables.shooterSpeedHubInterp,
+            interpTables.hoodAngleHubInterp);
 
     autoRoutines.buildAutoChooser();
     autoRoutines.populateChooser(autoChooser);

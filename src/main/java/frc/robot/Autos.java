@@ -1,4 +1,4 @@
-// package frc.robot;
+package frc.robot;
 
 import choreo.Choreo;
 import choreo.auto.AutoFactory;
@@ -17,7 +17,6 @@ import frc.robot.subsystems.intake.PivotIO.PivotPositions;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.util.PhoenixUtil;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -113,7 +112,7 @@ public class Autos {
                     shooterInterp,
                     hoodInterp,
                     () -> drive.getPose(),
-                    FieldConstants.HUB_POSE_BLUE,
+                    () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
     return routine.cmd();
   }
@@ -140,7 +139,7 @@ public class Autos {
                     shooterInterp,
                     hoodInterp,
                     () -> drive.getPose(),
-                    FieldConstants.HUB_POSE_BLUE,
+                    () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
 
     return routine.cmd();
@@ -170,7 +169,7 @@ public class Autos {
                     shooterInterp,
                     hoodInterp,
                     () -> drive.getPose(),
-                    FieldConstants.HUB_POSE_BLUE,
+                    () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
     return routine.cmd();
   }
@@ -198,7 +197,7 @@ public class Autos {
                         shooterInterp,
                         hoodInterp,
                         () -> drive.getPose(),
-                        FieldConstants.HUB_POSE_BLUE,
+                        () -> FieldConstants.HUB_POSE_BLUE,
                         drive)
                     .alongWith(indexer.runIndexer(6.0))));
     return routine.cmd();
@@ -226,7 +225,7 @@ public class Autos {
                     shooterInterp,
                     hoodInterp,
                     () -> drive.getPose(),
-                    FieldConstants.HUB_POSE_BLUE,
+                    () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
     return routine.cmd();
   }
@@ -253,7 +252,7 @@ public class Autos {
                     shooterInterp,
                     hoodInterp,
                     () -> drive.getPose(),
-                    FieldConstants.HUB_POSE_BLUE,
+                    () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
     return routine.cmd();
   }
@@ -313,7 +312,7 @@ public class Autos {
             shooterInterp,
             hoodInterp,
             () -> drive.getPose(),
-            PhoenixUtil.isRed() ? FieldConstants.HUB_POSE_RED : FieldConstants.HUB_POSE_BLUE,
+            () -> FieldConstants.HUB_POSE_BLUE,
             drive));
     autoFactory.bind("ShootBall", indexer.runIndexer(6.0));
   }
