@@ -15,21 +15,24 @@ public class HoodAutoAim extends Command {
   private final Hood hood;
   private Supplier<Pose2d> pose;
   private Supplier<Pose2d> targetPoseSupplier;
+  private InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
   private InterpolatingTreeMap<Double, Double> hoodInterpTable;
+
   private final Drive drive;
 
   public HoodAutoAim(
       Hood hood,
       Supplier<Pose2d> poseSupplier,
-      Supplier<Pose2d> targetPosesSupplier,
+      Supplier<Pose2d> targetPoseSupplier,
       InterpolatingTreeMap<Double, Double> hoodInterp,
+      InterpolatingTreeMap<Double, Double> TOFInterp,
       Drive drive) {
     this.hood = hood;
     this.pose = poseSupplier;
-    this.targetPoseSupplier = targetPosesSupplier;
-
+    this.targetPoseSupplier = targetPoseSupplier;
     this.hoodInterpTable = hoodInterp;
     this.drive = drive;
+    this.timeOfFlightInterp = TOFInterp;
     addRequirements(hood);
   }
 
@@ -48,11 +51,11 @@ public class HoodAutoAim extends Command {
     double distance = currentRobotPose.getTranslation().getDistance(targetPos);
 
     // CODE FOR SHOOT ON THE MOVE, NEEDS TO BE FINALIZED AND TESTED WITH PROPER INTERP TABLES
-    // targetPos =
-    //     targetPos.minus(
-    //         new Translation2d(
-    //             drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
-    //             drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
+    targetPos =
+        targetPos.minus(
+            new Translation2d(
+                drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
+                drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
 
     double botToTargetPoseDistance = currentRobotPose.getTranslation().getDistance(targetPos);
     double setpoint = hoodInterpTable.get(botToTargetPoseDistance);

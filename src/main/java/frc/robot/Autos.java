@@ -51,6 +51,7 @@ public class Autos {
   private final Turret turret;
   private final InterpolatingTreeMap<Double, Double> shooterInterp;
   private final InterpolatingTreeMap<Double, Double> hoodInterp;
+  private final InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
 
   /**
    * Constructor for AutonomousRoutines.
@@ -76,7 +77,8 @@ public class Autos {
       Vision vision,
       Turret turret,
       InterpolatingTreeMap<Double, Double> shooterInterp,
-      InterpolatingTreeMap<Double, Double> hoodInterp) {
+      InterpolatingTreeMap<Double, Double> hoodInterp,
+      InterpolatingTreeMap<Double, Double> timeOfFlightInterp) {
     this.autoFactory = autoFactory;
     this.drive = drive;
     this.intake = intake;
@@ -87,6 +89,7 @@ public class Autos {
     this.turret = turret;
     this.shooterInterp = shooterInterp;
     this.hoodInterp = hoodInterp;
+    this.timeOfFlightInterp = timeOfFlightInterp;
   }
 
   /**
@@ -111,6 +114,7 @@ public class Autos {
                     hood,
                     shooterInterp,
                     hoodInterp,
+                    timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
@@ -138,6 +142,7 @@ public class Autos {
                     hood,
                     shooterInterp,
                     hoodInterp,
+                    timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
@@ -168,6 +173,7 @@ public class Autos {
                     hood,
                     shooterInterp,
                     hoodInterp,
+                    timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
@@ -196,6 +202,7 @@ public class Autos {
                         hood,
                         shooterInterp,
                         hoodInterp,
+                        timeOfFlightInterp,
                         () -> drive.getPose(),
                         () -> FieldConstants.HUB_POSE_BLUE,
                         drive)
@@ -224,6 +231,7 @@ public class Autos {
                     hood,
                     shooterInterp,
                     hoodInterp,
+                    timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
@@ -251,6 +259,7 @@ public class Autos {
                     hood,
                     shooterInterp,
                     hoodInterp,
+                    timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> FieldConstants.HUB_POSE_BLUE,
                     drive)));
@@ -311,6 +320,7 @@ public class Autos {
             hood,
             shooterInterp,
             hoodInterp,
+            timeOfFlightInterp,
             () -> drive.getPose(),
             () -> FieldConstants.HUB_POSE_BLUE,
             drive));

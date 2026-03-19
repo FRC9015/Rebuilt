@@ -34,6 +34,8 @@ public class IndexerIOTalonFX implements IndexerIO {
   private final double defaultCurrentLimit = 45.0;
   private final double maxVoltage = 12.0;
 
+  private double indexerSetpoint = 0.0;
+
   private MotionMagicVelocityVoltage indexerVelocity =
       new MotionMagicVelocityVoltage(0.5).withSlot(0);
 
@@ -79,6 +81,7 @@ public class IndexerIOTalonFX implements IndexerIO {
     inputs.indexerCurrentAmpsMotor2 = currentSignalMotor2.getValueAsDouble();
     inputs.indexerVelocityMotor1 = motor1.getVelocity().getValueAsDouble();
     inputs.indexerVelocityMotor2 = motor2.getVelocity().getValueAsDouble();
+    inputs.indexerSetpoint = indexerSetpoint;
   }
 
   @Override
@@ -95,6 +98,7 @@ public class IndexerIOTalonFX implements IndexerIO {
 
   @Override
   public void setIndexerSpeed(double speed) {
+    indexerSetpoint = speed;
     motor1.setControl(indexerVelocity.withVelocity(speed));
     motor2.setControl(indexerVelocity.withVelocity(speed));
   }

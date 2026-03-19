@@ -16,6 +16,7 @@ public class ShooterAutoAim extends Command {
   private Supplier<Pose2d> pose;
   private Supplier<Pose2d> targetPoseSupplier;
   private InterpolatingTreeMap<Double, Double> shooterInterpTable;
+  private InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
   private final Drive drive;
 
   public ShooterAutoAim(
@@ -23,12 +24,14 @@ public class ShooterAutoAim extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> targetPoseSupplier,
       InterpolatingTreeMap<Double, Double> shooterInterp,
+      InterpolatingTreeMap<Double, Double> TOFInterp,
       Drive drive) {
     this.shooter = shooter;
     this.pose = poseSupplier;
     this.targetPoseSupplier = targetPoseSupplier;
     this.shooterInterpTable = shooterInterp;
     this.drive = drive;
+    this.timeOfFlightInterp = TOFInterp;
     addRequirements(shooter);
   }
 
@@ -46,11 +49,11 @@ public class ShooterAutoAim extends Command {
     double distance = currentRobotPose.getTranslation().getDistance(targetPos);
 
     // CODE FOR SHOOT ON THE MOVE, NEEDS TO BE FINALIZED AND TESTED WITH PROPER INTERP TABLES
-    // targetPos =
-    //     targetPos.minus(
-    //         new Translation2d(
-    //             drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
-    //             drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
+    targetPos =
+        targetPos.minus(
+            new Translation2d(
+                drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
+                drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
 
     double botToTargetPoseDistance = currentRobotPose.getTranslation().getDistance(targetPos);
     double setpoint = shooterInterpTable.get(botToTargetPoseDistance);

@@ -28,6 +28,7 @@ public interface IndexerIO {
     public double indexerVelocityMotor2 = 0.0;
     public double indexerAppliedVoltsMotor2 = 0.0;
     public double indexerCurrentAmpsMotor2 = 0.0;
+    public double indexerSetpoint = 0.0;
   }
 
   /** Updates the set of loggable inputs. */

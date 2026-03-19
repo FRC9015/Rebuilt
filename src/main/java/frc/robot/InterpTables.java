@@ -17,18 +17,6 @@ public class InterpTables {
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
 
   public InterpTables() {
-    timeOfFlightInterp.put(2.38, 0.8145);
-    timeOfFlightInterp.put(1.68, 0.9745);
-    timeOfFlightInterp.put(3.31, 0.8845);
-    timeOfFlightInterp.put(4.14, 1.0145);
-    timeOfFlightInterp.put(3.07, 1.2045);
-    timeOfFlightInterp.put(3.76, 1.1145);
-    timeOfFlightInterp.put(1.37, 1.1245);
-    timeOfFlightInterp.put(2.78, 1.3845);
-    timeOfFlightInterp.put(2.85, 1.4045);
-    timeOfFlightInterp.put(1.18, 1.1545);
-    timeOfFlightInterp.put(2.01, 0.7945);
-    timeOfFlightInterp.put(4.40, 1.1745);
 
     hoodAngleHubInterp.put(2.38, 0.38);
     hoodAngleHubInterp.put(1.68, 0.115);
@@ -75,6 +63,30 @@ public class InterpTables {
     shooterSpeedHubInterp.put(3.25, 34.0);
     shooterSpeedHubInterp.put(4.4, 38.0);
     shooterSpeedHubInterp.put(2.64, 33.0);
+
+    timeOfFlightInterp.put(2.0, 1.05);
+    timeOfFlightInterp.put(2.5, 1.167);
+    timeOfFlightInterp.put(3.0, 1.267);
+    timeOfFlightInterp.put(3.5, 1.3);
+    timeOfFlightInterp.put(4.0, 1.33);
+    timeOfFlightInterp.put(4.5, 1.267);
+    timeOfFlightInterp.put(5.0, 1.317);
+
+    shooterSpeedHubInterp.put(2.0, 31.0);
+    shooterSpeedHubInterp.put(2.5, 34.0);
+    shooterSpeedHubInterp.put(3.0, 36.0);
+    shooterSpeedHubInterp.put(3.5, 37.0);
+    shooterSpeedHubInterp.put(4.0, 39.0);
+    shooterSpeedHubInterp.put(4.5, 38.0);
+    shooterSpeedHubInterp.put(5.0, 39.0);
+
+    hoodAngleHubInterp.put(2.0, 0.18);
+    hoodAngleHubInterp.put(2.5, 0.215);
+    hoodAngleHubInterp.put(3.0, 0.245);
+    hoodAngleHubInterp.put(3.5, 0.285);
+    hoodAngleHubInterp.put(4.0, 0.325);
+    hoodAngleHubInterp.put(4.5, 0.365);
+    hoodAngleHubInterp.put(5.0, 0.395);
 
     shooterSpeedPassInterp.put(0.0, 0.0);
 

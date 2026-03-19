@@ -252,6 +252,7 @@ public class RobotContainer {
             hood,
             interpTables.shooterSpeedHubInterp,
             interpTables.hoodAngleHubInterp,
+            interpTables.timeOfFlightInterp,
             () -> drive.getPose(),
             () -> FieldConstants.HUB_POSE_BLUE,
             drive));
@@ -304,7 +305,8 @@ public class RobotContainer {
             vision,
             turret,
             interpTables.shooterSpeedHubInterp,
-            interpTables.hoodAngleHubInterp);
+            interpTables.hoodAngleHubInterp,
+            interpTables.timeOfFlightInterp);
 
     autoRoutines.buildAutoChooser();
     autoRoutines.populateChooser(autoChooser);
@@ -368,8 +370,8 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> -driverController.getRightX(),
                 0.3));
-    // intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    driverController.rightTrigger().whileTrue(intake.runRollerAtVoltage(6.0));
+    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.rightTrigger().whileTrue(indexer.runIndexer(50));
 
     operatorController
         .rightTrigger()
@@ -379,6 +381,7 @@ public class RobotContainer {
                     hood,
                     interpTables.shooterSpeedHubInterp,
                     interpTables.hoodAngleHubInterp,
+                    interpTables.timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> zones.getZoneTargetPose(),
                     drive)
@@ -389,7 +392,7 @@ public class RobotContainer {
                         () -> -driverController.getLeftY(),
                         () -> -driverController.getLeftX(),
                         () -> -driverController.getRightX(),
-                        0.1)));
+                        0.05)));
     operatorController.rightBumper().whileTrue(intake.runRollerAtVoltage(-6));
 
     shooterIsAtSetpoint.whileTrue(
@@ -398,7 +401,7 @@ public class RobotContainer {
             .onlyIf(() -> !DriverStation.isTest()));
 
     operatorController.x().whileTrue(intake.ajitateIntakeCommand());
-    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(50));
+    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(70));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
 
@@ -440,6 +443,16 @@ public class RobotContainer {
     driverController
         .leftBumper()
         .whileTrue(indexer.runIndexer(50).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .y()
+        .whileTrue(
+            new TurretAngleAim(
+                    () -> drive.getPose(),
+                    turret,
+                    () -> FieldConstants.HUB_POSE_BLUE,
+                    drive,
+                    interpTables.timeOfFlightInterp)
+                .onlyIf(() -> DriverStation.isTest()));
   }
 
   /**

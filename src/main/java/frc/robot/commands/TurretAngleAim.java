@@ -55,16 +55,16 @@ public class TurretAngleAim extends Command {
         DriverStation.getAlliance().isPresent()
             && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
 
-    Translation2d targetPos =
+    Translation2d targetPosOld =
         isRed ? filpedTargetPose.getTranslation() : targetPose.getTranslation();
-    double distance = robotPose.getTranslation().getDistance(targetPos);
+    double distance = robotPose.getTranslation().getDistance(targetPosOld);
 
     // CODE FOR SHOOT ON THE MOVE, NEEDS TO BE FINALIZED AND TESTED WITH PROPER INTERP TABLES
-    // targetPos =
-    //     targetPos.minus(
-    //         new Translation2d(
-    //             drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
-    //             drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
+    Translation2d targetPos =
+        targetPosOld.minus(
+            new Translation2d(
+                drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
+                drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
 
     // 3. Calculate Angle from Turret to Target (Field Relative)
     Translation2d turretToTarget = targetPos.minus(turretFieldPos);

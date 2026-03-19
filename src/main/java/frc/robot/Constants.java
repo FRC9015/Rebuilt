@@ -182,7 +182,7 @@ public final class Constants {
 
   public static class VisionConstants {
     public static final double MAX_AMBIGUITY = 0.3;
-    public static final int MAX_AVERAGE_DISTANCE = 3;
+    public static final int MAX_AVERAGE_DISTANCE = 4;
     public static final int STD_DEV_RANGE = 30;
 
     public static final AprilTagFieldLayout aprilTagLayout =
@@ -218,7 +218,7 @@ public final class Constants {
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
     public static final Slot0Configs ROLLER_SLOT0_CONFIGS =
-        new Slot0Configs().withKP(0.5).withKI(0).withKD(0).withKS(0.1).withKV(0).withKA(0);
+        new Slot0Configs().withKP(2.75).withKI(0).withKD(0).withKS(0.1).withKV(0).withKA(0);
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
@@ -456,15 +456,15 @@ public final class Constants {
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(125).withMotionMagicCruiseVelocity(25);
+        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(45)
+            .withKP(100) // 45
             .withKI(0.0)
-            .withKD(0.03)
+            .withKD(0.03) // 0.03
             .withKG(0)
             .withKA(0)
-            .withKS(0.13)
+            .withKS(0.13) // 0.13
             .withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
@@ -482,7 +482,7 @@ public final class Constants {
     // TODO TUNE THESE PID VALUES
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(0.5)
+            .withKP(0.3)
             .withKI(0.0)
             .withKD(0.00)
             .withKG(0)
