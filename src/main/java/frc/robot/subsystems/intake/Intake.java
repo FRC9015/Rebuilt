@@ -41,14 +41,10 @@ public class Intake extends SubsystemBase {
 
   public Command runIntakeAtSpeed(double intakeSpeed, PivotIO.PivotPositions pivotPosition) {
 
-    return this.startEnd(
+    return this.run(
         () -> {
           this.setRollerSpeed(intakeSpeed);
-          this.setPivotPosition(pivotPosition);
-        },
-        () -> {
-          this.stopRoller();
-          this.setPivotPosition(pivotPosition);
+          this.setPivotPosition(pivotPosition.getPivotPosition());
         });
   }
 

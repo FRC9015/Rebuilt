@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.util.ShootingUtil;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -24,14 +25,14 @@ public class ShooterAutoAim extends Command {
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> targetPoseSupplier,
       InterpolatingTreeMap<Double, Double> shooterInterp,
-      InterpolatingTreeMap<Double, Double> TOFInterp,
+      InterpolatingTreeMap<Double, Double> tofInterp,
       Drive drive) {
     this.shooter = shooter;
     this.pose = poseSupplier;
     this.targetPoseSupplier = targetPoseSupplier;
     this.shooterInterpTable = shooterInterp;
     this.drive = drive;
-    this.timeOfFlightInterp = TOFInterp;
+    this.timeOfFlightInterp = tofInterp;
     addRequirements(shooter);
   }
 
@@ -39,27 +40,26 @@ public class ShooterAutoAim extends Command {
   public void execute() {
     Pose2d currentRobotPose = pose.get();
     Pose2d targetPose = targetPoseSupplier.get();
-    Pose2d flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
     boolean isRed =
-        DriverStation.getAlliance().isPresent()
-            && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
+        DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)
+            == DriverStation.Alliance.Red;
 
-    Translation2d targetPos =
-        isRed ? flippedTargetPose.getTranslation() : targetPose.getTranslation();
-    double distance = currentRobotPose.getTranslation().getDistance(targetPos);
+    Translation2d realTargetPos =
+        isRed
+            ? FlippingUtil.flipFieldPose(targetPose).getTranslation()
+            : targetPose.getTranslation();
 
-    // CODE FOR SHOOT ON THE MOVE, NEEDS TO BE FINALIZED AND TESTED WITH PROPER INTERP TABLES
-    targetPos =
-        targetPos.minus(
-            new Translation2d(
-                drive.getChassisSpeeds().vxMetersPerSecond * timeOfFlightInterp.get(distance),
-                drive.getChassisSpeeds().vyMetersPerSecond * timeOfFlightInterp.get(distance)));
+    // GET VIRTUAL DATA
+    var shotData =
+        ShootingUtil.calculateVirtualTarget(
+            currentRobotPose, realTargetPos, drive.getChassisSpeeds(), timeOfFlightInterp);
 
-    double botToTargetPoseDistance = currentRobotPose.getTranslation().getDistance(targetPos);
-    double setpoint = shooterInterpTable.get(botToTargetPoseDistance);
+    // Use VIRTUAL distance for LUT lookup
+    double setpoint = shooterInterpTable.get(shotData.virtualDistance);
+
     shooter.setShooterSpeed(setpoint);
     Logger.recordOutput("Shooter/autoSetpoint", setpoint);
-    Logger.recordOutput("DistanceEdit", botToTargetPoseDistance);
+    Logger.recordOutput("Shooter/VirtualDistance", shotData.virtualDistance);
   }
 
   @Override

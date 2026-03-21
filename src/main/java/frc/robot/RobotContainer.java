@@ -122,7 +122,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
-                new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE));
+                new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE),
+                new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -370,8 +371,8 @@ public class RobotContainer {
                 () -> -driverController.getLeftX(),
                 () -> -driverController.getRightX(),
                 0.3));
-    intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    driverController.rightTrigger().whileTrue(indexer.runIndexer(50));
+    // intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
 
     operatorController
         .rightTrigger()
@@ -397,13 +398,13 @@ public class RobotContainer {
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(35))
-            .onlyIf(() -> !DriverStation.isTest()));
+            .alongWith(indexer.runIndexer(50)));
 
     operatorController.x().whileTrue(intake.ajitateIntakeCommand());
     operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(70));
     operatorController.a().onTrue(hood.setHoodPosition(0.0));
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
+    operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
 
     operatorController
         .povLeft()

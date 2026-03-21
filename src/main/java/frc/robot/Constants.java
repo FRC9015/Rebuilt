@@ -192,25 +192,30 @@ public final class Constants {
     public static final Transform3d STARBOARD_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(2.16), Units.inchesToMeters(-15.313), Units.inchesToMeters(7)),
-            new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(270)));
+                Units.inchesToMeters(5.156),
+                Units.inchesToMeters(-15.339),
+                Units.inchesToMeters(10.243)),
+            new Rotation3d(
+                Units.degreesToRadians(-2),
+                Units.degreesToRadians(10),
+                Units.degreesToRadians(270)));
     public static final Transform3d STERN_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-11.5812),
-                Units.inchesToMeters(5.657),
-                Units.inchesToMeters(10.25)),
+                Units.inchesToMeters(-11.5838),
+                Units.inchesToMeters(2.669),
+                Units.inchesToMeters(9.159)),
             new Rotation3d(
-                Units.degreesToRadians(2),
-                Units.degreesToRadians(15),
+                Units.degreesToRadians(0),
+                Units.degreesToRadians(10),
                 Units.degreesToRadians(180)));
     public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-8.86),
-                Units.inchesToMeters(14.886),
-                Units.inchesToMeters(10.737)),
-            new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(90)));
+                Units.inchesToMeters(5.156),
+                Units.inchesToMeters(15.339),
+                Units.inchesToMeters(10.243)),
+            new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(90)));
 
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
@@ -446,8 +451,8 @@ public final class Constants {
     public static final double MAXROTATION = 0.7;
     public static final double MINROTATION = -0.7;
 
-    public static final double ENCODER13_MAGNET_OFFSET = 0.278808593;
-    public static final double ENCODER15_MAGNET_OFFSET = 0.361328125;
+    public static final double ENCODER13_MAGNET_OFFSET = 0.115478;
+    public static final double ENCODER15_MAGNET_OFFSET = 0.358886;
 
     public static final double TURRET_X_OFFSET = Units.inchesToMeters(-3.186);
     public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.95);
@@ -459,13 +464,13 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(100) // 45
-            .withKI(0.0)
-            .withKD(0.03) // 0.03
+            .withKP(70) // 45
+            .withKI(0)
+            .withKD(0.0) // 0.03
             .withKG(0)
             .withKA(0)
-            .withKS(0.13) // 0.13
-            .withKV(0);
+            .withKS(0.2) // 0.13
+            .withKV(0.1);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)
