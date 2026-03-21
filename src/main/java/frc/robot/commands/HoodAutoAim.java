@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
-import frc.robot.util.ShootingUtil;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -16,24 +15,21 @@ public class HoodAutoAim extends Command {
   private final Hood hood;
   private Supplier<Pose2d> pose;
   private Supplier<Pose2d> targetPoseSupplier;
-  private InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
   private InterpolatingTreeMap<Double, Double> hoodInterpTable;
-
   private final Drive drive;
 
   public HoodAutoAim(
       Hood hood,
       Supplier<Pose2d> poseSupplier,
-      Supplier<Pose2d> targetPoseSupplier,
+      Supplier<Pose2d> targetPosesSupplier,
       InterpolatingTreeMap<Double, Double> hoodInterp,
-      InterpolatingTreeMap<Double, Double> tofInterp,
       Drive drive) {
     this.hood = hood;
     this.pose = poseSupplier;
-    this.targetPoseSupplier = targetPoseSupplier;
+    this.targetPoseSupplier = targetPosesSupplier;
+
     this.hoodInterpTable = hoodInterp;
     this.drive = drive;
-    this.timeOfFlightInterp = tofInterp;
     addRequirements(hood);
   }
 
@@ -41,23 +37,17 @@ public class HoodAutoAim extends Command {
   public void execute() {
     Pose2d currentRobotPose = pose.get();
     Pose2d targetPose = targetPoseSupplier.get();
+    Pose2d flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
+
     boolean isRed =
-        DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)
-            == DriverStation.Alliance.Red;
+        DriverStation.getAlliance().isPresent()
+            && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
 
-    Translation2d realTargetPos =
-        isRed
-            ? FlippingUtil.flipFieldPose(targetPose).getTranslation()
-            : targetPose.getTranslation();
+    Translation2d targetPos =
+        isRed ? flippedTargetPose.getTranslation() : targetPose.getTranslation();
 
-    // GET VIRTUAL DATA
-    var shotData =
-        ShootingUtil.calculateVirtualTarget(
-            currentRobotPose, realTargetPos, drive.getChassisSpeeds(), timeOfFlightInterp);
-
-    // Use VIRTUAL distance for LUT lookup
-    double setpoint = hoodInterpTable.get(shotData.virtualDistance);
-
+    double botToTargetPoseDistance = currentRobotPose.getTranslation().getDistance(targetPos);
+    double setpoint = hoodInterpTable.get(botToTargetPoseDistance);
     hood.setHoodPos(setpoint);
     Logger.recordOutput("Hood/setpointauto", setpoint);
   }

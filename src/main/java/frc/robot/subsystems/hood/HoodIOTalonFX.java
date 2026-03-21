@@ -43,8 +43,10 @@ public class HoodIOTalonFX implements HoodIO {
 
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    hoodConfig.CurrentLimits.StatorCurrentLimit = 60;
+    hoodConfig.CurrentLimits.StatorCurrentLimit = 20;
     hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    hoodConfig.CurrentLimits.SupplyCurrentLimit = 20;
+    hoodConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
     // hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
     // hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition.get();
     // hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;

@@ -296,13 +296,6 @@ public class Autos {
                 cl.resetOdometry(),
                 cl.cmd(),
                 Commands.runOnce(() -> drive.stop()),
-                new TurretAngleAim(
-                        () -> drive.getPose(),
-                        turret,
-                        () -> FieldConstants.HUB_POSE_BLUE,
-                        drive,
-                        timeOfFlightInterp)
-                    .withTimeout(1.5),
                 Commands.parallel(
                         new ShooterAutoAimSequence(
                             shooter,
@@ -317,13 +310,6 @@ public class Autos {
                     .withTimeout(4.0),
                 de.cmd(),
                 Commands.runOnce(() -> drive.stop()),
-                new TurretAngleAim(
-                        () -> drive.getPose(),
-                        turret,
-                        () -> FieldConstants.HUB_POSE_BLUE,
-                        drive,
-                        timeOfFlightInterp)
-                    .withTimeout(1.5),
                 Commands.parallel(
                     new ShooterAutoAimSequence(
                         shooter,

@@ -17,22 +17,15 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "wait",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "turret"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "shooter"
-                }
-              }
-            ]
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shooter"
           }
         }
       ]

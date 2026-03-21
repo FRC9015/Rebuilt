@@ -31,7 +31,7 @@ public class IndexerIOTalonFX implements IndexerIO {
   private final StatusSignal<Voltage> appliedVoltsSignalMotor1, appliedVoltsSignalMotor2;
   private final StatusSignal<Current> currentSignalMotor1, currentSignalMotor2;
 
-  private final double defaultCurrentLimit = 45.0;
+  private final double defaultCurrentLimit = 40.0;
   private final double maxVoltage = 12.0;
 
   private double indexerSetpoint = 0.0;
@@ -53,6 +53,8 @@ public class IndexerIOTalonFX implements IndexerIO {
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     motorConfig.CurrentLimits.StatorCurrentLimit = defaultCurrentLimit;
     motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    motorConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     // Configure the integrated encoder (default settings should work)
     motor1.getConfigurator().apply(motorConfig);

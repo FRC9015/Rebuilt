@@ -21,9 +21,9 @@ public class ShooterIOTalonFX implements ShooterIO {
   public final TalonFX flywheelMotorRight;
   public final TalonFX kickerMotor;
 
-  public StatusSignal<Voltage> motorVolts;
-  public StatusSignal<Current> motorAmps;
-  public StatusSignal<AngularVelocity> motorRPM;
+  public StatusSignal<Voltage> motorVolts, kickerVolts;
+  public StatusSignal<Current> motorAmps, kickerAmps;
+  public StatusSignal<AngularVelocity> motorRPM, kickerRPM;
   public StatusSignal<Angle> motorPosition;
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
@@ -49,6 +49,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     flyWheelConfigLeft.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     flyWheelConfigLeft.CurrentLimits.StatorCurrentLimit = 60;
     flyWheelConfigLeft.CurrentLimits.StatorCurrentLimitEnable = true;
+    flyWheelConfigLeft.CurrentLimits.SupplyCurrentLimit = 60;
+    flyWheelConfigLeft.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     TalonFXConfiguration flyWheelConfigRight =
         new TalonFXConfiguration()
@@ -59,6 +61,8 @@ public class ShooterIOTalonFX implements ShooterIO {
     flyWheelConfigRight.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     flyWheelConfigRight.CurrentLimits.StatorCurrentLimit = 60;
     flyWheelConfigRight.CurrentLimits.StatorCurrentLimitEnable = true;
+    flyWheelConfigRight.CurrentLimits.SupplyCurrentLimit = 60;
+    flyWheelConfigRight.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     TalonFXConfiguration kickerConfig =
         new TalonFXConfiguration()
@@ -67,8 +71,10 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     kickerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    kickerConfig.CurrentLimits.StatorCurrentLimit = 60;
+    kickerConfig.CurrentLimits.StatorCurrentLimit = 30;
     kickerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    kickerConfig.CurrentLimits.SupplyCurrentLimit = 30;
+    kickerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
@@ -77,19 +83,27 @@ public class ShooterIOTalonFX implements ShooterIO {
     motorVolts = flywheelMotorLeft.getMotorVoltage();
     motorAmps = flywheelMotorLeft.getStatorCurrent();
     motorRPM = flywheelMotorLeft.getVelocity();
-    BaseStatusSignal.setUpdateFrequencyForAll(50.0, motorVolts, motorAmps, motorRPM);
+    kickerVolts = kickerMotor.getMotorVoltage();
+    kickerAmps = kickerMotor.getStatorCurrent();
+    kickerRPM = kickerMotor.getVelocity();
+    BaseStatusSignal.setUpdateFrequencyForAll(
+        50.0, motorVolts, motorAmps, motorRPM, kickerAmps, kickerRPM, kickerVolts);
 
     ParentDevice.optimizeBusUtilizationForAll(flywheelMotorLeft, flywheelMotorRight, kickerMotor);
   }
 
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM);
+    BaseStatusSignal.refreshAll(
+        motorVolts, motorAmps, motorRPM, kickerAmps, kickerRPM, kickerVolts);
     inputs.flywheelAppliedVolts = motorVolts.getValueAsDouble();
     inputs.flywheelCurrentSpeed = flywheelMotorLeft.getVelocity().getValueAsDouble();
     inputs.flywheelRPM = motorRPM.getValueAsDouble();
     inputs.flywheelCurrentAmps = flywheelMotorLeft.getStatorCurrent().getValueAsDouble();
     inputs.flywheelTargetSpeed = lastFlywheelSetpointSpeed;
+    inputs.kickerCurrentAmps = kickerAmps.getValueAsDouble();
+    inputs.kickerAppliedVolts = kickerVolts.getValueAsDouble();
+    inputs.kickerRPM = kickerRPM.getValueAsDouble();
 
     if (Math.abs(inputs.flywheelCurrentSpeed - inputs.flywheelTargetSpeed)
             < Constants.ShooterConstants.FLYWHEEL_RPM_TOLERANCE

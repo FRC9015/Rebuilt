@@ -110,13 +110,10 @@ public class ZoneLogic extends SubsystemBase {
 
   public boolean isInTrench() {
     FieldZone zone = getCurrentFieldZone();
-    if (zone.equals(FieldZone.RED_LEFT_TRENCH)
+    return (zone.equals(FieldZone.RED_LEFT_TRENCH)
         || zone.equals(FieldZone.RED_RIGHT_TRENCH)
         || zone.equals(FieldZone.BLUE_LEFT_TRENCH)
-        || zone.equals(FieldZone.BLUE_RIGHT_TRENCH)) {
-      return true;
-    }
-    return false;
+        || zone.equals(FieldZone.BLUE_RIGHT_TRENCH));
   }
 
   public boolean inCurrentAllinace() {
@@ -126,15 +123,11 @@ public class ZoneLogic extends SubsystemBase {
     FieldZone zone = getCurrentFieldZone();
     boolean isRed = (alliance == DriverStation.Alliance.Red);
 
-    if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
+    return ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
         || (!isRed
             && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))
         || (isRed && (zone == FieldZone.RED_LEFT_TRENCH || zone == FieldZone.RED_RIGHT_TRENCH))
-        || (!isRed
-            && (zone == FieldZone.BLUE_LEFT_TRENCH || zone == FieldZone.BLUE_RIGHT_TRENCH))) {
-      return true;
-    }
-    return false;
+        || (!isRed && (zone == FieldZone.BLUE_LEFT_TRENCH || zone == FieldZone.BLUE_RIGHT_TRENCH)));
   }
 
   public boolean getRunMainZoneLogic() {
@@ -159,7 +152,9 @@ public class ZoneLogic extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (DriverStation.isEnabled()) {
+    if (DriverStation.isTeleopEnabled()
+        || DriverStation.isAutonomousEnabled()
+        || DriverStation.isTestEnabled()) {
       runMainZoneLogic = zoneControl;
       overrideZones = overrideControl;
     } else {
@@ -172,5 +167,13 @@ public class ZoneLogic extends SubsystemBase {
 
     Logger.recordOutput("Zones/runMainZoneLogic", runMainZoneLogic);
     Logger.recordOutput("zones", overrideZones);
+    Logger.recordOutput(
+        "GOOD TO SHOOT",
+        FieldConstants.HUB_POSE_BLUE.getTranslation().getDistance(drive.getPose().getTranslation())
+                < 4
+            && FieldConstants.HUB_POSE_BLUE
+                    .getTranslation()
+                    .getDistance(drive.getPose().getTranslation())
+                > 1);
   }
 }
