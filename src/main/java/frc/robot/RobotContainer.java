@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -360,16 +361,20 @@ public class RobotContainer {
     operatorController
         .rightTrigger()
         .whileTrue(
-            new ShooterAutoAimSequence(
-                    shooter,
-                    hood,
-                    interpTables.shooterSpeedHubInterp,
-                    interpTables.hoodAngleHubInterp,
-                    interpTables.timeOfFlightInterp,
-                    () -> drive.getPose(),
-                    () -> zones.getZoneTargetPose(),
-                    drive)
-                .alongWith(zones.override()));
+            Commands.startEnd(
+                    () -> driverController.setRumble(RumbleType.kBothRumble, 1),
+                    () -> driverController.setRumble(RumbleType.kBothRumble, 0))
+                .alongWith(
+                    new ShooterAutoAimSequence(
+                            shooter,
+                            hood,
+                            interpTables.shooterSpeedHubInterp,
+                            interpTables.hoodAngleHubInterp,
+                            interpTables.timeOfFlightInterp,
+                            () -> drive.getPose(),
+                            () -> zones.getZoneTargetPose(),
+                            drive)
+                        .alongWith(zones.override())));
     driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
     operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
     shooterIsAtSetpoint.whileTrue(

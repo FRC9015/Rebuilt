@@ -236,7 +236,9 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
 
     public static final MotionMagicConfigs ROLLER_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(100).withMotionMagicCruiseVelocity(50);
+        new MotionMagicConfigs()
+            .withMotionMagicAcceleration(100)
+            .withMotionMagicCruiseVelocity(100);
 
     public static final FeedbackConfigs PIVOT_FEEDBACK_CONFIGS =
         new FeedbackConfigs()
