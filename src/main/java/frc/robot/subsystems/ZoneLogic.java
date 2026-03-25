@@ -94,7 +94,7 @@ public class ZoneLogic extends SubsystemBase {
     if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
         || (!isRed
             && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))) {
-      return FieldConstants.HUB_POSE_BLUE; // TurretAngleAim handles the flip to Red Hub
+      return FieldConstants.HUB_POSE_BLUE;
     }
 
     if (zone == FieldZone.NEUTRAL_ZONE_LEFT
@@ -102,9 +102,9 @@ public class ZoneLogic extends SubsystemBase {
         || zone == FieldZone.RED_ALLIANCE_LEFT) {
       // Red Robot on the physical TOP side needs to hit Red-TOP, but FlippingUtil means
       // we feed the "Blue-BOTTOM" pose to get "Red-TOP" after rotation.
-      return FieldConstants.PASSING_POSE_LEFT_BLUE;
+      return isRed ? FieldConstants.PASSING_POSE_LEFT_BLUE : FieldConstants.PASSING_POSE_RIGHT_BLUE;
     } else {
-      return FieldConstants.PASSING_POSE_RIGHT_BLUE;
+      return isRed ? FieldConstants.PASSING_POSE_RIGHT_BLUE : FieldConstants.PASSING_POSE_LEFT_BLUE;
     }
   }
 
@@ -152,9 +152,11 @@ public class ZoneLogic extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (DriverStation.isTeleopEnabled()
-        || DriverStation.isAutonomousEnabled()
-        || DriverStation.isTestEnabled()) {
+    if (false
+    // DriverStation.isTeleopEnabled()
+    //   || DriverStation.isAutonomousEnabled()
+    //   || DriverStation.isTestEnabled()
+    ) {
       runMainZoneLogic = zoneControl;
       overrideZones = overrideControl;
     } else {

@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
 import com.pathplanner.lib.util.FlippingUtil;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -14,7 +13,7 @@ import frc.robot.subsystems.turret.Turret;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
-public class TurretAngleAim extends Command {
+public class TurretDriveAutoDrive extends Command {
 
   private final Supplier<Pose2d> poseSupplier;
   private final Turret turret;
@@ -22,7 +21,7 @@ public class TurretAngleAim extends Command {
   private final Drive drive;
   private final InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
 
-  public TurretAngleAim(
+  public TurretDriveAutoDrive(
       Supplier<Pose2d> poseSupplier,
       Turret turret,
       Supplier<Pose2d> targetPose,
@@ -45,7 +44,8 @@ public class TurretAngleAim extends Command {
     // Rotate the offset vector by the robot's current heading
     Translation2d turretOffset =
         new Translation2d(TurretConstants.TURRET_X_OFFSET, TurretConstants.TURRET_Y_OFFSET)
-            .rotateBy(robotPose.getRotation());
+            .rotateBy(
+                robotPose.getRotation().minus(new Rotation2d(turret.getTurretPositionRadians())));
 
     // Add that rotated offset to the robot's center position
     Translation2d turretFieldPos = robotPose.getTranslation().plus(turretOffset);
@@ -68,18 +68,18 @@ public class TurretAngleAim extends Command {
         fieldAngleToHub.minus(robotPose.getRotation().plus(Rotation2d.fromDegrees(360)));
 
     // 5. Convert to 0-360 range
-    double headingSetpoint = MathUtil.inputModulus(relativeSetpoint.getDegrees(), 0, 360);
-
     // 6. Send to Subsystem
     // The fastestPath logic will take this 0-360 and decide if it's better
     // to go to the positive or negative version based on your -0.7 to 0.7 limit.
     // turret.setTurretSetPoint(headingSetpoint);
-    double directionSetpoint = turret.setTurretAngleFastestPath(headingSetpoint);
-    turret.setPositionVoid(directionSetpoint);
+    turret.setDriveSetpoint(fieldAngleToHub);
     // Logging for debugging
-    Logger.recordOutput("Turret/HeadingSetpoint0to360", headingSetpoint);
     Logger.recordOutput("DISTANCETHING", targetPos.getDistance(robotPose.getTranslation()));
-    Logger.recordOutput("Turret/TurretFieldPos", new Pose2d(turretFieldPos, fieldAngleToHub));
+    Logger.recordOutput(
+        "Turret/TurretFieldPos",
+        new Pose2d(turretFieldPos, new Rotation2d(turret.getTurretPositionRadians())));
+    Logger.recordOutput("Turret/rotationwithDriveThing", relativeSetpoint);
+    Logger.recordOutput("Turret/fieldAngleToHub", fieldAngleToHub);
     Logger.recordOutput("Turret/Targetpose", targetPos);
   }
 }

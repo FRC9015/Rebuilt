@@ -23,17 +23,14 @@ public class AutoDrive extends Command {
     private final double MINIMUM_VELOCITY = 0.3;
     private final double MINIMUM_DISTANCE = 0.04;
     private PIDController rotationController = new PIDController(ROTATION_P, ROTATION_I, ROTATION_D);
-    private PIDController xController = new PIDController(XYCONTROLLERP, XYCONTROLLERI, XYCONTROLLERD);
-    private PIDController yController = new PIDController(XYCONTROLLERP, XYCONTROLLERI, XYCONTROLLERD);
     private Supplier<Pose2d> targetPose;
     private Pose2d flippedPose, targetPose2d;
     private Drive drive;
-    private Supplier<DriveStation.Alliance> alliance;
 
     private final Timer timer = new Timer();
 
     public AutoDrive(
-        Supplier<Pose2d> desiredPose, Drive drive, Supplier<DriverStation.Alliance> alliance) {
+        Supplier<Pose2d> desiredPose, Drive drive) {
         this.drive = drive;
         this.targetPose = desiredPose;
         this.alliance = alliance;
@@ -45,10 +42,6 @@ public class AutoDrive extends Command {
             alliance.get() == DriverStation.Alliance.Red ? flippedPose : targetPose.get();
         rotationController.enableContinuousInput(-Math.PI, Math.PI);
         rotationController.setTolerance(Units.degreesToRadians(1));
-        yController.setTolerance(Units.inchesToMeters(0.4));
-        xController.setTolerance(Units.inchesToMeters(0.4));
-        Logger.recordOutput("AutoDrive/alliance?", alliance.get());
-
         timer.reset();
         timer.start();
     }

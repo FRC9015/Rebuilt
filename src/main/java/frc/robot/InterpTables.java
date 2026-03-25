@@ -39,17 +39,10 @@ public class InterpTables {
     hoodAngleHubInterp.put(4.4, 0.64);
     hoodAngleHubInterp.put(2.64, 0.36);
 
-    shooterSpeedHubInterp.put(2.38, 31.0);
-    shooterSpeedHubInterp.put(1.68, 32.0);
     shooterSpeedHubInterp.put(3.31, 34.0);
     shooterSpeedHubInterp.put(4.14, 37.0);
     shooterSpeedHubInterp.put(3.07, 34.0);
     shooterSpeedHubInterp.put(3.76, 37.0);
-    shooterSpeedHubInterp.put(1.37, 32.0);
-    shooterSpeedHubInterp.put(2.78, 33.0);
-    shooterSpeedHubInterp.put(2.85, 34.0);
-    shooterSpeedHubInterp.put(1.18, 31.0);
-    shooterSpeedHubInterp.put(2.01, 33.0);
     shooterSpeedHubInterp.put(4.40, 37.0);
     shooterSpeedHubInterp.put(3.45, 37.0);
     shooterSpeedHubInterp.put(3.9, 37.0);
@@ -60,9 +53,22 @@ public class InterpTables {
     shooterSpeedHubInterp.put(4.4, 38.0);
     shooterSpeedHubInterp.put(4.84, 38.0);
     shooterSpeedHubInterp.put(5.25, 39.0);
-    shooterSpeedHubInterp.put(3.25, 34.0);
     shooterSpeedHubInterp.put(4.4, 38.0);
+
+    shooterSpeedHubInterp.put(1.18, 31.0);
+    shooterSpeedHubInterp.put(1.37, 32.0);
+    shooterSpeedHubInterp.put(1.68, 32.0);
+    shooterSpeedHubInterp.put(2.0, 31.0);
+    shooterSpeedHubInterp.put(2.38, 31.0);
+    shooterSpeedHubInterp.put(2.5, 34.0);
     shooterSpeedHubInterp.put(2.64, 33.0);
+    shooterSpeedHubInterp.put(2.78, 33.0);
+    shooterSpeedHubInterp.put(2.85, 34.0);
+    shooterSpeedHubInterp.put(3.0, 36.0);
+    shooterSpeedHubInterp.put(3.5, 37.0);
+    shooterSpeedHubInterp.put(4.0, 39.0);
+    shooterSpeedHubInterp.put(4.5, 38.0);
+    shooterSpeedHubInterp.put(5.0, 39.0);
 
     timeOfFlightInterp.put(2.0, 1.05);
     timeOfFlightInterp.put(2.25, 1.0);
@@ -77,14 +83,6 @@ public class InterpTables {
     timeOfFlightInterp.put(4.5, 1.267);
     timeOfFlightInterp.put(4.75, 1.183);
     timeOfFlightInterp.put(5.0, 1.317);
-
-    shooterSpeedHubInterp.put(2.0, 31.0);
-    shooterSpeedHubInterp.put(2.5, 34.0);
-    shooterSpeedHubInterp.put(3.0, 36.0);
-    shooterSpeedHubInterp.put(3.5, 37.0);
-    shooterSpeedHubInterp.put(4.0, 39.0);
-    shooterSpeedHubInterp.put(4.5, 38.0);
-    shooterSpeedHubInterp.put(5.0, 39.0);
 
     hoodAngleHubInterp.put(2.0, 0.18);
     hoodAngleHubInterp.put(2.5, 0.215);
@@ -108,5 +106,29 @@ public class InterpTables {
     shooterSpeedPassInterp.put(6.17, 44.0);
 
     hoodAnglePassInterp.put(6.17, 0.62);
+
+    shooterSpeedPassInterp.put(4.51, 36.0);
+
+    hoodAnglePassInterp.put(4.51, 0.45);
+
+    shooterSpeedPassInterp.put(16.0, 70.0);
+
+    hoodAnglePassInterp.put(16.0, 1.25);
+
+    shooterSpeedPassInterp.put(15.0, 66.0);
+
+    hoodAnglePassInterp.put(15.0, 1.21);
+
+    shooterSpeedPassInterp.put(14.0, 63.0);
+
+    hoodAnglePassInterp.put(14.0, 1.16);
+
+    shooterSpeedPassInterp.put(13.0, 59.0);
+
+    hoodAnglePassInterp.put(13.0, 1.11);
+
+    shooterSpeedPassInterp.put(12.0, 56.0);
+
+    hoodAnglePassInterp.put(12.0, 1.06);
   }
 }

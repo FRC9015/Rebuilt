@@ -4,6 +4,9 @@ import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -13,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Constants.TurretConstants;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -136,7 +140,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double getTurretPositionRadians() {
-    return Units.degreesToRadians(inputs.turretSetpoint);
+    return Units.degreesToRadians(inputs.turretResolvedPositionDegrees);
   }
 
   public void setPositionVoid(double angle) {
@@ -145,6 +149,20 @@ public class Turret extends SubsystemBase {
 
   public double getTurretError() {
     return inputs.turretError;
+  }
+
+  public Pose2d getTurretPose(Supplier<Translation2d> robotTranslation) {
+    return new Pose2d(
+        robotTranslation.get(),
+        new Rotation2d(getTurretPositionRadians()).rotateBy(new Rotation2d(Math.PI)));
+  }
+
+  public void setDriveSetpoint(Rotation2d rot) {
+    inputs.driveSetpoint = rot;
+  }
+
+  public Rotation2d getDriveSetpoint() {
+    return inputs.driveSetpoint;
   }
 
   @Override

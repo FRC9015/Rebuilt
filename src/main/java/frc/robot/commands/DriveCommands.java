@@ -7,7 +7,9 @@
 
 package frc.robot.commands;
 
+import com.pathplanner.lib.util.FlippingUtil;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,6 +25,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.turret.Turret;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -34,7 +37,7 @@ import java.util.function.Supplier;
 public class DriveCommands {
   private static final double DEADBAND = 0.1;
   private static final double ANGLE_KP = 5.0;
-  private static final double ANGLE_KD = 0.4;
+  private static final double ANGLE_KD = 0.1;
   private static final double ANGLE_MAX_VELOCITY = 8.0;
   private static final double ANGLE_MAX_ACCELERATION = 20.0;
   private static final double FF_START_DELAY = 2.0; // Secs
@@ -326,5 +329,83 @@ public class DriveCommands {
     double[] positions = new double[NUM_MODULES];
     Rotation2d lastAngle = Rotation2d.kZero;
     double gyroDelta = 0.0;
+  }
+
+  public static Command joystickDriveFacingPose(
+      Drive drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      Supplier<Pose2d> poseSupplier,
+      Turret turret) {
+
+    PIDController angleController = new PIDController(ANGLE_KP, 0.0, ANGLE_KD);
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+    return new Command() {
+      @Override
+      public void initialize() {
+        angleController.reset();
+      }
+
+      @Override
+      public void execute() {
+        // Alliance flip logic every cycle
+        Pose2d flippedPose = FlippingUtil.flipFieldPose(poseSupplier.get());
+        boolean isFlipped =
+            DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red;
+        Pose2d targetPose = isFlipped ? flippedPose : poseSupplier.get();
+
+        // Linear velocity from joysticks
+        Translation2d linearVelocity =
+            getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+        // Angular correction
+        double omega =
+            angleController.calculate(
+                (drive.getRotation().getRadians() - turret.getTurretPositionRadians()),
+                (drive
+                        .getPose()
+                        .getTranslation()
+                        .minus(targetPose.getTranslation())
+                        .getAngle()
+                        .minus(new Rotation2d(turret.getTurretPositionRadians())))
+                    .getRadians());
+
+        // Drive field-relative
+        ChassisSpeeds speeds =
+            new ChassisSpeeds(
+                -linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                -linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                omega);
+
+        drive.runVelocity(
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                speeds,
+                isFlipped
+                    ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                    : drive.getRotation()));
+      }
+
+      @Override
+      public void end(boolean interrupted) {
+        drive.stop();
+      }
+
+      @Override
+      public boolean isFinished() {
+        // Recompute live target pose for distance check
+        Pose2d flippedPose = FlippingUtil.flipFieldPose(poseSupplier.get());
+        boolean isFlipped =
+            DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red;
+        Pose2d targetPose = isFlipped ? flippedPose : poseSupplier.get();
+
+        Pose2d currentPose = drive.getPose();
+        double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+
+        return distance < 1.0; // or test with 1.0 to confirm
+      }
+    };
   }
 }

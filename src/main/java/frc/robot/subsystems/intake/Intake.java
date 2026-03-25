@@ -64,6 +64,10 @@ public class Intake extends SubsystemBase {
     return this.startEnd(() -> roller.setRollerSpeed(true), () -> roller.setRollerSpeed(false));
   }
 
+  public Command setIntakeVolts(double volts) {
+    return this.startEnd(() -> pivot.setVolts(volts), () -> pivot.setVolts(0));
+  }
+
   // Only used for simulation
   public boolean isFuelInsideIntake() {
     return rollerInputs.fuelInside > 0;

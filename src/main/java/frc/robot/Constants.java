@@ -63,6 +63,7 @@ public final class Constants {
     public static final int TURRET_MOTOR_ID = 60;
 
     // If another roller is added back to the Intake, set it to ID 51.
+    public static final int INTAKE_ROLLER_ID2 = 51;
     public static final int INTAKE_ROLLER_ID = 52;
     public static final int INTAKE_PIVOT_LEFT_ID = 53;
     public static final int INTAKE_PIVOT_RIGHT_ID = 54;
@@ -177,7 +178,7 @@ public final class Constants {
   }
 
   public static class VisionConstants {
-    public static final double MAX_AMBIGUITY = 0.3;
+    public static final double MAX_AMBIGUITY = 0.2;
     public static final int MAX_AVERAGE_DISTANCE = 4;
     public static final int STD_DEV_RANGE = 30;
 
@@ -237,7 +238,7 @@ public final class Constants {
 
     public static final MotionMagicConfigs ROLLER_MAGIC_CONFIGS =
         new MotionMagicConfigs()
-            .withMotionMagicAcceleration(100)
+            .withMotionMagicAcceleration(250)
             .withMotionMagicCruiseVelocity(100);
 
     public static final FeedbackConfigs PIVOT_FEEDBACK_CONFIGS =
@@ -272,6 +273,23 @@ public final class Constants {
         new MotorOutputConfigs()
             .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
+
+    private static final MotorOutputConfigs rollerOutputRightConfigs =
+        new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
+
+    public static final TalonFXConfiguration rollerConfigRight =
+        new TalonFXConfiguration()
+            .withMotorOutput(rollerOutputRightConfigs)
+            .withSlot0(ROLLER_SLOT0_CONFIGS)
+            .withMotionMagic(ROLLER_MAGIC_CONFIGS)
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(60.0)
+                    .withStatorCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(60.0)
+                    .withSupplyCurrentLimitEnable(true));
 
     public static final TalonFXConfiguration pivotConfigLeft =
         new TalonFXConfiguration()
@@ -438,8 +456,8 @@ public final class Constants {
     public static final double MAXROTATION = 0.6;
     public static final double MINROTATION = -0.6;
 
-    public static final double ENCODER13_MAGNET_OFFSET = 0.134521484375;
-    public static final double ENCODER15_MAGNET_OFFSET = 0.37109375;
+    public static final double ENCODER13_MAGNET_OFFSET = 0.0556640625;
+    public static final double ENCODER15_MAGNET_OFFSET = 0.37646484375;
 
     public static final double TURRET_X_OFFSET = Units.inchesToMeters(-3.186);
     public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.95);

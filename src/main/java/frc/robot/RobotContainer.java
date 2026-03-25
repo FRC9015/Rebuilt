@@ -29,6 +29,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
+import frc.robot.commands.TurretDriveAutoDrive;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ZoneLogic;
 import frc.robot.subsystems.drive.Drive;
@@ -132,7 +133,8 @@ public class RobotContainer {
                     MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.INDEXER2_MOTOR_ID));
         intake =
             new Intake(
-                new RollerIOTalonFX(MotorIDConstants.INTAKE_ROLLER_ID),
+                new RollerIOTalonFX(
+                    MotorIDConstants.INTAKE_ROLLER_ID, MotorIDConstants.INTAKE_ROLLER_ID2),
                 new PivotIOTalonFX(
                     MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
                     MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
@@ -346,16 +348,7 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    // driverController
-    //     .leftTrigger()
-    //     .whileTrue(
-    //         DriveCommands.joystickDrive(
-    //             drive,
-    //             () -> -driverController.getLeftY(),
-    //             () -> -driverController.getLeftX(),
-    //             () -> -driverController.getRightX(),
-    //             0.3));
-    // intake.setDefaultCommand(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+
     driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
 
     operatorController
@@ -380,33 +373,51 @@ public class RobotContainer {
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(50)));
-
+    turret.setDefaultCommand(
+        new TurretDriveAutoDrive(
+            () -> drive.getPose(),
+            turret,
+            () -> FieldConstants.HUB_POSE_BLUE,
+            drive,
+            interpTables.timeOfFlightInterp));
     operatorController.x().whileTrue(intake.ajitateIntakeCommand());
-    operatorController.leftBumper().whileTrue(shooter.runShooterAtSpeed(70));
-    operatorController.a().onTrue(hood.setHoodPosition(0.0));
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    operatorController
+        .a()
+        .whileTrue(
+            DriveCommands.joystickDriveFacingPose(
+                drive,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> FieldConstants.HUB_POSE_BLUE,
+                turret));
 
-    operatorController
-        .povLeft()
-        .onTrue(
-            turret.setTurretAngleFastestPathCommand(0).onlyIf(() -> runZoneLogic.equals((false))));
-    operatorController
-        .povRight()
-        .onTrue(
-            turret.setTurretAngleFastestPathCommand(90).onlyIf(() -> runZoneLogic.equals((false))));
-    operatorController
-        .povUp()
-        .onTrue(
-            turret
-                .setTurretAngleFastestPathCommand(180)
-                .onlyIf(() -> runZoneLogic.equals((false))));
-    operatorController
-        .povDown()
-        .onTrue(
-            turret
-                .setTurretAngleFastestPathCommand(270)
-                .onlyIf(() -> runZoneLogic.equals((false))));
+    // operatorController
+    //     .povLeft()
+    //     .onTrue(
+    //         turret.setTurretAngleFastestPathCommand(0).onlyIf(() ->
+    // runZoneLogic.equals((false))));
+    // operatorController
+    //     .povRight()
+    //     .onTrue(
+    //         turret.setTurretAngleFastestPathCommand(90).onlyIf(() ->
+    // runZoneLogic.equals((false))));
+    // operatorController
+    //     .povUp()
+    //     .onTrue(
+    //         turret
+    //             .setTurretAngleFastestPathCommand(180)
+    //             .onlyIf(() -> runZoneLogic.equals((false))));
+    // operatorController
+    //     .povDown()
+    //     .onTrue(
+    //         turret
+    //             .setTurretAngleFastestPathCommand(270)
+    //             .onlyIf(() -> runZoneLogic.equals((false))));
+    operatorController.povDown().whileTrue(intake.setIntakeVolts(2));
+    operatorController.povUp().whileTrue(intake.setIntakeVolts(-2));
+
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
