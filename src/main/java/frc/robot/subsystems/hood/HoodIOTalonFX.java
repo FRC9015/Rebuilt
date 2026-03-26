@@ -2,18 +2,20 @@ package frc.robot.subsystems.hood;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class HoodIOTalonFX implements HoodIO {
@@ -26,23 +28,30 @@ public class HoodIOTalonFX implements HoodIO {
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private final MotionMagicVoltage hoodMagicVoltage =
-      new MotionMagicVoltage(Constants.ShooterConstants.HOOD_MAX_POS);
+      new MotionMagicVoltage(ShooterConstants.HOOD_MAX_POS);
+  private double target;
 
-  public HoodIOTalonFX(int hoodID) {
+  public HoodIOTalonFX(int hoodID, int encoderID) {
 
     hoodMotor = new TalonFX(hoodID);
+
     TalonFXConfiguration hoodConfig =
         new TalonFXConfiguration()
-            .withSlot1(Constants.ShooterConstants.hoodSlotPositionConfigs)
-            .withFeedback(Constants.ShooterConstants.hoodFeedbackConfigs)
-            .withMotionMagic(Constants.ShooterConstants.hoodMagicConfigs);
+            .withSlot1(ShooterConstants.hoodSlotPositionConfigs)
+            .withFeedback(ShooterConstants.hoodFeedbackConfigs)
+            .withMotionMagic(ShooterConstants.hoodMagicConfigs);
 
     hoodConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     hoodConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition.get();
-    hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    hoodConfig.CurrentLimits.StatorCurrentLimit = 60;
+    hoodConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    // hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = maxPosition.get();
+    // hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = minPosition.get();
+    // hoodConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    // hoodConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    CANcoderConfiguration hoodEncoderConfig = new CANcoderConfiguration();
+    hoodEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+    hoodEncoderConfig.MagnetSensor.MagnetOffset = ShooterConstants.HOOD_ENCODER_OFFSET;
 
     hoodMotor.getConfigurator().apply(hoodConfig);
 
@@ -59,10 +68,10 @@ public class HoodIOTalonFX implements HoodIO {
   @Override
   public void updateInputs(HoodIOInputs inputs) {
     BaseStatusSignal.refreshAll(motorVolts, motorAmps, motorRPM, motorPosition);
-    inputs.hoodEncoderPosition = motorPosition.getValueAsDouble();
-    inputs.hoodEncoderConnected = hoodMotor.getPosition().isAllGood();
+    inputs.hoodMotorPosition = motorPosition.getValueAsDouble();
     inputs.hoodAppliedVolts = motorVolts.getValueAsDouble();
     inputs.hoodCurrentAmps = motorAmps.getValueAsDouble();
+    inputs.hoodTargetPosition = target;
   }
 
   @Override
@@ -78,12 +87,10 @@ public class HoodIOTalonFX implements HoodIO {
   @Override
   public void setHoodPosition(double position) {
     final double clampedPosition =
-        MathUtil.clamp(
-            position,
-            Constants.ShooterConstants.HOOD_MIN_POS,
-            Constants.ShooterConstants
-                .HOOD_MAX_POS); // TODO figure out max and min position for Hood
+        MathUtil.clamp(position, ShooterConstants.HOOD_MIN_POS, ShooterConstants.HOOD_MAX_POS);
 
-    hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(0));
+    target = clampedPosition;
+
+    hoodMotor.setControl(hoodMagicVoltage.withPosition(clampedPosition).withSlot(1));
   }
 }

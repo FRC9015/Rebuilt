@@ -1,6 +1,7 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -16,14 +17,15 @@ public class Intake extends SubsystemBase {
     this.pivot = pivot;
   }
 
-  // Minimum Value of speedValue: -512.0
-  // Maximum Value of speedValkue: 511.998046875
-
   public void setRollerSpeed(double speedValue) {
     roller.setRollerSpeed(speedValue);
   }
 
-  public void setIntakeReverseSpeed(double speedValue) {
+  public void setRollerVoltage(double voltage) {
+    roller.setRollerVolts(voltage);
+  }
+
+  public void setRollerReverseSpeed(double speedValue) {
     roller.setRollerSpeed(-speedValue);
   }
 
@@ -50,8 +52,12 @@ public class Intake extends SubsystemBase {
         });
   }
 
-  public Command runIntakeAtReverseSpeed(double speed) {
-    return this.startEnd(() -> this.setIntakeReverseSpeed(speed), () -> this.stopRoller());
+  public Command runRollerAtSpeed(double speed) {
+    return this.startEnd(() -> this.setRollerSpeed(speed), () -> roller.stop());
+  }
+
+  public Command runRollerAtVoltage(double voltage) {
+    return this.startEnd(() -> this.setRollerVoltage(voltage), () -> roller.stop());
   }
 
   public Command stopRoller() {
@@ -69,6 +75,28 @@ public class Intake extends SubsystemBase {
 
   public int getIntakeFuelCount() {
     return rollerInputs.fuelInside;
+  }
+
+  public Command ajitateIntakeCommand() {
+    return new SequentialCommandGroup(
+            this.run(
+                    () -> {
+                      setPivotPosition(PivotIO.PivotPositions.AGITATE.getPivotPosition());
+                      setRollerSpeed(50);
+                    })
+                .withTimeout(0.2),
+            this.run(
+                    () -> {
+                      setPivotPosition(PivotIO.PivotPositions.AGITATE_MIDDLE.getPivotPosition());
+                      setRollerSpeed(50);
+                    })
+                .withTimeout(0.2))
+        .repeatedly()
+        .finallyDo(
+            (interrupted) -> {
+              setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(0.5);
+              this.setRollerVoltage(0);
+            });
   }
 
   @Override

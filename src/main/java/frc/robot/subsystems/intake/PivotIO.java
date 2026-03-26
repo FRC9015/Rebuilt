@@ -8,18 +8,20 @@ public interface PivotIO {
   /** Class representing the inputs for the intake pivot. */
   @AutoLog
   public static class PivotIOInputs {
-    public double pivotLeftApppliedVolts = 0.0;
+    public double pivotLeftAppliedVolts = 0.0;
+    public double pivotRightAppliedVolts = 0.0;
     public double pivotLeftCurrentAmps = 0.0;
-    public double pivotLeftCurrentSpeed = 0.0;
-    public double pivotPosition = 0.0;
-    public double pivotRightApppliedVolts = 0.0;
     public double pivotRightCurrentAmps = 0.0;
+    public double pivotLeftCurrentSpeed = 0.0;
     public double pivotRightCurrentSpeed = 0.0;
+    public double pivotPosition = 0.0;
   }
 
   public enum PivotPositions {
     STOWED(Constants.IntakeConstants.PIVOT_STOWED_POSITION),
-    DEPLOYED(Constants.IntakeConstants.PIVOT_DEPLOYED_POSITION);
+    DEPLOYED(Constants.IntakeConstants.PIVOT_DEPLOYED_POSITION),
+    AGITATE(0.25),
+    AGITATE_MIDDLE(0.75);
 
     private final double position;
 

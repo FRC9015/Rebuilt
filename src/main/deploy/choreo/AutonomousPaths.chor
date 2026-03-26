@@ -1,0 +1,84 @@
+{
+ "name":"AutonomousPaths",
+ "version":2,
+ "type":"Swerve",
+ "variables":{
+  "expressions":{},
+  "poses":{}
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"9.25 in",
+    "val":0.23495
+   },
+   "y":{
+    "exp":"12.5 in",
+    "val":0.3175
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-9.25 in",
+    "val":-0.23495
+   },
+   "y":{
+    "exp":"12.5 in",
+    "val":0.3175
+   }
+  },
+  "mass":{
+   "exp":"143.5 lbs",
+   "val":65.090505095
+  },
+  "inertia":{
+   "exp":"6 kg m ^ 2",
+   "val":6.0
+  },
+  "gearing":{
+   "exp":"6.12",
+   "val":6.12
+  },
+  "radius":{
+   "exp":"2 in",
+   "val":0.0508
+  },
+  "vmax":{
+   "exp":"6000 RPM",
+   "val":628.3185307179587
+  },
+  "tmax":{
+   "exp":"1.2 N * m",
+   "val":1.2
+  },
+  "cof":{
+   "exp":"1.2",
+   "val":1.2
+  },
+  "bumper":{
+   "front":{
+    "exp":"15.25 in",
+    "val":0.38735
+   },
+   "side":{
+    "exp":"17.75 in",
+    "val":0.45085
+   },
+   "back":{
+    "exp":"15.25 in",
+    "val":0.38735
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[],
+ "codegen":{
+  "root":"../../java/frc/robot",
+  "genVars":false,
+  "genTrajData":false,
+  "useChoreoLib":false
+ }
+}
