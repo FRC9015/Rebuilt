@@ -6,9 +6,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.subsystems.ZoneLogic;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.turret.Turret;
 import java.util.function.Supplier;
@@ -21,65 +23,111 @@ public class TurretAngleAim extends Command {
   private final Supplier<Pose2d> targetPoseSupplier;
   private final Drive drive;
   private final InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
+  private final ZoneLogic zone;
 
   public TurretAngleAim(
       Supplier<Pose2d> poseSupplier,
       Turret turret,
       Supplier<Pose2d> targetPose,
       Drive drive,
-      InterpolatingTreeMap<Double, Double> timeOfFlightInterp) {
+      InterpolatingTreeMap<Double, Double> timeOfFlightInterp,
+      ZoneLogic zone) {
     this.poseSupplier = poseSupplier;
     this.turret = turret;
     this.targetPoseSupplier = targetPose;
     this.drive = drive;
     this.timeOfFlightInterp = timeOfFlightInterp;
+    this.zone = zone;
     addRequirements(turret);
   }
 
-  @Override
-  public void execute() {
-    Pose2d robotPose = poseSupplier.get();
-    Pose2d targetPose = targetPoseSupplier.get();
-    Pose2d filpedTargetPose = FlippingUtil.flipFieldPose(targetPose);
-    // 1. Calculate Turret Position on the Field
-    // Rotate the offset vector by the robot's current heading
+  private void aimAtTarget(Pose2d robotPose, Translation2d targetPos, String logPrefix) {
+    // 1. Turret field position
     Translation2d turretOffset =
         new Translation2d(TurretConstants.TURRET_X_OFFSET, TurretConstants.TURRET_Y_OFFSET)
             .rotateBy(robotPose.getRotation());
-
-    // Add that rotated offset to the robot's center position
     Translation2d turretFieldPos = robotPose.getTranslation().plus(turretOffset);
 
-    // 2. Select Target (Hub) based on Alliance
-    boolean isRed =
-        DriverStation.getAlliance().isPresent()
-            && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
-
-    Translation2d targetPos =
-        isRed ? filpedTargetPose.getTranslation() : targetPose.getTranslation();
-
-    // 3. Calculate Angle from Turret to Target (Field Relative)
+    // 2. Vector and distance
     Translation2d turretToTarget = targetPos.minus(turretFieldPos);
-    Rotation2d fieldAngleToHub = turretToTarget.getAngle();
+    double distance = turretToTarget.getNorm();
 
-    // 4. Calculate Robot-Relative Angle
-    // Setpoint = (Target Direction) - (Robot Direction)
+    // 3. Unit vector
+    Translation2d unitToTarget = turretToTarget.div(distance);
+
+    // 4. Robot velocity
+    ChassisSpeeds speeds = drive.getChassisSpeeds();
+    double vx = speeds.vxMetersPerSecond;
+    double vy = speeds.vyMetersPerSecond;
+
+    // 5. Dot product
+    double robotSpeedAlongShot = (vx * unitToTarget.getX()) + (vy * unitToTarget.getY());
+
+    // 6. Flight time and fuel speed
+    double timeOfFlight = timeOfFlightInterp.get(distance);
+    double fuelSpeedAlongShot = distance / timeOfFlight;
+
+    // 7. Corrected flight time
+    double totalSpeedAlongShot = Math.max(fuelSpeedAlongShot + robotSpeedAlongShot, 0.1);
+    double correctedFlightTime = distance / totalSpeedAlongShot;
+
+    // 8. Drift compensation
+    double driftX = vx * correctedFlightTime;
+    double driftY = vy * correctedFlightTime;
+    Translation2d compensatedTarget = targetPos.minus(new Translation2d(driftX, driftY));
+
+    // 9. Angle to compensated target
+    Translation2d turretToCompensated = compensatedTarget.minus(turretFieldPos);
+    Rotation2d fieldAngleToTarget = turretToCompensated.getAngle();
+
+    // 10. Robot-relative, normalized to 0-360
     Rotation2d relativeSetpoint =
-        fieldAngleToHub.minus(robotPose.getRotation().plus(Rotation2d.fromDegrees(360)));
-
-    // 5. Convert to 0-360 range
+        fieldAngleToTarget.minus(robotPose.getRotation().plus(Rotation2d.fromDegrees(360)));
     double headingSetpoint = MathUtil.inputModulus(relativeSetpoint.getDegrees(), 0, 360);
 
-    // 6. Send to Subsystem
-    // The fastestPath logic will take this 0-360 and decide if it's better
-    // to go to the positive or negative version based on your -0.7 to 0.7 limit.
-    // turret.setTurretSetPoint(headingSetpoint);
+    // 11. Send to subsystem
+    turret.setTurretSetPoint(headingSetpoint);
     double directionSetpoint = turret.setTurretAngleFastestPath(headingSetpoint);
     turret.setPositionVoid(directionSetpoint);
-    // Logging for debugging
-    Logger.recordOutput("Turret/HeadingSetpoint0to360", headingSetpoint);
-    Logger.recordOutput("DISTANCETHING", targetPos.getDistance(robotPose.getTranslation()));
-    Logger.recordOutput("Turret/TurretFieldPos", new Pose2d(turretFieldPos, fieldAngleToHub));
-    Logger.recordOutput("Turret/Targetpose", targetPos);
+
+    // 12. Logging
+    Logger.recordOutput(logPrefix + "/HeadingSetpoint", headingSetpoint);
+    Logger.recordOutput(logPrefix + "/TargetPos", targetPos);
+    Logger.recordOutput(logPrefix + "/CompensatedTarget", compensatedTarget);
+    Logger.recordOutput(logPrefix + "/RawFlightTime", timeOfFlight);
+    Logger.recordOutput(logPrefix + "/CorrectedFlightTime", correctedFlightTime);
+    Logger.recordOutput(logPrefix + "/FuelSpeedAlongShot", fuelSpeedAlongShot);
+    Logger.recordOutput(logPrefix + "/RobotSpeedAlongShot", robotSpeedAlongShot);
+    Logger.recordOutput(logPrefix + "/DriftVector", new Translation2d(driftX, driftY));
+    Logger.recordOutput(logPrefix + "/Zone", zone.getCurrentFieldZone().toString());
+    Logger.recordOutput(logPrefix + "/TurretFieldPos", new Pose2d(turretFieldPos, fieldAngleToTarget));
+}
+
+  @Override
+  public void execute() {
+      Pose2d robotPose = poseSupplier.get();
+      boolean isRed = DriverStation.getAlliance().isPresent()
+          && DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
+
+      Pose2d targetPose = targetPoseSupplier.get();
+      Pose2d flippedTargetPose = FlippingUtil.flipFieldPose(targetPose);
+      Translation2d targetPos =
+          isRed ? flippedTargetPose.getTranslation() : targetPose.getTranslation();
+
+      ZoneLogic.FieldZone currentZone = zone.getCurrentFieldZone();
+      boolean isInNeutral = currentZone == ZoneLogic.FieldZone.NEUTRAL_ZONE_LEFT
+          || currentZone == ZoneLogic.FieldZone.NEUTRAL_ZONE_RIGHT;
+
+      aimAtTarget(robotPose, targetPos, isInNeutral ? "Turret/PassAim" : "Turret/ShootAim");
+  }
+
+  @Override
+  public boolean isFinished() {
+    return false;
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    turret.setTurretSetPoint(0);
   }
 }
