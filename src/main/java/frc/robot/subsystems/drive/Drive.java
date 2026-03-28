@@ -589,5 +589,9 @@ public class Drive extends SubsystemBase {
 
     runVelocity(velocity);
     Logger.recordOutput("Auto/Setpoint", sample.getPose());
+    Logger.recordOutput("Auto/velocity", velocity);
+    Logger.recordOutput("Auto/xff", xFF);
+    Logger.recordOutput("Auto/yff", yFF);
+    Logger.recordOutput("Auto/rotationff", rotationFF);
   }
 }

@@ -1,7 +1,5 @@
 package frc.robot.subsystems.turret;
 
-import static edu.wpi.first.units.Units.Rotations;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -23,12 +21,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.robot.Constants;
 import frc.robot.Constants.TurretConstants;
-import org.littletonrobotics.junction.Logger;
-import yams.units.EasyCRT;
-import yams.units.EasyCRT.CRTStatus;
-import yams.units.EasyCRTConfig;
 
 /**
  * TurretIOTalonFX for actually running the turret and updating the turretIO file using a TalonFX
@@ -39,7 +32,7 @@ public class TurretIOTalonFX implements TurretIO {
   private final TalonFX turretMotor;
   private final CANcoder encoder13;
   private final CANcoder encoder15;
-  private final EasyCRT easyCRT;
+  // private final EasyCRT easyCRT;
   private double setpointDegrees = 0.0;
 
   private final StatusSignal<Angle> encoder13PosSignal;
@@ -80,7 +73,9 @@ public class TurretIOTalonFX implements TurretIO {
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(60.0)
-                    .withStatorCurrentLimitEnable(true));
+                    .withStatorCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(60.0)
+                    .withSupplyCurrentLimitEnable(true));
 
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -112,41 +107,42 @@ public class TurretIOTalonFX implements TurretIO {
         motorPositionSignal);
 
     // Configure EasyCRT to resolve turret angle from two encoders using Chinese Remainder Theorem
-    EasyCRTConfig easyCRTConfig =
-        new EasyCRTConfig(
-                () -> encoder13.getAbsolutePosition().getValue(),
-                () -> encoder15.getAbsolutePosition().getValue())
-            .withAbsoluteEncoder1Gearing(TurretConstants.T_TEETH, TurretConstants.E1_TEETH)
-            .withAbsoluteEncoder2Gearing(TurretConstants.T_TEETH, TurretConstants.E2_TEETH)
-            .withMechanismRange(
-                Rotations.of(TurretConstants.MINROTATION),
-                Rotations.of(TurretConstants.MAXROTATION))
-            .withMatchTolerance(Rotations.of(TurretConstants.CRT_TOLERANCE))
-            .withAbsoluteEncoderOffsets(Rotations.of(0.0), Rotations.of(0.0))
-            .withAbsoluteEncoderInversions(false, false);
+    // EasyCRTConfig easyCRTConfig =
+    //     new EasyCRTConfig(
+    //             () -> encoder13.getAbsolutePosition().getValue(),
+    //             () -> encoder15.getAbsolutePosition().getValue())
+    //         .withAbsoluteEncoder1Gearing(TurretConstants.T_TEETH, TurretConstants.E1_TEETH)
+    //         .withAbsoluteEncoder2Gearing(TurretConstants.T_TEETH, TurretConstants.E2_TEETH)
+    //         .withMechanismRange(
+    //             Rotations.of(TurretConstants.MINROTATION),
+    //             Rotations.of(TurretConstants.MAXROTATION))
+    //         .withMatchTolerance(Rotations.of(TurretConstants.CRT_TOLERANCE))
+    //         .withAbsoluteEncoderOffsets(Rotations.of(0.0), Rotations.of(0.0))
+    //         .withAbsoluteEncoderInversions(false, false);
 
-    easyCRT = new EasyCRT(easyCRTConfig);
+    // easyCRT = new EasyCRT(easyCRTConfig);
 
-    // Log initialization result for debugging
-    easyCRT
-        .getAngleOptional()
-        .ifPresentOrElse(
-            angle -> {
-              this.seedMotorPosition(angle.in(Rotations));
-              Logger.recordOutput(
-                  "Turret/InitStatus",
-                  "Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
-            },
-            () -> {
-              Logger.recordOutput("Turret/InitStatus", "CRT failed to resolve turret angle!");
-              Logger.recordOutput("Turret/InitStatuslast", "  Status: " + easyCRT.getLastStatus());
-              Logger.recordOutput(
-                  "Turret/InitStatus13",
-                  "  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
-              Logger.recordOutput(
-                  "Turret/InitStatus15",
-                  "  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
-            });
+    // // Log initialization result for debugging
+    // easyCRT
+    //     .getAngleOptional()
+    //     .ifPresentOrElse(
+    //         angle -> {
+    //           this.seedMotorPosition(angle.in(Rotations));
+    //           Logger.recordOutput(
+    //               "Turret/InitStatus",
+    //               "Turret CRT initialized at " + (angle.in(Rotations) * 360.0) + " degrees");
+    //         },
+    //         () -> {
+    //           Logger.recordOutput("Turret/InitStatus", "CRT failed to resolve turret angle!");
+    //           Logger.recordOutput("Turret/InitStatuslast", "  Status: " +
+    // easyCRT.getLastStatus());
+    //           Logger.recordOutput(
+    //               "Turret/InitStatus13",
+    //               "  Enc13: " + encoder13.getAbsolutePosition().getValueAsDouble());
+    //           Logger.recordOutput(
+    //               "Turret/InitStatus15",
+    //               "  Enc15: " + encoder15.getAbsolutePosition().getValueAsDouble());
+    //         });
   }
 
   @Override
@@ -169,35 +165,39 @@ public class TurretIOTalonFX implements TurretIO {
     inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
     inputs.turretSetpoint = setpointDegrees;
     inputs.turretError = (Math.abs(inputs.turretResolvedPosition - inputs.turretSetpoint)) * 360;
-
+    inputs.turretResolvedPosition =
+        MathUtil.inputModulus(
+            motorPositionSignal.getValueAsDouble(),
+            TurretConstants.MINROTATION,
+            TurretConstants.MAXROTATION);
     // Resolve turret angle using CRT from two encoder readings
-    easyCRT
-        .getAngleOptional()
-        .ifPresentOrElse(
-            angle -> {
-              inputs.turretResolvedValid = true;
-              inputs.turretResolvedPosition = angle.in(Rotations);
-              inputs.turretResolvedPositionDegrees = angle.in(Rotations) * 360.0;
-              double motorPositionWrapped =
-                  MathUtil.inputModulus(
-                      inputs.turretMotorPosition,
-                      TurretConstants.MINROTATION,
-                      TurretConstants.MAXROTATION);
+    // easyCRT
+    //     .getAngleOptional()
+    //     .ifPresentOrElse(
+    //         angle -> {
+    //           inputs.turretResolvedValid = true;
+    //           inputs.turretResolvedPosition = angle.in(Rotations);
+    //           inputs.turretResolvedPositionDegrees = angle.in(Rotations) * 360.0;
+    //           double motorPositionWrapped =
+    //               MathUtil.inputModulus(
+    //                   inputs.turretMotorPosition,
+    //                   TurretConstants.MINROTATION,
+    //                   TurretConstants.MAXROTATION);
 
-              if (Math.abs(inputs.turretResolvedPosition - motorPositionWrapped)
-                  > Constants.TurretConstants.SYNC_THRESHOLD) {
+    //           if (Math.abs(inputs.turretResolvedPosition - motorPositionWrapped)
+    //               > Constants.TurretConstants.SYNC_THRESHOLD) {
 
-                outofSyncAlert.set(
-                    Math.abs(inputs.turretResolvedPosition - motorPositionWrapped)
-                        > Constants.TurretConstants.SYNC_THRESHOLD);
+    //             outofSyncAlert.set(
+    //                 Math.abs(inputs.turretResolvedPosition - motorPositionWrapped)
+    //                     > Constants.TurretConstants.SYNC_THRESHOLD);
 
-                inputs.turretResolvedPosition = motorPositionWrapped;
-              }
-            },
-            () -> {
-              inputs.turretResolvedValid = false;
-              outofBoundsAlert.set(!inputs.turretResolvedValid);
-            });
+    //             inputs.turretResolvedPosition = motorPositionWrapped;
+    //           }
+    //         },
+    //         () -> {
+    //           inputs.turretResolvedValid = false;
+    //           outofBoundsAlert.set(!inputs.turretResolvedValid);
+    //         });
   }
 
   @Override
@@ -234,17 +234,17 @@ public class TurretIOTalonFX implements TurretIO {
     turretMotor.setControl(voltageOut.withOutput(voltage));
   }
 
-  public CRTStatus getLastCRTStatus() {
-    return easyCRT.getLastStatus();
-  }
+  // public CRTStatus getLastCRTStatus() {
+  //   return easyCRT.getLastStatus();
+  // }
 
-  public double getLastCRTErrorRotations() {
-    return easyCRT.getLastErrorRotations();
-  }
+  // public double getLastCRTErrorRotations() {
+  //   return easyCRT.getLastErrorRotations();
+  // }
 
-  public int getLastCRTIterations() {
-    return easyCRT.getLastIterations();
-  }
+  // public int getLastCRTIterations() {
+  //   return easyCRT.getLastIterations();
+  // }
 
   @Override
   public void setTurretSetPoint(double value) {

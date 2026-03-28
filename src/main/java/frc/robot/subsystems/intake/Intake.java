@@ -41,14 +41,10 @@ public class Intake extends SubsystemBase {
 
   public Command runIntakeAtSpeed(double intakeSpeed, PivotIO.PivotPositions pivotPosition) {
 
-    return this.startEnd(
+    return this.run(
         () -> {
           this.setRollerSpeed(intakeSpeed);
-          this.setPivotPosition(pivotPosition);
-        },
-        () -> {
-          this.stopRoller();
-          this.setPivotPosition(pivotPosition);
+          this.setPivotPosition(pivotPosition.getPivotPosition());
         });
   }
 
@@ -66,6 +62,10 @@ public class Intake extends SubsystemBase {
 
   public Command runIntakeSim() {
     return this.startEnd(() -> roller.setRollerSpeed(true), () -> roller.setRollerSpeed(false));
+  }
+
+  public Command setIntakeVolts(double volts) {
+    return this.startEnd(() -> pivot.setVolts(volts), () -> pivot.setVolts(0));
   }
 
   // Only used for simulation

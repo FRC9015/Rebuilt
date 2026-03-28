@@ -14,6 +14,7 @@ public class ShooterAutoAimSequence extends ParallelCommandGroup {
       Hood hood,
       InterpolatingTreeMap<Double, Double> shooterInterp,
       InterpolatingTreeMap<Double, Double> hoodInterp,
+      InterpolatingTreeMap<Double, Double> tofInterp,
       Supplier<Pose2d> poseSupplier,
       Supplier<Pose2d> targetPoseSupplier,
       Drive drive) {

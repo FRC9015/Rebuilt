@@ -101,6 +101,11 @@ public class PivotIOTalonFX implements PivotIO {
   }
 
   @Override
+  public void setVolts(double volts) {
+    pivotMotorLeft.setVoltage(volts);
+  }
+
+  @Override
   public void setPivotPosition(PivotPositions position) {
     // Only set control on the master; the follower handles the rest
     pivotMotorLeft.setControl(pivotMagicVoltage.withPosition(position.getPivotPosition()));

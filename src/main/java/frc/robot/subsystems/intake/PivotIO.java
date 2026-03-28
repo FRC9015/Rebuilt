@@ -42,6 +42,8 @@ public interface PivotIO {
 
   public default void updatePIDFromDashboard() {}
 
+  public default void setVolts(double volts) {}
+
   default void stop() {}
 
   default void setBrakeMode(boolean enable) {}

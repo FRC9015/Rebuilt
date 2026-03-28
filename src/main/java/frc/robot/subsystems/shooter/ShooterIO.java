@@ -21,6 +21,9 @@ public interface ShooterIO {
 
     // Fields representing the hood state and inputs
     public boolean flywheelAtSpeed = false;
+    public double kickerAppliedVolts = 0.0;
+    public double kickerCurrentAmps = 0.0;
+    public double kickerRPM = 0.0;
   }
 
   /** Method to update the inputs of the Shooter subsystem. */

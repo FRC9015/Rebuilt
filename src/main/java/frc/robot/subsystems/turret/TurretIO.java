@@ -1,5 +1,6 @@
 package frc.robot.subsystems.turret;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
 /** TurretIO file which has all the values that are loged and the default functions */
@@ -24,6 +25,7 @@ public interface TurretIO {
     public double turretResolvedPositionDegrees = 0.0;
     public boolean turretResolvedValid = false;
     public double turretMotorVelocity = 0.0;
+    public Rotation2d driveSetpoint = new Rotation2d();
   }
 
   public default void updateInputs(TurretIOInputs inputs) {}

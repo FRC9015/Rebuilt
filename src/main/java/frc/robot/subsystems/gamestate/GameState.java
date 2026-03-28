@@ -132,12 +132,12 @@ public class GameState extends SubsystemBase {
       return false;
     }
     double epsilon = 0.21;
-    return Math.abs(time - 133) < epsilon
-        || Math.abs(time - 108) < epsilon
-        || Math.abs(time - 83) < epsilon
-        || Math.abs(time - 58) < epsilon
-        || Math.abs(time - 33) < epsilon
-        || Math.abs(time - 3) < epsilon;
+    return Math.abs(time - 136) < epsilon
+        || Math.abs(time - 111) < epsilon
+        || Math.abs(time - 86) < epsilon
+        || Math.abs(time - 61) < epsilon
+        || Math.abs(time - 36) < epsilon
+        || Math.abs(time - 6) < epsilon;
   }
 
   private StateEnum findAlliance() {
