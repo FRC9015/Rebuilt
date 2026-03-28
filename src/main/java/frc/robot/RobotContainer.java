@@ -263,7 +263,7 @@ public class RobotContainer {
                 () -> drive.getPose(),
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive)
-            .alongWith(intake.ajitateIntakeCommand()));
+            .alongWith(intake.agitateIntakeCommand()));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.0));
 
@@ -380,7 +380,7 @@ public class RobotContainer {
             () -> FieldConstants.HUB_POSE_BLUE,
             drive,
             interpTables.timeOfFlightInterp));
-    operatorController.x().whileTrue(intake.ajitateIntakeCommand());
+    operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     operatorController
