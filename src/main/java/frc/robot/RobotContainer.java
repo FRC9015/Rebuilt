@@ -208,6 +208,8 @@ public class RobotContainer {
         zones = new ZoneLogic(drive);
 
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
+        runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
+        overrideZone = new Trigger(() -> zones.getOverrideZone());
 
         break;
 
