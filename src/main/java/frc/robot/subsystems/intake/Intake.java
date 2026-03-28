@@ -77,7 +77,7 @@ public class Intake extends SubsystemBase {
     return rollerInputs.fuelInside;
   }
 
-  public Command ajitateIntakeCommand() {
+  public Command agitateIntakeCommand() {
     return new SequentialCommandGroup(
             this.run(
                     () -> {
