@@ -180,7 +180,7 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
+                IntakeSimulation.IntakeSide.FRONT, // flipped from FRONT
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
         drive =
@@ -350,6 +350,7 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
+    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(100));
 
     operatorController
         .rightTrigger()
@@ -368,7 +369,6 @@ public class RobotContainer {
                             () -> zones.getZoneTargetPose(),
                             drive)
                         .alongWith(zones.override())));
-    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
     operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())

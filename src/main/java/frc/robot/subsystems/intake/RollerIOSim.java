@@ -7,7 +7,7 @@ public class RollerIOSim implements RollerIO {
 
   public RollerIOSim(IntakeSimulation simIntake) {
     this.intakeSimulation =
-        simIntake; // Assuming the IntakeSimulation is properly initialized and passed in
+        simIntake; // The intake simulation is passed in from RobotContainer, so it can be shared
   }
 
   @Override
@@ -20,8 +20,8 @@ public class RollerIOSim implements RollerIO {
   }
 
   @Override
-  public void setRollerSpeed(boolean runIntake) {
-    if (runIntake) {
+  public void setRollerSpeed(double speed) {
+    if (speed > 0) {
       intakeSimulation.startIntake();
     } else {
       intakeSimulation.stopIntake();
