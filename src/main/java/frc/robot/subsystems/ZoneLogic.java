@@ -152,11 +152,9 @@ public class ZoneLogic extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (false
-    // DriverStation.isTeleopEnabled()
-    //   || DriverStation.isAutonomousEnabled()
-    //   || DriverStation.isTestEnabled()
-    ) {
+    if (DriverStation.isTeleopEnabled()
+        || DriverStation.isAutonomousEnabled()
+        || DriverStation.isTestEnabled()) {
       runMainZoneLogic = zoneControl;
       overrideZones = overrideControl;
     } else {

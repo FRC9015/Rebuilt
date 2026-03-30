@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
+import frc.robot.subsystems.ZoneLogic;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.indexer.Indexer;
@@ -51,6 +52,7 @@ public class Autos {
   private final Hood hood;
   private final Vision vision;
   private final Turret turret;
+  private final ZoneLogic zone;
   private final InterpolatingTreeMap<Double, Double> shooterInterp;
   private final InterpolatingTreeMap<Double, Double> hoodInterp;
   private final InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
@@ -78,6 +80,7 @@ public class Autos {
       Hood hood,
       Vision vision,
       Turret turret,
+      ZoneLogic zone,
       InterpolatingTreeMap<Double, Double> shooterInterp,
       InterpolatingTreeMap<Double, Double> hoodInterp,
       InterpolatingTreeMap<Double, Double> timeOfFlightInterp) {
@@ -89,6 +92,7 @@ public class Autos {
     this.hood = hood;
     this.vision = vision;
     this.turret = turret;
+    this.zone = zone;
     this.shooterInterp = shooterInterp;
     this.hoodInterp = hoodInterp;
     this.timeOfFlightInterp = timeOfFlightInterp;
@@ -145,7 +149,8 @@ public class Autos {
                         turret,
                         () -> FieldConstants.HUB_POSE_BLUE,
                         drive,
-                        timeOfFlightInterp)
+                        timeOfFlightInterp,
+                        zone)
                     .withTimeout(1.5),
                 new ShooterAutoAimSequence(
                     shooter,
