@@ -65,6 +65,7 @@ import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOSim;
+import frc.robot.subsystems.vision.VisionIOUmbra;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -124,9 +125,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
-                new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
+                new VisionIOUmbra("port"),
+                new VisionIOUmbra("starboard"));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
