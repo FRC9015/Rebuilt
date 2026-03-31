@@ -21,10 +21,20 @@ public class VisionIOUmbra implements VisionIO {
   public void updateInputs(VisionIOInputs inputs) {
     double[] data = observationSub.get();
 
-    // Our C++ Packet: [TS, X, Y, Z, Roll, Pitch, Yaw, TagCount]
+    // LOG THESE TO SEE WHAT IS HAPPENING
+    // 1. Is the topic even found on the network?
+    org.littletonrobotics.junction.Logger.recordOutput(
+        "Vision/Debug/" + observationSub.getTopic().getName() + "/Exists",
+        observationSub.getTopic().isValid());
+    // 2. How many numbers are we getting?
+    org.littletonrobotics.junction.Logger.recordOutput(
+        "Vision/Debug/" + observationSub.getTopic().getName() + "/Length", data.length);
+
+    // Actual logic
+    inputs.connected = (data.length >= 8);
+
     if (data.length < 8) {
       inputs.poseObservations = new PoseObservation[0];
-      inputs.connected = false;
       return;
     }
 
