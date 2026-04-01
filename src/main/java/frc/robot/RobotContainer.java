@@ -206,8 +206,9 @@ public class RobotContainer {
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
-
+        runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
+        overrideZone = new Trigger(() -> zones.getOverrideZone());
 
         break;
 
