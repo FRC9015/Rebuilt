@@ -31,6 +31,7 @@ import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.commands.TurretDriveAutoDrive;
 import frc.robot.generated.TunerConstants;
+import frc.robot.generated.TunerConstantsSim;
 import frc.robot.subsystems.ZoneLogic;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -180,16 +181,16 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
+                IntakeSimulation.IntakeSide.FRONT,
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontLeft, simDrive.getModules()[0]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.FrontLeft, simDrive.getModules()[0]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.FrontRight, simDrive.getModules()[1]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackLeft, simDrive.getModules()[2]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackRight, simDrive.getModules()[3]));
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());
@@ -206,8 +207,9 @@ public class RobotContainer {
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
-
+        runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
+        overrideZone = new Trigger(() -> zones.getOverrideZone());
 
         break;
 
@@ -350,6 +352,7 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
+    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(100));
 
     operatorController
         .rightTrigger()
@@ -368,7 +371,6 @@ public class RobotContainer {
                             () -> zones.getZoneTargetPose(),
                             drive)
                         .alongWith(zones.override())));
-    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
     operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
