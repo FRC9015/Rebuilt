@@ -16,6 +16,7 @@ import frc.robot.Constants.IntakeConstants;
 public class RollerIOTalonFX implements RollerIO {
 
   public final TalonFX rollerMotorLeft;
+  public final TalonFX rollerMotorRight;
 
   public StatusSignal<Voltage> rollerLeftVolts;
   public StatusSignal<Current> rollerLeftAmps;
@@ -29,15 +30,20 @@ public class RollerIOTalonFX implements RollerIO {
       new MotionMagicVelocityVoltage(0.0);
   private final VoltageOut intakeVoltageOut = new VoltageOut(0.0);
 
-  public RollerIOTalonFX(int rollerIDLeft) {
+  public RollerIOTalonFX(int rollerIDLeft, int rollerIDRight) {
     rollerMotorLeft = new TalonFX(rollerIDLeft);
+    rollerMotorRight = new TalonFX(rollerIDRight);
 
     rollerMotorLeft.getConfigurator().apply(IntakeConstants.rollerConfigLeft);
+    rollerMotorRight.getConfigurator().apply(IntakeConstants.rollerConfigRight);
 
     rollerLeftVolts = rollerMotorLeft.getMotorVoltage();
     rollerLeftAmps = rollerMotorLeft.getStatorCurrent();
     rollerLeftspeed = rollerMotorLeft.getVelocity();
 
+    rollerRightVolts = rollerMotorRight.getMotorVoltage();
+    rollerRightAmps = rollerMotorRight.getStatorCurrent();
+    rollerRightSpeed = rollerMotorRight.getVelocity();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
@@ -48,7 +54,7 @@ public class RollerIOTalonFX implements RollerIO {
         rollerRightAmps,
         rollerRightSpeed);
 
-    ParentDevice.optimizeBusUtilizationForAll(rollerMotorLeft);
+    ParentDevice.optimizeBusUtilizationForAll(rollerMotorLeft, rollerMotorRight);
   }
 
   @Override
@@ -73,11 +79,13 @@ public class RollerIOTalonFX implements RollerIO {
   @Override
   public void stop() {
     rollerMotorLeft.stopMotor();
+    rollerMotorRight.stopMotor();
   }
 
   @Override
   public void setBrakeMode(boolean enable) {
     rollerMotorLeft.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    rollerMotorRight.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
   // Minimum Value of speedValue: -512.0
@@ -89,11 +97,15 @@ public class RollerIOTalonFX implements RollerIO {
         intakeVelocityVoltage.withVelocity(
             MathUtil.clamp(
                 speed, IntakeConstants.INTAKE_MIN_SPEED, IntakeConstants.INTAKE_MAX_SPEED)));
-   
+    rollerMotorRight.setControl(
+        intakeVelocityVoltage.withVelocity(
+            MathUtil.clamp(
+                speed, IntakeConstants.INTAKE_MIN_SPEED, IntakeConstants.INTAKE_MAX_SPEED)));
   }
 
   @Override
   public void setRollerVolts(double voltage) {
     rollerMotorLeft.setControl(intakeVoltageOut.withOutput(voltage));
+    rollerMotorRight.setControl(intakeVoltageOut.withOutput(voltage));
   }
 }
