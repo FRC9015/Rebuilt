@@ -138,7 +138,6 @@ public class RobotContainer {
                     MotorIDConstants.INTAKE_ROLLER_ID, MotorIDConstants.INTAKE_ROLLER_ID2),
                 new PivotIOTalonFX(
                     MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
-                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
                     MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
