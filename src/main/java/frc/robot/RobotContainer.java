@@ -31,6 +31,7 @@ import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.commands.TurretDriveAutoDrive;
 import frc.robot.generated.TunerConstants;
+import frc.robot.generated.TunerConstantsSim;
 import frc.robot.subsystems.ZoneLogic;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -186,10 +187,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontLeft, simDrive.getModules()[0]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.FrontLeft, simDrive.getModules()[0]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.FrontRight, simDrive.getModules()[1]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackLeft, simDrive.getModules()[2]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackRight, simDrive.getModules()[3]));
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());

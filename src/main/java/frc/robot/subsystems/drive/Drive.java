@@ -59,6 +59,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
+import frc.robot.generated.TunerConstantsSim;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -120,12 +121,12 @@ public class Drive extends SubsystemBase {
               new SwerveModuleSimulationConfig(
                   DCMotor.getKrakenX60(1),
                   DCMotor.getKrakenX60(1),
-                  TunerConstants.FrontLeft.DriveMotorGearRatio,
-                  TunerConstants.FrontLeft.SteerMotorGearRatio,
-                  Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage),
-                  Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage),
-                  Meters.of(TunerConstants.FrontLeft.WheelRadius),
-                  KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia),
+                  TunerConstantsSim.FrontLeft.DriveMotorGearRatio,
+                  TunerConstantsSim.FrontLeft.SteerMotorGearRatio,
+                  Volts.of(TunerConstantsSim.FrontLeft.DriveFrictionVoltage),
+                  Volts.of(TunerConstantsSim.FrontLeft.SteerFrictionVoltage),
+                  Meters.of(TunerConstantsSim.FrontLeft.WheelRadius),
+                  KilogramSquareMeters.of(TunerConstantsSim.FrontLeft.SteerInertia),
                   WHEEL_COF));
 
   static final Lock odometryLock = new ReentrantLock();
