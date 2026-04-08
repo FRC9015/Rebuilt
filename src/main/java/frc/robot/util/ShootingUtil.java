@@ -64,7 +64,7 @@ public class ShootingUtil {
       double measuredLoopDtSeconds, int additionalPipelineLoops) {
     double loopDt = clampLoopDt(measuredLoopDtSeconds);
     int loops = Math.max(0, additionalPipelineLoops);
-    return (loopDt * 0.5) + (loops * loopDt);
+    return loopDt * (0.5 + loops);
   }
 
   /**
