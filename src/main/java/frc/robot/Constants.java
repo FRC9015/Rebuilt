@@ -439,6 +439,8 @@ public final class Constants {
     public static final int ENCODER_13_TOOTH = 61; // Encoder 13 motor id
     public static final int ENCODER_15_TOOTH = 62; // Encoder 15 motor id
 
+    public static final int HALL_EFFECT_SENSOR_PORT = 0;
+
     /** The error allowance (in turret rotations) when comparing encoder predictions. */
     public static final double CRT_TOLERANCE = 0.034;
 
