@@ -358,9 +358,9 @@ public class RobotContainer {
                     () ->
                         simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
                 .andThen(() -> simShooter.shootBalls())
-                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
+                .onlyIf(() -> Constants.currentMode == Constants.Mode.SIM)
                 .alongWith(new WaitCommand(1 / 6.0))
-                .onlyIf(() -> Constants.currentMode != Constants.Mode.SIM)
+                .onlyIf(() -> Constants.currentMode == Constants.Mode.SIM)
                 .repeatedly());
 
     operatorController
