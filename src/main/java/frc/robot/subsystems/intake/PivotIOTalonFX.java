@@ -20,7 +20,10 @@ public class PivotIOTalonFX implements PivotIO {
   public StatusSignal<Current> pivotLeftAmps;
   public StatusSignal<AngularVelocity> pivotLeftVelocity;
   public StatusSignal<Angle> pivotPosition;
+  public StatusSignal<Angle> pivotPosition2;
   private final MotionMagicExpoVoltage pivotMagicVoltage = new MotionMagicExpoVoltage(0.0);
+
+  public double localSetpoint = 0.0;
 
   public PivotIOTalonFX(int pivotIDLeft, int encoderID) {
     pivotMotorLeft = new TalonFX(pivotIDLeft);
@@ -30,7 +33,8 @@ public class PivotIOTalonFX implements PivotIO {
     pivotLeftVolts = pivotMotorLeft.getMotorVoltage();
     pivotLeftAmps = pivotMotorLeft.getStatorCurrent();
     pivotLeftVelocity = pivotMotorLeft.getVelocity();
-    pivotPosition = pivotEncoder.getPosition();
+    pivotPosition = pivotMotorLeft.getRotorPosition();
+    pivotPosition2 = pivotMotorLeft.getPosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
@@ -42,15 +46,18 @@ public class PivotIOTalonFX implements PivotIO {
 
   @Override
   public void updateInputs(PivotIOInputs inputs) {
-    BaseStatusSignal.refreshAll(
-        pivotLeftVolts,
-        pivotLeftAmps,
-        pivotLeftVelocity,
-        pivotPosition);
+    BaseStatusSignal.refreshAll(pivotLeftVolts, pivotLeftAmps, pivotLeftVelocity, pivotPosition);
+
+    pivotMotorLeft.setPosition(pivotPosition.getValueAsDouble());
+
     inputs.pivotLeftAppliedVolts = pivotLeftVolts.getValueAsDouble();
     inputs.pivotLeftCurrentSpeed = pivotLeftVelocity.getValueAsDouble();
     inputs.pivotLeftCurrentAmps = pivotLeftAmps.getValueAsDouble();
     inputs.pivotPosition = pivotPosition.getValueAsDouble();
+    inputs.pivotPosition2 = pivotPosition2.getValueAsDouble();
+
+    inputs.setpoint = localSetpoint;
+    inputs.setpointError = inputs.setpoint - inputs.pivotPosition2;
   }
 
   @Override
@@ -67,12 +74,19 @@ public class PivotIOTalonFX implements PivotIO {
   public void setPivotPosition(double position) {
     final double clampedPosition =
         MathUtil.clamp(position, IntakeConstants.INTAKE_MIN_POS, IntakeConstants.INTAKE_MAX_POS);
+
+    localSetpoint = clampedPosition;
     pivotMotorLeft.setControl(pivotMagicVoltage.withPosition(clampedPosition));
   }
 
   @Override
   public void setVolts(double volts) {
     pivotMotorLeft.setVoltage(volts);
+  }
+
+  @Override
+  public void seedPivotPosition(double position) {
+    pivotMotorLeft.setPosition(position);
   }
 
   @Override

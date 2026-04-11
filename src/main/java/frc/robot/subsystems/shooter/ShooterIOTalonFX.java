@@ -71,7 +71,7 @@ public class ShooterIOTalonFX implements ShooterIO {
 
     kickerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    kickerConfig.CurrentLimits.StatorCurrentLimit = 30;
+    kickerConfig.CurrentLimits.StatorCurrentLimit = 40;
     kickerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
     kickerConfig.CurrentLimits.SupplyCurrentLimit = 30;
     kickerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;

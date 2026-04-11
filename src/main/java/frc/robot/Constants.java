@@ -68,8 +68,7 @@ public final class Constants {
     public static final int INTAKE_PIVOT_LEFT_ID = 53;
     public static final int INTAKE_PIVOT_RIGHT_ID = 54;
     public static final int INTAKE_ENCODER_ID = 50;
-    public static final int INDEXER1_MOTOR_ID = 5;
-    public static final int INDEXER2_MOTOR_ID = 6;
+    public static final int INDEXER1_MOTOR_ID = 54;
   }
 
   public static class FieldConstants {
@@ -224,11 +223,11 @@ public final class Constants {
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(7)
+            .withKP(6.8)
             .withKI(0)
             .withKD(0.0)
             .withKS(0.1)
-            .withKV(0.2)
+            .withKV(0.28)
             .withKA(0)
             .withGravityType(GravityTypeValue.Arm_Cosine)
             .withKG(0.01);
@@ -246,6 +245,9 @@ public final class Constants {
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
             .withFeedbackRemoteSensorID(50)
             .withRotorToSensorRatio(3 / 10);
+
+    public static final FeedbackConfigs PIVOT_FEEDBACK_CONFIGS_RELATIVE =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     private static final MotorOutputConfigs rollerOutputLeftConfigs =
         new MotorOutputConfigs()
@@ -266,7 +268,7 @@ public final class Constants {
 
     private static final MotorOutputConfigs pivotOutputLeftConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
 
     public static final MotorOutputConfigs pivotOutputRightConfigs =
@@ -294,7 +296,7 @@ public final class Constants {
     public static final TalonFXConfiguration pivotConfigLeft =
         new TalonFXConfiguration()
             .withSlot0(PIVOT_SLOT0_CONFIGS)
-            .withFeedback(PIVOT_FEEDBACK_CONFIGS)
+            .withFeedback(PIVOT_FEEDBACK_CONFIGS_RELATIVE)
             .withMotionMagic(PIVOT_MAGIC_CONFIGS)
             .withMotorOutput(pivotOutputLeftConfigs)
             .withCurrentLimits(
@@ -317,15 +319,15 @@ public final class Constants {
                     .withSupplyCurrentLimit(60.0)
                     .withSupplyCurrentLimitEnable(true));
 
-    public static final double INTAKE_MAX_POS = 300.0;
-    public static final double INTAKE_MIN_POS = 0.0;
+    public static final double INTAKE_MAX_POS = 4.95;
+    public static final double INTAKE_MIN_POS = 0;
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double PIVOT_MAX_POS = 1.0;
-    public static final double PIVOT_MIN_POS = 0.0;
-    public static final double PIVOT_DEPLOYED_POSITION = 0.95;
-    public static final double PIVOT_STOWED_POSITION = 0.05;
+    public static final double PIVOT_MAX_POS = -7.201;
+    public static final double PIVOT_MIN_POS = 0.299;
+    public static final double PIVOT_DEPLOYED_POSITION = 4.7;
+    public static final double PIVOT_STOWED_POSITION = 0.9;
   }
 
   public static class SimConstants {
@@ -492,7 +494,7 @@ public final class Constants {
     // TODO TUNE THESE PID VALUES
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(0.3)
+            .withKP(0.35)
             .withKI(0.0)
             .withKD(0.00)
             .withKG(0)
