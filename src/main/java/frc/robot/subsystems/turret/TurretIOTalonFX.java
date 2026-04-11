@@ -51,7 +51,7 @@ public class TurretIOTalonFX implements TurretIO {
       new Alert("Turret out of bounds; no longer tracking", AlertType.kError);
 
   public TurretIOTalonFX(int motorID, int encoderId13, int encoderId15) {
-    turretMotor = new TalonFX(motorID);
+    turretMo'tor = new TalonFX(motorID);
     encoder13 = new CANcoder(encoderId13);
     encoder15 = new CANcoder(encoderId15);
 
