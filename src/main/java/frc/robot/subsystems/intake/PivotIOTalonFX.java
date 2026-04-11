@@ -24,6 +24,7 @@ public class PivotIOTalonFX implements PivotIO {
   private final MotionMagicExpoVoltage pivotMagicVoltage = new MotionMagicExpoVoltage(0.0);
 
   public double localSetpoint = 0.0;
+  public boolean isDeployed = false;
 
   public PivotIOTalonFX(int pivotIDLeft, int encoderID) {
     pivotMotorLeft = new TalonFX(pivotIDLeft);
@@ -58,6 +59,7 @@ public class PivotIOTalonFX implements PivotIO {
 
     inputs.setpoint = localSetpoint;
     inputs.setpointError = inputs.setpoint - inputs.pivotPosition2;
+    inputs.isDeployed = isDeployed;
   }
 
   @Override
@@ -76,6 +78,13 @@ public class PivotIOTalonFX implements PivotIO {
         MathUtil.clamp(position, IntakeConstants.INTAKE_MIN_POS, IntakeConstants.INTAKE_MAX_POS);
 
     localSetpoint = clampedPosition;
+
+    if(position == PivotPositions.DEPLOYED.getPivotPosition()) {
+      isDeployed = true;
+    } else {
+      isDeployed = false;
+    }
+
     pivotMotorLeft.setControl(pivotMagicVoltage.withPosition(clampedPosition));
   }
 

@@ -15,6 +15,7 @@ public interface PivotIO {
     public double pivotPosition2 = 0.0;
     public double setpointError = 0.0;
     public double setpoint = 0.0;
+    public boolean isDeployed = false;
   }
 
   public enum PivotPositions {
