@@ -14,6 +14,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.Constants.MotorIDConstants;
 import frc.robot.Constants.TurretConstants;
 
 public class TurretIOSim implements TurretIO {
@@ -33,21 +34,21 @@ public class TurretIOSim implements TurretIO {
   private static final double TURRET_MOI_KG_M2 = 0.5; // Same here, TODO change this
 
   public TurretIOSim() {
-    turretMotor = new TalonFX(1);
+    turretMotor = new TalonFX(MotorIDConstants.TURRET_MOTOR_ID);
     turretMotorSim = turretMotor.getSimState();
 
-    var turretPlant = LinearSystemId.createDCMotorSystem(
-        DCMotor.getKrakenX44(1), 
-        TURRET_MOI_KG_M2, 
-        TURRET_GEARING
-    );
+    var turretPlant =
+        LinearSystemId.createDCMotorSystem(
+            DCMotor.getKrakenX44(1), TURRET_MOI_KG_M2, TURRET_GEARING);
 
     turretPhysicsSim = new DCMotorSim(turretPlant, DCMotor.getKrakenX44(1));
     turretMotorSim.setSupplyVoltage(12.0);
 
     // Motor Config
-    TalonFXConfiguration motorConfig = new TalonFXConfiguration()
-            .withSoftwareLimitSwitch(new SoftwareLimitSwitchConfigs()
+    TalonFXConfiguration motorConfig =
+        new TalonFXConfiguration()
+            .withSoftwareLimitSwitch(
+                new SoftwareLimitSwitchConfigs()
                     .withForwardSoftLimitEnable(true)
                     .withForwardSoftLimitThreshold(TurretConstants.MAXROTATION)
                     .withReverseSoftLimitEnable(true)
@@ -56,7 +57,8 @@ public class TurretIOSim implements TurretIO {
             .withSlot0(TurretConstants.SLOT0_CONFIGS)
             .withFeedback(TurretConstants.FEEDBACK_CONFIGS)
             .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1))
-            .withCurrentLimits(new CurrentLimitsConfigs()
+            .withCurrentLimits(
+                new CurrentLimitsConfigs()
                     .withStatorCurrentLimit(60.0)
                     .withStatorCurrentLimitEnable(true)
                     .withSupplyCurrentLimit(60.0)
@@ -71,29 +73,28 @@ public class TurretIOSim implements TurretIO {
   public void updateInputs(TurretIOInputs inputs) {
     // Apply voltage from motor to physics sim
     turretPhysicsSim.setInputVoltage(turretMotorSim.getMotorVoltage());
-    
+
     // Update physics (20ms loop)
     turretPhysicsSim.update(dtSeconds);
 
     // Update TalonFX Sim State with physics results
     double mechanismPositionRotations = turretPhysicsSim.getAngularPositionRotations();
     turretMotorSim.setRawRotorPosition(mechanismPositionRotations * TURRET_GEARING);
-    turretMotorSim.setRotorVelocity((turretPhysicsSim.getAngularVelocityRPM() / 60.0) * TURRET_GEARING);
-    
+    turretMotorSim.setRotorVelocity(
+        (turretPhysicsSim.getAngularVelocityRPM() / 60.0) * TURRET_GEARING);
+
     inputs.encoder13Connected = true;
     inputs.encoder15Connected = false; // Simulate only one encoder for accuracy with new mechanisms
     inputs.encoder13PositionRot = mechanismPositionRotations;
 
     inputs.turretAppliedVolts = turretMotorSim.getMotorVoltage();
     inputs.turretCurrentAmps = turretPhysicsSim.getCurrentDrawAmps();
-    inputs.turretMotorPosition = mechanismPositionRotations; 
+    inputs.turretMotorPosition = mechanismPositionRotations;
     inputs.turretSetpoint = setpointDegrees;
 
-    inputs.turretResolvedPosition = MathUtil.inputModulus( // The GOAT
-        mechanismPositionRotations,
-        TurretConstants.MINROTATION,
-        TurretConstants.MAXROTATION
-    );
+    inputs.turretResolvedPosition =
+        MathUtil.inputModulus( // The GOAT
+            mechanismPositionRotations, TurretConstants.MINROTATION, TurretConstants.MAXROTATION);
 
     inputs.turretError = (Math.abs(inputs.turretResolvedPosition - inputs.turretSetpoint)) * 360.0;
   }
@@ -105,13 +106,19 @@ public class TurretIOSim implements TurretIO {
   }
 
   @Override
-  public void stop() { turretMotor.stopMotor(); }
+  public void stop() {
+    turretMotor.stopMotor();
+  }
 
   @Override
-  public void setBrakeMode() { turretMotor.setNeutralMode(NeutralModeValue.Brake); }
+  public void setBrakeMode() {
+    turretMotor.setNeutralMode(NeutralModeValue.Brake);
+  }
 
   @Override
-  public void setCoastMode() { turretMotor.setNeutralMode(NeutralModeValue.Coast); }
+  public void setCoastMode() {
+    turretMotor.setNeutralMode(NeutralModeValue.Coast);
+  }
 
   @Override
   public void setTurretPosition(double positionDegrees) {
