@@ -1,94 +1,132 @@
 package frc.robot.subsystems.turret;
 
-import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.sim.CANcoderSimState;
-
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
-import frc.robot.util.PhoenixUtil.TalonFXMotorControllerSim;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.TalonFXSimState;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.Constants.TurretConstants;
 
 public class TurretIOSim implements TurretIO {
 
-  private final TalonFXMotorControllerSim turretMotorSim;
-  private final CANcoderSimState encoder13;
-  private final CANcoderSimState encoder15;
+  private final TalonFX turretMotor;
+  private final TalonFXSimState turretMotorSim;
+  private final DCMotorSim turretPhysicsSim;
 
-  private double setpointDegrees = 0.0;
-  private final StatusSignal<Angle> encoder13PosSignal;
-  private final StatusSignal<Angle> encoder15PosSignal;
-  private final StatusSignal<Voltage> motorAppliedVoltsSignal;
-  private final StatusSignal<Current> motorCurrentSignal;
-  private final StatusSignal<Angle> motorPositionSignal;
-
-  private final Debouncer encoderConnectedDebounce = new Debouncer(0.5);
   private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0);
   private final VoltageOut voltageOut = new VoltageOut(0.0);
 
-  private Alert outofSyncAlert =
-      new Alert("CRT-Motor desync detected! Resyncing motor.", AlertType.kWarning);
-  private Alert outofBoundsAlert =
-      new Alert("Turret out of bounds; no longer tracking", AlertType.kError);
-  
-  private double appliedTurretRotation = 0.0;
+  private double setpointDegrees = 0.0;
 
-  public TurretIOSim(int motorID, int encoderID13, int encoderID15) {
-    turretMotorSim = new TalonFXMotorControllerSim(new com.ctre.phoenix6.hardware.TalonFX(motorID), false);
-    encoder13 = new CANcoderSimState
-    encoder15 = new CANcoderSimState(encoderID15);
+  // Simulation Physics Constants
+  private static final double TURRET_GEARING = 12.0; // IDK what it's supposed to be
+  private static final double TURRET_MOI_KG_M2 = 0.5; // Same here, TODO change this
 
-    encoder13PosSignal = encoder13.getPosition();
-    encoder15PosSignal = encoder15.getPosition();
-    motorAppliedVoltsSignal = turretMotorSim.updateControlSignal(Angle.ofDegrees(setpointDegrees), Angle.ofDegrees(0), Angle.ofDegrees(0), Angle.ofDegrees(0));
-    motorCurrentSignal = new StatusSignal<Current>() {
-      @Override
-      public Current getValue() {
-        return Current.ofAmps(Math.abs(motorAppliedVoltsSignal.getValueAsDouble()) * 0.1); // Simulate current based on voltage
-      }
-    };
-    motorPositionSignal = new StatusSignal<Angle>() {
-      @Override
-      public Angle getValue() {
-        return Angle.ofDegrees(setpointDegrees); // Simulate position based on setpoint
-      }
-    };
-  }
+  public TurretIOSim() {
+    turretMotor = new TalonFX(1);
+    turretMotorSim = turretMotor.getSimState();
 
-  public TurretIOInputs inputs = new TurretIOInputs();
+    var turretPlant = LinearSystemId.createDCMotorSystem(
+        DCMotor.getKrakenX44(1), 
+        TURRET_MOI_KG_M2, 
+        TURRET_GEARING
+    );
 
-  public double getAppliedTurretRotation() {
-    return appliedTurretRotation;
+    turretPhysicsSim = new DCMotorSim(turretPlant, DCMotor.getKrakenX44(1));
+    turretMotorSim.setSupplyVoltage(12.0);
+
+    // Motor Config
+    TalonFXConfiguration motorConfig = new TalonFXConfiguration()
+            .withSoftwareLimitSwitch(new SoftwareLimitSwitchConfigs()
+                    .withForwardSoftLimitEnable(true)
+                    .withForwardSoftLimitThreshold(TurretConstants.MAXROTATION)
+                    .withReverseSoftLimitEnable(true)
+                    .withReverseSoftLimitThreshold(TurretConstants.MINROTATION))
+            .withMotionMagic(TurretConstants.MOTION_MAGIC_CONFIGS)
+            .withSlot0(TurretConstants.SLOT0_CONFIGS)
+            .withFeedback(TurretConstants.FEEDBACK_CONFIGS)
+            .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1))
+            .withCurrentLimits(new CurrentLimitsConfigs()
+                    .withStatorCurrentLimit(60.0)
+                    .withStatorCurrentLimitEnable(true)
+                    .withSupplyCurrentLimit(60.0)
+                    .withSupplyCurrentLimitEnable(true));
+
+    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    turretMotor.getConfigurator().apply(motorConfig);
   }
 
   @Override
   public void updateInputs(TurretIOInputs inputs) {
-    this.inputs = inputs;
+    // Apply voltage from motor to physics sim
+    turretPhysicsSim.setInputVoltage(turretMotorSim.getMotorVoltage());
+    
+    // Update physics (20ms loop)
+    turretPhysicsSim.update(0.020);
+
+    // Update TalonFX Sim State with physics results
+    double mechanismPositionRotations = turretPhysicsSim.getAngularPositionRotations();
+    turretMotorSim.setRawRotorPosition(mechanismPositionRotations * TURRET_GEARING);
+    turretMotorSim.setRotorVelocity((turretPhysicsSim.getAngularVelocityRPM() / 60.0) * TURRET_GEARING);
+    
+    inputs.encoder13Connected = true;
+    inputs.encoder15Connected = false; // Simulate only one encoder for accuracy with new mechanisms
+    inputs.encoder13PositionRot = mechanismPositionRotations;
+
+    inputs.turretAppliedVolts = turretMotorSim.getMotorVoltage();
+    inputs.turretCurrentAmps = turretPhysicsSim.getCurrentDrawAmps();
+    inputs.turretMotorPosition = mechanismPositionRotations; 
+    inputs.turretSetpoint = setpointDegrees;
+
+    inputs.turretResolvedPosition = MathUtil.inputModulus( // The GOAT
+        mechanismPositionRotations,
+        TurretConstants.MINROTATION,
+        TurretConstants.MAXROTATION
+    );
+
+    inputs.turretError = (Math.abs(inputs.turretResolvedPosition - inputs.turretSetpoint)) * 360.0;
   }
 
   @Override
-  public void stop() {}
-
-  @Override
-  public void setBrakeMode() {}
-
-  @Override
-  public void setCoastMode() {}
-
-  @Override
-  public void setTurretPosition(double value) {
-    inputs.turretResolvedPosition = (value);
+  public void seedMotorPosition(double positionRotations) {
+    turretMotor.setPosition(positionRotations);
+    turretMotorSim.setRawRotorPosition(positionRotations * TURRET_GEARING);
   }
 
   @Override
-  public void seedMotorPosition(double positionRotations) {}
+  public void stop() { turretMotor.stopMotor(); }
+
+  @Override
+  public void setBrakeMode() { turretMotor.setNeutralMode(NeutralModeValue.Brake); }
+
+  @Override
+  public void setCoastMode() { turretMotor.setNeutralMode(NeutralModeValue.Coast); }
+
+  @Override
+  public void setTurretPosition(double positionDegrees) {
+    double rotations = positionDegrees / 360.0;
+    double safePosition = MathUtil.clamp(rotations, -0.7, 0.7);
+    turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
+    setpointDegrees = safePosition;
+  }
+
+  @Override
+  public void setTurretVoltage(double voltage) {
+    turretMotor.setControl(voltageOut.withOutput(voltage));
+  }
 
   @Override
   public void setTurretSetPoint(double value) {
-    inputs.turretSetpoint = value;
+    setpointDegrees = value;
   }
 }
