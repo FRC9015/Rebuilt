@@ -74,7 +74,7 @@ public class TurretIOSim implements TurretIO {
     // Apply voltage from motor to physics sim
     turretPhysicsSim.setInputVoltage(turretMotorSim.getMotorVoltage());
 
-    // Update physics (20ms loop)en
+    // Update physics (20ms loop)
     turretPhysicsSim.update(dtSeconds);
 
     // Update TalonFX Sim State with physics results
