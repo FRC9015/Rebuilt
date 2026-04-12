@@ -26,9 +26,10 @@ public class TurretIOSim implements TurretIO {
   private final VoltageOut voltageOut = new VoltageOut(0.0);
 
   private double setpointDegrees = 0.0;
+  private double dtSeconds = 0.020; // 20ms loop
 
   // Simulation Physics Constants
-  private static final double TURRET_GEARING = 12.0; // IDK what it's supposed to be
+  private static final double TURRET_GEARING = TurretConstants.ENCODER_TO_TURRET_GEAR_RATIO;
   private static final double TURRET_MOI_KG_M2 = 0.5; // Same here, TODO change this
 
   public TurretIOSim() {
@@ -72,7 +73,7 @@ public class TurretIOSim implements TurretIO {
     turretPhysicsSim.setInputVoltage(turretMotorSim.getMotorVoltage());
     
     // Update physics (20ms loop)
-    turretPhysicsSim.update(0.020);
+    turretPhysicsSim.update(dtSeconds);
 
     // Update TalonFX Sim State with physics results
     double mechanismPositionRotations = turretPhysicsSim.getAngularPositionRotations();
