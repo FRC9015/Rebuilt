@@ -31,7 +31,7 @@ public class TurretIOSim implements TurretIO {
 
   // Simulation Physics Constants
   private static final double TURRET_GEARING = TurretConstants.ENCODER_TO_TURRET_GEAR_RATIO;
-  private static final double TURRET_MOI_KG_M2 = 0.5; // Same here, TODO change this
+  private static final double TURRET_MOI_KG_M2 = 1; // Same here, TODO change this
 
   public TurretIOSim() {
     turretMotor = new TalonFX(MotorIDConstants.TURRET_MOTOR_ID);
@@ -74,7 +74,7 @@ public class TurretIOSim implements TurretIO {
     // Apply voltage from motor to physics sim
     turretPhysicsSim.setInputVoltage(turretMotorSim.getMotorVoltage());
 
-    // Update physics (20ms loop)
+    // Update physics (20ms loop)en
     turretPhysicsSim.update(dtSeconds);
 
     // Update TalonFX Sim State with physics results
@@ -87,7 +87,7 @@ public class TurretIOSim implements TurretIO {
     inputs.encoder15Connected = false; // Simulate only one encoder for accuracy with new mechanisms
     inputs.encoder13PositionRot = mechanismPositionRotations;
 
-    inputs.turretAppliedVolts = turretMotorSim.getMotorVoltage();
+    // inputs.turretAppliedVolts = turretMotorSim.getMotorVoltage();
     inputs.turretCurrentAmps = turretPhysicsSim.getCurrentDrawAmps();
     inputs.turretMotorPosition = mechanismPositionRotations;
     inputs.turretSetpoint = setpointDegrees;
