@@ -380,7 +380,7 @@ public class RobotContainer {
                             () -> zones.getZoneTargetPose(),
                             drive)
                         .alongWith(zones.override())));
-                        
+
     operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
