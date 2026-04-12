@@ -24,7 +24,7 @@ public class ShootingUtil {
    * @param loopDt Seconds per loop (e.g., 0.02)
    * @param latencyCycles Number of loops to compensate for (typically 1.5 to 2.0)
    */
-  public static ShootingShotData calculateVirtualTarget(
+  public static ShootingShotData calculateVirtualTargetLocal(
       Pose2d robotPose,
       Translation2d realTarget,
       ChassisSpeeds robotRelativeSpeeds,
@@ -65,6 +65,6 @@ public class ShootingUtil {
       Translation2d realTarget,
       ChassisSpeeds robotRelativeSpeeds,
       InterpolatingTreeMap<Double, Double> tofLUT) {
-    return calculateVirtualTarget(robotPose, realTarget, robotRelativeSpeeds, tofLUT, 0.02, 1.5);
+    return calculateVirtualTargetLocal(robotPose, realTarget, robotRelativeSpeeds, tofLUT, 0.02, 1.5);
   }
 }
