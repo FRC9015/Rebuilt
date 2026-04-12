@@ -1,7 +1,6 @@
 package frc.robot.subsystems.turret;
 
 import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -51,13 +50,7 @@ public class TurretIOSim implements TurretIO {
             .withMotionMagic(TurretConstants.MOTION_MAGIC_CONFIGS)
             .withSlot0(TurretConstants.SIM_CONFIGS)
             .withFeedback(TurretConstants.FEEDBACK_CONFIGS)
-            .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1))
-            .withCurrentLimits(
-                new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(60.0)
-                    .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(60.0)
-                    .withSupplyCurrentLimitEnable(true));
+            .withClosedLoopRamps(new ClosedLoopRampsConfigs().withVoltageClosedLoopRampPeriod(0.1));
 
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 

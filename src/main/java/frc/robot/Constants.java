@@ -476,14 +476,14 @@ public final class Constants {
             .withKA(0)
             .withKS(0.2) // 0.13
             .withKV(0.1);
-    public static final Slot0Configs SIM_CONFIGS = 
+    public static final Slot0Configs SIM_CONFIGS =
         new Slot0Configs()
             .withKP(10)
             .withKI(0)
-            .withKD(0)
+            .withKD(0.25)
             .withKG(0)
             .withKA(0)
-            .withKS(0) 
+            .withKS(0)
             .withKV(0);
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
