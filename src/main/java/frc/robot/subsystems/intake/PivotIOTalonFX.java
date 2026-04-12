@@ -35,14 +35,9 @@ public class PivotIOTalonFX implements PivotIO {
     pivotLeftAmps = pivotMotorLeft.getStatorCurrent();
     pivotLeftVelocity = pivotMotorLeft.getVelocity();
     pivotPosition = pivotMotorLeft.getRotorPosition();
-    pivotPosition2 = pivotMotorLeft.getPosition();
 
     BaseStatusSignal.setUpdateFrequencyForAll(
-        50.0,
-        pivotLeftVolts,
-        pivotLeftAmps,
-        pivotLeftVelocity,
-        pivotPosition);
+        50.0, pivotLeftVolts, pivotLeftAmps, pivotLeftVelocity, pivotPosition);
   }
 
   @Override
@@ -55,10 +50,9 @@ public class PivotIOTalonFX implements PivotIO {
     inputs.pivotLeftCurrentSpeed = pivotLeftVelocity.getValueAsDouble();
     inputs.pivotLeftCurrentAmps = pivotLeftAmps.getValueAsDouble();
     inputs.pivotPosition = pivotPosition.getValueAsDouble();
-    inputs.pivotPosition2 = pivotPosition2.getValueAsDouble();
 
     inputs.setpoint = localSetpoint;
-    inputs.setpointError = inputs.setpoint - inputs.pivotPosition2;
+    inputs.setpointError = inputs.setpoint - inputs.pivotPosition;
     inputs.isDeployed = isDeployed;
   }
 
@@ -79,7 +73,7 @@ public class PivotIOTalonFX implements PivotIO {
 
     localSetpoint = clampedPosition;
 
-    if(position == PivotPositions.DEPLOYED.getPivotPosition()) {
+    if (position == PivotPositions.DEPLOYED.getPivotPosition()) {
       isDeployed = true;
     } else {
       isDeployed = false;

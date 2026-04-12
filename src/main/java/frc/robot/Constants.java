@@ -296,7 +296,7 @@ public final class Constants {
     public static final TalonFXConfiguration pivotConfigLeft =
         new TalonFXConfiguration()
             .withSlot0(PIVOT_SLOT0_CONFIGS)
-            .withFeedback(PIVOT_FEEDBACK_CONFIGS_RELATIVE)
+            .withFeedback(PIVOT_FEEDBACK_CONFIGS)
             .withMotionMagic(PIVOT_MAGIC_CONFIGS)
             .withMotorOutput(pivotOutputLeftConfigs)
             .withCurrentLimits(
