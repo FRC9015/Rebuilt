@@ -11,6 +11,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.turret.Turret;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
@@ -82,13 +83,18 @@ public class ShootAtAngleSim {
   }
 
   private RebuiltFuelOnFly createProjectile(Angle launchAngle) {
+
     return new RebuiltFuelOnFly(
         simDrive.getSimulatedDriveTrainPose().getTranslation(),
-        new Translation2d(0, 0), // shooter offet from center,
+        new Translation2d(TurretConstants.TURRET_X_OFFSET, TurretConstants.TURRET_Y_OFFSET)
+            .rotateBy(simDrive.getSimulatedDriveTrainPose().getRotation()),
         simDrive.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
         new Rotation2d(
-            simDrive.getSimulatedDriveTrainPose().getRotation().getRadians()
-                + turret.getTurretPositionRadians()), // accounting for drivertrain being flipped?
+            -(Math.PI
+                + simDrive.getSimulatedDriveTrainPose().getRotation().getRadians()
+                + turret.getTurretPositionRotationsToRadians())), // accounting for drivertrain
+        // being
+        // flipped?
         initialHeight, // initial height of the ball, in meters
         this.getLaunchSpeed(), // initial velocity, in m/s
         launchAngle); // shooter angle

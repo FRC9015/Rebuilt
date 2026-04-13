@@ -3,15 +3,18 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.ZoneConstants;
 import frc.robot.subsystems.drive.Drive;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
 public class ZoneLogic extends SubsystemBase {
   private Drive drive;
+  private SwerveDriveSimulation simDrive;
 
   public enum FieldZone {
     BLUE_ALLIANCE_LEFT,
@@ -32,10 +35,31 @@ public class ZoneLogic extends SubsystemBase {
   public boolean overrideZones = true;
   private boolean overrideControl = false;
 
+  /** Constructor for Real Robot */
   public ZoneLogic(Drive drive) {
     this.drive = drive;
+    this.simDrive = null;
+    logZoneConstants();
+  }
 
-    // LOGS ALL THE ZONES
+  /** Constructor for Simulation */
+  public ZoneLogic(SwerveDriveSimulation simDrive) {
+    this.simDrive = simDrive;
+    this.drive = null;
+    logZoneConstants();
+  }
+
+  /** Helper method to redirect pose requests based on the current environment. */
+  private Pose2d getPose() {
+    if (RobotBase.isSimulation() && simDrive != null) {
+      return simDrive.getSimulatedDriveTrainPose();
+    } else if (drive != null) {
+      return drive.getPose();
+    }
+    return new Pose2d(); // Default fallback
+  }
+
+  private void logZoneConstants() {
     Logger.recordOutput("Zones/BLUE_ALLIANCE_LEFT", ZoneConstants.BLUE_ALLIANCE_LEFT);
     Logger.recordOutput("Zones/BLUE_ALLIANCE_RIGHT", ZoneConstants.BLUE_ALLIANCE_RIGHT);
     Logger.recordOutput("Zones/RED_ALLIANCE_LEFT", ZoneConstants.RED_ALLIANCE_LEFT);
@@ -49,38 +73,27 @@ public class ZoneLogic extends SubsystemBase {
   }
 
   public FieldZone getCurrentFieldZone() {
-    Pose2d pose = drive.getPose();
+    Pose2d pose = getPose();
     Translation2d translationPose = pose.getTranslation();
-    if (ZoneConstants.BLUE_ALLIANCE_LEFT.contains(translationPose)) {
+
+    if (ZoneConstants.BLUE_ALLIANCE_LEFT.contains(translationPose))
       return FieldZone.BLUE_ALLIANCE_LEFT;
-    }
-    if (ZoneConstants.BLUE_ALLIANCE_RIGHT.contains(translationPose)) {
+    if (ZoneConstants.BLUE_ALLIANCE_RIGHT.contains(translationPose))
       return FieldZone.BLUE_ALLIANCE_RIGHT;
-    }
-    if (ZoneConstants.RED_ALLIANCE_LEFT.contains(translationPose)) {
+    if (ZoneConstants.RED_ALLIANCE_LEFT.contains(translationPose))
       return FieldZone.RED_ALLIANCE_LEFT;
-    }
-    if (ZoneConstants.RED_ALLIANCE_RIGHT.contains(translationPose)) {
+    if (ZoneConstants.RED_ALLIANCE_RIGHT.contains(translationPose))
       return FieldZone.RED_ALLIANCE_RIGHT;
-    }
-    if (ZoneConstants.NEUTRAL_ZONE_LEFT.contains(translationPose)) {
+    if (ZoneConstants.NEUTRAL_ZONE_LEFT.contains(translationPose))
       return FieldZone.NEUTRAL_ZONE_LEFT;
-    }
-    if (ZoneConstants.NEUTRAL_ZONE_RIGHT.contains(translationPose)) {
+    if (ZoneConstants.NEUTRAL_ZONE_RIGHT.contains(translationPose))
       return FieldZone.NEUTRAL_ZONE_RIGHT;
-    }
-    if (ZoneConstants.BLUE_RIGHT_TRENCH.contains(translationPose)) {
+    if (ZoneConstants.BLUE_RIGHT_TRENCH.contains(translationPose))
       return FieldZone.BLUE_RIGHT_TRENCH;
-    }
-    if (ZoneConstants.BLUE_LEFT_TRENCH.contains(translationPose)) {
-      return FieldZone.BLUE_LEFT_TRENCH;
-    }
-    if (ZoneConstants.RED_RIGHT_TRENCH.contains(translationPose)) {
-      return FieldZone.RED_RIGHT_TRENCH;
-    }
-    if (ZoneConstants.RED_LEFT_TRENCH.contains(translationPose)) {
-      return FieldZone.RED_LEFT_TRENCH;
-    }
+    if (ZoneConstants.BLUE_LEFT_TRENCH.contains(translationPose)) return FieldZone.BLUE_LEFT_TRENCH;
+    if (ZoneConstants.RED_RIGHT_TRENCH.contains(translationPose)) return FieldZone.RED_RIGHT_TRENCH;
+    if (ZoneConstants.RED_LEFT_TRENCH.contains(translationPose)) return FieldZone.RED_LEFT_TRENCH;
+
     return FieldZone.UNKNOWN;
   }
 
@@ -90,7 +103,6 @@ public class ZoneLogic extends SubsystemBase {
     FieldZone zone = getCurrentFieldZone();
     boolean isRed = (alliance == DriverStation.Alliance.Red);
 
-    // Own Alliance Zone -> Aim at Hub
     if ((isRed && (zone == FieldZone.RED_ALLIANCE_LEFT || zone == FieldZone.RED_ALLIANCE_RIGHT))
         || (!isRed
             && (zone == FieldZone.BLUE_ALLIANCE_LEFT || zone == FieldZone.BLUE_ALLIANCE_RIGHT))) {
@@ -100,8 +112,6 @@ public class ZoneLogic extends SubsystemBase {
     if (zone == FieldZone.NEUTRAL_ZONE_LEFT
         || zone == FieldZone.BLUE_ALLIANCE_LEFT
         || zone == FieldZone.RED_ALLIANCE_LEFT) {
-      // Red Robot on the physical TOP side needs to hit Red-TOP, but FlippingUtil means
-      // we feed the "Blue-BOTTOM" pose to get "Red-TOP" after rotation.
       return isRed ? FieldConstants.PASSING_POSE_LEFT_BLUE : FieldConstants.PASSING_POSE_RIGHT_BLUE;
     } else {
       return isRed ? FieldConstants.PASSING_POSE_RIGHT_BLUE : FieldConstants.PASSING_POSE_LEFT_BLUE;
@@ -110,16 +120,15 @@ public class ZoneLogic extends SubsystemBase {
 
   public boolean isInTrench() {
     FieldZone zone = getCurrentFieldZone();
-    return (zone.equals(FieldZone.RED_LEFT_TRENCH)
-        || zone.equals(FieldZone.RED_RIGHT_TRENCH)
-        || zone.equals(FieldZone.BLUE_LEFT_TRENCH)
-        || zone.equals(FieldZone.BLUE_RIGHT_TRENCH));
+    return (zone == FieldZone.RED_LEFT_TRENCH
+        || zone == FieldZone.RED_RIGHT_TRENCH
+        || zone == FieldZone.BLUE_LEFT_TRENCH
+        || zone == FieldZone.BLUE_RIGHT_TRENCH);
   }
 
   public boolean inCurrentAllinace() {
     DriverStation.Alliance alliance =
         DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
-
     FieldZone zone = getCurrentFieldZone();
     boolean isRed = (alliance == DriverStation.Alliance.Red);
 
@@ -163,17 +172,9 @@ public class ZoneLogic extends SubsystemBase {
       runMainZoneLogic = false;
       overrideZones = true;
     }
-    Logger.recordOutput("Zones/current", getCurrentFieldZone());
 
+    Logger.recordOutput("Zones/current", getCurrentFieldZone());
     Logger.recordOutput("Zones/runMainZoneLogic", runMainZoneLogic);
     Logger.recordOutput("zones", overrideZones);
-    Logger.recordOutput(
-        "GOOD TO SHOOT",
-        FieldConstants.HUB_POSE_BLUE.getTranslation().getDistance(drive.getPose().getTranslation())
-                < 4
-            && FieldConstants.HUB_POSE_BLUE
-                    .getTranslation()
-                    .getDistance(drive.getPose().getTranslation())
-                > 1);
   }
 }

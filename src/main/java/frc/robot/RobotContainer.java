@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -137,8 +138,7 @@ public class RobotContainer {
                 new RollerIOTalonFX(
                     MotorIDConstants.INTAKE_ROLLER_ID, MotorIDConstants.INTAKE_ROLLER_ID2),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
-                    MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -205,7 +205,7 @@ public class RobotContainer {
         simShooter =
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
-        zones = new ZoneLogic(drive);
+        zones = new ZoneLogic(simDrive);
         runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         overrideZone = new Trigger(() -> zones.getOverrideZone());
@@ -350,8 +350,17 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
     driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(100));
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            Commands.runOnce(
+                    () ->
+                        simShooter.setLaunchAngle(Units.degreesToRadians(10))) // TODO add hood sim
+                .andThen(() -> simShooter.shootBalls())
+                .onlyIf(() -> Constants.currentMode == Constants.Mode.SIM)
+                .alongWith(new WaitCommand(1 / 15.0))
+                .repeatedly());
 
     operatorController
         .rightTrigger()
@@ -370,6 +379,7 @@ public class RobotContainer {
                             () -> zones.getZoneTargetPose(),
                             drive)
                         .alongWith(zones.override())));
+
     operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())

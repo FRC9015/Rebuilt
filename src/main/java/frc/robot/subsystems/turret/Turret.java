@@ -143,6 +143,10 @@ public class Turret extends SubsystemBase {
     return Units.degreesToRadians(inputs.turretResolvedPositionDegrees);
   }
 
+  public double getTurretPositionRotationsToRadians() {
+    return Units.rotationsToRadians(inputs.turretResolvedPosition);
+  }
+
   public void setPositionVoid(double angle) {
     io.setTurretPosition(angle);
   }
