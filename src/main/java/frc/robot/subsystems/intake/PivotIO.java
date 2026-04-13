@@ -12,7 +12,6 @@ public interface PivotIO {
     public double pivotLeftCurrentAmps = 0.0;
     public double pivotLeftCurrentSpeed = 0.0;
     public double pivotPosition = 0.0;
-    public double pivotPosition2 = 0.0;
     public double setpointError = 0.0;
     public double setpoint = 0.0;
     public boolean isDeployed = false;

@@ -59,7 +59,7 @@ public class PivotIOTalonFX implements PivotIO {
     inputs.pivotPosition = pivotPosition.getValueAsDouble();
 
     inputs.setpoint = localSetpoint;
-    inputs.setpointError = inputs.setpoint - inputs.pivotPosition2;
+    inputs.setpointError = inputs.setpoint - inputs.pivotPosition;
     inputs.isDeployed = isDeployed;
   }
 
