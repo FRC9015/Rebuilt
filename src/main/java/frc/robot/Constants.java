@@ -17,7 +17,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.util.FlippingUtil;
@@ -223,14 +222,13 @@ public final class Constants {
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(6.8)
+            .withKP(27.5)
             .withKI(0)
             .withKD(0.0)
-            .withKS(0.1)
-            .withKV(0.28)
+            .withKS(0)
+            .withKV(0)
             .withKA(0)
-            .withGravityType(GravityTypeValue.Arm_Cosine)
-            .withKG(0.01);
+            .withKG(0);
 
     public static final MotionMagicConfigs PIVOT_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
@@ -244,7 +242,7 @@ public final class Constants {
         new FeedbackConfigs()
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
             .withFeedbackRemoteSensorID(50)
-            .withRotorToSensorRatio(3 / 10);
+            .withRotorToSensorRatio(50.0 / 12.0);
 
     public static final FeedbackConfigs PIVOT_FEEDBACK_CONFIGS_RELATIVE =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
@@ -296,7 +294,7 @@ public final class Constants {
     public static final TalonFXConfiguration pivotConfigLeft =
         new TalonFXConfiguration()
             .withSlot0(PIVOT_SLOT0_CONFIGS)
-            .withFeedback(PIVOT_FEEDBACK_CONFIGS_RELATIVE)
+            .withFeedback(PIVOT_FEEDBACK_CONFIGS)
             .withMotionMagic(PIVOT_MAGIC_CONFIGS)
             .withMotorOutput(pivotOutputLeftConfigs)
             .withCurrentLimits(
@@ -324,10 +322,10 @@ public final class Constants {
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double PIVOT_MAX_POS = -7.201;
-    public static final double PIVOT_MIN_POS = 0.299;
-    public static final double PIVOT_DEPLOYED_POSITION = 4.7;
-    public static final double PIVOT_STOWED_POSITION = 0.9;
+    public static final double PIVOT_MAX_POS = 6.5;
+    public static final double PIVOT_MIN_POS = 0.1;
+    public static final double PIVOT_DEPLOYED_POSITION = 1.7;
+    public static final double PIVOT_STOWED_POSITION = 0.3;
   }
 
   public static class SimConstants {

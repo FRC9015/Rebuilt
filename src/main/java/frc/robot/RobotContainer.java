@@ -133,8 +133,7 @@ public class RobotContainer {
                 new RollerIOTalonFX(
                     MotorIDConstants.INTAKE_ROLLER_ID, MotorIDConstants.INTAKE_ROLLER_ID2),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
-                    MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
@@ -371,7 +370,7 @@ public class RobotContainer {
                             () -> zones.getZoneTargetPose(),
                             drive)
                         .alongWith(zones.override())));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
+    operatorController.rightBumper().whileTrue(indexer.runIndexer(40));
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(50)));

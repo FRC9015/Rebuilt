@@ -3,7 +3,6 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.intake.PivotIO.PivotPositions;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -16,8 +15,6 @@ public class Intake extends SubsystemBase {
   public Intake(RollerIO roller, PivotIO pivot) {
     this.roller = roller;
     this.pivot = pivot;
-
-    pivot.seedPivotPosition(0.0);
   }
 
   public void setRollerSpeed(double speedValue) {
@@ -39,9 +36,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command setPivotPosition(PivotIO.PivotPositions position) {
-    return this.startEnd(
-        () -> setPivotPosition(position.getPivotPosition()),
-        () -> setPivotPosition(PivotPositions.STOWED.getPivotPosition()));
+    return this.startEnd(() -> setPivotPosition(position.getPivotPosition()), () -> stopPivot());
   }
 
   public Command runIntakeAtSpeed(double intakeSpeed, PivotIO.PivotPositions pivotPosition) {
@@ -63,6 +58,10 @@ public class Intake extends SubsystemBase {
 
   public Command stopRoller() {
     return this.run(() -> roller.stop());
+  }
+
+  public void stopPivot() {
+    pivot.stop();
   }
 
   public Command runIntakeSim() {
