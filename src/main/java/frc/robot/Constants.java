@@ -343,6 +343,7 @@ public final class Constants {
     public static final int FLY_WHEEL_RIGHT_ID = 57;
     public static final int HOOD_ID = 58;
     public static final int KICKER_ID = 59;
+    public static final int BALL_TUNNEL_ID = 7; // TODO FIX THIS FAHHHH
     public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value
     public static final double HOOD_RESTING_ANGLE = 10.0;
     public static final double HOOD_ENCODER_OFFSET = 0.076416015625;
@@ -365,6 +366,12 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
 
     public static final FeedbackConfigs kickerFeedbackConfigs =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final Slot0Configs ballTunnelSlotConfigs =
+        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+
+    public static final FeedbackConfigs ballTunnelFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     // TODO tune these values once final bot comes; reference this link:

@@ -139,7 +139,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID,
+                    Constants.ShooterConstants.BALL_TUNNEL_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -227,7 +228,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID,
+                    Constants.ShooterConstants.BALL_TUNNEL_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -329,6 +331,10 @@ public class RobotContainer {
     //         () -> zones.getZoneTargetPose(),
     //         drive,
     //         interpTables.timeOfFlightInterp));
+
+    shooterIsAtSetpoint.whileTrue(
+        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(50)));
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
