@@ -168,7 +168,7 @@ public class TurretIOSim implements TurretIO {
 
     double rotations = positionDegrees / 360.0;
 
-    double safePosition = MathUtil.clamp(rotations, -0.7, 0.7);
+    double safePosition = MathUtil.clamp(rotations, TurretConstants.MINROTATION, TurretConstants.MAXROTATION);
 
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
 
