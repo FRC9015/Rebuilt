@@ -173,13 +173,8 @@ public class ZoneLogic extends SubsystemBase {
       overrideZones = true;
     }
 
-    Translation2d currentTranslation = getPose().getTranslation();
-    double hubDistance =
-        FieldConstants.HUB_POSE_BLUE.getTranslation().getDistance(currentTranslation);
-
     Logger.recordOutput("Zones/current", getCurrentFieldZone());
     Logger.recordOutput("Zones/runMainZoneLogic", runMainZoneLogic);
     Logger.recordOutput("zones", overrideZones);
-    Logger.recordOutput("GOOD TO SHOOT", hubDistance < 4 && hubDistance > 1);
   }
 }
