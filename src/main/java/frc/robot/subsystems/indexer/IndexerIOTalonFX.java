@@ -39,8 +39,7 @@ public class IndexerIOTalonFX implements IndexerIO {
   private MotionMagicVelocityVoltage indexerVelocity =
       new MotionMagicVelocityVoltage(0.5).withSlot(0);
 
-  public IndexerIOTalonFX(
-      int motorId1, int motorid2) { // , int canRangeID1, int canRangeID2, int canRangeID3
+  public IndexerIOTalonFX(int motorId1) { // , int canRangeID1, int canRangeID2, int canRangeID3
     motor1 = new TalonFX(motorId1);
 
     // Configure motor

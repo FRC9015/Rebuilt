@@ -128,23 +128,20 @@ public class RobotContainer {
                 new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
                 new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
-        indexer =
-            new Indexer(
-                new IndexerIOTalonFX(
-                    MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.INDEXER2_MOTOR_ID));
+        indexer = new Indexer(new IndexerIOTalonFX(MotorIDConstants.INDEXER1_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
                     MotorIDConstants.INTAKE_ROLLER_ID, MotorIDConstants.INTAKE_ROLLER_ID2),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
-                    MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID,
+                    Constants.ShooterConstants.BALL_TUNNEL_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -232,7 +229,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID,
+                    Constants.ShooterConstants.BALL_TUNNEL_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -334,6 +332,11 @@ public class RobotContainer {
             () -> zones.getZoneTargetPose(),
             drive,
             interpTables.timeOfFlightInterp));
+
+    shooterIsAtSetpoint.whileTrue(
+        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(50)));
+
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
@@ -350,8 +353,12 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
-    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(100));
+    driverController
+        .rightTrigger()
+        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
+    driverController
+        .leftTrigger()
+        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
 
     operatorController
         .rightTrigger()
@@ -370,10 +377,11 @@ public class RobotContainer {
                             () -> zones.getZoneTargetPose(),
                             drive)
                         .alongWith(zones.override())));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
+    operatorController.rightBumper().whileTrue(indexer.runIndexer(40));
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(50)));
+
     turret.setDefaultCommand(
         new TurretDriveAutoDrive(
             () -> drive.getPose(),
@@ -381,6 +389,7 @@ public class RobotContainer {
             () -> FieldConstants.HUB_POSE_BLUE,
             drive,
             interpTables.timeOfFlightInterp));
+
     operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
@@ -434,9 +443,7 @@ public class RobotContainer {
     driverController
         .rightBumper()
         .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController
-        .leftBumper()
-        .whileTrue(indexer.runIndexer(50).onlyIf(() -> DriverStation.isTest()));
+    driverController.leftBumper().whileTrue(intake.runRollerAtSpeed(-100));
     driverController
         .y()
         .whileTrue(
@@ -446,6 +453,18 @@ public class RobotContainer {
                     () -> FieldConstants.HUB_POSE_BLUE,
                     drive,
                     interpTables.timeOfFlightInterp)
+                .onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .x()
+        .onTrue(
+            intake
+                .setPivotPosition(PivotIO.PivotPositions.DEPLOYED)
+                .onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .b()
+        .onTrue(
+            intake
+                .setPivotPosition(PivotIO.PivotPositions.STOWED)
                 .onlyIf(() -> DriverStation.isTest()));
   }
 
