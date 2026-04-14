@@ -29,6 +29,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
+import frc.robot.commands.TurretDriveAutoDrive;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstantsSim;
 import frc.robot.subsystems.ZoneLogic;
@@ -317,20 +318,20 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}. TODO set values for motors
    */
   private void configureButtonBindings() {
-    // overrideZone.whileFalse(
-    //     Commands.run(
-    //         () -> {
-    //           if (zones.isInTrench()) {
-    //             hood.setHoodPos(0.0);
-    //           }
-    //         }));
-    // runZoneLogic.whileTrue(
-    //     new TurretAngleAim(
-    //         () -> drive.getPose(),
-    //         turret,
-    //         () -> zones.getZoneTargetPose(),
-    //         drive,
-    //         interpTables.timeOfFlightInterp));
+    overrideZone.whileFalse(
+        Commands.run(
+            () -> {
+              if (zones.isInTrench()) {
+                hood.setHoodPos(0.0);
+              }
+            }));
+    runZoneLogic.whileTrue(
+        new TurretAngleAim(
+            () -> drive.getPose(),
+            turret,
+            () -> zones.getZoneTargetPose(),
+            drive,
+            interpTables.timeOfFlightInterp));
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
@@ -381,13 +382,13 @@ public class RobotContainer {
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(50)));
 
-    // turret.setDefaultCommand(
-    //     new TurretDriveAutoDrive(
-    //         () -> drive.getPose(),
-    //         turret,
-    //         () -> FieldConstants.HUB_POSE_BLUE,
-    //         drive,
-    //         interpTables.timeOfFlightInterp));
+    turret.setDefaultCommand(
+        new TurretDriveAutoDrive(
+            () -> drive.getPose(),
+            turret,
+            () -> FieldConstants.HUB_POSE_BLUE,
+            drive,
+            interpTables.timeOfFlightInterp));
 
     operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
