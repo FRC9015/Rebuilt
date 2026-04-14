@@ -217,6 +217,9 @@ public final class Constants {
   }
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
+
+    public static final double PIVOT_POSITION_TOLERANCE = 0.01; // TODO: Tune this value
+
     public static final Slot0Configs ROLLER_SLOT0_CONFIGS =
         new Slot0Configs().withKP(2.75).withKI(0).withKD(0).withKS(0.1).withKV(0).withKA(0);
 

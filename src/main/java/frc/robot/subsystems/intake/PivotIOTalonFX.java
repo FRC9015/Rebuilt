@@ -25,6 +25,8 @@ public class PivotIOTalonFX implements PivotIO {
   public StatusSignal<Angle> pivotPosition2;
   private final MotionMagicExpoVoltage pivotMagicVoltage = new MotionMagicExpoVoltage(0.0);
 
+
+
   public double localSetpoint = 0.0;
   public boolean isDeployed = false;
 
@@ -79,7 +81,7 @@ public class PivotIOTalonFX implements PivotIO {
 
     localSetpoint = clampedPosition;
 
-    if (position == PivotPositions.DEPLOYED.getPivotPosition()) {
+    if (Math.abs(position - PivotPositions.DEPLOYED.getPivotPosition()) < IntakeConstants.PIVOT_POSITION_TOLERANCE) {
       isDeployed = true;
     } else {
       isDeployed = false;
