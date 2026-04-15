@@ -32,6 +32,8 @@ public class ShooterIOTalonFX implements ShooterIO {
       new MotionMagicVelocityVoltage(00.);
   private MotionMagicVelocityVoltage kickerMagicVelocityVoltage =
       new MotionMagicVelocityVoltage(0.0);
+  private MotionMagicVelocityVoltage ballTunnelMagicVelocityVoltage =
+      new MotionMagicVelocityVoltage(0.0);
 
   private double lastFlywheelSetpointSpeed = 0.0;
 
@@ -69,11 +71,11 @@ public class ShooterIOTalonFX implements ShooterIO {
     TalonFXConfiguration kickerConfig =
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.kickerSlotVelocityConfigs)
-            .withFeedback(Constants.ShooterConstants.kickerFeedbackConfigs);
-    
-    TalonFXConfiguration ballTunnelConfig = new TalonFXConfiguration()
-        .withSlot0(Constants.ShooterConstants.ballTunnelSlotConfigs)
-        .withFeedback(Constants.ShooterConstants.ballTunnelFeedbackConfigs);
+            .withMotionMagic(Constants.ShooterConstants.kickerMagicConfligs);
+    TalonFXConfiguration ballTunnelConfig =
+        new TalonFXConfiguration()
+            .withSlot0(Constants.ShooterConstants.ballTunnelSlotConfigs)
+            .withMotionMagic(Constants.ShooterConstants.ballTunnelMagicConfligs);
 
     kickerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -166,8 +168,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   @Override
   public void setKickerSpeed(double speed) {
-    kickerMotor.set(speed);
-    ballTunnelMotor.set(speed);
+    kickerMotor.set(-1);
+    ballTunnelMotor.setControl(ballTunnelMagicVelocityVoltage.withVelocity(100));
   }
 
   @Override

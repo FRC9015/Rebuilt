@@ -35,6 +35,10 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Pivot/setpoint", position);
   }
 
+  public void stopTheRollers() {
+    roller.stop();
+  }
+
   public Command setPivotPosition(PivotIO.PivotPositions position) {
     return this.startEnd(() -> setPivotPosition(position.getPivotPosition()), () -> stopPivot());
   }
@@ -86,20 +90,34 @@ public class Intake extends SubsystemBase {
             this.run(
                     () -> {
                       setPivotPosition(PivotIO.PivotPositions.AGITATE.getPivotPosition());
-                      setRollerSpeed(50);
+                      setRollerSpeed(-20);
                     })
-                .withTimeout(0.2),
+                .withTimeout(0.5),
             this.run(
                     () -> {
                       setPivotPosition(PivotIO.PivotPositions.AGITATE_MIDDLE.getPivotPosition());
-                      setRollerSpeed(50);
+                      setRollerSpeed(-20);
                     })
-                .withTimeout(0.2))
+                .withTimeout(0.5))
         .repeatedly()
         .finallyDo(
             (interrupted) -> {
               setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(0.5);
-              this.setRollerVoltage(0);
+              this.stopTheRollers();
+            });
+  }
+
+  public Command pullIntakeCommand() {
+    return new SequentialCommandGroup(
+            this.run(
+                () -> {
+                  setPivotPosition(PivotIO.PivotPositions.STOWED.getPivotPosition());
+                  setRollerSpeed(-30);
+                }))
+        .finallyDo(
+            (interrupted) -> {
+              setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(0.5);
+              this.stopTheRollers();
             });
   }
 

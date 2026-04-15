@@ -368,11 +368,24 @@ public final class Constants {
     public static final MotionMagicConfigs flyWheelMagicConfligs =
         new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
 
+    public static final MotionMagicConfigs kickerMagicConfligs =
+        new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
+
+    public static final MotionMagicConfigs ballTunnelMagicConfligs =
+        new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
+
     public static final FeedbackConfigs kickerFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     public static final Slot0Configs ballTunnelSlotConfigs =
-        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+        new Slot0Configs()
+            .withKP(0.1)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0.5);
 
     public static final FeedbackConfigs ballTunnelFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);

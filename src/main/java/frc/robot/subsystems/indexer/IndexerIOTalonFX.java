@@ -87,6 +87,6 @@ public class IndexerIOTalonFX implements IndexerIO {
   @Override
   public void setIndexerSpeed(double speed) {
     indexerSetpoint = speed;
-    motor1.setControl(indexerVelocity.withVelocity(speed));
+    motor1.set(0.5);
   }
 }
