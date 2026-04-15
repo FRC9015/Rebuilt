@@ -168,6 +168,11 @@ public class Turret extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+
+    if (!inputs.isZeroed && inputs.hallEffectTriggered) {
+      io.seedMotorPosition(0.0);
+      inputs.isZeroed = true;
+    }
     Logger.processInputs("Turret", inputs);
     Logger.recordOutput("Turret/setpoint", inputs.turretSetpoint);
   }
