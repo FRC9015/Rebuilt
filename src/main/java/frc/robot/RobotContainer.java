@@ -122,11 +122,18 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID, TurretConstants.TURRET_HALL_EFFECT_CHANNEL));
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOUmbra("port"),
-                new VisionIOUmbra("starboard"));
+                () -> new Rotation2d(turret.getTurretPositionRadians()),
+                2,
+                new VisionIOUmbra("stern"),
+                new VisionIOUmbra("starboard"),
+                new VisionIOUmbra("turret"));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -145,12 +152,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.KICKER_ID));
-        turret =
-            new Turret(
-                new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    TurretConstants.ENCODER_13_TOOTH,
-                    TurretConstants.ENCODER_15_TOOTH));
         hood =
             new Hood(
                 new HoodIOTalonFX(
@@ -235,9 +236,7 @@ public class RobotContainer {
         turret =
             new Turret(
                 new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    TurretConstants.ENCODER_13_TOOTH,
-                    TurretConstants.ENCODER_15_TOOTH));
+                    MotorIDConstants.TURRET_MOTOR_ID, TurretConstants.TURRET_HALL_EFFECT_CHANNEL));
         hood = new Hood(new HoodIO() {});
         interpTables = new InterpTables();
 

@@ -5,6 +5,9 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
@@ -15,31 +18,47 @@ import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 /**
  * Main vision processing subsystem.
  *
  * <p>This class updates all VisionIO implementations, logs their inputs, and processes detected
- * AprilTag observations. Each pose observation is filtered based on tag count, ambiguity, field
- * bounds, distance, and blacklist criteria. Observations are classified as either accepted or
- * rejected and logged accordingly.
- *
- * <p>For accepted observations, measurement standard deviations are dynamically adjusted based on
- * the number of visible tags and their average distance from the robot.
+ * AprilTag observations. It supports both static cameras and dynamic turret-mounted cameras.
  */
 public class Vision extends SubsystemBase {
 
   private final VisionConsumer consumer;
   private final VisionIO[] io;
-
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
+  // Turret specifics
+  private final Supplier<Rotation2d> turretAngleSupplier;
+  private final int turretCameraIndex;
+
   private Matrix<N3, N1> curStdDevs = VisionConstants.kSingleTagStdDevs;
 
-  public Vision(VisionConsumer consumer, VisionIO... io) {
+  /**
+   * Creates a new Vision Subsystem WITH Turret Support.
+   *
+   * @param consumer The consumer (usually your SwerveDrivePoseEstimator)
+   * @param turretAngleSupplier A method to get the live angle of the turret (e.g., () ->
+   *     turret.getAngle())
+   * @param turretCameraIndex The index of the turret camera in the io array (use -1 if no turret
+   *     camera exists)
+   * @param io The VisionIO instances (e.g., Starboard, Port, Turret)
+   */
+  public Vision(
+      VisionConsumer consumer,
+      Supplier<Rotation2d> turretAngleSupplier,
+      int turretCameraIndex,
+      VisionIO... io) {
+
     this.consumer = consumer;
+    this.turretAngleSupplier = turretAngleSupplier;
+    this.turretCameraIndex = turretCameraIndex;
     this.io = io;
 
     // Initialize inputs
@@ -52,16 +71,15 @@ public class Vision extends SubsystemBase {
     this.disconnectedAlerts = new Alert[io.length];
     for (int i = 0; i < inputs.length; i++) {
       disconnectedAlerts[i] =
-          new Alert(
-              "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
+          new Alert("Vision camera " + i + " is disconnected.", AlertType.kWarning);
     }
   }
 
-  /**
-   * Returns the X angle to the best target, which can be used for simple servoing with vision.
-   *
-   * @param cameraIndex The index of the camera to use.
-   */
+  /** Standard constructor without a turret (for testing or basic setups). */
+  public Vision(VisionConsumer consumer, VisionIO... io) {
+    this(consumer, () -> new Rotation2d(), -1, io);
+  }
+
   public Rotation2d getTargetX(int cameraIndex) {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
@@ -79,108 +97,108 @@ public class Vision extends SubsystemBase {
   public void periodic() {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
-      Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
+      Logger.processInputs("Vision/Camera" + i, inputs[i]);
     }
-
-    // Initialize logging values
-    List<Pose3d> allTagPoses = new LinkedList<>();
-    List<Pose3d> allRobotPoses = new LinkedList<>();
-    List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
-    List<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
     // Loop over cameras
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
-      // Update disconnected alert
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
-      // Initialize logging values
       List<Pose3d> tagPoses = new LinkedList<>();
       List<Pose3d> robotPoses = new LinkedList<>();
       List<Pose3d> robotPosesAccepted = new LinkedList<>();
       List<Pose3d> robotPosesRejected = new LinkedList<>();
 
-      // Add tag poses
+      // Add tag poses to logs
       for (int tagId : inputs[cameraIndex].tagIds) {
         Optional<Pose3d> tagPose = VisionConstants.aprilTagLayout.getTagPose(tagId);
-        if (tagPose.isPresent()) {
-          tagPoses.add(tagPose.get());
-        }
+        tagPose.ifPresent(tagPoses::add);
       }
 
       // Loop over pose observations
       for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
-        // Check whether to reject pose
+
+        // 1. Get the raw pose from the Pi
+        Pose3d robotPose = observation.pose();
+
+        // 2. --- DYNAMIC TURRET MATH ---
+        // If this is the turret camera, the Pi sent us the CAMERA LENS pose.
+        // We must reverse-engineer the robot center based on the live turret angle.
+        if (cameraIndex == turretCameraIndex && turretAngleSupplier != null) {
+          Rotation2d liveTurretAngle = turretAngleSupplier.get();
+
+          // Transform 1: Un-spin the turret
+          Transform3d dynamicTurretRotation =
+              new Transform3d(
+                  new Translation3d(), new Rotation3d(0, 0, -liveTurretAngle.getRadians()));
+
+          // Field -> Camera -> Turret Center -> Robot Center
+          robotPose =
+              robotPose
+                  .transformBy(VisionConstants.TURRET_TO_CAMERA.inverse())
+                  .transformBy(dynamicTurretRotation.inverse())
+                  .transformBy(VisionConstants.ROBOT_TO_TURRET.inverse());
+        }
+
+        // 3. Check whether to reject pose
         boolean rejectPose =
             observation.tagCount() == 0 // Must have at least one tag
                 || (observation.tagCount() == 1
-                    && observation.ambiguity()
-                        > VisionConstants.MAX_AMBIGUITY) // Cannot be high ambiguity
-
-                // Must be within the field boundaries
-                || observation.pose().getX() < 0.0
-                || observation.pose().getX() > VisionConstants.FIELD_LENGTH
-                || observation.pose().getY() < 0.0
-                || observation.pose().getY() > VisionConstants.FIELD_WIDTH;
+                    && observation.ambiguity() > VisionConstants.MAX_AMBIGUITY)
+                || robotPose.getX() < 0.0 // Must be within the field boundaries
+                || robotPose.getX() > VisionConstants.FIELD_LENGTH
+                || robotPose.getY() < 0.0
+                || robotPose.getY() > VisionConstants.FIELD_WIDTH;
 
         // Add pose to log
-        robotPoses.add(observation.pose());
+        robotPoses.add(robotPose);
         if (rejectPose) {
-          robotPosesRejected.add(observation.pose());
+          robotPosesRejected.add(robotPose);
+          continue; // Skip the rest if rejected
         } else {
-          robotPosesAccepted.add(observation.pose());
+          robotPosesAccepted.add(robotPose);
         }
 
-        // Skip if rejected
-        if (rejectPose) {
-          continue;
-        }
-
-        // Pose present. Start running Heuristic
+        // 4. Calculate Standard Deviations (Trust Factor)
         var estStdDevs = VisionConstants.kSingleTagStdDevs;
         int numTags = observation.tagCount();
+
+        // Note: Unless averageTagDistance is sent from the Pi, this is likely 0.0.
+        // If you add distance to your C++ array later, this logic kicks in automatically.
         double avgDist = observation.averageTagDistance();
 
-        // One or more tags visible, run the full heuristic.
-        // Decrease std devs if multiple targets are visible
         if (numTags > 1) {
           estStdDevs = VisionConstants.kMultiTagStdDevs;
         }
 
-        // Increase std devs based on (average) distance
         if (numTags == 1 && avgDist > VisionConstants.MAX_AVERAGE_DISTANCE) {
           estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
         } else {
           estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / VisionConstants.STD_DEV_RANGE));
         }
+
         curStdDevs = estStdDevs;
 
-        // Send vision observation
-        consumer.accept(observation.pose().toPose2d(), observation.timestamp(), curStdDevs);
+        // 5. Send vision observation to the Pose Estimator
+        consumer.accept(robotPose.toPose2d(), observation.timestamp(), curStdDevs);
       }
 
-      // Log camera datadata
+      // Log camera data to AdvantageKit
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
-          tagPoses.toArray(new Pose3d[tagPoses.size()]));
+          "Vision/Camera" + cameraIndex + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(
-          "Vision/Camera" + Integer.toString(cameraIndex) + "/RobotPoses",
-          robotPoses.toArray(new Pose3d[robotPoses.size()]));
+          "Vision/Camera" + cameraIndex + "/RobotPoses", robotPoses.toArray(new Pose3d[0]));
 
       if (!robotPosesAccepted.isEmpty()) {
         Logger.recordOutput(
-            "Vision/Camera" + Integer.toString(cameraIndex) + "/AcceptedRobotPoses",
-            robotPosesAccepted.toArray(new Pose3d[robotPosesAccepted.size()]));
+            "Vision/Camera" + cameraIndex + "/AcceptedRobotPoses",
+            robotPosesAccepted.toArray(new Pose3d[0]));
       }
       if (!robotPosesRejected.isEmpty()) {
         Logger.recordOutput(
-            "Vision/Camera" + Integer.toString(cameraIndex) + "/RejectedRobotPoses",
-            robotPosesRejected.toArray(new Pose3d[robotPosesRejected.size()]));
+            "Vision/Camera" + cameraIndex + "/RejectedRobotPoses",
+            robotPosesRejected.toArray(new Pose3d[0]));
       }
-
-      allTagPoses.addAll(tagPoses);
-      allRobotPoses.addAll(robotPoses);
-      allRobotPosesAccepted.addAll(robotPosesAccepted);
-      allRobotPosesRejected.addAll(robotPosesRejected);
 
       Logger.recordOutput("Vision/StdDevs", curStdDevs);
     }

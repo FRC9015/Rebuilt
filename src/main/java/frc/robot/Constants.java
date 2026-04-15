@@ -179,13 +179,15 @@ public final class Constants {
 
   public static class VisionConstants {
     public static final double MAX_AMBIGUITY = 0.2;
-    public static final int MAX_AVERAGE_DISTANCE = 4;
+    public static final int MAX_AVERAGE_DISTANCE = 6;
     public static final int STD_DEV_RANGE = 30;
 
     public static final AprilTagFieldLayout aprilTagLayout =
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
     public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
+
+    // OUTDATED
     public static final Transform3d STARBOARD_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
@@ -213,9 +215,37 @@ public final class Constants {
                 Units.inchesToMeters(15.339),
                 Units.inchesToMeters(10.243)),
             new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(90)));
+    // --- TURRET CAMERA MEASUREMENTS ---
+    // 1. Where is the center of the turret rotation relative to the center of the robot?
+    public static final Transform3d ROBOT_TO_TURRET =
+        new Transform3d(
+            new Translation3d(
+                TurretConstants.TURRET_X_OFFSET,
+                TurretConstants.TURRET_Y_OFFSET,
+                Units.inchesToMeters(
+                    10.25) // TODO: Measure how high the turret base is off the floor!
+                ),
+            new Rotation3d());
 
-    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
-    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+    // 2. Where is the camera lens relative to the center of the turret? (When facing straight
+    // forward)
+    public static final Transform3d TURRET_TO_CAMERA =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(4.28), // TODO: How far forward from turret center?
+                Units.inchesToMeters(6.72), // TODO: How far left/right from turret center?
+                Units.inchesToMeters(5.476) // TODO: How high above turret center?
+                ),
+            new Rotation3d(
+                0,
+                Units.degreesToRadians(10),
+                0) // TODO: Measure the upwards tilt (Pitch) of the camera
+            );
+    // public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
+    // public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(0.4, 0.4, 0.7);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.1, 0.1, 0.3);
   }
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
@@ -453,14 +483,14 @@ public final class Constants {
     public static final int E2_SEARCH_LIMIT = (int) E1_TEETH;
 
     // --- MOVEMENT LIMITS ---
-    public static final double MAXROTATION = 0.6;
-    public static final double MINROTATION = -0.6;
+    public static final double MAXROTATION = 0.685;
+    public static final double MINROTATION = -0.2;
 
-    public static final double ENCODER13_MAGNET_OFFSET = 0.0556640625;
-    public static final double ENCODER15_MAGNET_OFFSET = 0.37646484375;
+    public static final double TURRET_X_OFFSET = Units.inchesToMeters(-2.75);
+    public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.25);
 
-    public static final double TURRET_X_OFFSET = Units.inchesToMeters(-3.186);
-    public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.95);
+    public static final int TURRET_HALL_EFFECT_CHANNEL = 0;
+    public static final double TURRET_ANGLE_OFFSET = 0.244;
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
