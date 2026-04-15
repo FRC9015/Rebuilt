@@ -191,19 +191,19 @@ public final class Constants {
     public static final Transform3d STARBOARD_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(5.156),
-                Units.inchesToMeters(-15.339),
-                Units.inchesToMeters(10.243)),
+                Units.inchesToMeters(-9.118792),
+                Units.inchesToMeters(-15.014516),
+                Units.inchesToMeters(16.519045)),
             new Rotation3d(
-                Units.degreesToRadians(-2),
+                Units.degreesToRadians(0),
                 Units.degreesToRadians(10),
                 Units.degreesToRadians(270)));
     public static final Transform3d STERN_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-11.5838),
-                Units.inchesToMeters(2.669),
-                Units.inchesToMeters(9.159)),
+                Units.inchesToMeters(-11.340810),
+                Units.inchesToMeters(-12.821636),
+                Units.inchesToMeters(16.504328)),
             new Rotation3d(
                 Units.degreesToRadians(0),
                 Units.degreesToRadians(10),
@@ -211,9 +211,9 @@ public final class Constants {
     public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(5.156),
-                Units.inchesToMeters(15.339),
-                Units.inchesToMeters(10.243)),
+                Units.inchesToMeters(1.035322),
+                Units.inchesToMeters(15.409983),
+                Units.inchesToMeters(11.573789)),
             new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(90)));
     // --- TURRET CAMERA MEASUREMENTS ---
     // 1. Where is the center of the turret rotation relative to the center of the robot?

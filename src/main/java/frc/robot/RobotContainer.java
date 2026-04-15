@@ -7,6 +7,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -131,9 +132,9 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 () -> new Rotation2d(turret.getTurretPositionRadians()),
                 2,
-                new VisionIOUmbra("stern"),
-                new VisionIOUmbra("starboard"),
-                new VisionIOUmbra("turret"));
+                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
+                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
+                new VisionIOPhotonVision("turret", new Transform3d()));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -195,14 +196,23 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());
         shooter = new Shooter(new ShooterIOSim());
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOSim(
+        //             "Camera",
+        //             VisionConstants.PORT_CAMERA_POSE,
+        //             simDrive::getSimulatedDriveTrainPose));
+  turret = new Turret(new TurretIOSim());
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOSim(
-                    "Camera",
-                    VisionConstants.PORT_CAMERA_POSE,
-                    simDrive::getSimulatedDriveTrainPose));
-        turret = new Turret(new TurretIOSim());
+                () -> new Rotation2d(turret.getTurretPositionRadians()),
+                2,
+                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
+                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
+                new VisionIOPhotonVision("turret", new Transform3d()));
+      
         simShooter =
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
@@ -221,10 +231,10 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", VisionConstants.PORT_CAMERA_POSE));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVision("placeholder", VisionConstants.PORT_CAMERA_POSE));
         intake = new Intake(new RollerIO() {}, new PivotIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
@@ -237,6 +247,14 @@ public class RobotContainer {
             new Turret(
                 new TurretIOTalonFX(
                     MotorIDConstants.TURRET_MOTOR_ID, TurretConstants.TURRET_HALL_EFFECT_CHANNEL));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                () -> new Rotation2d(turret.getTurretPositionRadians()),
+                2,
+                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
+                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
+                new VisionIOPhotonVision("turret", new Transform3d()));
         hood = new Hood(new HoodIO() {});
         interpTables = new InterpTables();
 
