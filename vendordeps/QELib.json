@@ -1,0 +1,41 @@
+{
+  "fileName": "QELib.json",
+  "name": "QELib",
+  "version": "0.0.1",
+  "frcYear": "2026",
+  "uuid": "db229d14-99e2-439f-885e-c62e8cbf8783",
+  "mavenUrls": [
+    "https://frcmaven.wpi.edu/release",
+    "https://FRC9015.github.io/QELib/"
+  ],
+  "jsonUrl": "https://frc9015.github.io/QELib/QELib.json",
+  "javaDependencies": [
+    {
+      "groupId": "com.qelib",
+      "artifactId": "qelib-java",
+      "version": "0.0.1"
+    }
+  ],
+  "jniDependencies": [
+    {
+      "groupId": "com.qelib.jni",
+      "artifactId": "qelib-driver",
+      "version": "0.0.1",
+      "skipInvalidPlatforms": true,
+      "isJar": false,
+      "validPlatforms": []
+    }
+  ],
+  "cppDependencies": [
+    {
+      "groupId": "com.qelib.lib",
+      "artifactId": "qelib-cpp",
+      "version": "0.0.1",
+      "libName": "QELib",
+      "headerClassifier": "headers",
+      "sharedLibrary": false,
+      "skipInvalidPlatforms": true,
+      "binaryPlatforms": []
+    }
+  ]
+}

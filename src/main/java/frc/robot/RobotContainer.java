@@ -2,9 +2,14 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.qelib.SpatialAutoBuilder;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -65,8 +70,6 @@ import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOSim;
-import frc.robot.subsystems.vision.VisionIOUmbra;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -96,7 +99,8 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final ZoneLogic zones;
 
-  private final AutoFactory autoFactory;
+  private final SpatialAutoBuilder spatialAutoBuilder;
+  private final Map<String,Command> eventMap;
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -203,7 +207,7 @@ public class RobotContainer {
         //             "Camera",
         //             VisionConstants.PORT_CAMERA_POSE,
         //             simDrive::getSimulatedDriveTrainPose));
-  turret = new Turret(new TurretIOSim());
+        turret = new Turret(new TurretIOSim());
         vision =
             new Vision(
                 drive::addVisionMeasurement,
@@ -212,7 +216,7 @@ public class RobotContainer {
                 new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
                 new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("turret", new Transform3d()));
-      
+
         simShooter =
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
@@ -305,10 +309,14 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
-    autoFactory =
-        new AutoFactory(
-            () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true, drive);
-
+    // autoFactory =
+    //     new AutoFactory(
+    //         () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true, drive);
+    spatialAutoBuilder = new SpatialAutoBuilder();
+    eventMap = new HashMap<String,Command>();
+    eventMap.put("intake",intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED));
+    spatialAutoBuilder.configure(() -> drive.getPose(), (speeds) -> drive.runVelocity(speeds), eventMap, 5, 5, 5);
+    autoChooser.addOption("spatialTEst", spatialAutoBuilder.buildPath("TEST"));
     // Autos autoRoutines =
     //     new Autos(
     //         autoFactory,

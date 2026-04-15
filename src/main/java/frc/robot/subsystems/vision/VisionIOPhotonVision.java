@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
 
 public class VisionIOPhotonVision implements VisionIO {
   protected final PhotonCamera camera;
@@ -33,12 +32,15 @@ public class VisionIOPhotonVision implements VisionIO {
 
       if (result.getMultiTagResult().isPresent()) {
         var mTag = result.getMultiTagResult().get();
-        lensPose = new Pose3d(mTag.estimatedPose.best.getTranslation(), mTag.estimatedPose.best.getRotation());
+        lensPose =
+            new Pose3d(
+                mTag.estimatedPose.best.getTranslation(), mTag.estimatedPose.best.getRotation());
         tagCount = mTag.fiducialIDsUsed.size();
         ambiguity = mTag.estimatedPose.ambiguity;
       } else {
         var target = result.getBestTarget();
-        Optional<Pose3d> tagPose = VisionConstants.aprilTagLayout.getTagPose(target.getFiducialId());
+        Optional<Pose3d> tagPose =
+            VisionConstants.aprilTagLayout.getTagPose(target.getFiducialId());
         if (tagPose.isEmpty()) continue;
         lensPose = tagPose.get().transformBy(target.getBestCameraToTarget().inverse());
         tagCount = 1;
@@ -48,14 +50,14 @@ public class VisionIOPhotonVision implements VisionIO {
       // Convert Lens -> Robot
       Pose3d robotPose = lensPose.transformBy(robotToCamera.inverse());
 
-      observations.add(new PoseObservation(
-          result.getTimestampSeconds(),
-          robotPose,
-          ambiguity,
-          tagCount,
-          result.getBestTarget().getBestCameraToTarget().getTranslation().getNorm(),
-          List.of()
-      ));
+      observations.add(
+          new PoseObservation(
+              result.getTimestampSeconds(),
+              robotPose,
+              ambiguity,
+              tagCount,
+              result.getBestTarget().getBestCameraToTarget().getTranslation().getNorm(),
+              List.of()));
     }
     inputs.poseObservations = observations.toArray(new PoseObservation[0]);
   }
