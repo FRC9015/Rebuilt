@@ -1,8 +1,8 @@
 package frc.robot.subsystems.turret;
 
-import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,9 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import frc.robot.Constants.TurretConstants;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -33,12 +31,16 @@ public class Turret extends SubsystemBase {
 
     sysId =
         new SysIdRoutine(
-            new Config(
-                Volts.of(0.5).per(Seconds),
-                Volts.of(4),
-                Seconds.of(5),
-                (state) -> Logger.recordOutput("Turret/SysIdState", state.toString())),
-            new Mechanism((voltage) -> io.setTurretVoltage(voltage.in(Volts)), null, this));
+            new SysIdRoutine.Config(
+                null, // Use default ramp rate (1 V/s)
+                Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
+                null, // Use default timeout (10 s)
+                // Log state with Phoenix SignalLogger class
+                (state) -> SignalLogger.writeString("state", state.toString())),
+            new SysIdRoutine.Mechanism(
+                (volts) -> io.setTurretVoltage(volts.magnitude()), // Voltage output function
+                null,
+                this));
   }
 
   /**

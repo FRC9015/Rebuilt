@@ -168,8 +168,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   @Override
   public void setKickerSpeed(double speed) {
-    kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(speed));
-    // ballTunnelMotor.setControl(ballTunnelMagicVelocityVoltage.withVelocity(100));
+    kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(-100));
+    ballTunnelMotor.setControl(ballTunnelMagicVelocityVoltage.withVelocity(100));
   }
 
   @Override

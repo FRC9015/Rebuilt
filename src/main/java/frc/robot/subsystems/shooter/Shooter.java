@@ -78,8 +78,9 @@ public class Shooter extends SubsystemBase {
     return this.run(() -> io.stopFlywheels());
   }
 
-  public void stopTheFlywheels() {
+  public void stopShooter() {
     io.stopFlywheels();
+    io.stopKicker();
   }
 
   public Command incrementShooterCommand(double value) {

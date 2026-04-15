@@ -16,7 +16,7 @@ public class ObjectDetection {
   private final PhotonCamera camera = new PhotonCamera("ObjectCamera");
   private Translation2d lastLockedTargetLocation = null;
   private int framesSinceLastSeen = 0;
-  private final int MAX_LOST_FRAMES = 10;
+  private final int maxLostFrames = 10;
   private final MedianFilter lockedTargetPitchFilter = new MedianFilter(5);
   private final InterpolatingTreeMap<Double, Double> distanceInterp =
       new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
@@ -45,7 +45,7 @@ public class ObjectDetection {
 
     if (currentTargets.isEmpty()) {
       framesSinceLastSeen++;
-      if (framesSinceLastSeen > MAX_LOST_FRAMES) {
+      if (framesSinceLastSeen > maxLostFrames) {
         lastLockedTargetLocation = null;
       }
       return Optional.ofNullable(lastLockedTargetLocation);

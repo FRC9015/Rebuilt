@@ -3,6 +3,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Meters;
 
 import choreo.auto.AutoFactory;
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -339,20 +340,20 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
-    driverController
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+    // driverController
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+    //                 drive)
+    //             .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerWithAutoUnjam(-100));
-    driverController
-        .leftTrigger()
-        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.leftTrigger().whileTrue(intake.runRollerWithAutoUnjam(-30));
+    // driverController
+    //     .leftTrigger()
+    //     .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
 
     operatorController
         .rightTrigger()
@@ -435,32 +436,51 @@ public class RobotContainer {
     driverController
         .povRight()
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
+
     driverController
-        .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
-    driverController.leftBumper().whileTrue(intake.runRollerAtSpeed(-100));
-    driverController
-        .y()
+        .rightTrigger()
         .whileTrue(
-            new TurretAngleAim(
-                    () -> drive.getPose(),
-                    turret,
-                    () -> FieldConstants.HUB_POSE_BLUE,
-                    drive,
-                    interpTables.timeOfFlightInterp)
-                .onlyIf(() -> DriverStation.isTest()));
-    driverController
-        .x()
-        .onTrue(
-            intake
-                .setPivotPosition(PivotIO.PivotPositions.DEPLOYED)
-                .onlyIf(() -> DriverStation.isTest()));
-    driverController
-        .b()
-        .onTrue(
-            intake
-                .setPivotPosition(PivotIO.PivotPositions.STOWED)
-                .onlyIf(() -> DriverStation.isTest()));
+            Commands.startEnd(
+                () -> {
+                  shooter.runShooterAtSpeed(40);
+                  indexer.runIndexer(50);
+                },
+                () -> {
+                  shooter.stopShooter();
+                  indexer.stop();
+                }));
+
+    // driverController
+    //     .rightBumper()
+    //     .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
+    // driverController.leftBumper().whileTrue(intake.runRollerAtSpeed(-100));
+    // driverController
+    //     .y()
+    //     .whileTrue(
+    //         new TurretAngleAim(
+    //                 () -> drive.getPose(),
+    //                 turret,
+    //                 () -> FieldConstants.HUB_POSE_BLUE,
+    //                 drive,
+    //                 interpTables.timeOfFlightInterp)
+    //             .onlyIf(() -> DriverStation.isTest()));
+    // driverController
+    //     .x()
+    //     .onTrue(
+    //         intake
+    //             .setPivotPosition(PivotIO.PivotPositions.DEPLOYED)
+    //             .onlyIf(() -> DriverStation.isTest()));
+    // driverController
+    //     .b()
+    //     .onTrue(
+    //         intake
+    //             .setPivotPosition(PivotIO.PivotPositions.STOWED)
+    //             .onlyIf(() -> DriverStation.isTest()));
+    driverController.a().whileTrue(intake.agitateIntakeCommand());
+    driverController.x().whileTrue(turret.quasistatic(Direction.kReverse));
+    driverController.b().whileTrue(turret.dynamic(Direction.kForward));
+    driverController.y().whileTrue(turret.dynamic(Direction.kReverse));
+    driverController.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
   }
 
   /**
