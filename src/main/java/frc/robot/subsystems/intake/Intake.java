@@ -74,21 +74,12 @@ public class Intake extends SubsystemBase {
     return this.startEnd(() -> this.setRollerSpeed(speed), () -> roller.stop());
   }
 
-  /**
-   * Reverses intake rollers to clear a detected jam.
-   *
-   * @return A command that reverses rollers briefly, then stops.
-   */
+
   public Command reverseRollersWhenJammed() {
     return this.runEnd(() -> this.setRollerReverseSpeed(34), this::stopTheRollers).withTimeout(0.5);
   }
 
-  /**
-   * Runs intake rollers and automatically reverses when a jam is detected.
-   *
-   * @param speed Speed provided to intake rollers.
-   * @return A command that runs rollers with automatic unjam behavior.
-   */
+  
   public Command runRollerWithAutoUnjam(double speed) {
     return runRollerAtSpeed(speed)
         .until(this::isJamDetected)
@@ -105,9 +96,6 @@ public class Intake extends SubsystemBase {
     return this.run(() -> roller.stop());
   }
 
-  /**
-   * @return True if one or more intake rollers are stalled for the jam threshold.
-   */
   public boolean isJamDetected() {
     return jamCycles >= jamCyclesThreshold;
   }
