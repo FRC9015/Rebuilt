@@ -20,12 +20,12 @@ public class Intake extends SubsystemBase {
   private static final double jamRPMThreshold = 50.0;
   private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
 
-  private static boolean leftHighCurrent;
-  private static boolean leftLowSpeed;
-  private static boolean leftIsRunning;
-  private static boolean rightHighCurrent;
-  private static boolean rightLowSpeed;
-  private static boolean rightIsRunning;
+  @AutoLogOutput static boolean leftHighCurrent;
+  @AutoLogOutput static boolean leftLowSpeed;
+  @AutoLogOutput static boolean leftIsRunning;
+  @AutoLogOutput static boolean rightHighCurrent;
+  @AutoLogOutput static boolean rightLowSpeed;
+  @AutoLogOutput static boolean rightIsRunning;
 
   @AutoLogOutput private int jamCycles = 0;
 
@@ -74,12 +74,10 @@ public class Intake extends SubsystemBase {
     return this.startEnd(() -> this.setRollerSpeed(speed), () -> roller.stop());
   }
 
-
   public Command reverseRollersWhenJammed() {
     return this.runEnd(() -> this.setRollerReverseSpeed(34), this::stopTheRollers).withTimeout(0.5);
   }
 
-  
   public Command runRollerWithAutoUnjam(double speed) {
     return runRollerAtSpeed(speed)
         .until(this::isJamDetected)

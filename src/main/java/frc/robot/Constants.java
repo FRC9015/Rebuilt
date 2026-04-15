@@ -363,7 +363,14 @@ public final class Constants {
             .withKV(0.13);
     // TODO: Tune kicker PID values
     public static final Slot0Configs kickerSlotVelocityConfigs =
-        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+        new Slot0Configs()
+            .withKP(0.17)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0.65);
 
     public static final MotionMagicConfigs flyWheelMagicConfligs =
         new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
@@ -379,13 +386,13 @@ public final class Constants {
 
     public static final Slot0Configs ballTunnelSlotConfigs =
         new Slot0Configs()
-            .withKP(0.1)
+            .withKP(0.25)
             .withKI(0)
             .withKD(0)
             .withKG(0)
             .withKA(0)
             .withKS(0)
-            .withKV(0.5);
+            .withKV(0.6);
 
     public static final FeedbackConfigs ballTunnelFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
@@ -523,6 +530,6 @@ public final class Constants {
             .withKG(0)
             .withKA(0)
             .withKS(0.08)
-            .withKV(0.13);
+            .withKV(1.3);
   }
 }

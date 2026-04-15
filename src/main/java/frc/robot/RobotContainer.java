@@ -349,9 +349,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController
-        .rightTrigger()
-        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
+    driverController.rightTrigger().whileTrue(intake.runRollerWithAutoUnjam(-100));
     driverController
         .leftTrigger()
         .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
@@ -373,7 +371,8 @@ public class RobotContainer {
                             () -> zones.getZoneTargetPose(),
                             drive)
                         .alongWith(zones.override())));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(40));
+
+    // driverController.rightBumper().whileTrue(indexer.runIndexer(-30));
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(50)));
@@ -438,7 +437,7 @@ public class RobotContainer {
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
     driverController.leftBumper().whileTrue(intake.runRollerAtSpeed(-100));
     driverController
         .y()

@@ -29,7 +29,7 @@ public class ShooterIOTalonFX implements ShooterIO {
   private LoggedNetworkNumber minPosition = new LoggedNetworkNumber("/Tuning/minPosition", 0.0);
   private LoggedNetworkNumber maxPosition = new LoggedNetworkNumber("/Tuning/maxPosition", 1.0);
   private MotionMagicVelocityVoltage flywheelMagicVelocityVoltage =
-      new MotionMagicVelocityVoltage(00.);
+      new MotionMagicVelocityVoltage(0.0);
   private MotionMagicVelocityVoltage kickerMagicVelocityVoltage =
       new MotionMagicVelocityVoltage(0.0);
   private MotionMagicVelocityVoltage ballTunnelMagicVelocityVoltage =
@@ -168,8 +168,8 @@ public class ShooterIOTalonFX implements ShooterIO {
 
   @Override
   public void setKickerSpeed(double speed) {
-    kickerMotor.set(-1);
-    ballTunnelMotor.setControl(ballTunnelMagicVelocityVoltage.withVelocity(100));
+    kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(speed));
+    // ballTunnelMotor.setControl(ballTunnelMagicVelocityVoltage.withVelocity(100));
   }
 
   @Override
