@@ -61,9 +61,11 @@ public class Shooter extends SubsystemBase {
     return this.startEnd(
         () -> {
           this.setShooterSpeed(speed);
+          this.setKickerSpeed(speed);
         },
         () -> {
           io.stopFlywheels();
+          io.stopKicker();
         });
   }
 
@@ -74,6 +76,11 @@ public class Shooter extends SubsystemBase {
 
   public Command stopFlywheels() {
     return this.run(() -> io.stopFlywheels());
+  }
+
+  public void stopShooter() {
+    io.stopFlywheels();
+    io.stopKicker();
   }
 
   public Command incrementShooterCommand(double value) {

@@ -16,26 +16,6 @@
       "version": "0.0.1"
     }
   ],
-  "jniDependencies": [
-    {
-      "groupId": "com.qelib.jni",
-      "artifactId": "qelib-driver",
-      "version": "0.0.1",
-      "skipInvalidPlatforms": true,
-      "isJar": false,
-      "validPlatforms": []
-    }
-  ],
-  "cppDependencies": [
-    {
-      "groupId": "com.qelib.lib",
-      "artifactId": "qelib-cpp",
-      "version": "0.0.1",
-      "libName": "QELib",
-      "headerClassifier": "headers",
-      "sharedLibrary": false,
-      "skipInvalidPlatforms": true,
-      "binaryPlatforms": []
-    }
-  ]
+  "jniDependencies": [],
+  "cppDependencies": []
 }

@@ -48,61 +48,62 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Vision/Camera" + i, inputs[i]);
       disconnectedAlerts[i].set(!inputs[i].connected);
 
-      List<Pose3d> tagPoses = new ArrayList<>();
       List<Pose3d> acceptedRobotPoses = new ArrayList<>();
-      List<Pose3d> rejectedRobotPoses = new ArrayList<>();
-
-      for (int tagId : inputs[i].tagIds) {
-        VisionConstants.aprilTagLayout.getTagPose(tagId).ifPresent(tagPoses::add);
-      }
 
       for (PoseObservation observation : inputs[i].poseObservations) {
-        Pose3d pose = observation.pose();
+        Pose3d lensPose = observation.pose(); // This is the Lens on the field
+        Pose3d robotPose;
 
-        // --- TURRET RE-CALCULATION ---
-        // If this is the turret camera, the IO gave us the LENS pose
-        // because we passed it an identity transform (0 offset)
         if (i == turretCameraIndex) {
+          // --- THE FIX: DYNAMIC TRANSFORM COMPOSITION ---
           Rotation2d turretAngle = turretAngleSupplier.get();
-          pose =
-              pose.transformBy(VisionConstants.TURRET_TO_CAMERA.inverse())
-                  .rotateBy(new Rotation3d(0, 0, -turretAngle.getRadians()))
-                  .transformBy(VisionConstants.ROBOT_TO_TURRET.inverse());
+
+          // 1. Create a transform that represents the turret's current rotation
+          Transform3d turretRotation =
+              new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngle.getRadians()));
+
+          // 2. Build the full chain from Robot Center -> Lens
+          // Chain: RobotCenter -> TurretPivot -> TurretRotation -> LensOffset
+          Transform3d robotToLensDynamic =
+              VisionConstants.ROBOT_TO_TURRET
+                  .plus(turretRotation)
+                  .plus(VisionConstants.TURRET_TO_CAMERA);
+
+          // 3. RobotPose = LensPose * (RobotToLens)^-1
+          robotPose = lensPose.transformBy(robotToLensDynamic.inverse());
+
+        } else {
+          // Static camera logic remains the same
+          // (Assuming the IO handled the static offset, or you handle it here)
+          robotPose = lensPose;
         }
 
-        // --- FILTERING ---
-        boolean rejected =
-            observation.tagCount() == 0
-                || (observation.tagCount() == 1
-                    && observation.ambiguity() > VisionConstants.MAX_AMBIGUITY)
-                || pose.getX() < 0
-                || pose.getX() > VisionConstants.FIELD_LENGTH
-                || pose.getY() < 0
-                || pose.getY() > VisionConstants.FIELD_WIDTH;
-
-        if (rejected) {
-          rejectedRobotPoses.add(pose);
-          continue;
+        // Filtering
+        if (isValid(robotPose, observation)) {
+          acceptedRobotPoses.add(robotPose);
+          consumer.accept(
+              robotPose.toPose2d(), observation.timestamp(), calculateStdDevs(observation));
         }
-
-        // --- ACCEPT ---
-        acceptedRobotPoses.add(pose);
-        Matrix<N3, N1> stdDevs =
-            (observation.tagCount() > 1)
-                ? VisionConstants.kMultiTagStdDevs
-                : VisionConstants.kSingleTagStdDevs;
-        double trustFactor =
-            1.0 + (Math.pow(observation.averageTagDistance(), 2) / VisionConstants.STD_DEV_RANGE);
-
-        consumer.accept(pose.toPose2d(), observation.timestamp(), stdDevs.times(trustFactor));
       }
-
-      Logger.recordOutput("Vision/Camera" + i + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(
           "Vision/Camera" + i + "/AcceptedPoses", acceptedRobotPoses.toArray(new Pose3d[0]));
-      Logger.recordOutput(
-          "Vision/Camera" + i + "/RejectedPoses", rejectedRobotPoses.toArray(new Pose3d[0]));
     }
+  }
+
+  private boolean isValid(Pose3d pose, PoseObservation obs) {
+    return obs.tagCount() > 0
+        && (obs.tagCount() > 1 || obs.ambiguity() < VisionConstants.MAX_AMBIGUITY)
+        && pose.getX() > 0
+        && pose.getX() < VisionConstants.FIELD_LENGTH
+        && pose.getY() > 0
+        && pose.getY() < VisionConstants.FIELD_WIDTH;
+  }
+
+  private Matrix<N3, N1> calculateStdDevs(PoseObservation obs) {
+    var base =
+        (obs.tagCount() > 1) ? VisionConstants.kMultiTagStdDevs : VisionConstants.kSingleTagStdDevs;
+    double factor = 1.0 + (Math.pow(obs.averageTagDistance(), 2) / VisionConstants.STD_DEV_RANGE);
+    return base.times(factor);
   }
 
   public interface VisionConsumer {

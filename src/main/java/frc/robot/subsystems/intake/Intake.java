@@ -1,20 +1,38 @@
 package frc.robot.subsystems.intake;
 
+import edu.wpi.first.wpilibj.Alert;
+import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
   private final RollerIO roller;
   private final PivotIO pivot;
+  private final Alert jamAlert;
 
   private final RollerIOInputsAutoLogged rollerInputs = new RollerIOInputsAutoLogged();
   private final PivotIOInputsAutoLogged pivotInputs = new PivotIOInputsAutoLogged();
 
+  private static final double jamCurrentAmps = 30.0;
+  private static final double jamRPMThreshold = 50.0;
+  private static final int jamCyclesThreshold = 10; // ~0.2s at 50Hz
+
+  @AutoLogOutput static boolean leftHighCurrent;
+  @AutoLogOutput static boolean leftLowSpeed;
+  @AutoLogOutput static boolean leftIsRunning;
+  @AutoLogOutput static boolean rightHighCurrent;
+  @AutoLogOutput static boolean rightLowSpeed;
+  @AutoLogOutput static boolean rightIsRunning;
+
+  @AutoLogOutput private int jamCycles = 0;
+
   public Intake(RollerIO roller, PivotIO pivot) {
     this.roller = roller;
     this.pivot = pivot;
+    jamAlert = new Alert("Intake roller jam detected!", AlertType.kInfo);
   }
 
   public void setRollerSpeed(double speedValue) {
@@ -35,8 +53,12 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Pivot/setpoint", position);
   }
 
+  public void stopTheRollers() {
+    roller.stop();
+  }
+
   public Command setPivotPosition(PivotIO.PivotPositions position) {
-    return this.run(() -> setPivotPosition(position.getPivotPosition()));
+    return this.startEnd(() -> setPivotPosition(position.getPivotPosition()), () -> stopPivot());
   }
 
   public Command runIntakeAtSpeed(double intakeSpeed, PivotIO.PivotPositions pivotPosition) {
@@ -52,12 +74,32 @@ public class Intake extends SubsystemBase {
     return this.startEnd(() -> this.setRollerSpeed(speed), () -> roller.stop());
   }
 
+  public Command reverseRollersWhenJammed() {
+    return this.runEnd(() -> this.setRollerReverseSpeed(34), this::stopTheRollers).withTimeout(0.5);
+  }
+
+  public Command runRollerWithAutoUnjam(double speed) {
+    return runRollerAtSpeed(speed)
+        .until(this::isJamDetected)
+        .andThen(reverseRollersWhenJammed())
+        .repeatedly()
+        .finallyDo(interrupted -> this.stopRoller());
+  }
+
   public Command runRollerAtVoltage(double voltage) {
     return this.startEnd(() -> this.setRollerVoltage(voltage), () -> roller.stop());
   }
 
   public Command stopRoller() {
     return this.run(() -> roller.stop());
+  }
+
+  public boolean isJamDetected() {
+    return jamCycles >= jamCyclesThreshold;
+  }
+
+  public void stopPivot() {
+    pivot.stop();
   }
 
   public Command runIntakeSim() {
@@ -82,20 +124,34 @@ public class Intake extends SubsystemBase {
             this.run(
                     () -> {
                       setPivotPosition(PivotIO.PivotPositions.AGITATE.getPivotPosition());
-                      setRollerSpeed(50);
+                      setRollerSpeed(-20);
                     })
-                .withTimeout(0.2),
+                .withTimeout(0.5),
             this.run(
                     () -> {
                       setPivotPosition(PivotIO.PivotPositions.AGITATE_MIDDLE.getPivotPosition());
-                      setRollerSpeed(50);
+                      setRollerSpeed(-20);
                     })
-                .withTimeout(0.2))
+                .withTimeout(0.5))
         .repeatedly()
         .finallyDo(
             (interrupted) -> {
               setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(0.5);
-              this.setRollerVoltage(0);
+              this.stopTheRollers();
+            });
+  }
+
+  public Command pullIntakeCommand() {
+    return new SequentialCommandGroup(
+            this.run(
+                () -> {
+                  setPivotPosition(PivotIO.PivotPositions.STOWED.getPivotPosition());
+                  setRollerSpeed(-30);
+                }))
+        .finallyDo(
+            (interrupted) -> {
+              setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(0.5);
+              this.stopTheRollers();
             });
   }
 
@@ -103,6 +159,25 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     roller.updateInputs(rollerInputs);
     pivot.updateInputs(pivotInputs);
+
+    leftHighCurrent = rollerInputs.rollerLeftCurentAmps >= jamCurrentAmps;
+    leftLowSpeed = Math.abs(rollerInputs.rollerLeftCurrentSpeed) <= jamRPMThreshold;
+    leftIsRunning = Math.abs(rollerInputs.rollerLeftAppliedVolts) > 0.1;
+
+    rightHighCurrent = rollerInputs.rollerRightCurentAmps >= jamCurrentAmps;
+    rightLowSpeed = Math.abs(rollerInputs.rollerRightCurrentSpeed) <= jamRPMThreshold;
+    rightIsRunning = Math.abs(rollerInputs.rollerRightAppliedVolts) > 0.1;
+
+    boolean leftStalled = leftHighCurrent && leftLowSpeed && leftIsRunning;
+    boolean rightStalled = rightHighCurrent && rightLowSpeed && rightIsRunning;
+
+    if (leftStalled || rightStalled) {
+      jamCycles++;
+    } else {
+      jamCycles = 0;
+    }
+
+    jamAlert.set(isJamDetected());
 
     Logger.processInputs("Intake/Roller", rollerInputs);
     Logger.processInputs("Intake/Pivot", pivotInputs);

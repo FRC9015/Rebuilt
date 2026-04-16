@@ -9,19 +9,19 @@ public interface PivotIO {
   @AutoLog
   public static class PivotIOInputs {
     public double pivotLeftAppliedVolts = 0.0;
-    public double pivotRightAppliedVolts = 0.0;
     public double pivotLeftCurrentAmps = 0.0;
-    public double pivotRightCurrentAmps = 0.0;
     public double pivotLeftCurrentSpeed = 0.0;
-    public double pivotRightCurrentSpeed = 0.0;
     public double pivotPosition = 0.0;
+    public double setpointError = 0.0;
+    public double setpoint = 0.0;
+    public boolean isDeployed = false;
   }
 
   public enum PivotPositions {
     STOWED(Constants.IntakeConstants.PIVOT_STOWED_POSITION),
     DEPLOYED(Constants.IntakeConstants.PIVOT_DEPLOYED_POSITION),
-    AGITATE(0.25),
-    AGITATE_MIDDLE(0.75);
+    AGITATE(0.6),
+    AGITATE_MIDDLE(1.2);
 
     private final double position;
 
@@ -43,6 +43,8 @@ public interface PivotIO {
   public default void updatePIDFromDashboard() {}
 
   public default void setVolts(double volts) {}
+
+  public default void seedPivotPosition(double position) {}
 
   default void stop() {}
 

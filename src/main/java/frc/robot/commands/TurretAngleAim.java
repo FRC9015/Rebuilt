@@ -76,6 +76,7 @@ public class TurretAngleAim extends Command {
     // turret.setTurretSetPoint(headingSetpoint);
     double directionSetpoint = turret.setTurretAngleFastestPath(headingSetpoint);
     turret.setPositionVoid(directionSetpoint);
+    turret.setTurretSetPoint(directionSetpoint);
     // Logging for debugging
     Logger.recordOutput("Turret/HeadingSetpoint0to360", headingSetpoint);
     Logger.recordOutput("DISTANCETHING", targetPos.getDistance(robotPose.getTranslation()));

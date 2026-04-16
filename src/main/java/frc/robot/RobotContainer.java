@@ -2,14 +2,9 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.qelib.SpatialAutoBuilder;
-
+// import com.qelib.SpatialAutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -17,7 +12,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -35,7 +29,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
-import frc.robot.commands.TurretDriveAutoDrive;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ZoneLogic;
 import frc.robot.subsystems.drive.Drive;
@@ -99,8 +92,9 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final ZoneLogic zones;
 
-  private final SpatialAutoBuilder spatialAutoBuilder;
-  private final Map<String,Command> eventMap;
+  // private final AutoFactory autoFactory;
+  // private final SpatialAutoBuilder spatialAutoBuilder;
+  // private final Map<String, Command> eventMap;
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -148,15 +142,14 @@ public class RobotContainer {
                 new RollerIOTalonFX(
                     MotorIDConstants.INTAKE_ROLLER_ID, MotorIDConstants.INTAKE_ROLLER_ID2),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
-                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
-                    MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID,
+                    Constants.ShooterConstants.BALL_TUNNEL_ID));
         hood =
             new Hood(
                 new HoodIOTalonFX(
@@ -246,7 +239,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID,
+                    Constants.ShooterConstants.BALL_TUNNEL_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -311,12 +305,16 @@ public class RobotContainer {
 
     // autoFactory =
     //     new AutoFactory(
-    //         () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true, drive);
-    spatialAutoBuilder = new SpatialAutoBuilder();
-    eventMap = new HashMap<String,Command>();
-    eventMap.put("intake",intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED));
-    spatialAutoBuilder.configure(() -> drive.getPose(), (speeds) -> drive.runVelocity(speeds), eventMap, 5, 5, 5);
-    autoChooser.addOption("spatialTEst", spatialAutoBuilder.buildPath("TEST"));
+    //         () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true,
+    // drive);
+    // CommandScheduler.getInstance().schedule(autoFactory.warmupCmd());
+
+    // spatialAutoBuilder = new SpatialAutoBuilder();
+    // eventMap = new HashMap<String, Command>();
+    // eventMap.put("intake", intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED));
+    // spatialAutoBuilder.configure(
+    //     () -> drive.getPose(), (speeds) -> drive.runVelocity(speeds), eventMap, 5, 5, 5);
+    // autoChooser.addOption("spatialTEst", spatialAutoBuilder.buildPath("TEST"));
     // Autos autoRoutines =
     //     new Autos(
     //         autoFactory,
@@ -374,50 +372,36 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(30));
 
     operatorController
         .rightTrigger()
         .whileTrue(
-            Commands.startEnd(
-                    () -> driverController.setRumble(RumbleType.kBothRumble, 1),
-                    () -> driverController.setRumble(RumbleType.kBothRumble, 0))
-                .alongWith(
-                    new ShooterAutoAimSequence(
-                            shooter,
-                            hood,
-                            interpTables.shooterSpeedHubInterp,
-                            interpTables.hoodAngleHubInterp,
-                            interpTables.timeOfFlightInterp,
-                            () -> drive.getPose(),
-                            () -> zones.getZoneTargetPose(),
-                            drive)
-                        .alongWith(zones.override())));
+            // Commands.startEnd(
+            //         () -> driverController.setRumble(RumbleType.kBothRumble, 1),
+            //         () -> driverController.setRumble(RumbleType.kBothRumble, 0))
+            //     .alongWith(
+            new ShooterAutoAimSequence(
+                    shooter,
+                    hood,
+                    interpTables.shooterSpeedHubInterp,
+                    interpTables.hoodAngleHubInterp,
+                    interpTables.timeOfFlightInterp,
+                    () -> drive.getPose(),
+                    () -> zones.getZoneTargetPose(),
+                    drive)
+                .alongWith(zones.override()));
     driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
     operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
+
     shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+        Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(50)));
-    turret.setDefaultCommand(
-        new TurretDriveAutoDrive(
-            () -> drive.getPose(),
-            turret,
-            () -> FieldConstants.HUB_POSE_BLUE,
-            drive,
-            interpTables.timeOfFlightInterp));
+
     operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
-    operatorController
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveFacingPose(
-                drive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> FieldConstants.HUB_POSE_BLUE,
-                turret));
-
+    operatorController.a().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
     // operatorController
     //     .povLeft()
     //     .onTrue(
@@ -457,10 +441,10 @@ public class RobotContainer {
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(indexer.runIndexer(50).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(indexer.runIndexer(100).onlyIf(() -> DriverStation.isTest()));
     driverController
         .y()
         .whileTrue(
