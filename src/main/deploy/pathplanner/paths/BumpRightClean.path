@@ -3,89 +3,73 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.431,
-        "y": 7.426
+        "x": 3.52598551212938,
+        "y": 2.392148595434635
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.259280555587475,
-        "y": 7.340741889993236
+        "x": 4.114370367250674,
+        "y": 2.3520272489892182
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.405133333333334,
-        "y": 7.426
+        "x": 6.6239167263308625,
+        "y": 2.392148595434635
       },
       "prevControl": {
-        "x": 4.692806941691045,
-        "y": 7.440123592581788
+        "x": 5.784628558038458,
+        "y": 2.196946493300021
       },
       "nextControl": {
-        "x": 6.261774376446483,
-        "y": 7.409015020608918
+        "x": 7.390562247304582,
+        "y": 2.570455430845686
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.740122222222222,
-        "y": 4.025255555555555
+        "x": 6.815566564184636,
+        "y": 4.981891477847034
       },
       "prevControl": {
-        "x": 7.949818054625079,
-        "y": 4.389386253788029
+        "x": 7.778214350802678,
+        "y": 4.716292578315782
       },
       "nextControl": {
-        "x": 5.862452414964789,
-        "y": 3.761068053892922
+        "x": 5.685944331975718,
+        "y": 5.293559385810312
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.956581925960243,
-        "y": 5.802924738881402
+        "x": 6.008753527206874,
+        "y": 2.5080341875842316
       },
       "prevControl": {
-        "x": 5.680327658785094,
-        "y": 5.308554662378271
+        "x": 6.474052436477377,
+        "y": 3.0117436112573497
       },
       "nextControl": {
-        "x": 6.583795379885445,
-        "y": 6.925352878621968
+        "x": 5.576421780239218,
+        "y": 2.040013371799191
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.405133333333334,
-        "y": 7.426
+        "x": 3.298646605458221,
+        "y": 2.392148595434635
       },
       "prevControl": {
-        "x": 6.298513677139487,
-        "y": 7.6073234290768195
-      },
-      "nextControl": {
-        "x": 4.828678665816385,
-        "y": 7.3090008542876665
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 2.9063900353773584,
-        "y": 7.426
-      },
-      "prevControl": {
-        "x": 2.593472211897626,
-        "y": 7.409697434676363
+        "x": 3.1072239751739144,
+        "y": 2.231346304981303
       },
       "nextControl": null,
       "isLocked": false,
@@ -94,12 +78,20 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.25,
-      "rotationDegrees": -90.0
+      "waypointRelativePos": 0.7281808035714287,
+      "rotationDegrees": 0.0
     },
     {
-      "waypointRelativePos": 2.419698660714284,
-      "rotationDegrees": 100.0
+      "waypointRelativePos": 1.4339564732142858,
+      "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 2.263643973214286,
+      "rotationDegrees": -100.0
+    },
+    {
+      "waypointRelativePos": 3.050223214285712,
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
@@ -107,8 +99,8 @@
   "eventMarkers": [
     {
       "name": "intake",
-      "waypointRelativePos": 1.25,
-      "endWaypointRelativePos": 4.5577358490566136,
+      "waypointRelativePos": 0.813279625779626,
+      "endWaypointRelativePos": 2.494315228690229,
       "command": {
         "type": "named",
         "data": {
@@ -133,7 +125,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

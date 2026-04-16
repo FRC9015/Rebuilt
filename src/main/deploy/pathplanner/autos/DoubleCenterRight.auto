@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CenterRightRush"
+            "pathName": "CenterRushRight"
           }
         },
         {
-          "type": "race",
+          "type": "parallel",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "turret"
+                }
+              },
               {
                 "type": "named",
                 "data": {
@@ -21,9 +27,9 @@
                 }
               },
               {
-                "type": "wait",
+                "type": "named",
                 "data": {
-                  "waitTime": 4.0
+                  "name": "indexer"
                 }
               }
             ]
@@ -36,9 +42,28 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "shooter"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "turret"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "shooter"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "indexer"
+                }
+              }
+            ]
           }
         }
       ]

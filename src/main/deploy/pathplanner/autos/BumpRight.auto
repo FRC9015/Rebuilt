@@ -5,15 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "deploy"
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "DepotLeft"
+            "pathName": "BumpRightClean"
           }
         },
         {
@@ -30,6 +24,12 @@
                 "type": "named",
                 "data": {
                   "name": "shooter"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "indexer"
                 }
               }
             ]
