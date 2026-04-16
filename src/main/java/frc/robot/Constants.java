@@ -17,7 +17,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.util.FlippingUtil;
@@ -68,8 +67,7 @@ public final class Constants {
     public static final int INTAKE_PIVOT_LEFT_ID = 53;
     public static final int INTAKE_PIVOT_RIGHT_ID = 54;
     public static final int INTAKE_ENCODER_ID = 50;
-    public static final int INDEXER1_MOTOR_ID = 5;
-    public static final int INDEXER2_MOTOR_ID = 6;
+    public static final int INDEXER1_MOTOR_ID = 54;
   }
 
   public static class FieldConstants {
@@ -219,19 +217,21 @@ public final class Constants {
   }
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
+
+    public static final double PIVOT_POSITION_TOLERANCE = 0.01; // TODO: Tune this value
+
     public static final Slot0Configs ROLLER_SLOT0_CONFIGS =
         new Slot0Configs().withKP(2.75).withKI(0).withKD(0).withKS(0.1).withKV(0).withKA(0);
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(7)
+            .withKP(27.5)
             .withKI(0)
             .withKD(0.0)
-            .withKS(0.1)
-            .withKV(0.2)
+            .withKS(0)
+            .withKV(0)
             .withKA(0)
-            .withGravityType(GravityTypeValue.Arm_Cosine)
-            .withKG(0.01);
+            .withKG(0);
 
     public static final MotionMagicConfigs PIVOT_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
@@ -245,7 +245,10 @@ public final class Constants {
         new FeedbackConfigs()
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
             .withFeedbackRemoteSensorID(50)
-            .withRotorToSensorRatio(3 / 10);
+            .withRotorToSensorRatio(50.0 / 12.0);
+
+    public static final FeedbackConfigs PIVOT_FEEDBACK_CONFIGS_RELATIVE =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     private static final MotorOutputConfigs rollerOutputLeftConfigs =
         new MotorOutputConfigs()
@@ -266,7 +269,7 @@ public final class Constants {
 
     private static final MotorOutputConfigs pivotOutputLeftConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
 
     public static final MotorOutputConfigs pivotOutputRightConfigs =
@@ -317,15 +320,15 @@ public final class Constants {
                     .withSupplyCurrentLimit(60.0)
                     .withSupplyCurrentLimitEnable(true));
 
-    public static final double INTAKE_MAX_POS = 300.0;
-    public static final double INTAKE_MIN_POS = 0.0;
+    public static final double INTAKE_MAX_POS = 4.95;
+    public static final double INTAKE_MIN_POS = 0;
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double PIVOT_MAX_POS = 1.0;
-    public static final double PIVOT_MIN_POS = 0.0;
-    public static final double PIVOT_DEPLOYED_POSITION = 0.95;
-    public static final double PIVOT_STOWED_POSITION = 0.05;
+    public static final double PIVOT_MAX_POS = 6.5;
+    public static final double PIVOT_MIN_POS = 0.1;
+    public static final double PIVOT_DEPLOYED_POSITION = 1.7;
+    public static final double PIVOT_STOWED_POSITION = 0.3;
   }
 
   public static class SimConstants {
@@ -343,6 +346,7 @@ public final class Constants {
     public static final int FLY_WHEEL_RIGHT_ID = 57;
     public static final int HOOD_ID = 58;
     public static final int KICKER_ID = 59;
+    public static final int BALL_TUNNEL_ID = 7; // TODO FIX THIS FAHHHH
     public static final double FLYWHEEL_RPM_TOLERANCE = 10.0; // TODO: tune this value
     public static final double HOOD_RESTING_ANGLE = 10.0;
     public static final double HOOD_ENCODER_OFFSET = 0.076416015625;
@@ -365,6 +369,12 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
 
     public static final FeedbackConfigs kickerFeedbackConfigs =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final Slot0Configs ballTunnelSlotConfigs =
+        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+
+    public static final FeedbackConfigs ballTunnelFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     // TODO tune these values once final bot comes; reference this link:
@@ -492,7 +502,7 @@ public final class Constants {
     // TODO TUNE THESE PID VALUES
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(0.3)
+            .withKP(0.35)
             .withKI(0.0)
             .withKD(0.00)
             .withKG(0)

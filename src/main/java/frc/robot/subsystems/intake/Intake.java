@@ -36,7 +36,7 @@ public class Intake extends SubsystemBase {
   }
 
   public Command setPivotPosition(PivotIO.PivotPositions position) {
-    return this.run(() -> setPivotPosition(position.getPivotPosition()));
+    return this.startEnd(() -> setPivotPosition(position.getPivotPosition()), () -> stopPivot());
   }
 
   public Command runIntakeAtSpeed(double intakeSpeed, PivotIO.PivotPositions pivotPosition) {
@@ -60,6 +60,10 @@ public class Intake extends SubsystemBase {
     return this.run(() -> roller.stop());
   }
 
+  public void stopPivot() {
+    pivot.stop();
+  }
+
   public Command runIntakeSim() {
     return this.startEnd(() -> roller.setRollerSpeed(true), () -> roller.setRollerSpeed(false));
   }
@@ -77,7 +81,7 @@ public class Intake extends SubsystemBase {
     return rollerInputs.fuelInside;
   }
 
-  public Command ajitateIntakeCommand() {
+  public Command agitateIntakeCommand() {
     return new SequentialCommandGroup(
             this.run(
                     () -> {

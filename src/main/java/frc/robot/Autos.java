@@ -311,7 +311,7 @@ public class Autos {
                             () -> drive.getPose(),
                             () -> FieldConstants.HUB_POSE_BLUE,
                             drive),
-                        intake.ajitateIntakeCommand())
+                        intake.agitateIntakeCommand())
                     .withTimeout(4.0),
                 de.cmd(),
                 Commands.runOnce(() -> drive.stop()),
@@ -325,7 +325,7 @@ public class Autos {
                         () -> drive.getPose(),
                         () -> FieldConstants.HUB_POSE_BLUE,
                         drive),
-                    intake.ajitateIntakeCommand())));
+                    intake.agitateIntakeCommand())));
     return routine.cmd();
   }
 

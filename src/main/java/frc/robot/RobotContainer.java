@@ -31,6 +31,7 @@ import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.commands.TurretDriveAutoDrive;
 import frc.robot.generated.TunerConstants;
+import frc.robot.generated.TunerConstantsSim;
 import frc.robot.subsystems.ZoneLogic;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -127,24 +128,20 @@ public class RobotContainer {
                 new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
                 new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
-        indexer =
-            new Indexer(
-                new IndexerIOTalonFX(
-                    MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.INDEXER2_MOTOR_ID));
+        indexer = new Indexer(new IndexerIOTalonFX(MotorIDConstants.INDEXER1_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
                     MotorIDConstants.INTAKE_ROLLER_ID, MotorIDConstants.INTAKE_ROLLER_ID2),
                 new PivotIOTalonFX(
-                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID,
-                    MotorIDConstants.INTAKE_PIVOT_RIGHT_ID,
-                    MotorIDConstants.INTAKE_ENCODER_ID));
+                    MotorIDConstants.INTAKE_PIVOT_LEFT_ID, MotorIDConstants.INTAKE_ENCODER_ID));
         shooter =
             new Shooter(
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID,
+                    Constants.ShooterConstants.BALL_TUNNEL_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -180,16 +177,16 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.BACK, // flipped from FRONT
+                IntakeSimulation.IntakeSide.FRONT,
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
         drive =
             new Drive(
                 new GyroIOSim(simDrive.getGyroSimulation()),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontLeft, simDrive.getModules()[0]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.FrontRight, simDrive.getModules()[1]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackLeft, simDrive.getModules()[2]),
-                new ModuleIOTalonFXMapleSim(TunerConstants.BackRight, simDrive.getModules()[3]));
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.FrontLeft, simDrive.getModules()[0]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.FrontRight, simDrive.getModules()[1]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackLeft, simDrive.getModules()[2]),
+                new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackRight, simDrive.getModules()[3]));
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());
@@ -206,8 +203,9 @@ public class RobotContainer {
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
-
+        runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
+        overrideZone = new Trigger(() -> zones.getOverrideZone());
 
         break;
 
@@ -231,7 +229,8 @@ public class RobotContainer {
                 new ShooterIOTalonFX(
                     Constants.ShooterConstants.FLY_WHEEL_LEFT_ID,
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
-                    Constants.ShooterConstants.KICKER_ID));
+                    Constants.ShooterConstants.KICKER_ID,
+                    Constants.ShooterConstants.BALL_TUNNEL_ID));
         turret =
             new Turret(
                 new TurretIOTalonFX(
@@ -263,7 +262,7 @@ public class RobotContainer {
                 () -> drive.getPose(),
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive)
-            .alongWith(intake.ajitateIntakeCommand()));
+            .alongWith(intake.agitateIntakeCommand()));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.0));
 
@@ -332,8 +331,12 @@ public class RobotContainer {
             turret,
             () -> zones.getZoneTargetPose(),
             drive,
-            interpTables.timeOfFlightInterp,
-            zones));
+            interpTables.timeOfFlightInterp));
+
+    shooterIsAtSetpoint.whileTrue(
+        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(50)));
+
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
@@ -350,7 +353,12 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
+    driverController
+        .rightTrigger()
+        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
+    driverController
+        .leftTrigger()
+        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
 
     operatorController
         .rightTrigger()
@@ -369,11 +377,11 @@ public class RobotContainer {
                             () -> zones.getZoneTargetPose(),
                             drive)
                         .alongWith(zones.override())));
-    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
+    operatorController.rightBumper().whileTrue(indexer.runIndexer(40));
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(50)));
+
     turret.setDefaultCommand(
         new TurretDriveAutoDrive(
             () -> drive.getPose(),
@@ -381,7 +389,8 @@ public class RobotContainer {
             () -> FieldConstants.HUB_POSE_BLUE,
             drive,
             interpTables.timeOfFlightInterp));
-    operatorController.x().whileTrue(intake.ajitateIntakeCommand());
+
+    operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     operatorController
@@ -434,9 +443,7 @@ public class RobotContainer {
     driverController
         .rightBumper()
         .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController
-        .leftBumper()
-        .whileTrue(indexer.runIndexer(50).onlyIf(() -> DriverStation.isTest()));
+    driverController.leftBumper().whileTrue(intake.runRollerAtSpeed(-100));
     driverController
         .y()
         .whileTrue(
@@ -445,8 +452,19 @@ public class RobotContainer {
                     turret,
                     () -> FieldConstants.HUB_POSE_BLUE,
                     drive,
-                    interpTables.timeOfFlightInterp,
-                    zones)
+                    interpTables.timeOfFlightInterp)
+                .onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .x()
+        .onTrue(
+            intake
+                .setPivotPosition(PivotIO.PivotPositions.DEPLOYED)
+                .onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .b()
+        .onTrue(
+            intake
+                .setPivotPosition(PivotIO.PivotPositions.STOWED)
                 .onlyIf(() -> DriverStation.isTest()));
   }
 
