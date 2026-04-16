@@ -331,7 +331,8 @@ public class RobotContainer {
             turret,
             () -> zones.getZoneTargetPose(),
             drive,
-            interpTables.timeOfFlightInterp));
+            interpTables.timeOfFlightInterp,
+            zones));
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
@@ -452,7 +453,8 @@ public class RobotContainer {
                     turret,
                     () -> FieldConstants.HUB_POSE_BLUE,
                     drive,
-                    interpTables.timeOfFlightInterp)
+                    interpTables.timeOfFlightInterp,
+                    zones)
                 .onlyIf(() -> DriverStation.isTest()));
     driverController
         .x()
