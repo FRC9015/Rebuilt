@@ -5,34 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "deploy"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "DepotLeft"
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "turret"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "shooter"
-                }
-              }
-            ]
+            "name": "shootNoTimeout"
           }
         }
       ]

@@ -11,28 +11,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "turret"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "shooter"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "indexer"
-                }
-              }
-            ]
+            "name": "shooter"
           }
         },
         {
@@ -42,28 +23,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "turret"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "shooter"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "indexer"
-                }
-              }
-            ]
+            "name": "shooter"
           }
         }
       ]

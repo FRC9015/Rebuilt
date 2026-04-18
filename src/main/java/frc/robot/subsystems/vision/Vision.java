@@ -49,6 +49,7 @@ public class Vision extends SubsystemBase {
       disconnectedAlerts[i].set(!inputs[i].connected);
 
       List<Pose3d> acceptedRobotPoses = new ArrayList<>();
+      List<Pose3d> rejectedRobotPoses = new ArrayList<>();
 
       for (PoseObservation observation : inputs[i].poseObservations) {
         Pose3d lensPose = observation.pose(); // This is the Lens on the field
@@ -83,10 +84,14 @@ public class Vision extends SubsystemBase {
           acceptedRobotPoses.add(robotPose);
           consumer.accept(
               robotPose.toPose2d(), observation.timestamp(), calculateStdDevs(observation));
+        } else {
+          rejectedRobotPoses.add(robotPose);
         }
       }
       Logger.recordOutput(
           "Vision/Camera" + i + "/AcceptedPoses", acceptedRobotPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput(
+          "Vision/Camera" + i + "/RejectedPoses", rejectedRobotPoses.toArray(new Pose3d[0]));
     }
   }
 

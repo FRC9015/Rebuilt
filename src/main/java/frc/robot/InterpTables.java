@@ -111,23 +111,23 @@ public class InterpTables {
 
     hoodAnglePassInterp.put(4.51, 0.45);
 
-    shooterSpeedPassInterp.put(16.0, 70.0);
+    shooterSpeedPassInterp.put(16.0, 85.0);
 
     hoodAnglePassInterp.put(16.0, 1.25);
 
-    shooterSpeedPassInterp.put(15.0, 66.0);
+    shooterSpeedPassInterp.put(15.0, 80.0);
 
     hoodAnglePassInterp.put(15.0, 1.21);
 
-    shooterSpeedPassInterp.put(14.0, 63.0);
+    shooterSpeedPassInterp.put(14.0, 75.0);
 
     hoodAnglePassInterp.put(14.0, 1.16);
 
-    shooterSpeedPassInterp.put(13.0, 59.0);
+    shooterSpeedPassInterp.put(13.0, 70.0);
 
     hoodAnglePassInterp.put(13.0, 1.11);
 
-    shooterSpeedPassInterp.put(12.0, 56.0);
+    shooterSpeedPassInterp.put(12.0, 70.0);
 
     hoodAnglePassInterp.put(12.0, 1.06);
   }

@@ -15,6 +15,12 @@
           "data": {
             "pathName": "CenterLeftCleanDelay"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shooter"
+          }
         }
       ]
     }

@@ -103,9 +103,14 @@
   "eventMarkers": [
     {
       "name": "intake",
-      "waypointRelativePos": 0.8,
+      "waypointRelativePos": 0.44198895027624363,
       "endWaypointRelativePos": 3.511320754716982,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "intakeDeploy"
+        }
+      }
     }
   ],
   "globalConstraints": {

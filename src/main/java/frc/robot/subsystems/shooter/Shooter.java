@@ -69,6 +69,16 @@ public class Shooter extends SubsystemBase {
         });
   }
 
+  public Command runShooterSpeed(double speed) {
+    return this.startEnd(
+        () -> {
+          this.setShooterSpeed(speed);
+        },
+        () -> {
+          io.stopFlywheels();
+        });
+  }
+
   public Command runShooterAtReverseSpeed(double speed) {
     Logger.recordOutput("Shooter/Speed", speed);
     return this.startEnd(() -> this.setShooterReverseSpeed(speed), () -> io.stopFlywheels());

@@ -112,7 +112,7 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "intake"
+          "name": "intakeDeploy"
         }
       }
     },

@@ -5,15 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 4.0
+            "pathName": "DepotMiddleCenterP"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shooter"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CenterRightCleanDelay"
+            "pathName": "CenterLeftClean"
           }
         },
         {

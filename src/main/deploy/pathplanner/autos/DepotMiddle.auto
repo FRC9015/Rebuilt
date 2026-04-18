@@ -5,15 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 4.0
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "CenterRightCleanDelay"
+            "pathName": "DepotMiddle"
           }
         },
         {
@@ -25,7 +19,7 @@
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

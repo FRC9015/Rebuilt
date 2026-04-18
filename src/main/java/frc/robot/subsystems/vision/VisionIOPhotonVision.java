@@ -28,7 +28,6 @@ public class VisionIOPhotonVision implements VisionIO {
       Pose3d lensPose;
       int tagCount;
       double ambiguity;
-      double dist = 0;
 
       if (result.getMultiTagResult().isPresent()) {
         var mTag = result.getMultiTagResult().get();

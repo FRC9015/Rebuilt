@@ -67,7 +67,7 @@ public final class Constants {
     public static final int INTAKE_PIVOT_LEFT_ID = 53;
     public static final int INTAKE_PIVOT_RIGHT_ID = 54;
     public static final int INTAKE_ENCODER_ID = 50;
-    public static final int INDEXER1_MOTOR_ID = 5;
+    public static final int INDEXER1_MOTOR_ID = 54;
     public static final int INDEXER2_MOTOR_ID = 6;
   }
 
@@ -256,16 +256,16 @@ public final class Constants {
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(27.5)
+            .withKP(40)
             .withKI(0)
             .withKD(0.0)
-            .withKS(0)
+            .withKS(0.1)
             .withKV(0)
             .withKA(0)
             .withKG(0);
 
     public static final MotionMagicConfigs PIVOT_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
+        new MotionMagicConfigs().withMotionMagicAcceleration(250).withMotionMagicCruiseVelocity(50);
 
     public static final MotionMagicConfigs ROLLER_MAGIC_CONFIGS =
         new MotionMagicConfigs()
@@ -283,7 +283,7 @@ public final class Constants {
 
     private static final MotorOutputConfigs rollerOutputLeftConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
 
     public static final TalonFXConfiguration rollerConfigLeft =
@@ -310,7 +310,7 @@ public final class Constants {
 
     private static final MotorOutputConfigs rollerOutputRightConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
+            .withInverted(InvertedValue.CounterClockwise_Positive)
             .withNeutralMode(NeutralModeValue.Brake);
 
     public static final TalonFXConfiguration rollerConfigRight =
@@ -530,13 +530,13 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(70) // 45
+            .withKP(70) // 45   //70
             .withKI(0)
             .withKD(0.0) // 0.03
             .withKG(0)
             .withKA(0)
-            .withKS(0.2) // 0.13
-            .withKV(0.1);
+            .withKS(0.25) // 0.13  //0.2
+            .withKV(1.0); // 0.1
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)

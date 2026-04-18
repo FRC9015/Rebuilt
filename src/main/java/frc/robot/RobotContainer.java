@@ -265,11 +265,24 @@ public class RobotContainer {
     }
     // Set up auto routines
     NamedCommands.registerCommand(
-        "intakeDeploy", intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED));
-    NamedCommands.registerCommand("intake", intake.runRollerAtSpeed(100));
+        "intakeDeploy", intake.runIntakeAtSpeed(75, PivotPositions.DEPLOYED));
+    NamedCommands.registerCommand("intake", intake.runRollerAtSpeed(50));
     NamedCommands.registerCommand(
         "shooter",
-        new ShooterAutoAimSequence(
+        (new ShooterAutoAimSequence(
+                    shooter,
+                    hood,
+                    interpTables.shooterSpeedHubInterp,
+                    interpTables.hoodAngleHubInterp,
+                    interpTables.timeOfFlightInterp,
+                    () -> drive.getPose(),
+                    () -> FieldConstants.HUB_POSE_BLUE,
+                    drive)
+                .alongWith(intake.agitateIntakeCommand()))
+            .withTimeout(4));
+    NamedCommands.registerCommand(
+        "shootNoTimeout",
+        (new ShooterAutoAimSequence(
                 shooter,
                 hood,
                 interpTables.shooterSpeedHubInterp,
@@ -278,7 +291,7 @@ public class RobotContainer {
                 () -> drive.getPose(),
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive)
-            .alongWith(intake.agitateIntakeCommand()));
+            .alongWith(intake.agitateIntakeCommand())));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.0));
 
@@ -346,7 +359,7 @@ public class RobotContainer {
         Commands.run(
             () -> {
               if (zones.isInTrench()) {
-                hood.setHoodPos(0.0);
+                hood.setHoodPos(0.015);
               }
             }));
     runZoneLogic.whileTrue(
@@ -372,7 +385,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(30));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(75));
 
     operatorController
         .rightTrigger()
@@ -402,31 +415,16 @@ public class RobotContainer {
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     operatorController.a().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
-    // operatorController
-    //     .povLeft()
-    //     .onTrue(
-    //         turret.setTurretAngleFastestPathCommand(0).onlyIf(() ->
-    // runZoneLogic.equals((false))));
-    // operatorController
-    //     .povRight()
-    //     .onTrue(
-    //         turret.setTurretAngleFastestPathCommand(90).onlyIf(() ->
-    // runZoneLogic.equals((false))));
-    // operatorController
-    //     .povUp()
-    //     .onTrue(
-    //         turret
-    //             .setTurretAngleFastestPathCommand(180)
-    //             .onlyIf(() -> runZoneLogic.equals((false))));
-    // operatorController
-    //     .povDown()
-    //     .onTrue(
-    //         turret
-    //             .setTurretAngleFastestPathCommand(270)
-    //             .onlyIf(() -> runZoneLogic.equals((false))));
+    operatorController
+        .leftBumper()
+        .whileTrue(
+            Commands.startEnd(() -> hood.setHoodPos(0.8), () -> hood.setHoodPos(0))
+                .alongWith(shooter.runShooterSpeed(100)));
+
     operatorController.povDown().whileTrue(intake.setIntakeVolts(2));
     operatorController.povUp().whileTrue(intake.setIntakeVolts(-2));
 
+    // TEST MODE STUFF
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
@@ -444,7 +442,7 @@ public class RobotContainer {
         .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(indexer.runIndexer(100).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(shooter.runShooterSpeed(12).onlyIf(() -> DriverStation.isTest()));
     driverController
         .y()
         .whileTrue(
