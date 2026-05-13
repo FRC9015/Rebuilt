@@ -200,12 +200,12 @@ public final class Constants {
     public static final Transform3d STERN_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-11.340810),
-                Units.inchesToMeters(-12.821636),
-                Units.inchesToMeters(16.504328)),
+                Units.inchesToMeters(-11.25),
+                Units.inchesToMeters(-2.75),
+                Units.inchesToMeters(17.125)),
             new Rotation3d(
                 Units.degreesToRadians(0),
-                Units.degreesToRadians(10),
+                Units.degreesToRadians(15),
                 Units.degreesToRadians(180)));
     public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(

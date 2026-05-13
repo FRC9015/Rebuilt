@@ -1,0 +1,87 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.913736654804271,
+        "y": 7.426066666666667
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.2484359893145935,
+        "y": 7.485025073529718
+      },
+      "isLocked": false,
+      "linkedName": "CRLF"
+    },
+    {
+      "anchor": {
+        "x": 6.15043890865955,
+        "y": 3.9865836298932384
+      },
+      "prevControl": {
+        "x": 6.231664371540176,
+        "y": 4.223020564782498
+      },
+      "nextControl": {
+        "x": 6.0692134457789235,
+        "y": 3.750146695003979
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.913736654804271,
+        "y": 7.426066666666667
+      },
+      "prevControl": {
+        "x": 5.959134335979295,
+        "y": 7.110188450096626
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "CRLF"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.25,
+      "rotationDegrees": -90.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "intake",
+      "waypointRelativePos": 0.2,
+      "endWaypointRelativePos": 2.4751381215469554,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "intakeDeploy"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "NoTurret",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}

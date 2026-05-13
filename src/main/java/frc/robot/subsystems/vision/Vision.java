@@ -10,7 +10,6 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Vision extends SubsystemBase {
@@ -19,16 +18,10 @@ public class Vision extends SubsystemBase {
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
-  private final Supplier<Rotation2d> turretAngleSupplier;
   private final int turretCameraIndex;
 
-  public Vision(
-      VisionConsumer consumer,
-      Supplier<Rotation2d> turretAngleSupplier,
-      int turretCameraIndex,
-      VisionIO... io) {
+  public Vision(VisionConsumer consumer, int turretCameraIndex, VisionIO... io) {
     this.consumer = consumer;
-    this.turretAngleSupplier = turretAngleSupplier;
     this.turretCameraIndex = turretCameraIndex;
     this.io = io;
 
@@ -55,29 +48,30 @@ public class Vision extends SubsystemBase {
         Pose3d lensPose = observation.pose(); // This is the Lens on the field
         Pose3d robotPose;
 
-        if (i == turretCameraIndex) {
-          // --- THE FIX: DYNAMIC TRANSFORM COMPOSITION ---
-          Rotation2d turretAngle = turretAngleSupplier.get();
+        // if (i == turretCameraIndex) {
+        //   // --- THE FIX: DYNAMIC TRANSFORM COMPOSITION ---
+        //   Rotation2d turretAngle = turretAngleSupplier.get();
 
-          // 1. Create a transform that represents the turret's current rotation
-          Transform3d turretRotation =
-              new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngle.getRadians()));
+        //   // 1. Create a transform that represents the turret's current rotation
+        //   Transform3d turretRotation =
+        //       new Transform3d(new Translation3d(), new Rotation3d(0, 0,
+        // turretAngle.getRadians()));
 
-          // 2. Build the full chain from Robot Center -> Lens
-          // Chain: RobotCenter -> TurretPivot -> TurretRotation -> LensOffset
-          Transform3d robotToLensDynamic =
-              VisionConstants.ROBOT_TO_TURRET
-                  .plus(turretRotation)
-                  .plus(VisionConstants.TURRET_TO_CAMERA);
+        //   // 2. Build the full chain from Robot Center -> Lens
+        //   // Chain: RobotCenter -> TurretPivot -> TurretRotation -> LensOffset
+        //   Transform3d robotToLensDynamic =
+        //       VisionConstants.ROBOT_TO_TURRET
+        //           .plus(turretRotation)
+        //           .plus(VisionConstants.TURRET_TO_CAMERA);
 
-          // 3. RobotPose = LensPose * (RobotToLens)^-1
-          robotPose = lensPose.transformBy(robotToLensDynamic.inverse());
+        //   // 3. RobotPose = LensPose * (RobotToLens)^-1
+        //   robotPose = lensPose.transformBy(robotToLensDynamic.inverse());
 
-        } else {
-          // Static camera logic remains the same
-          // (Assuming the IO handled the static offset, or you handle it here)
-          robotPose = lensPose;
-        }
+        // } else {
+        // Static camera logic remains the same
+        // (Assuming the IO handled the static offset, or you handle it here)
+        robotPose = lensPose;
+        // }
 
         // Filtering
         if (isValid(robotPose, observation)) {
