@@ -93,6 +93,11 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final ZoneLogic zones;
 
+  // RobotContainer Constants
+  private double simShooterVelocityRPM = 6000;
+  private double simShooterHoodAngle = Units.degreesToRadians(45);
+  private double hoodTrenchAngle = 0.015;
+
   // private final AutoFactory autoFactory;
   // private final SpatialAutoBuilder spatialAutoBuilder;
   // private final Map<String, Command> eventMap;
@@ -209,7 +214,7 @@ public class RobotContainer {
                 new VisionIOPhotonVision("turret", new Transform3d()));
 
         simShooter =
-            new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
+            new ShootAtAngleSim(simIntake, simDrive, turret, simShooterVelocityRPM, simShooterHoodAngle);
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
         runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
@@ -358,7 +363,7 @@ public class RobotContainer {
         Commands.run(
             () -> {
               if (zones.isInTrench()) {
-                hood.setHoodPos(0.015);
+                hood.setHoodPos(hoodTrenchAngle);
               }
             }));
     runZoneLogic.whileTrue(
