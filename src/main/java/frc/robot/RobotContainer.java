@@ -134,10 +134,7 @@ public class RobotContainer {
                 new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
                 new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("turret", new Transform3d()));
-        indexer =
-            new Indexer(
-                new IndexerIOTalonFX(
-                    MotorIDConstants.INDEXER1_MOTOR_ID));
+        indexer = new Indexer(new IndexerIOTalonFX(MotorIDConstants.INDEXER1_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
@@ -472,6 +469,8 @@ public class RobotContainer {
             intake
                 .setPivotPosition(PivotIO.PivotPositions.STOWED)
                 .onlyIf(() -> DriverStation.isTest()));
+                
+    driverController.a().whileTrue(indexer.runIndexer(-100));
   }
 
   /**

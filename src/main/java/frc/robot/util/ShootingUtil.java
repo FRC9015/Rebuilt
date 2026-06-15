@@ -65,6 +65,7 @@ public class ShootingUtil {
       Translation2d realTarget,
       ChassisSpeeds robotRelativeSpeeds,
       InterpolatingTreeMap<Double, Double> tofLUT) {
-    return calculateVirtualTargetLocal(robotPose, realTarget, robotRelativeSpeeds, tofLUT, 0.02, 1.5);
+    return calculateVirtualTargetLocal(
+        robotPose, realTarget, robotRelativeSpeeds, tofLUT, 0.02, 1.5);
   }
 }
