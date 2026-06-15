@@ -478,14 +478,18 @@ public class RobotContainer {
         .whileTrue(indexer.runIndexer(-100).onlyIf(() -> DriverStation.isTest()));
 
     operatorController
-        .leftTrigger()
+        .povUp()
         .whileTrue(intake.runRollerAtSpeed(100).onlyIf(() -> DriverStation.isTest()));
 
     operatorController
-        .start()
+        .povDown()
+        .whileTrue(intake.runRollerAtSpeed(-100).onlyIf(() -> DriverStation.isTest()));
+
+    operatorController
+        .rightTrigger()
         .whileTrue(shooter.runShooterSpeed(20).onlyIf(() -> DriverStation.isTest()));
     operatorController
-        .back()
+        .leftTrigger()
         .whileTrue(shooter.runShooterSpeed(-20).onlyIf(() -> DriverStation.isTest()));
 
   
