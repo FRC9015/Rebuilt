@@ -451,7 +451,7 @@ public class RobotContainer {
         .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(shooter.runShooterSpeed(12).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(shooter.setKickerSpeedCommand(-100).onlyIf(() -> DriverStation.isTest()));
     driverController
         .y()
         .whileTrue(
@@ -474,8 +474,30 @@ public class RobotContainer {
             intake
                 .setPivotPosition(PivotIO.PivotPositions.STOWED)
                 .onlyIf(() -> DriverStation.isTest()));
-                
-    driverController.a().whileTrue(indexer.runIndexer(-100));
+
+    operatorController
+        .povLeft()
+        .whileTrue(indexer.runIndexer(100).onlyIf(() -> DriverStation.isTest()));
+    operatorController
+        .povRight()
+        .whileTrue(indexer.runIndexer(-100).onlyIf(() -> DriverStation.isTest()));
+
+    operatorController
+        .povUp()
+        .whileTrue(intake.runRollerAtSpeed(100).onlyIf(() -> DriverStation.isTest()));
+
+    operatorController
+        .povDown()
+        .whileTrue(intake.runRollerAtSpeed(-100).onlyIf(() -> DriverStation.isTest()));
+
+    operatorController
+        .rightTrigger()
+        .whileTrue(shooter.runShooterSpeed(20).onlyIf(() -> DriverStation.isTest()));
+    operatorController
+        .leftTrigger()
+        .whileTrue(shooter.runShooterSpeed(-20).onlyIf(() -> DriverStation.isTest()));
+
+  
   }
 
   /**
