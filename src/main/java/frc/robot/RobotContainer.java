@@ -446,7 +446,7 @@ public class RobotContainer {
         .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(shooter.runShooterSpeed(12).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(shooter.runShooterSpeed(23).onlyIf(() -> DriverStation.isTest()));
     driverController
         .y()
         .whileTrue(
@@ -469,7 +469,28 @@ public class RobotContainer {
             intake
                 .setPivotPosition(PivotIO.PivotPositions.STOWED)
                 .onlyIf(() -> DriverStation.isTest()));
-                
+
+    operatorController
+        .povLeft()
+        .whileTrue(indexer.runIndexer(100).onlyIf(() -> DriverStation.isTest()));
+    operatorController
+        .povRight()
+        .whileTrue(indexer.runIndexer(-100).onlyIf(() -> DriverStation.isTest()));
+
+    // Intake forward (operator) and reverse (driver left trigger already maps to reverse)
+    operatorController
+        .leftTrigger()
+        .whileTrue(intake.runRollerAtSpeed(100).onlyIf(() -> DriverStation.isTest()));
+
+    // Shooter manual forward/reverse for test mode
+    operatorController
+        .start()
+        .whileTrue(shooter.runShooterSpeed(100).onlyIf(() -> DriverStation.isTest()));
+    operatorController
+        .back()
+        .whileTrue(shooter.runShooterSpeed(-100).onlyIf(() -> DriverStation.isTest()));
+
+    // Keep driver a-button mapping as an alternate control (reverse indexer)
     driverController.a().whileTrue(indexer.runIndexer(-100));
   }
 
