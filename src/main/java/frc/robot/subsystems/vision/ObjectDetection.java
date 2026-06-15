@@ -1,79 +1,68 @@
 package frc.robot.subsystems.vision;
 
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.Logger;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
-public class ObjectDetection extends SubsystemBase {
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.Interpolator;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
+import edu.wpi.first.math.geometry.Rotation2d;
 
-  private final PhotonCamera camera = new PhotonCamera("Wsp");
-
-  private Translation2d lastTranslation = new Translation2d();
-
-  private double smoothedDistanceCm = 0.0;
-  private boolean hasMeasurement = false;
-
-  /*
-   * Alr, explanation time.
-   * So like basically, you have the pitch and then you have the distance.
-   * If you have a pitch axis and distance axis.
-   * You can basically do a regression to find a formula that maps pitch to distance nicely.
-   * So like that's how all these random-ass numbers came from.
-   * I'M BATMAN.
-   */
-
-  private double getDistanceFromPitch(double pitch) {
-    double x = pitch;
-    return -0.93193701 * Math.pow(x, 3)
-        + 2.15170038 * Math.pow(x, 2)
-        - 7.41876578 * x
-        + 57.61577731;
-  }
-
-  @Override
-  public void periodic() {
-    var results = camera.getAllUnreadResults();
-
-    if (results.isEmpty()) {
-      Logger.recordOutput("Vision/Status", "No result");
+public class ObjectDetection {
+    private final InterpolatingTreeMap<Double, Double> distanceInterp =
+      new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), Interpolator.forDouble());
+    
+    public Translation2d getObjectTranslation(double pitch, Rotation2d yaw) {
+        return PhotonUtils.estimateCameraToTargetTranslation(distanceInterp.get(pitch), yaw);
     }
 
-    PhotonPipelineResult result = results.get(results.size() - 1);
+    private final PhotonCamera camera = new PhotonCamera("ObjectCamera");
 
-    if (!result.hasTargets()) {
-      Logger.recordOutput("Vision/Status", "No targets");
+    public List<Translation2d> getObjectTranslations() {
+        List<PhotonPipelineResult> targets = camera.getAllUnreadResults();
+
+        // basically, if there are targets, get the translation for each target and return it as a list
+        return targets.stream()
+            .filter(result -> result.hasTargets())
+            .flatMap(result -> result.getTargets().stream())
+            .map(target -> {
+                return getObjectTranslation(target.getPitch(), Rotation2d.fromDegrees(target.getYaw()));
+            })
+            .toList();
     }
 
-    PhotonTrackedTarget target = result.getBestTarget();
-
-    double pitch = target.getPitch();
-    double rawDistanceCm = getDistanceFromPitch(pitch);
-
-    if (!hasMeasurement) {
-      smoothedDistanceCm = rawDistanceCm; // initialize
-      hasMeasurement = true;
-    } else {
-      double alpha = 0.3; // smoothing factor (0 = heavy smoothing, 1 = no smoothing)
-      smoothedDistanceCm = (1 - alpha) * smoothedDistanceCm + alpha * rawDistanceCm;
+    public List<Double> getObjectDistances(List<Translation2d> translations) {
+        List<Double> distances = translations.stream()
+            .map(translation -> translation.getNorm())
+            .toList();
+        return distances;
     }
 
-    double yawRad = Math.toRadians(target.getYaw());
+    public List<List<Translation2d>> clusterPoints(List<Translation2d> points, double maxDistance) {
+        List<List<Translation2d>> clusters = new ArrayList<>();
 
-    lastTranslation =
-        new Translation2d(
-            smoothedDistanceCm * Math.cos(yawRad), smoothedDistanceCm * Math.sin(yawRad));
-
-    Logger.recordOutput("Vision/DistanceCmRaw", rawDistanceCm);
-    Logger.recordOutput("Vision/DistanceCmSmoothed", smoothedDistanceCm);
-    Logger.recordOutput("Vision/YawDeg", target.getYaw());
-    Logger.recordOutput("Vision/PitchDeg", pitch);
-    Logger.recordOutput("Vision/Translation", lastTranslation);
-  }
-
-  public Translation2d getLastTranslation() {
-    return lastTranslation;
-  }
+        for (Translation2d point : points) {
+            boolean added = false;
+            for (List<Translation2d> cluster : clusters) {
+                // Check distance to the first point or average of the cluster
+                if (point.getDistance(cluster.get(0)) < maxDistance) {
+                    cluster.add(point);
+                    added = true;
+                    break;
+                }
+            }
+            
+            if (!added) {
+                List<Translation2d> newCluster = new ArrayList<>();
+                newCluster.add(point);
+                clusters.add(newCluster);
+            }
+        }
+        return clusters;
+    }
 }
