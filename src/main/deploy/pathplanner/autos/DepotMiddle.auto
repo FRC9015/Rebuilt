@@ -7,19 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CenterRushRight"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shooter"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CenterRightClean"
+            "pathName": "DepotMiddle"
           }
         },
         {
@@ -31,7 +19,7 @@
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

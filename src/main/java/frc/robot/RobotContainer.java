@@ -2,16 +2,16 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
-import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+// import com.qelib.SpatialAutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -29,7 +29,6 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
-import frc.robot.commands.TurretDriveAutoDrive;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstantsSim;
 import frc.robot.subsystems.ZoneLogic;
@@ -65,7 +64,6 @@ import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOSim;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -95,7 +93,9 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final ZoneLogic zones;
 
-  private final AutoFactory autoFactory;
+  // private final AutoFactory autoFactory;
+  // private final SpatialAutoBuilder spatialAutoBuilder;
+  // private final Map<String, Command> eventMap;
   // Controller
   private final CommandXboxController operatorController = new CommandXboxController(1);
   private final CommandXboxController driverController = new CommandXboxController(0);
@@ -122,13 +122,22 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        turret =
+            new Turret(
+                new TurretIOTalonFX(
+                    MotorIDConstants.TURRET_MOTOR_ID, TurretConstants.TURRET_HALL_EFFECT_CHANNEL));
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("Port", VisionConstants.PORT_CAMERA_POSE),
-                new VisionIOPhotonVision("Starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("Stern", VisionConstants.STERN_CAMERA_POSE));
-        indexer = new Indexer(new IndexerIOTalonFX(MotorIDConstants.INDEXER1_MOTOR_ID));
+                () -> new Rotation2d(turret.getTurretPositionRadians()),
+                2,
+                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
+                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
+                new VisionIOPhotonVision("turret", new Transform3d()));
+        indexer =
+            new Indexer(
+                new IndexerIOTalonFX(
+                    MotorIDConstants.INDEXER1_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
@@ -142,12 +151,6 @@ public class RobotContainer {
                     Constants.ShooterConstants.FLY_WHEEL_RIGHT_ID,
                     Constants.ShooterConstants.KICKER_ID,
                     Constants.ShooterConstants.BALL_TUNNEL_ID));
-        turret =
-            new Turret(
-                new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    TurretConstants.ENCODER_13_TOOTH,
-                    TurretConstants.ENCODER_15_TOOTH));
         hood =
             new Hood(
                 new HoodIOTalonFX(
@@ -191,14 +194,23 @@ public class RobotContainer {
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());
         shooter = new Shooter(new ShooterIOSim());
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOSim(
+        //             "Camera",
+        //             VisionConstants.PORT_CAMERA_POSE,
+        //             simDrive::getSimulatedDriveTrainPose));
+        turret = new Turret(new TurretIOSim());
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOSim(
-                    "Camera",
-                    VisionConstants.PORT_CAMERA_POSE,
-                    simDrive::getSimulatedDriveTrainPose));
-        turret = new Turret(new TurretIOSim());
+                () -> new Rotation2d(turret.getTurretPositionRadians()),
+                2,
+                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
+                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
+                new VisionIOPhotonVision("turret", new Transform3d()));
+
         simShooter =
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
         interpTables = new InterpTables();
@@ -218,10 +230,10 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision("placeholder", VisionConstants.PORT_CAMERA_POSE));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVision("placeholder", VisionConstants.PORT_CAMERA_POSE));
         intake = new Intake(new RollerIO() {}, new PivotIO() {});
         indexer = new Indexer(new IndexerIO() {});
         shooter =
@@ -234,9 +246,15 @@ public class RobotContainer {
         turret =
             new Turret(
                 new TurretIOTalonFX(
-                    MotorIDConstants.TURRET_MOTOR_ID,
-                    TurretConstants.ENCODER_13_TOOTH,
-                    TurretConstants.ENCODER_15_TOOTH));
+                    MotorIDConstants.TURRET_MOTOR_ID, TurretConstants.TURRET_HALL_EFFECT_CHANNEL));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                () -> new Rotation2d(turret.getTurretPositionRadians()),
+                2,
+                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
+                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
+                new VisionIOPhotonVision("turret", new Transform3d()));
         hood = new Hood(new HoodIO() {});
         interpTables = new InterpTables();
 
@@ -249,11 +267,24 @@ public class RobotContainer {
     }
     // Set up auto routines
     NamedCommands.registerCommand(
-        "intakeDeploy", intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED));
-    NamedCommands.registerCommand("intake", intake.runRollerAtSpeed(100));
+        "intakeDeploy", intake.runIntakeAtSpeed(75, PivotPositions.DEPLOYED));
+    NamedCommands.registerCommand("intake", intake.runRollerAtSpeed(50));
     NamedCommands.registerCommand(
         "shooter",
-        new ShooterAutoAimSequence(
+        (new ShooterAutoAimSequence(
+                    shooter,
+                    hood,
+                    interpTables.shooterSpeedHubInterp,
+                    interpTables.hoodAngleHubInterp,
+                    interpTables.timeOfFlightInterp,
+                    () -> drive.getPose(),
+                    () -> FieldConstants.HUB_POSE_BLUE,
+                    drive)
+                .alongWith(intake.agitateIntakeCommand()))
+            .withTimeout(4));
+    NamedCommands.registerCommand(
+        "shootNoTimeout",
+        (new ShooterAutoAimSequence(
                 shooter,
                 hood,
                 interpTables.shooterSpeedHubInterp,
@@ -262,7 +293,7 @@ public class RobotContainer {
                 () -> drive.getPose(),
                 () -> FieldConstants.HUB_POSE_BLUE,
                 drive)
-            .alongWith(intake.agitateIntakeCommand()));
+            .alongWith(intake.agitateIntakeCommand())));
     NamedCommands.registerCommand(
         "deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(1.0));
 
@@ -287,10 +318,18 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
-    autoFactory =
-        new AutoFactory(
-            () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true, drive);
+    // autoFactory =
+    //     new AutoFactory(
+    //         () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true,
+    // drive);
+    // CommandScheduler.getInstance().schedule(autoFactory.warmupCmd());
 
+    // spatialAutoBuilder = new SpatialAutoBuilder();
+    // eventMap = new HashMap<String, Command>();
+    // eventMap.put("intake", intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED));
+    // spatialAutoBuilder.configure(
+    //     () -> drive.getPose(), (speeds) -> drive.runVelocity(speeds), eventMap, 5, 5, 5);
+    // autoChooser.addOption("spatialTEst", spatialAutoBuilder.buildPath("TEST"));
     // Autos autoRoutines =
     //     new Autos(
     //         autoFactory,
@@ -322,7 +361,7 @@ public class RobotContainer {
         Commands.run(
             () -> {
               if (zones.isInTrench()) {
-                hood.setHoodPos(0.0);
+                hood.setHoodPos(0.015);
               }
             }));
     runZoneLogic.whileTrue(
@@ -353,81 +392,46 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController
-        .rightTrigger()
-        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
-    driverController
-        .leftTrigger()
-        .whileTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(75));
 
     operatorController
         .rightTrigger()
         .whileTrue(
-            Commands.startEnd(
-                    () -> driverController.setRumble(RumbleType.kBothRumble, 1),
-                    () -> driverController.setRumble(RumbleType.kBothRumble, 0))
-                .alongWith(
-                    new ShooterAutoAimSequence(
-                            shooter,
-                            hood,
-                            interpTables.shooterSpeedHubInterp,
-                            interpTables.hoodAngleHubInterp,
-                            interpTables.timeOfFlightInterp,
-                            () -> drive.getPose(),
-                            () -> zones.getZoneTargetPose(),
-                            drive)
-                        .alongWith(zones.override())));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(40));
-    shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
+            // Commands.startEnd(
+            //         () -> driverController.setRumble(RumbleType.kBothRumble, 1),
+            //         () -> driverController.setRumble(RumbleType.kBothRumble, 0))
+            //     .alongWith(
+            new ShooterAutoAimSequence(
+                    shooter,
+                    hood,
+                    interpTables.shooterSpeedHubInterp,
+                    interpTables.hoodAngleHubInterp,
+                    interpTables.timeOfFlightInterp,
+                    () -> drive.getPose(),
+                    () -> zones.getZoneTargetPose(),
+                    drive)
+                .alongWith(zones.override()));
+    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
+    operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
 
-    turret.setDefaultCommand(
-        new TurretDriveAutoDrive(
-            () -> drive.getPose(),
-            turret,
-            () -> FieldConstants.HUB_POSE_BLUE,
-            drive,
-            interpTables.timeOfFlightInterp));
+    shooterIsAtSetpoint.whileTrue(
+        Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(50)));
 
     operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    operatorController.a().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
     operatorController
-        .a()
+        .leftBumper()
         .whileTrue(
-            DriveCommands.joystickDriveFacingPose(
-                drive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> FieldConstants.HUB_POSE_BLUE,
-                turret));
+            Commands.startEnd(() -> hood.setHoodPos(0.8), () -> hood.setHoodPos(0))
+                .alongWith(shooter.runShooterSpeed(100)));
 
-    // operatorController
-    //     .povLeft()
-    //     .onTrue(
-    //         turret.setTurretAngleFastestPathCommand(0).onlyIf(() ->
-    // runZoneLogic.equals((false))));
-    // operatorController
-    //     .povRight()
-    //     .onTrue(
-    //         turret.setTurretAngleFastestPathCommand(90).onlyIf(() ->
-    // runZoneLogic.equals((false))));
-    // operatorController
-    //     .povUp()
-    //     .onTrue(
-    //         turret
-    //             .setTurretAngleFastestPathCommand(180)
-    //             .onlyIf(() -> runZoneLogic.equals((false))));
-    // operatorController
-    //     .povDown()
-    //     .onTrue(
-    //         turret
-    //             .setTurretAngleFastestPathCommand(270)
-    //             .onlyIf(() -> runZoneLogic.equals((false))));
     operatorController.povDown().whileTrue(intake.setIntakeVolts(2));
     operatorController.povUp().whileTrue(intake.setIntakeVolts(-2));
 
+    // TEST MODE STUFF
     driverController
         .povUp()
         .onTrue(hood.incrementhoodCommand(1).onlyIf(() -> DriverStation.isTest()));
@@ -442,8 +446,10 @@ public class RobotContainer {
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(1).onlyIf(() -> DriverStation.isTest()));
-    driverController.leftBumper().whileTrue(intake.runRollerAtSpeed(-100));
+        .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
+    driverController
+        .leftBumper()
+        .whileTrue(shooter.runShooterSpeed(12).onlyIf(() -> DriverStation.isTest()));
     driverController
         .y()
         .whileTrue(

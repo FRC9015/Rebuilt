@@ -3,7 +3,6 @@ package frc.robot.subsystems.turret;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-/** TurretIO file which has all the values that are loged and the default functions */
 public interface TurretIO {
 
   @AutoLog
@@ -15,11 +14,8 @@ public interface TurretIO {
     public double turretSetpoint = 0.0;
     public double turretError = 0.0;
 
-    public double encoder13PositionRot = 0.0;
-    public boolean encoder13Connected = false;
-
-    public double encoder15PositionRot = 0.0;
-    public boolean encoder15Connected = false;
+    public boolean hallEffectTriggered = false; // NEW: True when magnet is detected
+    public boolean isZeroed = false; // NEW: Tracks if seeded
 
     public double turretResolvedPosition = 0.0;
     public double turretResolvedPositionDegrees = 0.0;

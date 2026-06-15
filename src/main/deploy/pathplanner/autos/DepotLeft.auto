@@ -5,27 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "deploy"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "DepotLeft"
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "shooter"
+            "name": "shootNoTimeout"
           }
         }
       ]

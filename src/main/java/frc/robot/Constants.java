@@ -68,6 +68,7 @@ public final class Constants {
     public static final int INTAKE_PIVOT_RIGHT_ID = 54;
     public static final int INTAKE_ENCODER_ID = 50;
     public static final int INDEXER1_MOTOR_ID = 54;
+    public static final int INDEXER2_MOTOR_ID = 6;
   }
 
   public static class FieldConstants {
@@ -184,22 +185,24 @@ public final class Constants {
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     public static final double FIELD_LENGTH = aprilTagLayout.getFieldLength();
     public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
+
+    // OUTDATED
     public static final Transform3d STARBOARD_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(5.156),
-                Units.inchesToMeters(-15.339),
-                Units.inchesToMeters(10.243)),
+                Units.inchesToMeters(-9.118792),
+                Units.inchesToMeters(-15.014516),
+                Units.inchesToMeters(16.519045)),
             new Rotation3d(
-                Units.degreesToRadians(-2),
+                Units.degreesToRadians(0),
                 Units.degreesToRadians(10),
                 Units.degreesToRadians(270)));
     public static final Transform3d STERN_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-11.5838),
-                Units.inchesToMeters(2.669),
-                Units.inchesToMeters(9.159)),
+                Units.inchesToMeters(-11.340810),
+                Units.inchesToMeters(-12.821636),
+                Units.inchesToMeters(16.504328)),
             new Rotation3d(
                 Units.degreesToRadians(0),
                 Units.degreesToRadians(10),
@@ -207,13 +210,41 @@ public final class Constants {
     public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(5.156),
-                Units.inchesToMeters(15.339),
-                Units.inchesToMeters(10.243)),
+                Units.inchesToMeters(1.035322),
+                Units.inchesToMeters(15.409983),
+                Units.inchesToMeters(11.573789)),
             new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(90)));
+    // --- TURRET CAMERA MEASUREMENTS ---
+    // 1. Where is the center of the turret rotation relative to the center of the robot?
+    public static final Transform3d ROBOT_TO_TURRET =
+        new Transform3d(
+            new Translation3d(
+                TurretConstants.TURRET_X_OFFSET,
+                TurretConstants.TURRET_Y_OFFSET,
+                Units.inchesToMeters(
+                    10.25) // TODO: Measure how high the turret base is off the floor!
+                ),
+            new Rotation3d());
 
+    // 2. Where is the camera lens relative to the center of the turret? (When facing straight
+    // forward)
+    public static final Transform3d TURRET_TO_CAMERA =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(4.28), // TODO: How far forward from turret center?
+                Units.inchesToMeters(6.72), // TODO: How far left/right from turret center?
+                Units.inchesToMeters(5.476) // TODO: How high above turret center?
+                ),
+            new Rotation3d(
+                0,
+                Units.degreesToRadians(10),
+                0) // TODO: Measure the upwards tilt (Pitch) of the camera
+            );
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(5, 5, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+
+    // public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(0.4, 0.4, 0.7);
+    // public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.1, 0.1, 0.3);
   }
   /** Configuration and tuning constants for the intake mechanism. */
   public static class IntakeConstants {
@@ -225,16 +256,16 @@ public final class Constants {
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(27.5)
+            .withKP(40)
             .withKI(0)
             .withKD(0.0)
-            .withKS(0)
+            .withKS(0.1)
             .withKV(0)
             .withKA(0)
             .withKG(0);
 
     public static final MotionMagicConfigs PIVOT_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
+        new MotionMagicConfigs().withMotionMagicAcceleration(250).withMotionMagicCruiseVelocity(50);
 
     public static final MotionMagicConfigs ROLLER_MAGIC_CONFIGS =
         new MotionMagicConfigs()
@@ -252,7 +283,7 @@ public final class Constants {
 
     private static final MotorOutputConfigs rollerOutputLeftConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withInverted(InvertedValue.Clockwise_Positive)
             .withNeutralMode(NeutralModeValue.Coast);
 
     public static final TalonFXConfiguration rollerConfigLeft =
@@ -279,7 +310,7 @@ public final class Constants {
 
     private static final MotorOutputConfigs rollerOutputRightConfigs =
         new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
+            .withInverted(InvertedValue.CounterClockwise_Positive)
             .withNeutralMode(NeutralModeValue.Brake);
 
     public static final TalonFXConfiguration rollerConfigRight =
@@ -363,16 +394,36 @@ public final class Constants {
             .withKV(0.13);
     // TODO: Tune kicker PID values
     public static final Slot0Configs kickerSlotVelocityConfigs =
-        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+        new Slot0Configs()
+            .withKP(0.17)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0.65);
 
     public static final MotionMagicConfigs flyWheelMagicConfligs =
+        new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
+
+    public static final MotionMagicConfigs kickerMagicConfligs =
+        new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
+
+    public static final MotionMagicConfigs ballTunnelMagicConfligs =
         new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
 
     public static final FeedbackConfigs kickerFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     public static final Slot0Configs ballTunnelSlotConfigs =
-        new Slot0Configs().withKP(0).withKI(0).withKD(0).withKG(0).withKA(0).withKS(0).withKV(0);
+        new Slot0Configs()
+            .withKP(0.25)
+            .withKI(0)
+            .withKD(0)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0)
+            .withKV(0.6);
 
     public static final FeedbackConfigs ballTunnelFeedbackConfigs =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
@@ -463,14 +514,14 @@ public final class Constants {
     public static final int E2_SEARCH_LIMIT = (int) E1_TEETH;
 
     // --- MOVEMENT LIMITS ---
-    public static final double MAXROTATION = 0.6;
-    public static final double MINROTATION = -0.6;
+    public static final double MAXROTATION = 0.685;
+    public static final double MINROTATION = -0.2;
 
-    public static final double ENCODER13_MAGNET_OFFSET = 0.0556640625;
-    public static final double ENCODER15_MAGNET_OFFSET = 0.37646484375;
+    public static final double TURRET_X_OFFSET = Units.inchesToMeters(-2.75);
+    public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.25);
 
-    public static final double TURRET_X_OFFSET = Units.inchesToMeters(-3.186);
-    public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.95);
+    public static final int TURRET_HALL_EFFECT_CHANNEL = 0;
+    public static final double TURRET_ANGLE_OFFSET = 0.244;
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
@@ -479,13 +530,13 @@ public final class Constants {
         new MotionMagicConfigs().withMotionMagicAcceleration(150).withMotionMagicCruiseVelocity(50);
     public static final Slot0Configs SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(70) // 45
+            .withKP(70) // 45   //70
             .withKI(0)
             .withKD(0.0) // 0.03
             .withKG(0)
             .withKA(0)
-            .withKS(0.2) // 0.13
-            .withKV(0.1);
+            .withKS(0.25) // 0.13  //0.2
+            .withKV(1.0); // 0.1
     public static final FeedbackConfigs FEEDBACK_CONFIGS =
         new FeedbackConfigs()
             .withSensorToMechanismRatio(ENCODER_TO_TURRET_GEAR_RATIO)
@@ -508,6 +559,6 @@ public final class Constants {
             .withKG(0)
             .withKA(0)
             .withKS(0.08)
-            .withKV(0.13);
+            .withKV(1.3);
   }
 }

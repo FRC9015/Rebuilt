@@ -5,21 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "CenterRushRight"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shooter"
+            "waitTime": 4.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CenterRightClean"
+            "pathName": "CenterRightCleanDelay"
           }
         },
         {

@@ -54,7 +54,7 @@ public class HoodAutoAim extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    hood.setHoodPos(0.0);
+    hood.setHoodPos(0.015);
   }
 }
 

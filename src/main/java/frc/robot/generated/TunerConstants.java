@@ -61,7 +61,7 @@ public class TunerConstants {
       new TalonFXConfiguration()
           .withCurrentLimits(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(Amps.of(80))
+                  .withStatorCurrentLimit(Amps.of(60))
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(80)
                   .withSupplyCurrentLimitEnable(true));
@@ -72,7 +72,7 @@ public class TunerConstants {
                   // Swerve azimuth does not require much torque output, so we can set a relatively
                   // low
                   // stator current limit to help avoid brownouts without impacting performance.
-                  .withStatorCurrentLimit(Amps.of(60))
+                  .withStatorCurrentLimit(Amps.of(40))
                   .withStatorCurrentLimitEnable(true)
                   .withSupplyCurrentLimit(60)
                   .withSupplyCurrentLimitEnable(true));
@@ -286,9 +286,9 @@ public class TunerConstants {
      * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set
      *     to 0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
      * @param odometryStandardDeviation The standard deviation for odometry calculation in the form
-     *     [x, y, theta]áµ€, with units in meters and radians
+     *     [x, y, theta], with units in meters and radians
      * @param visionStandardDeviation The standard deviation for vision calculation in the form [x,
-     *     y, theta]áµ€, with units in meters and radians
+     *     y, theta], with units in meters and radians
      * @param modules Constants for each specific module
      */
     public TunerSwerveDrivetrain(

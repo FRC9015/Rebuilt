@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CenterRushRight"
+            "pathName": "DepotMiddleCenterP"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CenterRightClean"
+            "pathName": "CenterLeftClean"
           }
         },
         {
