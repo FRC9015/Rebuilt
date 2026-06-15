@@ -137,7 +137,7 @@ public class RobotContainer {
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
-                    MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.INDEXER2_MOTOR_ID));
+                    MotorIDConstants.INDEXER1_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
