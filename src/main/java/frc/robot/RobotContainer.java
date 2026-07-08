@@ -137,7 +137,7 @@ public class RobotContainer {
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
-                    MotorIDConstants.INDEXER1_MOTOR_ID));
+                    MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.TUNNEL_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
@@ -364,13 +364,13 @@ public class RobotContainer {
                 hood.setHoodPos(0.015);
               }
             }));
-    runZoneLogic.whileTrue(
-        new TurretAngleAim(
-            () -> drive.getPose(),
-            turret,
-            () -> zones.getZoneTargetPose(),
-            drive,
-            interpTables.timeOfFlightInterp));
+    // runZoneLogic.whileTrue(
+    //     new TurretAngleAim(
+    //         () -> drive.getPose(),
+    //         turret,
+    //         () -> zones.getZoneTargetPose(),
+    //         drive,
+    //         interpTables.timeOfFlightInterp));
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())

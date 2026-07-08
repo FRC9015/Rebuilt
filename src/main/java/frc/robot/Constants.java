@@ -62,13 +62,13 @@ public final class Constants {
     public static final int TURRET_MOTOR_ID = 60;
 
     // If another roller is added back to the Intake, set it to ID 51.
-    public static final int INTAKE_ROLLER_ID2 = 51;
+    public static final int INTAKE_ROLLER_ID2 = 55;
     public static final int INTAKE_ROLLER_ID = 52;
     public static final int INTAKE_PIVOT_LEFT_ID = 53;
     public static final int INTAKE_PIVOT_RIGHT_ID = 54;
     public static final int INTAKE_ENCODER_ID = 50;
-    public static final int INDEXER1_MOTOR_ID = 54;
-    public static final int INDEXER2_MOTOR_ID = 6;
+    public static final int INDEXER1_MOTOR_ID = 51;
+    public static final int TUNNEL_MOTOR_ID = 7;
   }
 
   public static class FieldConstants {
@@ -514,14 +514,14 @@ public final class Constants {
     public static final int E2_SEARCH_LIMIT = (int) E1_TEETH;
 
     // --- MOVEMENT LIMITS ---
-    public static final double MAXROTATION = 0.685;
-    public static final double MINROTATION = -0.2;
+    public static final double MAXROTATION = 0.5;
+    public static final double MINROTATION = -0.65;
 
     public static final double TURRET_X_OFFSET = Units.inchesToMeters(-2.75);
     public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.25);
 
     public static final int TURRET_HALL_EFFECT_CHANNEL = 0;
-    public static final double TURRET_ANGLE_OFFSET = 0.244;
+    public static final double TURRET_ANGLE_OFFSET = 0.235;
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
@@ -544,14 +544,31 @@ public final class Constants {
   }
 
   public static class IndexerConstants {
-    public static final FeedbackConfigs FEEDBACK_CONFIGS =
+    public static final FeedbackConfigs INDEXER_FEEDBACK_CONFIGS =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
-    public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
+    public static final MotionMagicConfigs INDEXER_MOTION_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(25);
 
     // TODO TUNE THESE PID VALUES
-    public static final Slot0Configs SLOT0_CONFIGS =
+    public static final Slot0Configs INDEXER_SLOT0_CONFIGS =
+        new Slot0Configs()
+            .withKP(0.2)
+            .withKI(0.0)
+            .withKD(0.00)
+            .withKG(0)
+            .withKA(0)
+            .withKS(0.08)
+            .withKV(1.3);
+
+    public static final FeedbackConfigs TUNNEL_FEEDBACK_CONFIGS =
+        new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
+
+    public static final MotionMagicConfigs TUNNEL_MOTION_MAGIC_CONFIGS =
+        new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(25);
+
+    // TODO TUNE THESE PID VALUES
+    public static final Slot0Configs TUNNEL_SLOT0_CONFIGS =
         new Slot0Configs()
             .withKP(0.35)
             .withKI(0.0)

@@ -27,9 +27,9 @@ import frc.robot.Constants.IndexerConstants;
 /** IO implementation for the Indexer subsystem using a TalonFX motor controller. */
 public class IndexerIOTalonFX implements IndexerIO {
 
-  private final TalonFX motor1;
-  private final StatusSignal<Voltage> appliedVoltsSignalMotor1;
-  private final StatusSignal<Current> currentSignalMotor1;
+  private final TalonFX hotDogMotor, ballTunnelMotor;
+  private final StatusSignal<Voltage> appliedVoltsSignalMotor1, appliedVoltsSignalMotor2;
+  private final StatusSignal<Current> currentSignalMotor1, currentSignalMotor2;
 
   private final double defaultCurrentLimit = 40.0;
   private final double maxVoltage = 12.0;
@@ -39,15 +39,32 @@ public class IndexerIOTalonFX implements IndexerIO {
   private MotionMagicVelocityVoltage indexerVelocity =
       new MotionMagicVelocityVoltage(0.5).withSlot(0);
 
-  public IndexerIOTalonFX(int motorId1) { // , int canRangeID1, int canRangeID2, int canRangeID3
-    motor1 = new TalonFX(motorId1);
+  private MotionMagicVelocityVoltage tunnelVelocity =
+      new MotionMagicVelocityVoltage(0.5).withSlot(0);
+
+  public IndexerIOTalonFX(
+      int motorId1, int motorid2) { // , int canRangeID1, int canRangeID2, int canRangeID3
+    hotDogMotor = new TalonFX(motorId1);
+    ballTunnelMotor = new TalonFX(motorid2);
 
     // Configure motor
     TalonFXConfiguration motorConfig =
         new TalonFXConfiguration()
-            .withSlot0(IndexerConstants.SLOT0_CONFIGS)
-            .withFeedback(IndexerConstants.FEEDBACK_CONFIGS)
-            .withMotionMagic(IndexerConstants.MOTION_MAGIC_CONFIGS);
+            .withSlot0(IndexerConstants.INDEXER_SLOT0_CONFIGS)
+            .withFeedback(IndexerConstants.INDEXER_FEEDBACK_CONFIGS)
+            .withMotionMagic(IndexerConstants.INDEXER_MOTION_MAGIC_CONFIGS);
+    motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    motorConfig.CurrentLimits.StatorCurrentLimit = defaultCurrentLimit;
+    motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+    motorConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    TalonFXConfiguration ballTunnelConfig =
+        new TalonFXConfiguration()
+            .withSlot0(IndexerConstants.TUNNEL_SLOT0_CONFIGS)
+            .withFeedback(IndexerConstants.TUNNEL_FEEDBACK_CONFIGS)
+            .withMotionMagic(IndexerConstants.TUNNEL_MOTION_MAGIC_CONFIGS);
     motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     motorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     motorConfig.CurrentLimits.StatorCurrentLimit = defaultCurrentLimit;
@@ -56,11 +73,15 @@ public class IndexerIOTalonFX implements IndexerIO {
     motorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     // Configure the integrated encoder (default settings should work)
-    motor1.getConfigurator().apply(motorConfig);
+    hotDogMotor.getConfigurator().apply(motorConfig);
+    ballTunnelMotor.getConfigurator().apply(ballTunnelConfig);
 
     // Use the built-in relative encoder of the TalonFX
-    appliedVoltsSignalMotor1 = motor1.getMotorVoltage();
-    currentSignalMotor1 = motor1.getStatorCurrent();
+    appliedVoltsSignalMotor1 = hotDogMotor.getMotorVoltage();
+    currentSignalMotor1 = hotDogMotor.getStatorCurrent();
+
+    appliedVoltsSignalMotor2 = ballTunnelMotor.getMotorVoltage();
+    currentSignalMotor2 = ballTunnelMotor.getStatorCurrent();
   }
 
   @Override
@@ -70,23 +91,28 @@ public class IndexerIOTalonFX implements IndexerIO {
     // Update inputs
     inputs.indexerAppliedVoltsMotor1 = appliedVoltsSignalMotor1.getValueAsDouble();
     inputs.indexerCurrentAmpsMotor1 = currentSignalMotor1.getValueAsDouble();
-    inputs.indexerVelocityMotor1 = motor1.getVelocity().getValueAsDouble();
+    inputs.indexerVelocityMotor1 = hotDogMotor.getVelocity().getValueAsDouble();
+    inputs.tunnelAppliedVoltsMotor2 = appliedVoltsSignalMotor2.getValueAsDouble();
+    inputs.tunnelCurrentAmpsMotor2 = currentSignalMotor2.getValueAsDouble();
+    inputs.tunnelVelocityMotor2 = ballTunnelMotor.getVelocity().getValueAsDouble();
     inputs.indexerSetpoint = indexerSetpoint;
   }
 
   @Override
   public void stop() {
-    motor1.stopMotor();
+    hotDogMotor.stopMotor();
+    ballTunnelMotor.stopMotor();
   }
 
   @Override
   public void setBrakeMode(boolean enable) {
-    motor1.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
+    hotDogMotor.setNeutralMode(enable ? NeutralModeValue.Brake : NeutralModeValue.Coast);
   }
 
   @Override
   public void setIndexerSpeed(double speed) {
     indexerSetpoint = speed;
-    motor1.setControl(indexerVelocity.withVelocity(speed));
+    hotDogMotor.setControl(indexerVelocity.withVelocity(speed));
+    ballTunnelMotor.setControl(tunnelVelocity.withVelocity(60));
   }
 }

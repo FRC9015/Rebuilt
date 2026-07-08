@@ -25,9 +25,9 @@ public interface IndexerIO {
     public double indexerVelocityMotor1 = 0.0;
     public double indexerAppliedVoltsMotor1 = 0.0;
     public double indexerCurrentAmpsMotor1 = 0.0;
-    public double indexerVelocityMotor2 = 0.0;
-    public double indexerAppliedVoltsMotor2 = 0.0;
-    public double indexerCurrentAmpsMotor2 = 0.0;
+    public double tunnelVelocityMotor2 = 0.0;
+    public double tunnelAppliedVoltsMotor2 = 0.0;
+    public double tunnelCurrentAmpsMotor2 = 0.0;
     public double indexerSetpoint = 0.0;
   }
 
