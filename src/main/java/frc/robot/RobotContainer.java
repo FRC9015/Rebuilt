@@ -130,9 +130,11 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
+                drive::getRawRotation,
                 () -> new Rotation2d(turret.getTurretPositionRadians()),
                 -1,
-                new VisionIOUmbra("stern"));
+                new VisionIOUmbra("starboard"),
+                new VisionIOUmbra("port"));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -204,6 +206,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
+                drive::getRotation,
                 () -> new Rotation2d(turret.getTurretPositionRadians()),
                 2,
                 new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
@@ -249,6 +252,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
+                drive::getRotation,
                 () -> new Rotation2d(turret.getTurretPositionRadians()),
                 2,
                 new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
@@ -363,13 +367,13 @@ public class RobotContainer {
                 hood.setHoodPos(0.015);
               }
             }));
-    // runZoneLogic.whileTrue(
-    //     new TurretAngleAim(
-    //         () -> drive.getPose(),
-    //         turret,
-    //         () -> zones.getZoneTargetPose(),
-    //         drive,
-    //         interpTables.timeOfFlightInterp));
+    runZoneLogic.whileTrue(
+        new TurretAngleAim(
+            () -> drive.getPose(),
+            turret,
+            () -> zones.getZoneTargetPose(),
+            drive,
+            interpTables.timeOfFlightInterp));
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())

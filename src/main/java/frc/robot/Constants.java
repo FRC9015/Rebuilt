@@ -521,7 +521,7 @@ public final class Constants {
     public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.25);
 
     public static final int TURRET_HALL_EFFECT_CHANNEL = 0;
-    public static final double TURRET_ANGLE_OFFSET = 0.235;
+    public static final double TURRET_ANGLE_OFFSET = 0.23;
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;

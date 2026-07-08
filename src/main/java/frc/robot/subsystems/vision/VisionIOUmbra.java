@@ -8,37 +8,30 @@ import java.util.List;
 
 public class VisionIOUmbra implements VisionIO {
   private final DoubleArraySubscriber observationSub;
+  private final String cameraName;
 
-  /**
-   * Constructor for the custom Umbra Vision coprocessor connection.
-   *
-   * @param cameraName The name assigned in config.json on the Pi (e.g. "starboard", "turret")
-   */
   public VisionIOUmbra(String cameraName) {
-    // NT4 Target: Umbra/[cameraName]/observations
+    this.cameraName = cameraName;
     var table = NetworkTableInstance.getDefault().getTable("Umbra").getSubTable(cameraName);
     this.observationSub = table.getDoubleArrayTopic("observations").subscribe(new double[] {});
   }
 
   @Override
+  public String getName() {
+    return this.cameraName;
+  }
+
+  @Override
   public void updateInputs(VisionIOInputs inputs) {
     double[] data = observationSub.get();
-
-    // Verify array structure has the target 9 elements
     inputs.connected = (data.length >= 9);
 
-    // If packet size is incomplete or no tags are visible, empty the observations
     if (data.length < 9 || data[7] == 0) {
       inputs.poseObservations = new PoseObservation[0];
       return;
     }
 
     double timestamp = data[0];
-
-    // Calculated on the Pi side:
-    //   - Represents Robot Pose if using static offsets inside C++ config.json
-    //   - Represents Lens Pose if using empty offsets (0,0,0) inside C++ config.json for the turret
-    // camera
     Pose3d incomingPose =
         new Pose3d(data[1], data[2], data[3], new Rotation3d(data[4], data[5], data[6]));
 
@@ -50,7 +43,7 @@ public class VisionIOUmbra implements VisionIO {
           new PoseObservation(
               timestamp,
               incomingPose,
-              0.0, // Ambiguity is pre-filtered on the Pi using solvePnPGeneric
+              0.0, // Pre-filtered on Pi
               tagCount,
               averageTagDistance,
               List.of())

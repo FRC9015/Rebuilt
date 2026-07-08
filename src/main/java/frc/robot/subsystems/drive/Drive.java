@@ -149,13 +149,14 @@ public class Drive extends SubsystemBase {
     }
   }
 
+  // Odometry trust is tightened to standard baseline values to integrate cleanly with Gyro-locking
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(
           kinematics,
           rawGyroRotation,
           lastModulePositions,
           new Pose2d(),
-          VecBuilder.fill(0.9, 0.9, 0.9),
+          VecBuilder.fill(0.1, 0.1, 0.1),
           VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(15)));
   private SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint prevSetpoint;
@@ -194,9 +195,6 @@ public class Drive extends SubsystemBase {
         this::setPose,
         this::getChassisSpeeds,
         this::runVelocity,
-        //  new PPHolonomicDriveController(new PIDConstants(5, 0.0, 0), new PIDConstants(5.0,
-        // 0)),
-        //     new PIDConstants(4.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.02)),
         new PPHolonomicDriveController(
             new PIDConstants(2, 0.0, 0.12), new PIDConstants(5.0, 0.0, 0.02)),
         PP_CONFIG,
@@ -449,6 +447,12 @@ public class Drive extends SubsystemBase {
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
+  }
+
+  // --- THE FIX: Returns the raw Pigeon2 rotation, untouched by vision measurements ---
+  @AutoLogOutput(key = "Odometry/RawGyroRotation")
+  public Rotation2d getRawRotation() {
+    return rawGyroRotation;
   }
 
   @AutoLogOutput
