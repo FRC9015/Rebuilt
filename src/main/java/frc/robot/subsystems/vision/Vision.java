@@ -22,6 +22,14 @@ public class Vision extends SubsystemBase {
   private final Supplier<Rotation2d> turretAngleSupplier;
   private final int turretCameraIndex;
 
+  /**
+   * Main Vision Subsystem Constructor.
+   *
+   * @param consumer Usually SwerveDrivePoseEstimator::addVisionMeasurement
+   * @param turretAngleSupplier Supplier returning the live angle of your turret
+   * @param turretCameraIndex The index in the array representing the turret camera (use -1 if none)
+   * @param io One or more VisionIO implementations (e.g. VisionIOUmbra or VisionIOPhotonVision)
+   */
   public Vision(
       VisionConsumer consumer,
       Supplier<Rotation2d> turretAngleSupplier,
@@ -48,38 +56,45 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Vision/Camera" + i, inputs[i]);
       disconnectedAlerts[i].set(!inputs[i].connected);
 
+      List<Pose3d> tagPoses = new ArrayList<>();
       List<Pose3d> acceptedRobotPoses = new ArrayList<>();
       List<Pose3d> rejectedRobotPoses = new ArrayList<>();
 
+      // Collect physical field poses of tags currently being observed
+      for (int tagId : inputs[i].tagIds) {
+        VisionConstants.aprilTagLayout.getTagPose(tagId).ifPresent(tagPoses::add);
+      }
+
       for (PoseObservation observation : inputs[i].poseObservations) {
-        Pose3d lensPose = observation.pose(); // This is the Lens on the field
+        Pose3d rawPose = observation.pose();
         Pose3d robotPose;
 
         if (i == turretCameraIndex) {
-          // --- THE FIX: DYNAMIC TRANSFORM COMPOSITION ---
+          // --- DYNAMIC TURRET MATH ---
+          // Since the static offset is zeroed out, rawPose represents the camera Lens
           Rotation2d turretAngle = turretAngleSupplier.get();
 
-          // 1. Create a transform that represents the turret's current rotation
           Transform3d turretRotation =
               new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngle.getRadians()));
 
-          // 2. Build the full chain from Robot Center -> Lens
-          // Chain: RobotCenter -> TurretPivot -> TurretRotation -> LensOffset
+          // Build the complete spatial translation: RobotCenter -> TurretPivot -> Rotate ->
+          // LensOffset
           Transform3d robotToLensDynamic =
               VisionConstants.ROBOT_TO_TURRET
                   .plus(turretRotation)
                   .plus(VisionConstants.TURRET_TO_CAMERA);
 
-          // 3. RobotPose = LensPose * (RobotToLens)^-1
-          robotPose = lensPose.transformBy(robotToLensDynamic.inverse());
+          // Apply the inverse matrix to convert Lens back to Robot Center
+          robotPose = rawPose.transformBy(robotToLensDynamic.inverse());
 
         } else {
-          // Static camera logic remains the same
-          // (Assuming the IO handled the static offset, or you handle it here)
-          robotPose = lensPose;
+          // --- STATIC CAMERA MATH ---
+          // The static offset is handled inside the IO class (constructor) or C++ config.json,
+          // meaning the observation pose is already converted to the Robot Center.
+          robotPose = rawPose;
         }
 
-        // Filtering
+        // Filtering & Safety Rejections
         if (isValid(robotPose, observation)) {
           acceptedRobotPoses.add(robotPose);
           consumer.accept(
@@ -88,6 +103,9 @@ public class Vision extends SubsystemBase {
           rejectedRobotPoses.add(robotPose);
         }
       }
+
+      // Visual debugging arrays for AdvantageScope
+      Logger.recordOutput("Vision/Camera" + i + "/TagPoses", tagPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(
           "Vision/Camera" + i + "/AcceptedPoses", acceptedRobotPoses.toArray(new Pose3d[0]));
       Logger.recordOutput(

@@ -64,6 +64,7 @@ import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOUmbra;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -130,10 +131,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 () -> new Rotation2d(turret.getTurretPositionRadians()),
-                2,
-                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
-                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("turret", new Transform3d()));
+                -1,
+                new VisionIOUmbra("stern"));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
