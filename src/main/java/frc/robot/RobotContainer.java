@@ -64,7 +64,6 @@ import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOUmbra;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -104,6 +103,7 @@ public class RobotContainer {
   private Trigger shooterIsAtSetpoint;
   private Trigger overrideZone;
   private Trigger runZoneLogic;
+  private Trigger ballTunnelStall;
 
   // Dashboard inputs
 
@@ -130,11 +130,8 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                drive::getRawRotation,
-                () -> new Rotation2d(turret.getTurretPositionRadians()),
-                -1,
-                new VisionIOUmbra("starboard"),
-                new VisionIOUmbra("port"));
+                new VisionIOPhotonVision("port", VisionConstants.PORT_CAMERA_POSE),
+                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -162,6 +159,7 @@ public class RobotContainer {
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
         overrideZone = new Trigger(() -> zones.getOverrideZone());
+        ballTunnelStall = new Trigger(() -> indexer.getTunnelStalled());
         break;
 
       case SIM:
@@ -206,9 +204,6 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                drive::getRotation,
-                () -> new Rotation2d(turret.getTurretPositionRadians()),
-                2,
                 new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
                 new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("turret", new Transform3d()));
@@ -252,9 +247,6 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                drive::getRotation,
-                () -> new Rotation2d(turret.getTurretPositionRadians()),
-                2,
                 new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
                 new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("turret", new Transform3d()));
@@ -377,7 +369,8 @@ public class RobotContainer {
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
+            .alongWith(indexer.runIndexer(100, 100))
+            .onlyIf(() -> !DriverStation.isTestEnabled()));
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -395,15 +388,11 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(75));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
 
     operatorController
         .rightTrigger()
         .whileTrue(
-            // Commands.startEnd(
-            //         () -> driverController.setRumble(RumbleType.kBothRumble, 1),
-            //         () -> driverController.setRumble(RumbleType.kBothRumble, 0))
-            //     .alongWith(
             new ShooterAutoAimSequence(
                     shooter,
                     hood,
@@ -413,15 +402,29 @@ public class RobotContainer {
                     () -> drive.getPose(),
                     () -> zones.getZoneTargetPose(),
                     drive)
-                .alongWith(zones.override()));
+                .alongWith(zones.override())
+                .alongWith(
+                    DriveCommands.joystickDrive(
+                        drive,
+                        () -> -driverController.getLeftY(),
+                        () -> -driverController.getLeftX(),
+                        () -> -driverController.getRightX(),
+                        0.1)));
     driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
+    driverController.y().whileTrue(intake.agitateIntakeCommand());
 
-    shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
+    operatorController
+        .rightBumper()
+        .whileTrue(
+            Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+                .alongWith(indexer.runIndexer(100, 100)));
 
-    operatorController.x().whileTrue(intake.agitateIntakeCommand());
+    // shooterIsAtSetpoint.whileTrue(
+    //     Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
+    //         .alongWith(indexer.runIndexer(100, 60))
+    //         .onlyIf(() -> DriverStation.isTestEnabled()));
+
+    operatorController.leftTrigger().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     operatorController.a().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
@@ -449,19 +452,9 @@ public class RobotContainer {
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
-    driverController
-        .leftBumper()
-        .whileTrue(shooter.runShooterSpeed(12).onlyIf(() -> DriverStation.isTest()));
-    driverController
-        .y()
         .whileTrue(
-            new TurretAngleAim(
-                    () -> drive.getPose(),
-                    turret,
-                    () -> FieldConstants.HUB_POSE_BLUE,
-                    drive,
-                    interpTables.timeOfFlightInterp)
+            Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+                .alongWith(indexer.runIndexer(100, 100))
                 .onlyIf(() -> DriverStation.isTest()));
     driverController
         .x()
@@ -470,7 +463,7 @@ public class RobotContainer {
                 .setPivotPosition(PivotIO.PivotPositions.DEPLOYED)
                 .onlyIf(() -> DriverStation.isTest()));
     driverController
-        .b()
+        .a()
         .onTrue(
             intake
                 .setPivotPosition(PivotIO.PivotPositions.STOWED)

@@ -96,12 +96,21 @@ public class IndexerIOTalonFX implements IndexerIO {
     inputs.tunnelCurrentAmpsMotor2 = currentSignalMotor2.getValueAsDouble();
     inputs.tunnelVelocityMotor2 = ballTunnelMotor.getVelocity().getValueAsDouble();
     inputs.indexerSetpoint = indexerSetpoint;
+    inputs.tunnelStall =
+        ballTunnelMotor.getMotorStallCurrent().getValueAsDouble()
+                <= currentSignalMotor2.getValueAsDouble()
+            || (inputs.indexerSetpoint != 0 && inputs.tunnelVelocityMotor2 < 3.0);
+    inputs.indexerStall =
+        hotDogMotor.getMotorStallCurrent().getValueAsDouble()
+                <= currentSignalMotor1.getValueAsDouble()
+            || (inputs.indexerSetpoint != 0 && inputs.indexerVelocityMotor1 < 3.0);
   }
 
   @Override
   public void stop() {
     hotDogMotor.stopMotor();
     ballTunnelMotor.stopMotor();
+    indexerSetpoint = 0;
   }
 
   @Override
@@ -110,9 +119,18 @@ public class IndexerIOTalonFX implements IndexerIO {
   }
 
   @Override
-  public void setIndexerSpeed(double speed) {
+  public void setIndexerSpeed(double speed, double tunnel) {
     indexerSetpoint = speed;
     hotDogMotor.setControl(indexerVelocity.withVelocity(speed));
-    ballTunnelMotor.setControl(tunnelVelocity.withVelocity(60));
+    ballTunnelMotor.setControl(tunnelVelocity.withVelocity(tunnel));
+  }
+
+  public void setIndexerVoltage(double voltage) {
+    indexerSetpoint = voltage;
+    hotDogMotor.setVoltage(voltage);
+  }
+
+  public void setBallTunnelSpeed(double speed) {
+    ballTunnelMotor.setControl(tunnelVelocity.withVelocity(speed));
   }
 }
