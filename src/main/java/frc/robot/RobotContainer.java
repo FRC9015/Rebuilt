@@ -97,6 +97,13 @@ public class RobotContainer {
   private double simShooterVelocityRPM = 6000;
   private double simShooterHoodAngle = Units.degreesToRadians(45);
   private double hoodTrenchAngle = 0.015;
+  private double intakeSpeed = 75;
+  private int maxForwardSpeed = 100;
+  private int maxReverseSpeed = -100;
+  private double zoneDt = 0.04;
+  private int indexerSpeed = 50;
+  private int indexerReverseSpeed = -40;
+  private int intakeSpeedAuto = 50;
 
   // private final AutoFactory autoFactory;
   // private final SpatialAutoBuilder spatialAutoBuilder;
@@ -269,8 +276,8 @@ public class RobotContainer {
     }
     // Set up auto routines
     NamedCommands.registerCommand(
-        "intakeDeploy", intake.runIntakeAtSpeed(75, PivotPositions.DEPLOYED));
-    NamedCommands.registerCommand("intake", intake.runRollerAtSpeed(50));
+        "intakeDeploy", intake.runIntakeAtSpeed(intakeSpeed, PivotPositions.DEPLOYED));
+    NamedCommands.registerCommand("intake", intake.runRollerAtSpeed(intakeSpeedAuto));
     NamedCommands.registerCommand(
         "shooter",
         (new ShooterAutoAimSequence(
@@ -376,7 +383,7 @@ public class RobotContainer {
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
+            .alongWith(indexer.runIndexer(indexerSpeed)));
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -394,7 +401,7 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(75));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(intakeSpeed));
 
     operatorController
         .rightTrigger()
@@ -413,13 +420,12 @@ public class RobotContainer {
                     () -> zones.getZoneTargetPose(),
                     drive)
                 .alongWith(zones.override()));
-    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
+    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(maxReverseSpeed));
+    operatorController.rightBumper().whileTrue(indexer.runIndexer(-indexerReverseSpeed));
 
     shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
-
+        Commands.startEnd(() -> shooter.setKickerSpeed(maxForwardSpeed), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(indexerSpeed)));
     operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
@@ -428,7 +434,7 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(
             Commands.startEnd(() -> hood.setHoodPos(0.8), () -> hood.setHoodPos(0))
-                .alongWith(shooter.runShooterSpeed(100)));
+                .alongWith(shooter.runShooterSpeed(maxForwardSpeed)));
 
     operatorController.povDown().whileTrue(intake.setIntakeVolts(2));
     operatorController.povUp().whileTrue(intake.setIntakeVolts(-2));
@@ -448,10 +454,10 @@ public class RobotContainer {
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(shooter.setKickerSpeedCommand(maxForwardSpeed).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(-100).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(shooter.setKickerSpeedCommand(maxReverseSpeed).onlyIf(() -> DriverStation.isTest()));
     driverController
         .y()
         .whileTrue(
@@ -477,18 +483,17 @@ public class RobotContainer {
 
     operatorController
         .povLeft()
-        .whileTrue(indexer.runIndexer(100).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(indexer.runIndexer(maxForwardSpeed).onlyIf(() -> DriverStation.isTest()));
     operatorController
         .povRight()
-        .whileTrue(indexer.runIndexer(-100).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(indexer.runIndexer(maxReverseSpeed).onlyIf(() -> DriverStation.isTest()));
 
     operatorController
         .povUp()
-        .whileTrue(intake.runRollerAtSpeed(100).onlyIf(() -> DriverStation.isTest()));
-
+        .whileTrue(intake.runRollerAtSpeed(maxForwardSpeed).onlyIf(() -> DriverStation.isTest()));
     operatorController
         .povDown()
-        .whileTrue(intake.runRollerAtSpeed(-100).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(intake.runRollerAtSpeed(maxReverseSpeed).onlyIf(() -> DriverStation.isTest()));
 
     operatorController
         .rightTrigger()
@@ -519,6 +524,6 @@ public class RobotContainer {
   public void setupZonesLogic() {
     zones.toggleRunMainZoneLogic();
     zones.toggleRunMainZoneLogic();
-    zones.override().withTimeout(0.04);
+    zones.override().withTimeout(zoneDt);
   }
 }
