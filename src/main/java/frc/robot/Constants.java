@@ -333,9 +333,9 @@ public final class Constants {
             .withMotorOutput(pivotOutputLeftConfigs)
             .withCurrentLimits(
                 new CurrentLimitsConfigs()
-                    .withStatorCurrentLimit(60.0)
+                    .withStatorCurrentLimit(40.0)
                     .withStatorCurrentLimitEnable(true)
-                    .withSupplyCurrentLimit(60.0)
+                    .withSupplyCurrentLimit(40.0)
                     .withSupplyCurrentLimitEnable(true));
 
     public static final TalonFXConfiguration pivotConfigRight =

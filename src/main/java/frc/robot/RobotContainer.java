@@ -412,6 +412,8 @@ public class RobotContainer {
                         0.1)));
     driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
     driverController.y().whileTrue(intake.agitateIntakeCommand());
+    driverController.leftBumper().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.rightBumper().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
 
     operatorController
         .rightBumper()
