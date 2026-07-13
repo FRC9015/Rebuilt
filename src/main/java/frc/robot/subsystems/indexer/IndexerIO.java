@@ -25,10 +25,12 @@ public interface IndexerIO {
     public double indexerVelocityMotor1 = 0.0;
     public double indexerAppliedVoltsMotor1 = 0.0;
     public double indexerCurrentAmpsMotor1 = 0.0;
-    public double indexerVelocityMotor2 = 0.0;
-    public double indexerAppliedVoltsMotor2 = 0.0;
-    public double indexerCurrentAmpsMotor2 = 0.0;
+    public double tunnelVelocityMotor2 = 0.0;
+    public double tunnelAppliedVoltsMotor2 = 0.0;
+    public double tunnelCurrentAmpsMotor2 = 0.0;
     public double indexerSetpoint = 0.0;
+    public boolean tunnelStall = false;
+    public boolean indexerStall = false;
   }
 
   /** Updates the set of loggable inputs. */
@@ -45,5 +47,9 @@ public interface IndexerIO {
    *
    * @param voltage The desired voltage.
    */
-  default void setIndexerSpeed(double voltage) {}
+  default void setIndexerSpeed(double voltage, double tunnel) {}
+
+  default void setIndexerVoltage(double voltage) {}
+
+  default void setBallTunnelSpeed(double speed) {}
 }

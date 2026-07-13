@@ -216,7 +216,7 @@ public class Autos {
                         () -> drive.getPose(),
                         () -> FieldConstants.HUB_POSE_BLUE,
                         drive)
-                    .alongWith(indexer.runIndexer(6.0))));
+                    .alongWith(indexer.runIndexer(60, 60))));
     return routine.cmd();
   }
 
@@ -382,7 +382,7 @@ public class Autos {
             () -> drive.getPose(),
             () -> FieldConstants.HUB_POSE_BLUE,
             drive));
-    autoFactory.bind("ShootBall", indexer.runIndexer(6.0));
+    autoFactory.bind("ShootBall", indexer.runIndexer(60, 60));
     autoFactory.bind("deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
   }
 }

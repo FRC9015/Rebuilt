@@ -20,7 +20,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   public final TalonFX flywheelMotorLeft;
   public final TalonFX flywheelMotorRight;
   public final TalonFX kickerMotor;
-  public final TalonFX ballTunnelMotor;
 
   public StatusSignal<Voltage> motorVolts, kickerVolts, ballTunnelVolts;
   public StatusSignal<Current> motorAmps, kickerAmps, ballTunnelAmps;
@@ -32,8 +31,6 @@ public class ShooterIOTalonFX implements ShooterIO {
       new MotionMagicVelocityVoltage(0.0);
   private MotionMagicVelocityVoltage kickerMagicVelocityVoltage =
       new MotionMagicVelocityVoltage(0.0);
-  private MotionMagicVelocityVoltage ballTunnelMagicVelocityVoltage =
-      new MotionMagicVelocityVoltage(0.0);
 
   private double lastFlywheelSetpointSpeed = 0.0;
 
@@ -41,7 +38,6 @@ public class ShooterIOTalonFX implements ShooterIO {
     flywheelMotorLeft = new TalonFX(flywheelID1);
     flywheelMotorRight = new TalonFX(flywheelID2);
     kickerMotor = new TalonFX(kickerID);
-    ballTunnelMotor = new TalonFX(ballTunnelID);
 
     // Configure motor
     TalonFXConfiguration flyWheelConfigLeft =
@@ -72,10 +68,6 @@ public class ShooterIOTalonFX implements ShooterIO {
         new TalonFXConfiguration()
             .withSlot0(Constants.ShooterConstants.kickerSlotVelocityConfigs)
             .withMotionMagic(Constants.ShooterConstants.kickerMagicConfligs);
-    TalonFXConfiguration ballTunnelConfig =
-        new TalonFXConfiguration()
-            .withSlot0(Constants.ShooterConstants.ballTunnelSlotConfigs)
-            .withMotionMagic(Constants.ShooterConstants.ballTunnelMagicConfligs);
 
     kickerConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     kickerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -84,16 +76,9 @@ public class ShooterIOTalonFX implements ShooterIO {
     kickerConfig.CurrentLimits.SupplyCurrentLimit = 30;
     kickerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    ballTunnelConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    ballTunnelConfig.CurrentLimits.StatorCurrentLimit = 40;
-    ballTunnelConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-    ballTunnelConfig.CurrentLimits.SupplyCurrentLimit = 30;
-    ballTunnelConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-
     flywheelMotorLeft.getConfigurator().apply(flyWheelConfigLeft);
     flywheelMotorRight.getConfigurator().apply(flyWheelConfigRight);
     kickerMotor.getConfigurator().apply(kickerConfig);
-    ballTunnelMotor.getConfigurator().apply(ballTunnelConfig);
 
     motorVolts = flywheelMotorLeft.getMotorVoltage();
     motorAmps = flywheelMotorLeft.getStatorCurrent();
@@ -101,9 +86,7 @@ public class ShooterIOTalonFX implements ShooterIO {
     kickerVolts = kickerMotor.getMotorVoltage();
     kickerAmps = kickerMotor.getStatorCurrent();
     kickerRPM = kickerMotor.getVelocity();
-    ballTunnelVolts = ballTunnelMotor.getMotorVoltage();
-    ballTunnelAmps = ballTunnelMotor.getStatorCurrent();
-    ballTunnelRPM = ballTunnelMotor.getVelocity();
+
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0, motorVolts, motorAmps, motorRPM, kickerAmps, kickerRPM, kickerVolts);
 
@@ -141,7 +124,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void stopKicker() {
     kickerMotor.stopMotor();
-    ballTunnelMotor.stopMotor();
   }
 
   @Override
@@ -169,7 +151,6 @@ public class ShooterIOTalonFX implements ShooterIO {
   @Override
   public void setKickerSpeed(double speed) {
     kickerMotor.setControl(kickerMagicVelocityVoltage.withVelocity(-100));
-    ballTunnelMotor.setControl(ballTunnelMagicVelocityVoltage.withVelocity(100));
   }
 
   @Override
