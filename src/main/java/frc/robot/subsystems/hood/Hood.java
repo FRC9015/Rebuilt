@@ -25,7 +25,13 @@ public class Hood extends SubsystemBase {
   }
 
   public void setHoodPos(double value) {
+    setpoint = value;
     io.setHoodPosition(value);
+    Logger.recordOutput("Hood/Setpoint", value);
+  }
+
+  public void adjustHoodPos(double delta) {
+    setHoodPos(setpoint + delta);
   }
 
   public Command incrementhoodCommand(double value) {
@@ -45,7 +51,7 @@ public class Hood extends SubsystemBase {
   }
 
   public double returnHoodSetpoint() {
-    return inputs.hoodTargetPosition;
+    return setpoint;
   }
 
   @Override

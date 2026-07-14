@@ -21,11 +21,17 @@ public class Shooter extends SubsystemBase {
   // Maximum Value of speedValue: 100 RPS
 
   public void setShooterSpeed(double speedValue) {
+    setpoint = speedValue;
     io.setFlyWheelSpeed(speedValue);
+    Logger.recordOutput("Shooter/Setpoint", speedValue);
   }
 
   public void incrementFlyWheelSpeed(double value) {
     setpoint += (1 * value);
+  }
+
+  public void adjustShooterSpeed(double delta) {
+    setShooterSpeed(setpoint + delta);
   }
 
   public void setShooterReverseSpeed(double speedValue) {
@@ -102,7 +108,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public double getTargetSpeed() {
-    return inputs.flywheelTargetSpeed;
+    return setpoint;
   }
 
   @Override

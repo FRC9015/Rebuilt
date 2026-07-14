@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -274,8 +275,8 @@ public class RobotContainer {
         (new ShooterAutoAimSequence(
                     shooter,
                     hood,
-                    interpTables.shooterSpeedHubInterp,
-                    interpTables.hoodAngleHubInterp,
+                    getShooterHubInterp(),
+                    getHoodHubInterp(),
                     interpTables.timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> FieldConstants.HUB_POSE_BLUE,
@@ -287,8 +288,8 @@ public class RobotContainer {
         (new ShooterAutoAimSequence(
                 shooter,
                 hood,
-                interpTables.shooterSpeedHubInterp,
-                interpTables.hoodAngleHubInterp,
+                getShooterHubInterp(),
+                getHoodHubInterp(),
                 interpTables.timeOfFlightInterp,
                 () -> drive.getPose(),
                 () -> FieldConstants.HUB_POSE_BLUE,
@@ -340,8 +341,8 @@ public class RobotContainer {
     //         hood,
     //         vision,
     //         turret,
-    //         interpTables.shooterSpeedHubInterp,
-    //         interpTables.hoodAngleHubInterp,
+    //         getShooterHubInterp(),
+    //         getHoodHubInterp(),
     //         interpTables.timeOfFlightInterp);
 
     // autoRoutines.buildAutoChooser();
@@ -406,14 +407,16 @@ public class RobotContainer {
                 ? simDrive.getSimulatedDriveTrainPose()
                 : drive.getPose();
 
+    // Interp-based shot command to restore later once the new tables are recorded.
+
     driverController
         .rightTrigger()
         .whileTrue(
             new ShooterAutoAimSequence(
                     shooter,
                     hood,
-                    interpTables.shooterSpeedHubInterp,
-                    interpTables.hoodAngleHubInterp,
+                    getShooterHubInterp(),
+                    getHoodHubInterp(),
                     interpTables.timeOfFlightInterp,
                     autoAimPoseSupplier,
                     () -> FieldConstants.HUB_POSE_BLUE,
@@ -426,17 +429,31 @@ public class RobotContainer {
                         drive,
                         interpTables.timeOfFlightInterp)));
 
-    // Active for setpoint feeding in both real and sim
-    shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(maxForwardSpeed), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(indexerSpeed)));
+    // // Active for setpoint feeding in both real and sim
+    // driverController
+    //     .rightTrigger()
+    //     .and(shooterIsAtSetpoint)
+    //     .whileTrue(
+    //         Commands.startEnd(
+    //                 () -> shooter.setKickerSpeed(maxForwardSpeed), () -> shooter.stopKicker())
+    //             .alongWith(indexer.runIndexer(indexerSpeed))
+    //             .alongWith(
+    //                 new TurretAngleAim(
+    //                     autoAimPoseSupplier,
+    //                     turret,
+    //                     () -> FieldConstants.HUB_POSE_BLUE,
+    //                     drive,
+    //                     interpTables.timeOfFlightInterp)));
 
     // Sim shooter projectile launcher
     if (Constants.currentMode == Constants.Mode.SIM) {
-      shooterIsAtSetpoint.whileTrue(
-          Commands.sequence(
-                  Commands.runOnce(() -> simShooter.shootBalls()), Commands.waitSeconds(0.15))
-              .repeatedly());
+      driverController
+          .rightTrigger()
+          .and(shooterIsAtSetpoint)
+          .whileTrue(
+              Commands.sequence(
+                      Commands.runOnce(() -> simShooter.shootBalls()), Commands.waitSeconds(0.1))
+                  .repeatedly());
     }
 
     // COMMENTED OUT FOR MERGE PREPARATION
@@ -451,8 +468,8 @@ public class RobotContainer {
             new ShooterAutoAimSequence(
                     shooter,
                     hood,
-                    interpTables.shooterSpeedHubInterp,
-                    interpTables.hoodAngleHubInterp,
+                    getShooterHubInterp(),
+                    getHoodHubInterp(),
                     interpTables.timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> zones.getZoneTargetPose(),
@@ -541,6 +558,18 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(shooter.runShooterSpeed(-20).onlyIf(() -> DriverStation.isTest()));
     */
+
+    final double hoodStep = 0.01;
+    final double shooterStep = 1.0;
+
+    driverController.povUp().onTrue(Commands.runOnce(() -> hood.adjustHoodPos(hoodStep)));
+    driverController.povDown().onTrue(Commands.runOnce(() -> hood.adjustHoodPos(-hoodStep)));
+    driverController
+        .povRight()
+        .onTrue(Commands.runOnce(() -> shooter.adjustShooterSpeed(shooterStep)));
+    driverController
+        .povLeft()
+        .onTrue(Commands.runOnce(() -> shooter.adjustShooterSpeed(-shooterStep)));
   }
 
   /**
@@ -557,6 +586,18 @@ public class RobotContainer {
     Logger.recordOutput("FieldSimulation/RobotPosition", simDrive.getSimulatedDriveTrainPose());
     Logger.recordOutput(
         "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
+  }
+
+  private InterpolatingTreeMap<Double, Double> getHoodHubInterp() {
+    return Constants.currentMode == Constants.Mode.SIM
+        ? interpTables.hoodAngleHubInterpSim
+        : interpTables.hoodAngleHubInterpReal;
+  }
+
+  private InterpolatingTreeMap<Double, Double> getShooterHubInterp() {
+    return Constants.currentMode == Constants.Mode.SIM
+        ? interpTables.shooterSpeedHubInterpSim
+        : interpTables.shooterSpeedHubInterpReal;
   }
 
   public void setupZonesLogic() {

@@ -47,8 +47,8 @@ public class ShooterAutoAim extends Command {
     double botToTargetPoseDistance = currentRobotPose.getTranslation().getDistance(targetPos);
     double setpoint = shooterInterpTable.get(botToTargetPoseDistance);
     shooter.setShooterSpeed(setpoint);
-    Logger.recordOutput("Shooter/autoSetpoint", setpoint);
-    Logger.recordOutput("DistanceEdit", botToTargetPoseDistance);
+    Logger.recordOutput("Shooter/AutoAim/Distance", botToTargetPoseDistance);
+    Logger.recordOutput("Shooter/AutoAim/Setpoint", setpoint);
   }
 
   @Override
