@@ -9,7 +9,7 @@ import frc.robot.Constants.ShooterConstants;
 
 public class HoodIOSim implements HoodIO {
   private double target = 0.0;
-  private Angle launchAngle = Degrees.of(Constants.SimConstants.HOOD_MIN_ANGLE_DEG);
+  private Angle launchAngle = Degrees.of(Constants.SimConstants.HOOD_MAX_ANGLE_DEG);
 
   public HoodIOSim() {}
 
@@ -36,10 +36,10 @@ public class HoodIOSim implements HoodIO {
         MathUtil.clamp(position, ShooterConstants.HOOD_MIN_POS, ShooterConstants.HOOD_MAX_POS);
     target = clampedPosition;
 
-    // Map clampedPosition (0.0 to 1.38) to (HOOD_MIN_ANGLE_DEG to HOOD_MAX_ANGLE_DEG)
+    // Map clampedPosition (0.0 to 1.38) to (HOOD_MAX_ANGLE_DEG to HOOD_MIN_ANGLE_DEG)
     double angleDeg =
-        Constants.SimConstants.HOOD_MIN_ANGLE_DEG
-            + (clampedPosition / ShooterConstants.HOOD_MAX_POS)
+        Constants.SimConstants.HOOD_MAX_ANGLE_DEG
+            - (clampedPosition / ShooterConstants.HOOD_MAX_POS)
                 * (Constants.SimConstants.HOOD_MAX_ANGLE_DEG
                     - Constants.SimConstants.HOOD_MIN_ANGLE_DEG);
 
