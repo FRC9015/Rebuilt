@@ -1,7 +1,11 @@
 package frc.robot.subsystems.turret;
 
+import edu.wpi.first.math.MathUtil;
+import frc.robot.Constants.TurretConstants;
+
 public class TurretIOSim implements TurretIO {
   private double appliedTurretRotation = 0.0;
+  private double setpointDegrees = 0.0;
 
   public TurretIOSim() {}
 
@@ -13,6 +17,11 @@ public class TurretIOSim implements TurretIO {
 
   @Override
   public void updateInputs(TurretIOInputs inputs) {
+    inputs.turretSetpoint = setpointDegrees;
+    // Assume we instantly reach the setpoint in simulation
+    inputs.turretResolvedPosition = setpointDegrees / 360.0;
+    inputs.turretResolvedPositionDegrees = setpointDegrees;
+    inputs.turretAtSetpoint = true;
     this.inputs = inputs;
   }
 
@@ -26,8 +35,12 @@ public class TurretIOSim implements TurretIO {
   public void setCoastMode() {}
 
   @Override
-  public void setTurretPosition(double value) {
-    inputs.turretResolvedPosition = (value);
+  public void setTurretPosition(double positionDegrees) {
+    double rotations = positionDegrees / 360.0;
+    double safePosition =
+        MathUtil.clamp(
+            rotations, TurretConstants.MINROTATION + 0.05, TurretConstants.MAXROTATION - 0.05);
+    setpointDegrees = safePosition * 360.0;
   }
 
   @Override
@@ -35,6 +48,6 @@ public class TurretIOSim implements TurretIO {
 
   @Override
   public void setTurretSetPoint(double value) {
-    inputs.turretSetpoint = value;
+    setpointDegrees = value;
   }
 }

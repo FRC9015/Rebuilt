@@ -9,13 +9,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -94,15 +91,10 @@ public class RobotContainer {
   private final ZoneLogic zones;
 
   // RobotContainer Constants
-  private double simShooterVelocityRPM = 6000;
-  private double simShooterHoodAngle = Units.degreesToRadians(45);
-  private double hoodTrenchAngle = 0.015;
   private double intakeSpeed = 75;
   private int maxForwardSpeed = 100;
-  private int maxReverseSpeed = -100;
   private double zoneDt = 0.04;
   private int indexerSpeed = 50;
-  private int indexerReverseSpeed = -40;
   private int intakeSpeedAuto = 50;
 
   // private final AutoFactory autoFactory;
@@ -189,7 +181,7 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.FRONT,
+                IntakeSimulation.IntakeSide.BACK,
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
         drive =
@@ -220,8 +212,7 @@ public class RobotContainer {
                 new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("turret", new Transform3d()));
 
-        simShooter =
-            new ShootAtAngleSim(simIntake, simDrive, turret, simShooterVelocityRPM, simShooterHoodAngle);
+        simShooter = new ShootAtAngleSim(simIntake, simDrive, turret, shooter, hood);
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
         runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
@@ -366,6 +357,8 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}. TODO set values for motors
    */
   private void configureButtonBindings() {
+    // COMMENTED OUT FOR MERGE PREPARATION
+    /*
     overrideZone.whileFalse(
         Commands.run(
             () -> {
@@ -384,6 +377,7 @@ public class RobotContainer {
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(indexerSpeed)));
+    */
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -391,6 +385,7 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
+
     driverController
         .b()
         .onTrue(
@@ -401,8 +396,51 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(intakeSpeed));
+    driverController
+        .leftTrigger()
+        .whileTrue(intake.runIntakeAtSpeed(intakeSpeed, PivotPositions.DEPLOYED));
 
+    java.util.function.Supplier<edu.wpi.first.math.geometry.Pose2d> autoAimPoseSupplier =
+        () ->
+            Constants.currentMode == Constants.Mode.SIM
+                ? simDrive.getSimulatedDriveTrainPose()
+                : drive.getPose();
+
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            new ShooterAutoAimSequence(
+                    shooter,
+                    hood,
+                    interpTables.shooterSpeedHubInterp,
+                    interpTables.hoodAngleHubInterp,
+                    interpTables.timeOfFlightInterp,
+                    autoAimPoseSupplier,
+                    () -> FieldConstants.HUB_POSE_BLUE,
+                    drive)
+                .alongWith(
+                    new TurretAngleAim(
+                        autoAimPoseSupplier,
+                        turret,
+                        () -> FieldConstants.HUB_POSE_BLUE,
+                        drive,
+                        interpTables.timeOfFlightInterp)));
+
+    // Active for setpoint feeding in both real and sim
+    shooterIsAtSetpoint.whileTrue(
+        Commands.startEnd(() -> shooter.setKickerSpeed(maxForwardSpeed), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(indexerSpeed)));
+
+    // Sim shooter projectile launcher
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      shooterIsAtSetpoint.whileTrue(
+          Commands.sequence(
+                  Commands.runOnce(() -> simShooter.shootBalls()), Commands.waitSeconds(0.15))
+              .repeatedly());
+    }
+
+    // COMMENTED OUT FOR MERGE PREPARATION
+    /*
     operatorController
         .rightTrigger()
         .whileTrue(
@@ -420,7 +458,6 @@ public class RobotContainer {
                     () -> zones.getZoneTargetPose(),
                     drive)
                 .alongWith(zones.override()));
-    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(maxReverseSpeed));
     operatorController.rightBumper().whileTrue(indexer.runIndexer(-indexerReverseSpeed));
 
     shooterIsAtSetpoint.whileTrue(
@@ -454,10 +491,12 @@ public class RobotContainer {
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(maxForwardSpeed).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(
+            shooter.setKickerSpeedCommand(maxForwardSpeed).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(maxReverseSpeed).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(
+            shooter.setKickerSpeedCommand(maxReverseSpeed).onlyIf(() -> DriverStation.isTest()));
     driverController
         .y()
         .whileTrue(
@@ -501,8 +540,7 @@ public class RobotContainer {
     operatorController
         .leftTrigger()
         .whileTrue(shooter.runShooterSpeed(-20).onlyIf(() -> DriverStation.isTest()));
-
-  
+    */
   }
 
   /**

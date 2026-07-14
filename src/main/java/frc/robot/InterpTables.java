@@ -66,7 +66,6 @@ public class InterpTables {
     shooterSpeedHubInterp.put(2.85, 34.0);
     shooterSpeedHubInterp.put(3.0, 36.0);
     shooterSpeedHubInterp.put(3.5, 37.0);
-    shooterSpeedHubInterp.put(4.0, 39.0);
     shooterSpeedHubInterp.put(4.5, 38.0);
     shooterSpeedHubInterp.put(5.0, 39.0);
 

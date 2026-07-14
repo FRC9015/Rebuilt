@@ -155,7 +155,7 @@ public class Drive extends SubsystemBase {
           rawGyroRotation,
           lastModulePositions,
           new Pose2d(),
-          VecBuilder.fill(0.9, 0.9, 0.9),
+          VecBuilder.fill(0.1, 0.1, 0.1),
           VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(15)));
   private SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint prevSetpoint;

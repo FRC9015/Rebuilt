@@ -101,6 +101,10 @@ public class Shooter extends SubsystemBase {
     return inputs.flywheelAtSpeed;
   }
 
+  public double getTargetSpeed() {
+    return inputs.flywheelTargetSpeed;
+  }
+
   @Override
   public void periodic() {
     io.updateInputs(inputs);
