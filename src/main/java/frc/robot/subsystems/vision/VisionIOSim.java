@@ -3,8 +3,13 @@ package frc.robot.subsystems.vision;
 import static frc.robot.Constants.VisionConstants.aprilTagLayout;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.robot.Constants.VisionConstants;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
@@ -17,6 +22,7 @@ public class VisionIOSim implements VisionIO {
   private static VisionSystemSim visionSim;
 
   private final Supplier<Pose2d> poseSupplier;
+  private final Transform3d robotToCamera;
   private final PhotonCameraSim cameraSim;
   private final PhotonCamera camera;
 
@@ -30,6 +36,7 @@ public class VisionIOSim implements VisionIO {
   public VisionIOSim(String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier) {
 
     this.poseSupplier = poseSupplier;
+    this.robotToCamera = robotToCamera;
 
     // Initialize vision system once
     if (visionSim == null) {
@@ -59,14 +66,52 @@ public class VisionIOSim implements VisionIO {
     // Update simulation with current robot pose
     visionSim.update(poseSupplier.get());
 
-    var result = camera.getLatestResult();
+    inputs.connected = true;
+    inputs.hasTargets = false;
 
-    inputs.hasTargets = result.hasTargets();
+    List<PoseObservation> observations = new ArrayList<>();
+    List<Integer> targetIds = new ArrayList<>();
 
-    if (result.hasTargets()) {
-      inputs.targetIDs = result.getTargets().stream().mapToInt(t -> t.getFiducialId()).toArray();
-    } else {
-      inputs.targetIDs = new int[0];
+    for (var result : camera.getAllUnreadResults()) {
+      if (!result.hasTargets()) continue;
+
+      inputs.hasTargets = true;
+      result.getTargets().forEach(target -> targetIds.add(target.getFiducialId()));
+
+      Pose3d lensPose;
+      int tagCount;
+      double ambiguity;
+
+      if (result.getMultiTagResult().isPresent()) {
+        var mTag = result.getMultiTagResult().get();
+        lensPose =
+            new Pose3d(
+                mTag.estimatedPose.best.getTranslation(), mTag.estimatedPose.best.getRotation());
+        tagCount = mTag.fiducialIDsUsed.size();
+        ambiguity = mTag.estimatedPose.ambiguity;
+      } else {
+        var target = result.getBestTarget();
+        Optional<Pose3d> tagPose =
+            VisionConstants.aprilTagLayout.getTagPose(target.getFiducialId());
+        if (tagPose.isEmpty()) continue;
+        lensPose = tagPose.get().transformBy(target.getBestCameraToTarget().inverse());
+        tagCount = 1;
+        ambiguity = target.getPoseAmbiguity();
+      }
+
+      Pose3d robotPose = lensPose.transformBy(robotToCamera.inverse());
+
+      observations.add(
+          new PoseObservation(
+              result.getTimestampSeconds(),
+              robotPose,
+              ambiguity,
+              tagCount,
+              result.getBestTarget().getBestCameraToTarget().getTranslation().getNorm(),
+              List.of()));
     }
+
+    inputs.poseObservations = observations.toArray(new PoseObservation[0]);
+    inputs.targetIDs = targetIds.stream().mapToInt(Integer::intValue).toArray();
   }
 }

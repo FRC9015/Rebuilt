@@ -6,6 +6,7 @@ import frc.robot.Constants.VisionConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.photonvision.PhotonCamera;
 
 public class VisionIOPhotonVision implements VisionIO {
@@ -15,6 +16,11 @@ public class VisionIOPhotonVision implements VisionIO {
   public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
     this.camera = new PhotonCamera(name);
     this.robotToCamera = robotToCamera;
+  }
+
+  public VisionIOPhotonVision(
+      String name, Transform3d robotToCamera, Supplier<Pose3d> ignoredPoseSupplier) {
+    this(name, robotToCamera);
   }
 
   @Override
