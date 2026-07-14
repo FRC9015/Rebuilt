@@ -407,8 +407,7 @@ public class RobotContainer {
                 ? simDrive.getSimulatedDriveTrainPose()
                 : drive.getPose();
 
-    // Interp-based shot command to restore later once the new tables are recorded.
-
+    // Interp-based shot command
     driverController
         .rightTrigger()
         .whileTrue(
@@ -429,7 +428,7 @@ public class RobotContainer {
                         drive,
                         interpTables.timeOfFlightInterp)));
 
-    // // Active for setpoint feeding in both real and sim
+    // // For Setpoint feeding in both real and sim
     // driverController
     //     .rightTrigger()
     //     .and(shooterIsAtSetpoint)
