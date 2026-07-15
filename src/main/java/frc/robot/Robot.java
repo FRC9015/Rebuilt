@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.commands.FollowPathCommand;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.ironmaple.simulation.SimulatedArena;
@@ -29,26 +28,14 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   public Robot() {
-    // Record metadata
-    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
-    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
-    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
-    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
-    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
-    Logger.recordMetadata(
-        "GitDirty",
-        switch (BuildConstants.DIRTY) {
-          case 0 -> "All changes committed";
-          case 1 -> "Uncommitted changes";
-          default -> "Unknown";
-        });
+
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
-        CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+        // Logger.addDataReceiver(new WPILOGWriter());
+        // Logger.addDataReceiver(new NT4Publisher());
+        // CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
         break;
 
       case SIM:
@@ -106,8 +93,6 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    autonomousCommand = robotContainer.getAutonomousCommand();
-
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(autonomousCommand);
@@ -156,6 +141,5 @@ public class Robot extends LoggedRobot {
   public void simulationPeriodic() {
     // simulation period method in your Robot
     SimulatedArena.getInstance().simulationPeriodic();
-    robotContainer.displaySimFieldToAdvantageScope();
   }
 }
