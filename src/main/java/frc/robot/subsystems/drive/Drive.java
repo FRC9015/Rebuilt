@@ -64,6 +64,7 @@ import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
 import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
@@ -160,6 +161,8 @@ public class Drive extends SubsystemBase {
   private SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint prevSetpoint;
   private boolean oribtSafe = false;
+  // Optional callback to sync the physics simulation world pose when odometry is reset
+  private Consumer<Pose2d> simPoseResetConsumer = null;
 
   /**
    * Constructs a new Drive.
@@ -461,9 +464,20 @@ public class Drive extends SubsystemBase {
     return getPose().getRotation();
   }
 
-  /** Resets the current odometry pose. */
+  /**
+   * Registers a callback to be called when odometry is reset, so the physics sim world pose stays
+   * in sync with the software pose estimator (required in SIM mode with MapleSim).
+   */
+  public void setSimPoseResetConsumer(Consumer<Pose2d> consumer) {
+    this.simPoseResetConsumer = consumer;
+  }
+
+  /** Resets the current odometry pose. Also syncs physics simulation world pose if in SIM mode. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+    if (simPoseResetConsumer != null) {
+      simPoseResetConsumer.accept(pose);
+    }
   }
 
   /** Adds a new timestamped vision measurement. */
@@ -581,12 +595,11 @@ public class Drive extends SubsystemBase {
     double rotationFeedback =
         choreoThetaController.calculate(pose.getRotation().getRadians(), sample.heading);
 
+    // Use actual robot heading (pose.getRotation()), NOT sample.heading, for field-to-robot
+    // coordinate transformation. Using sample.heading causes instability when heading errors exist.
     ChassisSpeeds velocity =
         ChassisSpeeds.fromFieldRelativeSpeeds(
-            xFF + xFeedback,
-            yFF + yFeedback,
-            rotationFF + rotationFeedback,
-            Rotation2d.fromRadians(sample.heading));
+            xFF + xFeedback, yFF + yFeedback, rotationFF + rotationFeedback, pose.getRotation());
 
     runVelocity(velocity);
     Logger.recordOutput("Auto/Setpoint", sample.getPose());

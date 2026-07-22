@@ -2,17 +2,21 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-// import com.qelib.SpatialAutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+// import com.qelib.SpatialAutoBuilder;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -62,7 +66,6 @@ import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOSim;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -78,7 +81,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Vision vision;
+  private Vision vision;
   private final Shooter shooter;
   private final GameState gamestate;
   private final Indexer indexer;
@@ -99,7 +102,8 @@ public class RobotContainer {
   private int indexerSpeed = 50;
   private int intakeSpeedAuto = 50;
 
-  // private final AutoFactory autoFactory;
+  private final AutoFactory autoFactory;
+  private Autos autoRoutines;
   // private final SpatialAutoBuilder spatialAutoBuilder;
   // private final Map<String, Command> eventMap;
   // Controller
@@ -183,7 +187,7 @@ public class RobotContainer {
                 // The extension length of the intake beyond the robot's frame (when activated)
                 Meters.of(SimConstants.INTAKE_LENGTH),
                 // The intake is mounted on the back side of the chassis
-                IntakeSimulation.IntakeSide.BACK,
+                IntakeSimulation.IntakeSide.FRONT,
                 // The intake can hold up to 50 Fuel
                 SimConstants.HOPPER_CAPACITY);
         drive =
@@ -193,6 +197,8 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstantsSim.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackRight, simDrive.getModules()[3]));
+        // Sync MapleSim physics world pose whenever software odometry is reset (e.g. on auto start)
+        drive.setSimPoseResetConsumer(simDrive::setSimulationWorldPose);
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());
@@ -205,20 +211,21 @@ public class RobotContainer {
         //             VisionConstants.PORT_CAMERA_POSE,
         //             simDrive::getSimulatedDriveTrainPose));
         turret = new Turret(new TurretIOSim());
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                () -> new Rotation2d(turret.getTurretPositionRadians()),
-                2,
-                new VisionIOSim(
-                    "stern",
-                    VisionConstants.STERN_CAMERA_POSE,
-                    simDrive::getSimulatedDriveTrainPose),
-                new VisionIOSim(
-                    "starboard",
-                    VisionConstants.STARBOARD_CAMERA_POSE,
-                    simDrive::getSimulatedDriveTrainPose),
-                new VisionIOSim("turret", new Transform3d(), simDrive::getSimulatedDriveTrainPose));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         () -> new Rotation2d(turret.getTurretPositionRadians()),
+        //         2,
+        //         new VisionIOSim(
+        //             "stern",
+        //             VisionConstants.STERN_CAMERA_POSE,
+        //             simDrive::getSimulatedDriveTrainPose),
+        //         new VisionIOSim(
+        //             "starboard",
+        //             VisionConstants.STARBOARD_CAMERA_POSE,
+        //             simDrive::getSimulatedDriveTrainPose),
+        //         new VisionIOSim("turret", new Transform3d(),
+        // simDrive::getSimulatedDriveTrainPose));
 
         simShooter = new ShootAtAngleSim(simIntake, simDrive, turret, shooter, hood);
         interpTables = new InterpTables();
@@ -274,9 +281,8 @@ public class RobotContainer {
         throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
     // Set up auto routines
-    NamedCommands.registerCommand(
-        "intakeDeploy", intake.runIntakeAtSpeed(intakeSpeed, PivotPositions.DEPLOYED));
-    NamedCommands.registerCommand("intake", intake.runRollerAtSpeed(intakeSpeedAuto));
+    NamedCommands.registerCommand("intakeDeploy", getAutoIntakeCommand());
+    NamedCommands.registerCommand("intake", getAutoIntakeCommand());
     NamedCommands.registerCommand(
         "shooter",
         (new ShooterAutoAimSequence(
@@ -326,11 +332,14 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
-    // autoFactory =
-    //     new AutoFactory(
-    //         () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true,
-    // drive);
-    // CommandScheduler.getInstance().schedule(autoFactory.warmupCmd());
+    autoFactory =
+        new AutoFactory(
+            () -> drive.getPose(),
+            (pose) -> drive.setPose(pose),
+            drive::choreoDrive,
+            DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+            drive);
+    CommandScheduler.getInstance().schedule(autoFactory.warmupCmd());
 
     // spatialAutoBuilder = new SpatialAutoBuilder();
     // eventMap = new HashMap<String, Command>();
@@ -338,22 +347,24 @@ public class RobotContainer {
     // spatialAutoBuilder.configure(
     //     () -> drive.getPose(), (speeds) -> drive.runVelocity(speeds), eventMap, 5, 5, 5);
     // autoChooser.addOption("spatialTEst", spatialAutoBuilder.buildPath("TEST"));
-    // Autos autoRoutines =
-    //     new Autos(
-    //         autoFactory,
-    //         drive,
-    //         intake,
-    //         shooter,
-    //         indexer,
-    //         hood,
-    //         vision,
-    //         turret,
-    //         getShooterHubInterp(),
-    //         getHoodHubInterp(),
-    //         interpTables.timeOfFlightInterp);
+    autoRoutines =
+        new Autos(
+            autoFactory,
+            drive,
+            intake,
+            shooter,
+            indexer,
+            hood,
+            vision,
+            turret,
+            simShooter,
+            getAutoAimPoseSupplier(),
+            getShooterHubInterp(),
+            getHoodHubInterp(),
+            interpTables.timeOfFlightInterp);
 
-    // autoRoutines.buildAutoChooser();
-    // autoRoutines.populateChooser(autoChooser);
+    autoRoutines.buildAutoChooser();
+    autoRoutines.populateChooser(autoChooser);
 
     configureButtonBindings();
   }
@@ -409,10 +420,7 @@ public class RobotContainer {
         .whileTrue(intake.runIntakeAtSpeed(intakeSpeed, PivotPositions.DEPLOYED));
 
     java.util.function.Supplier<edu.wpi.first.math.geometry.Pose2d> autoAimPoseSupplier =
-        () ->
-            Constants.currentMode == Constants.Mode.SIM
-                ? simDrive.getSimulatedDriveTrainPose()
-                : drive.getPose();
+        getAutoAimPoseSupplier();
 
     // Interp-based shot command
     driverController
@@ -584,7 +592,37 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    String override = Constants.AUTO_OVERRIDE;
+    if (override != null && !override.isEmpty()) {
+      // 1. Try to find a matching Choreo auto routine via reflection
+      if (autoRoutines != null) {
+        try {
+          java.lang.reflect.Method method = autoRoutines.getClass().getMethod(override);
+          if (Command.class.isAssignableFrom(method.getReturnType())) {
+            System.out.println("[AutoOverride] Selected Choreo auto: " + override);
+            return (Command) method.invoke(autoRoutines);
+          }
+        } catch (Exception e) {
+          // Method not found or failed to invoke, fall back to PathPlanner
+        }
+      }
+      // 2. Try to load matching PathPlanner auto
+      try {
+        System.out.println("[AutoOverride] Selected PathPlanner auto: " + override);
+        return AutoBuilder.buildAuto(override);
+      } catch (Exception e) {
+        System.err.println("[AutoOverride] Could not find/build auto: " + override);
+      }
+    }
     return autoChooser.get();
+  }
+
+  private Command getAutoIntakeCommand() {
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      return intake.runIntakeAtSpeed(intakeSpeedAuto, PivotPositions.DEPLOYED);
+    }
+
+    return intake.runRollerAtSpeed(intakeSpeedAuto);
   }
 
   public void displaySimFieldToAdvantageScope() {
@@ -604,6 +642,13 @@ public class RobotContainer {
     return Constants.currentMode == Constants.Mode.SIM
         ? interpTables.shooterSpeedHubInterpSim
         : interpTables.shooterSpeedHubInterpReal;
+  }
+
+  private java.util.function.Supplier<edu.wpi.first.math.geometry.Pose2d> getAutoAimPoseSupplier() {
+    return () ->
+        Constants.currentMode == Constants.Mode.SIM
+            ? simDrive.getSimulatedDriveTrainPose()
+            : drive.getPose();
   }
 
   public void setupZonesLogic() {

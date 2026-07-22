@@ -45,6 +45,9 @@ import frc.robot.Constants.FieldConstants;
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+  public static final String AUTO_OVERRIDE =
+      "centerrushRight"; // Set to the name of an auto (e.g. "centerrushLeft") to override dashboard
+  // selection
 
   /** The runtime mode for the robot (real, simulation, or replay). */
   public static enum Mode {
