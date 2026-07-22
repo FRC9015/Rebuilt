@@ -4,10 +4,12 @@ import choreo.Choreo;
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.commands.ShootAtAngleSim;
 import frc.robot.commands.ShooterAutoAimSequence;
 import frc.robot.commands.TurretAngleAim;
 import frc.robot.subsystems.drive.Drive;
@@ -21,9 +23,13 @@ import frc.robot.subsystems.turret.Turret;
 import frc.robot.subsystems.vision.Vision;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class Autos {
+  private static final double AUTO_SHOOT_PERIOD_SECONDS = 0.1;
+  private static final double AUTO_SHOOT_WINDOW_SECONDS = 2.5;
+
   // public enum TrajChoices {
   //   TEST,
   //   CENTER_RUSH_LEFT,
@@ -51,6 +57,8 @@ public class Autos {
   private final Hood hood;
   private final Vision vision;
   private final Turret turret;
+  private final ShootAtAngleSim simShooter;
+  private final Supplier<Pose2d> autoAimPoseSupplier;
   private final InterpolatingTreeMap<Double, Double> shooterInterp;
   private final InterpolatingTreeMap<Double, Double> hoodInterp;
   private final InterpolatingTreeMap<Double, Double> timeOfFlightInterp;
@@ -78,6 +86,8 @@ public class Autos {
       Hood hood,
       Vision vision,
       Turret turret,
+      ShootAtAngleSim simShooter,
+      Supplier<Pose2d> autoAimPoseSupplier,
       InterpolatingTreeMap<Double, Double> shooterInterp,
       InterpolatingTreeMap<Double, Double> hoodInterp,
       InterpolatingTreeMap<Double, Double> timeOfFlightInterp) {
@@ -89,6 +99,8 @@ public class Autos {
     this.hood = hood;
     this.vision = vision;
     this.turret = turret;
+    this.simShooter = simShooter;
+    this.autoAimPoseSupplier = autoAimPoseSupplier;
     this.shooterInterp = shooterInterp;
     this.hoodInterp = hoodInterp;
     this.timeOfFlightInterp = timeOfFlightInterp;
@@ -109,17 +121,9 @@ public class Autos {
         .onTrue(
             Commands.sequence(
                 testPath.resetOdometry(),
-                testPath.cmd(),
+                Commands.deadline(testPath.cmd(), getAutoIntakeCommand()),
                 Commands.runOnce(() -> drive.stop()),
-                new ShooterAutoAimSequence(
-                    shooter,
-                    hood,
-                    shooterInterp,
-                    hoodInterp,
-                    timeOfFlightInterp,
-                    () -> drive.getPose(),
-                    () -> FieldConstants.HUB_POSE_BLUE,
-                    drive)));
+                Commands.deadline(getAutoShootCommand(), getAutoAimCommand())));
     return routine.cmd();
   }
 
@@ -138,24 +142,16 @@ public class Autos {
         .onTrue(
             Commands.sequence(
                 centerRush.resetOdometry(),
-                centerRush.cmd(),
+                Commands.deadline(centerRush.cmd(), getAutoIntakeCommand()),
                 Commands.runOnce(() -> drive.stop()),
                 new TurretAngleAim(
-                        () -> drive.getPose(),
+                        autoAimPoseSupplier,
                         turret,
                         () -> FieldConstants.HUB_POSE_BLUE,
                         drive,
                         timeOfFlightInterp)
                     .withTimeout(1.5),
-                new ShooterAutoAimSequence(
-                    shooter,
-                    hood,
-                    shooterInterp,
-                    hoodInterp,
-                    timeOfFlightInterp,
-                    () -> drive.getPose(),
-                    () -> FieldConstants.HUB_POSE_BLUE,
-                    drive)));
+                Commands.deadline(getAutoShootCommand(), getAutoAimCommand())));
 
     return routine.cmd();
   }
@@ -168,25 +164,16 @@ public class Autos {
    */
   public Command centerrushRight() {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_RIGHT");
-    AutoTrajectory centerRush =
-        routine.trajectory(Choreo.loadTrajectory("CENTER_RUSH_RIGHT").get());
+    AutoTrajectory centerRush = routine.trajectory(Choreo.loadTrajectory("CENTERRUSH_RIGHT").get());
 
     routine
         .active()
         .onTrue(
             Commands.sequence(
                 centerRush.resetOdometry(),
-                centerRush.cmd(),
+                Commands.deadline(centerRush.cmd(), getAutoIntakeCommand()),
                 Commands.runOnce(() -> drive.stop()),
-                new ShooterAutoAimSequence(
-                    shooter,
-                    hood,
-                    shooterInterp,
-                    hoodInterp,
-                    timeOfFlightInterp,
-                    () -> drive.getPose(),
-                    () -> FieldConstants.HUB_POSE_BLUE,
-                    drive)));
+                Commands.deadline(getAutoShootCommand(), getAutoAimCommand())));
     return routine.cmd();
   }
 
@@ -205,18 +192,9 @@ public class Autos {
         .onTrue(
             Commands.sequence(
                 depotTraj.resetOdometry(),
-                depotTraj.cmd(),
+                Commands.deadline(depotTraj.cmd(), getAutoIntakeCommand()),
                 Commands.runOnce(() -> drive.stop()),
-                new ShooterAutoAimSequence(
-                        shooter,
-                        hood,
-                        shooterInterp,
-                        hoodInterp,
-                        timeOfFlightInterp,
-                        () -> drive.getPose(),
-                        () -> FieldConstants.HUB_POSE_BLUE,
-                        drive)
-                    .alongWith(indexer.runIndexer(6.0))));
+                Commands.deadline(getAutoShootCommand(), getAutoAimCommand())));
     return routine.cmd();
   }
 
@@ -234,17 +212,9 @@ public class Autos {
         .onTrue(
             Commands.sequence(
                 depot.resetOdometry(),
-                depot.cmd(),
+                Commands.deadline(depot.cmd(), getAutoIntakeCommand()),
                 Commands.runOnce(() -> drive.stop()),
-                new ShooterAutoAimSequence(
-                    shooter,
-                    hood,
-                    shooterInterp,
-                    hoodInterp,
-                    timeOfFlightInterp,
-                    () -> drive.getPose(),
-                    () -> FieldConstants.HUB_POSE_BLUE,
-                    drive)));
+                Commands.deadline(getAutoShootCommand(), getAutoAimCommand())));
     return routine.cmd();
   }
 
@@ -262,17 +232,9 @@ public class Autos {
         .onTrue(
             Commands.sequence(
                 hp.resetOdometry(),
-                hp.cmd(),
+                Commands.deadline(hp.cmd(), getAutoIntakeCommand()),
                 Commands.runOnce(() -> drive.stop()),
-                new ShooterAutoAimSequence(
-                    shooter,
-                    hood,
-                    shooterInterp,
-                    hoodInterp,
-                    timeOfFlightInterp,
-                    () -> drive.getPose(),
-                    () -> FieldConstants.HUB_POSE_BLUE,
-                    drive)));
+                Commands.deadline(getAutoShootCommand(), getAutoAimCommand())));
     return routine.cmd();
   }
 
@@ -294,32 +256,16 @@ public class Autos {
         .onTrue(
             Commands.sequence(
                 cl.resetOdometry(),
-                cl.cmd(),
+                Commands.deadline(cl.cmd(), getAutoIntakeCommand()),
                 Commands.runOnce(() -> drive.stop()),
                 Commands.parallel(
-                        new ShooterAutoAimSequence(
-                            shooter,
-                            hood,
-                            shooterInterp,
-                            hoodInterp,
-                            timeOfFlightInterp,
-                            () -> drive.getPose(),
-                            () -> FieldConstants.HUB_POSE_BLUE,
-                            drive),
+                        Commands.deadline(getAutoShootCommand(), getAutoAimCommand()),
                         intake.agitateIntakeCommand())
                     .withTimeout(4.0),
-                de.cmd(),
+                Commands.deadline(de.cmd(), getAutoIntakeCommand()),
                 Commands.runOnce(() -> drive.stop()),
                 Commands.parallel(
-                    new ShooterAutoAimSequence(
-                        shooter,
-                        hood,
-                        shooterInterp,
-                        hoodInterp,
-                        timeOfFlightInterp,
-                        () -> drive.getPose(),
-                        () -> FieldConstants.HUB_POSE_BLUE,
-                        drive),
+                    Commands.deadline(getAutoShootCommand(), getAutoAimCommand()),
                     intake.agitateIntakeCommand())));
     return routine.cmd();
   }
@@ -370,19 +316,50 @@ public class Autos {
    * @see AutoFactory
    */
   public void buildAutoChooser() {
-    autoFactory.bind("Intake", intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED));
-    autoFactory.bind(
-        "ShooterSpeed",
-        new ShooterAutoAimSequence(
+    autoFactory.bind("Intake", getAutoIntakeCommand());
+    autoFactory.bind("ShooterSpeed", getAutoAimCommand());
+    autoFactory.bind("ShootBall", getAutoShootCommand());
+    autoFactory.bind("deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+  }
+
+  private Command getAutoIntakeCommand() {
+    return intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED);
+  }
+
+  private Command getAutoShootCommand() {
+    if (Constants.currentMode == Constants.Mode.SIM && simShooter != null) {
+      return Commands.waitUntil(shooter::returnShooterAtSetpoint)
+          .andThen(
+              Commands.sequence(
+                      Commands.runOnce(() -> simShooter.shootBalls()),
+                      Commands.waitSeconds(AUTO_SHOOT_PERIOD_SECONDS))
+                  .repeatedly())
+          .withTimeout(AUTO_SHOOT_WINDOW_SECONDS);
+    }
+
+    return Commands.waitUntil(shooter::returnShooterAtSetpoint)
+        .andThen(
+            Commands.startEnd(() -> shooter.setKickerSpeed(6.0), () -> shooter.stopKicker())
+                .alongWith(indexer.runIndexer(6.0)))
+        .withTimeout(AUTO_SHOOT_WINDOW_SECONDS);
+  }
+
+  private Command getAutoAimCommand() {
+    return new ShooterAutoAimSequence(
             shooter,
             hood,
             shooterInterp,
             hoodInterp,
             timeOfFlightInterp,
-            () -> drive.getPose(),
+            autoAimPoseSupplier,
             () -> FieldConstants.HUB_POSE_BLUE,
-            drive));
-    autoFactory.bind("ShootBall", indexer.runIndexer(6.0));
-    autoFactory.bind("deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+            drive)
+        .alongWith(
+            new TurretAngleAim(
+                autoAimPoseSupplier,
+                turret,
+                () -> FieldConstants.HUB_POSE_BLUE,
+                drive,
+                timeOfFlightInterp));
   }
 }

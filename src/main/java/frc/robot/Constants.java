@@ -45,6 +45,9 @@ import frc.robot.Constants.FieldConstants;
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+  public static final String AUTO_OVERRIDE =
+      "centerrushRight"; // Set to the name of an auto (e.g. "centerrushLeft") to override dashboard
+  // selection
 
   /** The runtime mode for the robot (real, simulation, or replay). */
   public static enum Mode {
@@ -366,8 +369,17 @@ public final class Constants {
     // Simulation constants (e.g., physics parameters) can be added here
     public static final double INTAKE_LENGTH = 0.2;
     public static final double INTAKE_WIDTH = 0.7;
-    public static final int HOPPER_CAPACITY = 50;
+    public static final int HOPPER_CAPACITY = 100;
     public static final String GAMEPIECE = "Fuel";
+
+    // Flywheel radius for converting RPS → linear launch velocity (v = 2π * r * RPS)
+    public static final double FLYWHEEL_RADIUS_METERS = Units.inchesToMeters(2.0);
+
+    // Hood angle mapping: mechanism rotations (0 → HOOD_MAX_POS) map to launch angle in degrees
+    public static final double HOOD_MIN_ANGLE_DEG = 35.0; // angle when hood position = 0 (flat)
+    public static final double HOOD_MAX_ANGLE_DEG = 80; // angle when hood position = HOOD_MAX_POS
+    public static final double PROJECTILE_INITIAL_HEIGHT_METERS =
+        0.45; // launch height above ground
   }
 
   public static class ShooterConstants {

@@ -49,7 +49,8 @@ public class HoodAutoAim extends Command {
     double botToTargetPoseDistance = currentRobotPose.getTranslation().getDistance(targetPos);
     double setpoint = hoodInterpTable.get(botToTargetPoseDistance);
     hood.setHoodPos(setpoint);
-    Logger.recordOutput("Hood/setpointauto", setpoint);
+    Logger.recordOutput("Hood/AutoAim/Distance", botToTargetPoseDistance);
+    Logger.recordOutput("Hood/AutoAim/Setpoint", setpoint);
   }
 
   @Override

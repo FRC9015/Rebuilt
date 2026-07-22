@@ -2,20 +2,22 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Meters;
 
+import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-// import com.qelib.SpatialAutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+// import com.qelib.SpatialAutoBuilder;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -79,7 +81,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Vision vision;
+  private Vision vision;
   private final Shooter shooter;
   private final GameState gamestate;
   private final Indexer indexer;
@@ -93,7 +95,15 @@ public class RobotContainer {
   private final InterpTables interpTables;
   private final ZoneLogic zones;
 
-  // private final AutoFactory autoFactory;
+  // RobotContainer Constants
+  private double intakeSpeed = 75;
+  private int maxForwardSpeed = 100;
+  private double zoneDt = 0.04;
+  private int indexerSpeed = 50;
+  private int intakeSpeedAuto = 50;
+
+  private final AutoFactory autoFactory;
+  private Autos autoRoutines;
   // private final SpatialAutoBuilder spatialAutoBuilder;
   // private final Map<String, Command> eventMap;
   // Controller
@@ -134,10 +144,7 @@ public class RobotContainer {
                 new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
                 new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
                 new VisionIOPhotonVision("turret", new Transform3d()));
-        indexer =
-            new Indexer(
-                new IndexerIOTalonFX(
-                    MotorIDConstants.INDEXER1_MOTOR_ID));
+        indexer = new Indexer(new IndexerIOTalonFX(MotorIDConstants.INDEXER1_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
@@ -190,6 +197,8 @@ public class RobotContainer {
                 new ModuleIOTalonFXMapleSim(TunerConstantsSim.FrontRight, simDrive.getModules()[1]),
                 new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackLeft, simDrive.getModules()[2]),
                 new ModuleIOTalonFXMapleSim(TunerConstantsSim.BackRight, simDrive.getModules()[3]));
+        // Sync MapleSim physics world pose whenever software odometry is reset (e.g. on auto start)
+        drive.setSimPoseResetConsumer(simDrive::setSimulationWorldPose);
         intake = new Intake(new RollerIOSim(simIntake), new PivotIOSim());
         indexer = new Indexer(new IndexerIO() {});
         hood = new Hood(new HoodIOSim());
@@ -202,17 +211,23 @@ public class RobotContainer {
         //             VisionConstants.PORT_CAMERA_POSE,
         //             simDrive::getSimulatedDriveTrainPose));
         turret = new Turret(new TurretIOSim());
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                () -> new Rotation2d(turret.getTurretPositionRadians()),
-                2,
-                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
-                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("turret", new Transform3d()));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         () -> new Rotation2d(turret.getTurretPositionRadians()),
+        //         2,
+        //         new VisionIOSim(
+        //             "stern",
+        //             VisionConstants.STERN_CAMERA_POSE,
+        //             simDrive::getSimulatedDriveTrainPose),
+        //         new VisionIOSim(
+        //             "starboard",
+        //             VisionConstants.STARBOARD_CAMERA_POSE,
+        //             simDrive::getSimulatedDriveTrainPose),
+        //         new VisionIOSim("turret", new Transform3d(),
+        // simDrive::getSimulatedDriveTrainPose));
 
-        simShooter =
-            new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
+        simShooter = new ShootAtAngleSim(simIntake, simDrive, turret, shooter, hood);
         interpTables = new InterpTables();
         zones = new ZoneLogic(drive);
         runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
@@ -266,16 +281,15 @@ public class RobotContainer {
         throw new IllegalStateException("Unexpected value: " + Constants.currentMode);
     }
     // Set up auto routines
-    NamedCommands.registerCommand(
-        "intakeDeploy", intake.runIntakeAtSpeed(75, PivotPositions.DEPLOYED));
-    NamedCommands.registerCommand("intake", intake.runRollerAtSpeed(50));
+    NamedCommands.registerCommand("intakeDeploy", getAutoIntakeCommand());
+    NamedCommands.registerCommand("intake", getAutoIntakeCommand());
     NamedCommands.registerCommand(
         "shooter",
         (new ShooterAutoAimSequence(
                     shooter,
                     hood,
-                    interpTables.shooterSpeedHubInterp,
-                    interpTables.hoodAngleHubInterp,
+                    getShooterHubInterp(),
+                    getHoodHubInterp(),
                     interpTables.timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> FieldConstants.HUB_POSE_BLUE,
@@ -287,8 +301,8 @@ public class RobotContainer {
         (new ShooterAutoAimSequence(
                 shooter,
                 hood,
-                interpTables.shooterSpeedHubInterp,
-                interpTables.hoodAngleHubInterp,
+                getShooterHubInterp(),
+                getHoodHubInterp(),
                 interpTables.timeOfFlightInterp,
                 () -> drive.getPose(),
                 () -> FieldConstants.HUB_POSE_BLUE,
@@ -318,11 +332,14 @@ public class RobotContainer {
     autoChooser.addOption("Turret SysId DF", turret.dynamic(Direction.kForward));
     autoChooser.addOption("Turret SysId DR", turret.dynamic(Direction.kReverse));
 
-    // autoFactory =
-    //     new AutoFactory(
-    //         () -> drive.getPose(), (pose) -> drive.setPose(pose), drive::choreoDrive, true,
-    // drive);
-    // CommandScheduler.getInstance().schedule(autoFactory.warmupCmd());
+    autoFactory =
+        new AutoFactory(
+            () -> drive.getPose(),
+            (pose) -> drive.setPose(pose),
+            drive::choreoDrive,
+            DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+            drive);
+    CommandScheduler.getInstance().schedule(autoFactory.warmupCmd());
 
     // spatialAutoBuilder = new SpatialAutoBuilder();
     // eventMap = new HashMap<String, Command>();
@@ -330,22 +347,24 @@ public class RobotContainer {
     // spatialAutoBuilder.configure(
     //     () -> drive.getPose(), (speeds) -> drive.runVelocity(speeds), eventMap, 5, 5, 5);
     // autoChooser.addOption("spatialTEst", spatialAutoBuilder.buildPath("TEST"));
-    // Autos autoRoutines =
-    //     new Autos(
-    //         autoFactory,
-    //         drive,
-    //         intake,
-    //         shooter,
-    //         indexer,
-    //         hood,
-    //         vision,
-    //         turret,
-    //         interpTables.shooterSpeedHubInterp,
-    //         interpTables.hoodAngleHubInterp,
-    //         interpTables.timeOfFlightInterp);
+    autoRoutines =
+        new Autos(
+            autoFactory,
+            drive,
+            intake,
+            shooter,
+            indexer,
+            hood,
+            vision,
+            turret,
+            simShooter,
+            getAutoAimPoseSupplier(),
+            getShooterHubInterp(),
+            getHoodHubInterp(),
+            interpTables.timeOfFlightInterp);
 
-    // autoRoutines.buildAutoChooser();
-    // autoRoutines.populateChooser(autoChooser);
+    autoRoutines.buildAutoChooser();
+    autoRoutines.populateChooser(autoChooser);
 
     configureButtonBindings();
   }
@@ -357,11 +376,13 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}. TODO set values for motors
    */
   private void configureButtonBindings() {
+    // COMMENTED OUT FOR MERGE PREPARATION
+    /*
     overrideZone.whileFalse(
         Commands.run(
             () -> {
               if (zones.isInTrench()) {
-                hood.setHoodPos(0.015);
+                hood.setHoodPos(hoodTrenchAngle);
               }
             }));
     runZoneLogic.whileTrue(
@@ -374,7 +395,8 @@ public class RobotContainer {
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
+            .alongWith(indexer.runIndexer(indexerSpeed)));
+    */
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -382,6 +404,7 @@ public class RobotContainer {
             () -> -driverController.getLeftY(),
             () -> -driverController.getLeftX(),
             () -> -driverController.getRightX()));
+
     driverController
         .b()
         .onTrue(
@@ -392,8 +415,63 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(75));
+    driverController
+        .leftTrigger()
+        .whileTrue(intake.runIntakeAtSpeed(intakeSpeed, PivotPositions.DEPLOYED));
 
+    java.util.function.Supplier<edu.wpi.first.math.geometry.Pose2d> autoAimPoseSupplier =
+        getAutoAimPoseSupplier();
+
+    // Interp-based shot command
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            new ShooterAutoAimSequence(
+                    shooter,
+                    hood,
+                    getShooterHubInterp(),
+                    getHoodHubInterp(),
+                    interpTables.timeOfFlightInterp,
+                    autoAimPoseSupplier,
+                    () -> FieldConstants.HUB_POSE_BLUE,
+                    drive)
+                .alongWith(
+                    new TurretAngleAim(
+                        autoAimPoseSupplier,
+                        turret,
+                        () -> FieldConstants.HUB_POSE_BLUE,
+                        drive,
+                        interpTables.timeOfFlightInterp)));
+
+    // // For Setpoint feeding in both real and sim
+    // driverController
+    //     .rightTrigger()
+    //     .and(shooterIsAtSetpoint)
+    //     .whileTrue(
+    //         Commands.startEnd(
+    //                 () -> shooter.setKickerSpeed(maxForwardSpeed), () -> shooter.stopKicker())
+    //             .alongWith(indexer.runIndexer(indexerSpeed))
+    //             .alongWith(
+    //                 new TurretAngleAim(
+    //                     autoAimPoseSupplier,
+    //                     turret,
+    //                     () -> FieldConstants.HUB_POSE_BLUE,
+    //                     drive,
+    //                     interpTables.timeOfFlightInterp)));
+
+    // Sim shooter projectile launcher
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      driverController
+          .rightTrigger()
+          .and(shooterIsAtSetpoint)
+          .whileTrue(
+              Commands.sequence(
+                      Commands.runOnce(() -> simShooter.shootBalls()), Commands.waitSeconds(0.1))
+                  .repeatedly());
+    }
+
+    // COMMENTED OUT FOR MERGE PREPARATION
+    /*
     operatorController
         .rightTrigger()
         .whileTrue(
@@ -404,20 +482,18 @@ public class RobotContainer {
             new ShooterAutoAimSequence(
                     shooter,
                     hood,
-                    interpTables.shooterSpeedHubInterp,
-                    interpTables.hoodAngleHubInterp,
+                    getShooterHubInterp(),
+                    getHoodHubInterp(),
                     interpTables.timeOfFlightInterp,
                     () -> drive.getPose(),
                     () -> zones.getZoneTargetPose(),
                     drive)
                 .alongWith(zones.override()));
-    driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
+    operatorController.rightBumper().whileTrue(indexer.runIndexer(-indexerReverseSpeed));
 
     shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
-
+        Commands.startEnd(() -> shooter.setKickerSpeed(maxForwardSpeed), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(indexerSpeed)));
     operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
@@ -426,7 +502,7 @@ public class RobotContainer {
         .leftBumper()
         .whileTrue(
             Commands.startEnd(() -> hood.setHoodPos(0.8), () -> hood.setHoodPos(0))
-                .alongWith(shooter.runShooterSpeed(100)));
+                .alongWith(shooter.runShooterSpeed(maxForwardSpeed)));
 
     operatorController.povDown().whileTrue(intake.setIntakeVolts(2));
     operatorController.povUp().whileTrue(intake.setIntakeVolts(-2));
@@ -446,10 +522,12 @@ public class RobotContainer {
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(
+            shooter.setKickerSpeedCommand(maxForwardSpeed).onlyIf(() -> DriverStation.isTest()));
     driverController
         .leftBumper()
-        .whileTrue(shooter.runShooterSpeed(12).onlyIf(() -> DriverStation.isTest()));
+        .whileTrue(
+            shooter.setKickerSpeedCommand(maxReverseSpeed).onlyIf(() -> DriverStation.isTest()));
     driverController
         .y()
         .whileTrue(
@@ -472,6 +550,40 @@ public class RobotContainer {
             intake
                 .setPivotPosition(PivotIO.PivotPositions.STOWED)
                 .onlyIf(() -> DriverStation.isTest()));
+
+    operatorController
+        .povLeft()
+        .whileTrue(indexer.runIndexer(maxForwardSpeed).onlyIf(() -> DriverStation.isTest()));
+    operatorController
+        .povRight()
+        .whileTrue(indexer.runIndexer(maxReverseSpeed).onlyIf(() -> DriverStation.isTest()));
+
+    operatorController
+        .povUp()
+        .whileTrue(intake.runRollerAtSpeed(maxForwardSpeed).onlyIf(() -> DriverStation.isTest()));
+    operatorController
+        .povDown()
+        .whileTrue(intake.runRollerAtSpeed(maxReverseSpeed).onlyIf(() -> DriverStation.isTest()));
+
+    operatorController
+        .rightTrigger()
+        .whileTrue(shooter.runShooterSpeed(20).onlyIf(() -> DriverStation.isTest()));
+    operatorController
+        .leftTrigger()
+        .whileTrue(shooter.runShooterSpeed(-20).onlyIf(() -> DriverStation.isTest()));
+    */
+
+    final double hoodStep = 0.01;
+    final double shooterStep = 1.0;
+
+    driverController.povUp().onTrue(Commands.runOnce(() -> hood.adjustHoodPos(hoodStep)));
+    driverController.povDown().onTrue(Commands.runOnce(() -> hood.adjustHoodPos(-hoodStep)));
+    driverController
+        .povRight()
+        .onTrue(Commands.runOnce(() -> shooter.adjustShooterSpeed(shooterStep)));
+    driverController
+        .povLeft()
+        .onTrue(Commands.runOnce(() -> shooter.adjustShooterSpeed(-shooterStep)));
   }
 
   /**
@@ -480,7 +592,37 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
+    String override = Constants.AUTO_OVERRIDE;
+    if (override != null && !override.isEmpty()) {
+      // 1. Try to find a matching Choreo auto routine via reflection
+      if (autoRoutines != null) {
+        try {
+          java.lang.reflect.Method method = autoRoutines.getClass().getMethod(override);
+          if (Command.class.isAssignableFrom(method.getReturnType())) {
+            System.out.println("[AutoOverride] Selected Choreo auto: " + override);
+            return (Command) method.invoke(autoRoutines);
+          }
+        } catch (Exception e) {
+          // Method not found or failed to invoke, fall back to PathPlanner
+        }
+      }
+      // 2. Try to load matching PathPlanner auto
+      try {
+        System.out.println("[AutoOverride] Selected PathPlanner auto: " + override);
+        return AutoBuilder.buildAuto(override);
+      } catch (Exception e) {
+        System.err.println("[AutoOverride] Could not find/build auto: " + override);
+      }
+    }
     return autoChooser.get();
+  }
+
+  private Command getAutoIntakeCommand() {
+    if (Constants.currentMode == Constants.Mode.SIM) {
+      return intake.runIntakeAtSpeed(intakeSpeedAuto, PivotPositions.DEPLOYED);
+    }
+
+    return intake.runRollerAtSpeed(intakeSpeedAuto);
   }
 
   public void displaySimFieldToAdvantageScope() {
@@ -490,9 +632,28 @@ public class RobotContainer {
         "FieldSimulation/Fuel", SimulatedArena.getInstance().getGamePiecesArrayByType("Fuel"));
   }
 
+  private InterpolatingTreeMap<Double, Double> getHoodHubInterp() {
+    return Constants.currentMode == Constants.Mode.SIM
+        ? interpTables.hoodAngleHubInterpSim
+        : interpTables.hoodAngleHubInterpReal;
+  }
+
+  private InterpolatingTreeMap<Double, Double> getShooterHubInterp() {
+    return Constants.currentMode == Constants.Mode.SIM
+        ? interpTables.shooterSpeedHubInterpSim
+        : interpTables.shooterSpeedHubInterpReal;
+  }
+
+  private java.util.function.Supplier<edu.wpi.first.math.geometry.Pose2d> getAutoAimPoseSupplier() {
+    return () ->
+        Constants.currentMode == Constants.Mode.SIM
+            ? simDrive.getSimulatedDriveTrainPose()
+            : drive.getPose();
+  }
+
   public void setupZonesLogic() {
     zones.toggleRunMainZoneLogic();
     zones.toggleRunMainZoneLogic();
-    zones.override().withTimeout(0.04);
+    zones.override().withTimeout(zoneDt);
   }
 }

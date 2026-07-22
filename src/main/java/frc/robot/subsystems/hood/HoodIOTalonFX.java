@@ -1,5 +1,7 @@
 package frc.robot.subsystems.hood;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -15,6 +17,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -74,6 +77,16 @@ public class HoodIOTalonFX implements HoodIO {
     inputs.hoodAppliedVolts = motorVolts.getValueAsDouble();
     inputs.hoodCurrentAmps = motorAmps.getValueAsDouble();
     inputs.hoodTargetPosition = target;
+
+    final double clampedPosition =
+        MathUtil.clamp(
+            inputs.hoodMotorPosition, ShooterConstants.HOOD_MIN_POS, ShooterConstants.HOOD_MAX_POS);
+    double angleDeg =
+        Constants.SimConstants.HOOD_MAX_ANGLE_DEG
+            - (clampedPosition / ShooterConstants.HOOD_MAX_POS)
+                * (Constants.SimConstants.HOOD_MAX_ANGLE_DEG
+                    - Constants.SimConstants.HOOD_MIN_ANGLE_DEG);
+    inputs.launchAngle = Degrees.of(angleDeg);
   }
 
   @Override

@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -10,7 +9,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import frc.robot.Constants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.hood.Hood;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.turret.Turret;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
@@ -23,13 +25,12 @@ public class ShootAtAngleSim {
   private final IntakeSimulation simIntake;
   private final SwerveDriveSimulation simDrive;
   private final Turret turret;
-  private final double maxVelocityRPM = 6000;
-  private double standardHoodOffset = Math.PI / 2;
-  private double velocityRPM;
-  private final Distance initialHeight = Distance.ofBaseUnits(0.45, Meters);
+  private final Shooter shooter;
+  private final Hood hood;
+
+  private final Distance initialHeight =
+      Distance.ofBaseUnits(Constants.SimConstants.PROJECTILE_INITIAL_HEIGHT_METERS, Meters);
   private LinearVelocity launchSpeed = LinearVelocity.ofBaseUnits(8, MetersPerSecond);
-  private Angle launchAngle = Angle.ofBaseUnits(0, Degrees);
-  private double desiredLaunchAngle;
 
   private int shotsMade = 0;
 
@@ -37,30 +38,33 @@ public class ShootAtAngleSim {
       IntakeSimulation simIntake,
       SwerveDriveSimulation simDrive,
       Turret turret,
-      double velocityRPM,
-      double desiredLaunchAngle) {
+      Shooter shooter,
+      Hood hood) {
     this.simIntake = simIntake;
     this.simDrive = simDrive;
     this.turret = turret;
-    this.velocityRPM = velocityRPM;
-    this.desiredLaunchAngle = desiredLaunchAngle;
+    this.shooter = shooter;
+    this.hood = hood;
   }
 
   public void initialize() {
-    launchSpeed =
-        LinearVelocity.ofBaseUnits(
-            8, MetersPerSecond); // TODO Update Example Launch Speed of the projectile
+    launchSpeed = LinearVelocity.ofBaseUnits(0, MetersPerSecond);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   public void shootBalls() {
-
-    launchSpeed = LinearVelocity.ofBaseUnits((velocityRPM / maxVelocityRPM) * 8, MetersPerSecond);
+    double rps = shooter.getTargetSpeed();
+    double speedMetersPerSecond = 2 * Math.PI * Constants.SimConstants.FLYWHEEL_RADIUS_METERS * rps;
+    double efficiencyMultiplier = 0.65; // accounts for slip
+    launchSpeed =
+        LinearVelocity.ofBaseUnits(speedMetersPerSecond * efficiencyMultiplier, MetersPerSecond);
 
     if (!simIntake.obtainGamePieceFromIntake()) {
       return;
     }
-    RebuiltFuelOnFly projectile = createProjectile(launchAngle);
+
+    Angle currentLaunchAngle = hood.getLaunchAngle();
+    RebuiltFuelOnFly projectile = createProjectile(currentLaunchAngle);
 
     projectile.setHitTargetCallBack(() -> Logger.recordOutput("Shots Made", ++shotsMade));
     SimulatedArena.getInstance()
@@ -82,30 +86,24 @@ public class ShootAtAngleSim {
   }
 
   private RebuiltFuelOnFly createProjectile(Angle launchAngle) {
+    Translation2d turretOffset =
+        new Translation2d(
+                Constants.TurretConstants.TURRET_X_OFFSET,
+                Constants.TurretConstants.TURRET_Y_OFFSET)
+            .rotateBy(simDrive.getSimulatedDriveTrainPose().getRotation());
+
+    Translation2d startPos =
+        simDrive.getSimulatedDriveTrainPose().getTranslation().plus(turretOffset);
+
     return new RebuiltFuelOnFly(
-        simDrive.getSimulatedDriveTrainPose().getTranslation(),
-        new Translation2d(0, 0), // shooter offet from center,
+        startPos,
+        new Translation2d(0, 0), // shooter offset from center
         simDrive.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
         new Rotation2d(
             simDrive.getSimulatedDriveTrainPose().getRotation().getRadians()
-                + turret.getTurretPositionRadians()), // accounting for drivertrain being flipped?
+                + turret.getTurretPositionRadians()), // accounting for drivetrain being flipped?
         initialHeight, // initial height of the ball, in meters
-        this.getLaunchSpeed(), // initial velocity, in m/s
+        launchSpeed, // initial velocity, in m/s
         launchAngle); // shooter angle
-  }
-
-  public Angle getLaunchAngle() {
-    return launchAngle;
-  }
-
-  public void setLaunchAngle(double desiredLaunchAngle) {
-    this.launchAngle =
-        Angle.ofBaseUnits(
-            standardHoodOffset + desiredLaunchAngle,
-            Degrees); // TODO Update Example Launch Angle of the projectile;
-  }
-
-  private LinearVelocity getLaunchSpeed() {
-    return launchSpeed;
   }
 }
