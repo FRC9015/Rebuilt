@@ -516,7 +516,7 @@ public final class Constants {
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
-    public static final double TURRET_GEAR_MAGIC_FIX_NUMBER = 1.0357;
+    public static final double TURRET_GEAR_MAGIC_FIX_NUMBER = 1;
 
     // --- MOVEMENT LIMITS ---
     public static final double MAXROTATION = 0.45 / TURRET_GEAR_MAGIC_FIX_NUMBER;
