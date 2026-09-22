@@ -430,6 +430,7 @@ public class RobotContainer {
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     operatorController.a().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
+    operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController
         .leftBumper()
         .whileTrue(

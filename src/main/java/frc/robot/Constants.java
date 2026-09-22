@@ -516,17 +516,17 @@ public final class Constants {
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
-    public static final double TURRET_GEAR_MAGIC_FIX_NUMBER = 1.0357;
+    public static final double TURRET_GEAR_MAGIC_FIX_NUMBER = 1.0357; // 1.0357
 
     // --- MOVEMENT LIMITS ---
-    public static final double MAXROTATION = 0.45 / TURRET_GEAR_MAGIC_FIX_NUMBER;
-    public static final double MINROTATION = -0.6 / TURRET_GEAR_MAGIC_FIX_NUMBER;
+    public static final double MAXROTATION = 0.5 / TURRET_GEAR_MAGIC_FIX_NUMBER;
+    public static final double MINROTATION = -0.65 / TURRET_GEAR_MAGIC_FIX_NUMBER;
 
     public static final double TURRET_X_OFFSET = Units.inchesToMeters(-2.75);
     public static final double TURRET_Y_OFFSET = Units.inchesToMeters(6.25);
 
     public static final int TURRET_HALL_EFFECT_CHANNEL = 0;
-    public static final double TURRET_ANGLE_OFFSET = 0.232;
+    public static final double TURRET_ANGLE_OFFSET = 0.246;
 
     // --- MOTOR CONFIGS ---
     public static final MotionMagicConfigs MOTION_MAGIC_CONFIGS =
