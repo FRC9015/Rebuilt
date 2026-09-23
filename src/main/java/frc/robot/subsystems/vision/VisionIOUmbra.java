@@ -8,17 +8,22 @@ import java.util.List;
 
 public class VisionIOUmbra implements VisionIO {
   private final DoubleArraySubscriber observationSub;
+  private final String cameraName;
 
   public VisionIOUmbra(String cameraName) {
+    this.cameraName = cameraName;
     var table = NetworkTableInstance.getDefault().getTable("Umbra").getSubTable(cameraName);
     this.observationSub = table.getDoubleArrayTopic("observations").subscribe(new double[] {});
   }
 
   @Override
+  public String getName() {
+    return this.cameraName;
+  }
+
+  @Override
   public void updateInputs(VisionIOInputs inputs) {
     double[] data = observationSub.get();
-
-    // 1. Connected Status - now expecting 9 values
     inputs.connected = (data.length >= 9);
 
     if (data.length < 9 || data[7] == 0) {
@@ -29,17 +34,18 @@ public class VisionIOUmbra implements VisionIO {
     double timestamp = data[0];
     Pose3d incomingPose =
         new Pose3d(data[1], data[2], data[3], new Rotation3d(data[4], data[5], data[6]));
+
     int tagCount = (int) data[7];
-    double avgDist = data[8]; // Now actually being sent!
+    double averageTagDistance = data[8];
 
     inputs.poseObservations =
         new PoseObservation[] {
           new PoseObservation(
               timestamp,
               incomingPose,
-              0.0, // Ambiguity is already rejected on the Pi
+              0.0, // Pre-filtered on Pi
               tagCount,
-              avgDist,
+              averageTagDistance,
               List.of())
         };
   }

@@ -71,9 +71,18 @@ public class Indexer extends SubsystemBase {
    *
    * @param voltage The desired voltage for the indexer.
    */
-  public void setIndexerSpeed(double speed) {
-    io.setIndexerSpeed(speed);
+  public void setIndexerSpeed(double speed, double tunnel) {
+    io.setIndexerSpeed(speed, tunnel);
     Logger.recordOutput("Indexer/setVoltage", speed);
+  }
+
+  public void setIndexerVoltage(double voltage) {
+    io.setIndexerVoltage(voltage);
+  }
+
+  public void setBallTunnelSpeed(double speed) {
+    io.setBallTunnelSpeed(speed);
+    Logger.recordOutput("Indexer/ballTunnelSpeed", speed);
   }
 
   /** Stops the indexer. */
@@ -107,8 +116,8 @@ public class Indexer extends SubsystemBase {
    * @param speed speed provided to the motor (-100 to 100).
    * @return A command that runs the indexer.
    */
-  public Command runIndexer(double speed) {
-    return this.startEnd(() -> io.setIndexerSpeed(speed), () -> stop());
+  public Command runIndexer(double speed, double tunnel) {
+    return this.startEnd(() -> io.setIndexerSpeed(speed, tunnel), () -> stop());
   }
 
   /**
@@ -117,7 +126,7 @@ public class Indexer extends SubsystemBase {
    * @return A command that unjams the indexer.
    */
   public Command unjam() {
-    return this.runEnd(() -> io.setIndexerSpeed(-34), () -> stop()).withTimeout(0.5);
+    return this.runEnd(() -> io.setIndexerSpeed(-50, -50), () -> stop()).withTimeout(0.5);
   }
 
   /**
@@ -127,6 +136,18 @@ public class Indexer extends SubsystemBase {
    * @return A command that runs the indexer with auto unjam functionality.
    */
   public Command runIndexerWithAutoUnjam(double voltage) {
-    return runIndexer(voltage).until(this::isJamDetected).andThen(unjam()).repeatedly();
+    return runIndexer(voltage, 0).until(this::isJamDetected).andThen(unjam()).repeatedly();
+  }
+
+  public Command setVoltage(double voltage) {
+    return this.runEnd(() -> io.setIndexerVoltage(voltage), () -> stop());
+  }
+
+  public Command setBallTunnelVelocity(double speed) {
+    return this.runEnd(() -> io.setBallTunnelSpeed(speed), () -> stop());
+  }
+
+  public boolean getTunnelStalled() {
+    return inputs.tunnelStall;
   }
 }
