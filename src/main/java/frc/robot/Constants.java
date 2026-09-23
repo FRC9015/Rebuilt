@@ -187,12 +187,12 @@ public final class Constants {
     public static final double FIELD_WIDTH = aprilTagLayout.getFieldWidth();
 
     // OUTDATED
-    public static final Transform3d STARBOARD_CAMERA_POSE =
+    public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-9.250),
-                Units.inchesToMeters(-15.032),
-                Units.inchesToMeters(8.433)),
+                Units.inchesToMeters(9.062),
+                Units.inchesToMeters(-15.057),
+                Units.inchesToMeters(-9.329)),
             new Rotation3d(
                 Units.degreesToRadians(0),
                 Units.degreesToRadians(10),
@@ -200,19 +200,19 @@ public final class Constants {
     public static final Transform3d STERN_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-11.532),
-                Units.inchesToMeters(1.75),
-                Units.inchesToMeters(11.933)),
+                Units.inchesToMeters(11.532),
+                Units.inchesToMeters(-1.562),
+                Units.inchesToMeters(-9.828)),
             new Rotation3d(
                 Units.degreesToRadians(0),
                 Units.degreesToRadians(10),
                 Units.degreesToRadians(180)));
-    public static final Transform3d PORT_CAMERA_POSE =
+    public static final Transform3d STARBOARD_CAMERA_POSE =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(-5.253),
-                Units.inchesToMeters(13.782),
-                Units.inchesToMeters(11.932)),
+                Units.inchesToMeters(9.062),
+                Units.inchesToMeters(15.034),
+                Units.inchesToMeters(-7.829)),
             new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(90)));
     // --- TURRET CAMERA MEASUREMENTS ---
     // 1. Where is the center of the turret rotation relative to the center of the robot?
@@ -516,7 +516,9 @@ public final class Constants {
 
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
+
     public static final double TURRET_GEAR_MAGIC_FIX_NUMBER = 1.0357; // 1.0357
+
 
     // --- MOVEMENT LIMITS ---
     public static final double MAXROTATION = 0.5 / TURRET_GEAR_MAGIC_FIX_NUMBER;
@@ -556,7 +558,7 @@ public final class Constants {
     // TODO TUNE THESE PID VALUES
     public static final Slot0Configs INDEXER_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(0.5)
+            .withKP(25)
             .withKI(0.0)
             .withKD(0.0)
             .withKG(0)

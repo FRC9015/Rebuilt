@@ -59,7 +59,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
-import frc.robot.generated.TunerConstantsSim;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -121,12 +120,12 @@ public class Drive extends SubsystemBase {
               new SwerveModuleSimulationConfig(
                   DCMotor.getKrakenX60(1),
                   DCMotor.getKrakenX60(1),
-                  TunerConstantsSim.FrontLeft.DriveMotorGearRatio,
-                  TunerConstantsSim.FrontLeft.SteerMotorGearRatio,
-                  Volts.of(TunerConstantsSim.FrontLeft.DriveFrictionVoltage),
-                  Volts.of(TunerConstantsSim.FrontLeft.SteerFrictionVoltage),
-                  Meters.of(TunerConstantsSim.FrontLeft.WheelRadius),
-                  KilogramSquareMeters.of(TunerConstantsSim.FrontLeft.SteerInertia),
+                  TunerConstants.FrontLeft.DriveMotorGearRatio,
+                  TunerConstants.FrontLeft.SteerMotorGearRatio,
+                  Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage),
+                  Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage),
+                  Meters.of(TunerConstants.FrontLeft.WheelRadius),
+                  KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia),
                   WHEEL_COF));
 
   static final Lock odometryLock = new ReentrantLock();
@@ -149,14 +148,13 @@ public class Drive extends SubsystemBase {
     }
   }
 
-  // Odometry trust is tightened to standard baseline values to integrate cleanly with Gyro-locking
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(
           kinematics,
           rawGyroRotation,
           lastModulePositions,
           new Pose2d(),
-          VecBuilder.fill(0.1, 0.1, 0.1),
+          VecBuilder.fill(0.9, 0.9, 0.9),
           VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(15)));
   private SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint prevSetpoint;
@@ -195,6 +193,9 @@ public class Drive extends SubsystemBase {
         this::setPose,
         this::getChassisSpeeds,
         this::runVelocity,
+        //  new PPHolonomicDriveController(new PIDConstants(5, 0.0, 0), new PIDConstants(5.0,
+        // 0)),
+        //     new PIDConstants(4.5, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.02)),
         new PPHolonomicDriveController(
             new PIDConstants(2, 0.0, 0.12), new PIDConstants(5.0, 0.0, 0.02)),
         PP_CONFIG,
@@ -447,12 +448,6 @@ public class Drive extends SubsystemBase {
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
-  }
-
-  // --- THE FIX: Returns the raw Pigeon2 rotation, untouched by vision measurements ---
-  @AutoLogOutput(key = "Odometry/RawGyroRotation")
-  public Rotation2d getRawRotation() {
-    return rawGyroRotation;
   }
 
   @AutoLogOutput
