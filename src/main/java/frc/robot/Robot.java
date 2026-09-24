@@ -8,6 +8,11 @@
 package frc.robot;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.util.FlippingUtil;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.ironmaple.simulation.SimulatedArena;
@@ -29,6 +34,9 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   public Robot() {
+    FlippingUtil.fieldSizeX = 14.6811920722;
+    importRoboConAprilTagLayout();
+
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -75,6 +83,28 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+  }
+
+  public void importRoboConAprilTagLayout() {
+    String path =
+        Filesystem.getDeployDirectory().getAbsolutePath()
+            + "\\2026-robocon-welded-photonvision-wpilib.json";
+    try {
+      AprilTagFieldLayout atflRobocon = new AprilTagFieldLayout(path);
+
+      for (int i = 1; i <= 50; i++) {
+        try {
+          Field2d aprilTag = new Field2d();
+          aprilTag.setRobotPose(atflRobocon.getTagPose(i).get().toPose2d());
+          SmartDashboard.putData("Tag" + Integer.toString(i), aprilTag);
+        } catch (Exception e) {
+          continue;
+        }
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /** This function is called periodically during all modes. */

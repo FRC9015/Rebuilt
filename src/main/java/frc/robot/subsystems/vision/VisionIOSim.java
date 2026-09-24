@@ -1,7 +1,6 @@
 package frc.robot.subsystems.vision;
 
-import static frc.robot.Constants.VisionConstants.aprilTagLayout;
-
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -19,6 +18,7 @@ public class VisionIOSim implements VisionIO {
   private final Supplier<Pose2d> poseSupplier;
   private final PhotonCameraSim cameraSim;
   private final PhotonCamera camera;
+  private final AprilTagFieldLayout aprilTagLayout;
 
   /**
    * Creates a new VisionIOSim.
@@ -27,10 +27,14 @@ public class VisionIOSim implements VisionIO {
    * @param robotToCamera Transform from robot center to camera.
    * @param poseSupplier Supplier for the robot pose used in simulation.
    */
-  public VisionIOSim(String name, Transform3d robotToCamera, Supplier<Pose2d> poseSupplier) {
+  public VisionIOSim(
+      String name,
+      Transform3d robotToCamera,
+      Supplier<Pose2d> poseSupplier,
+      AprilTagFieldLayout layout) {
 
     this.poseSupplier = poseSupplier;
-
+    this.aprilTagLayout = layout;
     // Initialize vision system once
     if (visionSim == null) {
       visionSim = new VisionSystemSim("main");

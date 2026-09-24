@@ -4,13 +4,15 @@ import static edu.wpi.first.units.Units.Meters;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 // import com.qelib.SpatialAutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -104,6 +106,7 @@ public class RobotContainer {
   private Trigger overrideZone;
   private Trigger runZoneLogic;
   private Trigger ballTunnelStall;
+  private AprilTagFieldLayout aprilTagLayout;
 
   // Dashboard inputs
 
@@ -112,7 +115,15 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
-
+    try {
+      aprilTagLayout =
+          new AprilTagFieldLayout(
+              (Filesystem.getDeployDirectory().getAbsolutePath()
+                  + "\\2026-robocon-welded-photonvision-wpilib.json"));
+    } catch (Exception e) {
+      aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+      e.printStackTrace();
+    }
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -130,8 +141,10 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("port", VisionConstants.PORT_CAMERA_POSE),
-                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE));
+                aprilTagLayout,
+                new VisionIOPhotonVision("port", VisionConstants.PORT_CAMERA_POSE, aprilTagLayout),
+                new VisionIOPhotonVision(
+                    "stern", VisionConstants.STERN_CAMERA_POSE, aprilTagLayout));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -204,9 +217,11 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
-                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("turret", new Transform3d()));
+                aprilTagLayout,
+                new VisionIOPhotonVision(
+                    "stern", VisionConstants.STERN_CAMERA_POSE, aprilTagLayout),
+                new VisionIOPhotonVision(
+                    "starboard", VisionConstants.STARBOARD_CAMERA_POSE, aprilTagLayout));
 
         simShooter =
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
@@ -247,9 +262,11 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
-                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("turret", new Transform3d()));
+                aprilTagLayout,
+                new VisionIOPhotonVision(
+                    "stern", VisionConstants.STERN_CAMERA_POSE, aprilTagLayout),
+                new VisionIOPhotonVision(
+                    "starboard", VisionConstants.STARBOARD_CAMERA_POSE, aprilTagLayout));
         hood = new Hood(new HoodIO() {});
         interpTables = new InterpTables();
 
@@ -368,7 +385,7 @@ public class RobotContainer {
             interpTables.timeOfFlightInterp));
 
     shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+        Commands.startEnd(() -> shooter.setKickerSpeed(-1), () -> shooter.stopKicker())
             .alongWith(indexer.runIndexer(100, 100))
             .onlyIf(() -> !DriverStation.isTestEnabled()));
 
@@ -418,7 +435,7 @@ public class RobotContainer {
     operatorController
         .rightBumper()
         .whileTrue(
-            Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+            Commands.startEnd(() -> shooter.setKickerSpeed(-1), () -> shooter.stopKicker())
                 .alongWith(indexer.runIndexer(100, 100)));
 
     // shooterIsAtSetpoint.whileTrue(

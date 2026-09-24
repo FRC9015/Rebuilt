@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.turret.Turret;
@@ -89,5 +90,6 @@ public class TurretAngleAim extends Command {
     Logger.recordOutput("DISTANCETHING", targetPos.getDistance(robotPose.getTranslation()));
     Logger.recordOutput("Turret/TurretFieldPos", new Pose2d(turretFieldPos, fieldAngleToHub));
     Logger.recordOutput("Turret/Targetpose", new Pose2d(targetPos, new Rotation2d()));
+    Logger.recordOutput("Turret/BlueHubPose", Constants.FieldConstants.HUB_POSE_BLUE);
   }
 }

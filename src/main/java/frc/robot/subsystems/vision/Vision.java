@@ -1,5 +1,6 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -37,10 +38,12 @@ public class Vision extends SubsystemBase {
   private final Alert[] disconnectedAlerts;
 
   private Matrix<N3, N1> curStdDevs = VisionConstants.kSingleTagStdDevs;
+  private final AprilTagFieldLayout aprilTagLayout;
 
-  public Vision(VisionConsumer consumer, VisionIO... io) {
+  public Vision(VisionConsumer consumer, AprilTagFieldLayout layout, VisionIO... io) {
     this.consumer = consumer;
     this.io = io;
+    this.aprilTagLayout = layout;
 
     // Initialize inputs
     this.inputs = new VisionIOInputsAutoLogged[io.length];
@@ -101,7 +104,7 @@ public class Vision extends SubsystemBase {
 
       // Add tag poses
       for (int tagId : inputs[cameraIndex].tagIds) {
-        Optional<Pose3d> tagPose = VisionConstants.aprilTagLayout.getTagPose(tagId);
+        Optional<Pose3d> tagPose = aprilTagLayout.getTagPose(tagId);
         if (tagPose.isPresent()) {
           tagPoses.add(tagPose.get());
         }
@@ -118,9 +121,9 @@ public class Vision extends SubsystemBase {
 
                 // Must be within the field boundaries
                 || observation.pose().getX() < 0.0
-                || observation.pose().getX() > VisionConstants.FIELD_LENGTH
+                || observation.pose().getX() > aprilTagLayout.getFieldLength()
                 || observation.pose().getY() < 0.0
-                || observation.pose().getY() > VisionConstants.FIELD_WIDTH;
+                || observation.pose().getY() > aprilTagLayout.getFieldWidth();
 
         // Add pose to log
         robotPoses.add(observation.pose());
