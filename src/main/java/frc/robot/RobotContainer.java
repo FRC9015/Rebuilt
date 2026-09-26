@@ -144,7 +144,9 @@ public class RobotContainer {
                 aprilTagLayout,
                 new VisionIOPhotonVision("port", VisionConstants.PORT_CAMERA_POSE, aprilTagLayout),
                 new VisionIOPhotonVision(
-                    "stern", VisionConstants.STERN_CAMERA_POSE, aprilTagLayout));
+                    "stern", VisionConstants.STERN_CAMERA_POSE, aprilTagLayout),
+                new VisionIOPhotonVision(
+                    "starboard", VisionConstants.STARBOARD_CAMERA_POSE, aprilTagLayout));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
@@ -386,7 +388,7 @@ public class RobotContainer {
 
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(-1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(100, 100))
+            .alongWith(indexer.runIndexer(75, 90))
             .onlyIf(() -> !DriverStation.isTestEnabled()));
 
     drive.setDefaultCommand(

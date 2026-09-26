@@ -259,11 +259,11 @@ public final class Constants {
 
     public static final Slot0Configs PIVOT_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(80)
+            .withKP(10)
             .withKI(0)
-            .withKD(0.0)
-            .withKS(0.2)
-            .withKV(0.15)
+            .withKD(0.15)
+            .withKS(0.4)
+            .withKV(0.45)
             .withKA(0)
             .withKG(0);
 
@@ -361,8 +361,8 @@ public final class Constants {
 
     public static final double PIVOT_MAX_POS = 6.5;
     public static final double PIVOT_MIN_POS = 0.1;
-    public static final double PIVOT_DEPLOYED_POSITION = 1.72;
-    public static final double PIVOT_STOWED_POSITION = 0.3;
+    public static final double PIVOT_DEPLOYED_POSITION = 1.3;
+    public static final double PIVOT_STOWED_POSITION = 0.25;
   }
 
   public static class SimConstants {
@@ -398,13 +398,13 @@ public final class Constants {
     // TODO: Tune kicker PID values
     public static final Slot0Configs kickerSlotVelocityConfigs =
         new Slot0Configs()
-            .withKP(1.5)
+            .withKP(2)
             .withKI(0)
             .withKD(0)
             .withKG(0)
             .withKA(0)
             .withKS(0.15)
-            .withKV(0.65);
+            .withKV(0.85);
 
     public static final MotionMagicConfigs flyWheelMagicConfligs =
         new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
@@ -412,7 +412,7 @@ public final class Constants {
     public static final MotionMagicConfigs kickerMagicConfligs =
         new MotionMagicConfigs()
             .withMotionMagicAcceleration(150)
-            .withMotionMagicCruiseVelocity(100);
+            .withMotionMagicCruiseVelocity(150);
     public static final MotionMagicConfigs ballTunnelMagicConfligs =
         new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(50);
 
@@ -421,12 +421,12 @@ public final class Constants {
 
     public static final Slot0Configs ballTunnelSlotConfigs =
         new Slot0Configs()
-            .withKP(0.25)
+            .withKP(1)
             .withKI(0)
             .withKD(0)
             .withKG(0)
             .withKA(0)
-            .withKS(0)
+            .withKS(0.3)
             .withKV(0.6);
 
     public static final FeedbackConfigs ballTunnelFeedbackConfigs =
@@ -555,34 +555,36 @@ public final class Constants {
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     public static final MotionMagicConfigs INDEXER_MOTION_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(25);
+        new MotionMagicConfigs().withMotionMagicAcceleration(75).withMotionMagicCruiseVelocity(75);
 
     // TODO TUNE THESE PID VALUES
     public static final Slot0Configs INDEXER_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(25)
+            .withKP(15)
             .withKI(0.0)
             .withKD(0.0)
             .withKG(0)
             .withKA(0)
             .withKS(0.4)
-            .withKV(0.116666666667);
+            .withKV(0.5);
 
     public static final FeedbackConfigs TUNNEL_FEEDBACK_CONFIGS =
         new FeedbackConfigs().withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor);
 
     public static final MotionMagicConfigs TUNNEL_MOTION_MAGIC_CONFIGS =
-        new MotionMagicConfigs().withMotionMagicAcceleration(50).withMotionMagicCruiseVelocity(25);
+        new MotionMagicConfigs()
+            .withMotionMagicAcceleration(100)
+            .withMotionMagicCruiseVelocity(100);
 
     // TODO TUNE THESE PID VALUES
     public static final Slot0Configs TUNNEL_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(0.35)
+            .withKP(0.75)
             .withKI(0.0)
             .withKD(0.00)
             .withKG(0)
             .withKA(0)
-            .withKS(0.08)
+            .withKS(0.3)
             .withKV(1.3);
   }
 }
