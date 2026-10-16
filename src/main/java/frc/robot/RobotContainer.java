@@ -386,9 +386,10 @@ public class RobotContainer {
             drive,
             interpTables.timeOfFlightInterp));
 
+    // THIS IS THE ONE TAHT ACTUALLY MATTERS CHANGE THIS ONE
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(-1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(75, 90))
+            .alongWith(indexer.runIndexer(58, 90))
             .onlyIf(() -> !DriverStation.isTestEnabled()));
 
     drive.setDefaultCommand(
@@ -437,8 +438,8 @@ public class RobotContainer {
     operatorController
         .rightBumper()
         .whileTrue(
-            Commands.startEnd(() -> shooter.setKickerSpeed(-1), () -> shooter.stopKicker())
-                .alongWith(indexer.runIndexer(100, 100)));
+            Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+                .alongWith(indexer.runIndexer(-30, -20)));
 
     // shooterIsAtSetpoint.whileTrue(
     //     Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())

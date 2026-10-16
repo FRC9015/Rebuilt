@@ -74,11 +74,11 @@ public final class Constants {
     public static final double FIELD_LENGTH = Units.inchesToMeters(578.12);
     public static final double FIELD_WIDTH = Units.inchesToMeters(316.64);
 
-    public static final double ALLIANCE_BLUE = Units.inchesToMeters(156.06);
+    public static final double ALLIANCE_BLUE = Units.inchesToMeters(134);
     public static final double ALLIANCE_RED = FIELD_LENGTH - ALLIANCE_BLUE;
 
     public static final double TRENCH_BUMP_X =
-        Units.inchesToMeters(181.56); // x position of the center of the trench and bump
+        Units.inchesToMeters(157.5); // x position of the center of the trench and bump
     public static final double TRENCH_BUMP_LENGTH =
         Units.inchesToMeters(47); // x length of the trench and bump
     public static final double NEUTRAL_ZONE_BUMP = Units.inchesToMeters(47) / 2.0;
@@ -177,7 +177,7 @@ public final class Constants {
 
   public static class VisionConstants {
     public static final double MAX_AMBIGUITY = 0.2;
-    public static final int MAX_AVERAGE_DISTANCE = 4;
+    public static final int MAX_AVERAGE_DISTANCE = 3;
     public static final int STD_DEV_RANGE = 30;
 
     // OUTDATED
@@ -189,7 +189,7 @@ public final class Constants {
                 Units.inchesToMeters(7.829)),
             new Rotation3d(
                 Units.degreesToRadians(0),
-                Units.degreesToRadians(10),
+                Units.degreesToRadians(15),
                 Units.degreesToRadians(270)));
     public static final Transform3d STERN_CAMERA_POSE =
         new Transform3d(
@@ -199,7 +199,7 @@ public final class Constants {
                 Units.inchesToMeters(9.828)),
             new Rotation3d(
                 Units.degreesToRadians(0),
-                Units.degreesToRadians(10),
+                Units.degreesToRadians(15),
                 Units.degreesToRadians(180)));
     public static final Transform3d PORT_CAMERA_POSE =
         new Transform3d(
@@ -207,7 +207,7 @@ public final class Constants {
                 Units.inchesToMeters(-9.062),
                 Units.inchesToMeters(15.057),
                 Units.inchesToMeters(9.329)),
-            new Rotation3d(0, Units.degreesToRadians(10), Units.degreesToRadians(90)));
+            new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(90)));
     // --- TURRET CAMERA MEASUREMENTS ---
     // 1. Where is the center of the turret rotation relative to the center of the robot?
     public static final Transform3d ROBOT_TO_TURRET =
@@ -265,7 +265,7 @@ public final class Constants {
             .withKS(0.4)
             .withKV(0.45)
             .withKA(0)
-            .withKG(0);
+            .withKG(0.1);
 
     public static final MotionMagicConfigs PIVOT_MAGIC_CONFIGS =
         new MotionMagicConfigs().withMotionMagicAcceleration(250).withMotionMagicCruiseVelocity(50);
@@ -359,10 +359,10 @@ public final class Constants {
     public static final double INTAKE_MAX_SPEED = 512.0;
     public static final double INTAKE_MIN_SPEED = -511.0;
 
-    public static final double PIVOT_MAX_POS = 6.5;
-    public static final double PIVOT_MIN_POS = 0.1;
-    public static final double PIVOT_DEPLOYED_POSITION = 1.3;
-    public static final double PIVOT_STOWED_POSITION = 0.25;
+    public static final double PIVOT_MAX_POS = 1.75;
+    public static final double PIVOT_MIN_POS = -0.2;
+    public static final double PIVOT_DEPLOYED_POSITION = 1.7;
+    public static final double PIVOT_STOWED_POSITION = -0.2;
   }
 
   public static class SimConstants {
@@ -520,7 +520,7 @@ public final class Constants {
     // total gear ratio on turret
     public static final double ENCODER_TO_TURRET_GEAR_RATIO = 37.5;
 
-    public static final double TURRET_GEAR_MAGIC_FIX_NUMBER = 1.0357; // 1.0357
+    public static final double TURRET_GEAR_MAGIC_FIX_NUMBER = 1.045968; // 1.0357
 
     // --- MOVEMENT LIMITS ---
     public static final double MAXROTATION = 0.5 / TURRET_GEAR_MAGIC_FIX_NUMBER;
@@ -560,12 +560,12 @@ public final class Constants {
     // TODO TUNE THESE PID VALUES
     public static final Slot0Configs INDEXER_SLOT0_CONFIGS =
         new Slot0Configs()
-            .withKP(15)
+            .withKP(20)
             .withKI(0.0)
             .withKD(0.0)
             .withKG(0)
             .withKA(0)
-            .withKS(0.4)
+            .withKS(0.6)
             .withKV(0.5);
 
     public static final FeedbackConfigs TUNNEL_FEEDBACK_CONFIGS =

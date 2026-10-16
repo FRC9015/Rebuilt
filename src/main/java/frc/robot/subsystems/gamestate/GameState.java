@@ -19,6 +19,12 @@ public class GameState extends SubsystemBase {
   @AutoLogOutput private boolean allianceResolved = false;
 
   @AutoLogOutput private String gameDataManual = "";
+
+  // Dashboard outputs for period tracking & timers
+  @AutoLogOutput private String currentPeriod = "Unknown";
+  @AutoLogOutput private double timeToNextPeriod = 0.0;
+  @AutoLogOutput private double timeToEndgame = 0.0;
+
   private Timer mTimer;
 
   public GameState() {
@@ -33,6 +39,7 @@ public class GameState extends SubsystemBase {
     if (!allianceResolved) this.alliance = findAlliance();
     this.isHubActive = canWeScore();
     this.isThreeSeconds = threeSecondTime();
+    updatePeriodTimers();
   }
 
   public StateEnum getState() {
@@ -53,6 +60,18 @@ public class GameState extends SubsystemBase {
 
   public boolean getIsAllianceResolved() {
     return this.allianceResolved;
+  }
+
+  public String getCurrentPeriod() {
+    return this.currentPeriod;
+  }
+
+  public double getTimeToNextPeriod() {
+    return this.timeToNextPeriod;
+  }
+
+  public double getTimeToEndgame() {
+    return this.timeToEndgame;
   }
 
   private void setGameDataManualy(String teamColor) {
@@ -114,6 +133,66 @@ public class GameState extends SubsystemBase {
     }
     return StateEnum.ENDGAME;
   }
+
+  /** Updates the period name, time until next period, and time until endgame. */
+  private void updatePeriodTimers() {
+    double time = -1;
+    try {
+      time = OptionalDouble.of(DriverStation.getMatchTime()).getAsDouble();
+    } catch (Exception noSuchElementException) {
+      time = this.mTimer.get();
+    }
+
+    boolean auto = DriverStation.isAutonomous();
+
+    if (time == -1) {
+      this.currentPeriod = "Practice";
+      this.timeToNextPeriod = 0.0;
+      this.timeToEndgame = 0.0;
+      return;
+    }
+
+    if (auto) {
+      this.currentPeriod = "Autonomous";
+      this.timeToNextPeriod = Math.max(0.0, time);
+      // Auto time remaining + 105s of teleop before endgame starts at match time 30
+      this.timeToEndgame = Math.max(0.0, time + 105.0);
+      return;
+    }
+
+    // Teleop time until endgame starts (at 30 seconds remaining)
+    this.timeToEndgame = Math.max(0.0, time - 30.0);
+
+    if (time > 130) {
+      this.currentPeriod = "Transition";
+      this.timeToNextPeriod = Math.max(0.0, time - 130.0);
+    } else if (time > 105) {
+      this.currentPeriod = "Shift 1" + getActiveHubSuffix();
+      this.timeToNextPeriod = Math.max(0.0, time - 105.0);
+    } else if (time > 80) {
+      this.currentPeriod = "Shift 2" + getActiveHubSuffix();
+      this.timeToNextPeriod = Math.max(0.0, time - 80.0);
+    } else if (time > 55) {
+      this.currentPeriod = "Shift 3" + getActiveHubSuffix();
+      this.timeToNextPeriod = Math.max(0.0, time - 55.0);
+    } else if (time > 30) {
+      this.currentPeriod = "Shift 4" + getActiveHubSuffix();
+      this.timeToNextPeriod = Math.max(0.0, time - 30.0);
+    } else {
+      this.currentPeriod = "Endgame";
+      this.timeToNextPeriod = Math.max(0.0, time); // Time until match end
+    }
+  }
+
+  private String getActiveHubSuffix() {
+    if (this.state == StateEnum.BLUE_TEAM) {
+      return " (Blue Hub)";
+    } else if (this.state == StateEnum.RED_TEAM) {
+      return " (Red Hub)";
+    }
+    return "";
+  }
+
   /**
    * checks if the robot can score
    *
