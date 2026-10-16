@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -66,6 +65,7 @@ import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOUmbra;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -134,11 +134,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 aprilTagLayout,
-                new VisionIOPhotonVision("port", VisionConstants.PORT_CAMERA_POSE, aprilTagLayout),
-                new VisionIOPhotonVision(
-                    "stern", VisionConstants.STERN_CAMERA_POSE, aprilTagLayout),
-                new VisionIOPhotonVision(
-                    "starboard", VisionConstants.STARBOARD_CAMERA_POSE, aprilTagLayout));
+                new VisionIOUmbra("port"),
+                new VisionIOUmbra("starboard"));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
