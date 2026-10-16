@@ -389,7 +389,7 @@ public class RobotContainer {
     // THIS IS THE ONE TAHT ACTUALLY MATTERS CHANGE THIS ONE
     shooterIsAtSetpoint.whileTrue(
         Commands.startEnd(() -> shooter.setKickerSpeed(-1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(58, 90))
+            .alongWith(indexer.runIndexer(20, 85))
             .onlyIf(() -> !DriverStation.isTestEnabled()));
 
     drive.setDefaultCommand(
@@ -439,7 +439,7 @@ public class RobotContainer {
         .rightBumper()
         .whileTrue(
             Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-                .alongWith(indexer.runIndexer(-30, -20)));
+                .alongWith(indexer.runIndexer(20, 85)));
 
     // shooterIsAtSetpoint.whileTrue(
     //     Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
