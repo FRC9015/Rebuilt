@@ -71,14 +71,14 @@ public final class Constants {
   }
 
   public static class FieldConstants {
-    public static final double FIELD_LENGTH = Units.inchesToMeters(578.12);
+    public static final double FIELD_LENGTH = Units.inchesToMeters(650.12);
     public static final double FIELD_WIDTH = Units.inchesToMeters(316.64);
 
-    public static final double ALLIANCE_BLUE = Units.inchesToMeters(134);
+    public static final double ALLIANCE_BLUE = Units.inchesToMeters(156.06);
     public static final double ALLIANCE_RED = FIELD_LENGTH - ALLIANCE_BLUE;
 
     public static final double TRENCH_BUMP_X =
-        Units.inchesToMeters(157.5); // x position of the center of the trench and bump
+        Units.inchesToMeters(181.56); // x position of the center of the trench and bump
     public static final double TRENCH_BUMP_LENGTH =
         Units.inchesToMeters(47); // x length of the trench and bump
     public static final double NEUTRAL_ZONE_BUMP = Units.inchesToMeters(47) / 2.0;
@@ -92,11 +92,11 @@ public final class Constants {
     private static final double TRENCH_Y_MAX = Units.inchesToMeters(49.86);
 
     public static final Pose2d HUB_POSE_BLUE =
-        new Pose2d(Units.inchesToMeters(157.5), Units.inchesToMeters(158.84), new Rotation2d());
+        new Pose2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84), new Rotation2d());
     public static final Pose2d HUB_POSE_RED = FlippingUtil.flipFieldPose(HUB_POSE_BLUE);
     public static final Translation3d HUB_TARGET_TRANSLATION =
         new Translation3d(
-            Units.inchesToMeters(157.5), Units.inchesToMeters(158.84), Units.inchesToMeters(72));
+            Units.inchesToMeters(181.11), Units.inchesToMeters(158.84), Units.inchesToMeters(72));
     public static final Translation3d HUB_TARGET_TOLERANCE =
         new Translation3d(
             Units.inchesToMeters(24), Units.inchesToMeters(21), Units.inchesToMeters(0.02));

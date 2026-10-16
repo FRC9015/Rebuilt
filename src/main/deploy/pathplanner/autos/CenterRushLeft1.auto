@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "shootNoTimeout"
+            "name": "shooter"
           }
         }
       ]

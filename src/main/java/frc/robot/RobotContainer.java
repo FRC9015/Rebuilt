@@ -115,15 +115,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
-    try {
-      aprilTagLayout =
-          new AprilTagFieldLayout(
-              (Filesystem.getDeployDirectory().getAbsolutePath()
-                  + "\\2026-robocon-welded-photonvision-wpilib.json"));
-    } catch (Exception e) {
-      aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
-      e.printStackTrace();
-    }
+    aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
