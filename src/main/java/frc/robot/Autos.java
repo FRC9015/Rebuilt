@@ -137,6 +137,11 @@ public class Autos {
         .active()
         .onTrue(
             Commands.sequence(
+                intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED),
+                intake
+                    .startEnd(() -> intake.setRollerSpeed(-100), () -> intake.stopRoller())
+                    .withTimeout(5),
+                intake.setPivotPosition(PivotIO.PivotPositions.STOWED),
                 centerRush.resetOdometry(),
                 centerRush.cmd(),
                 Commands.runOnce(() -> drive.stop()),
@@ -170,11 +175,16 @@ public class Autos {
     AutoRoutine routine = autoFactory.newRoutine("CENTER_RUSH_RIGHT");
     AutoTrajectory centerRush =
         routine.trajectory(Choreo.loadTrajectory("CENTER_RUSH_RIGHT").get());
-
+    centerRush.atTime("Marker").onTrue(intake.runIntakeAtSpeed(100, PivotPositions.DEPLOYED));
     routine
         .active()
         .onTrue(
             Commands.sequence(
+                intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED),
+                intake
+                    .startEnd(() -> intake.setRollerSpeed(-100), () -> intake.stopRoller())
+                    .withTimeout(5),
+                intake.setPivotPosition(PivotIO.PivotPositions.STOWED),
                 centerRush.resetOdometry(),
                 centerRush.cmd(),
                 Commands.runOnce(() -> drive.stop()),
@@ -216,7 +226,7 @@ public class Autos {
                         () -> drive.getPose(),
                         () -> FieldConstants.HUB_POSE_BLUE,
                         drive)
-                    .alongWith(indexer.runIndexer(6.0))));
+                    .alongWith(indexer.runIndexer(60, 60))));
     return routine.cmd();
   }
 
@@ -382,7 +392,7 @@ public class Autos {
             () -> drive.getPose(),
             () -> FieldConstants.HUB_POSE_BLUE,
             drive));
-    autoFactory.bind("ShootBall", indexer.runIndexer(6.0));
+    autoFactory.bind("ShootBall", indexer.runIndexer(60, 60));
     autoFactory.bind("deploy", intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
   }
 }

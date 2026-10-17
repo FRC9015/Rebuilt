@@ -15,7 +15,7 @@ public interface TurretIO {
     public double turretError = 0.0;
 
     public boolean hallEffectTriggered = false; // NEW: True when magnet is detected
-    public boolean isZeroed = false; // NEW: Tracks if seeded
+    public boolean isZeroed = true; // NEW: Tracks if seeded
 
     public double turretResolvedPosition = 0.0;
     public double turretResolvedPositionDegrees = 0.0;

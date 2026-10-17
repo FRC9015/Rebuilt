@@ -1,44 +1,81 @@
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.numbers.*;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO.PoseObservation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * Shared PhotonVision/Umbra observation validation, visualization, and pose fusion.
+ *
+ * <p>Vision fusion is OFF by default for controlled Umbra testing. Raw and accepted camera poses
+ * are still visible through AdvantageKit/AdvantageScope.
+ */
 public class Vision extends SubsystemBase {
+  // Keep disabled until Umbra's real-world timestamp, mounting, and odometry
+  // compatibility have been confirmed. Call setFusionEnabled(true) deliberately.
+  private boolean fusionEnabled = true;
+
+  private static final double MAX_REAL_OBSERVATION_AGE_SEC = 0.50;
+  private static final double MAX_FUTURE_SEC = 0.05;
+  // When Umbra doesn't publish a real tag range, DO NOT use its legacy range value.
+  // Deliberately conservative starting uncertainty; tune on actual field data.
+  private static final Matrix<N3, N1> UMBRA_UNKNOWN_RANGE_STD_DEVS = VecBuilder.fill(1.0, 1.0, 1.5);
+
   private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
+  private final AprilTagFieldLayout aprilTagLayout;
 
-  private final Supplier<Rotation2d> turretAngleSupplier;
-  private final int turretCameraIndex;
-
-  public Vision(
-      VisionConsumer consumer,
-      Supplier<Rotation2d> turretAngleSupplier,
-      int turretCameraIndex,
-      VisionIO... io) {
+  public Vision(VisionConsumer consumer, AprilTagFieldLayout layout, VisionIO... io) {
     this.consumer = consumer;
-    this.turretAngleSupplier = turretAngleSupplier;
-    this.turretCameraIndex = turretCameraIndex;
+    this.aprilTagLayout = layout;
     this.io = io;
-
     this.inputs = new VisionIOInputsAutoLogged[io.length];
     this.disconnectedAlerts = new Alert[io.length];
 
     for (int i = 0; i < io.length; i++) {
       inputs[i] = new VisionIOInputsAutoLogged();
-      disconnectedAlerts[i] = new Alert("Vision camera " + i + " disconnected", AlertType.kWarning);
+      disconnectedAlerts[i] =
+          new Alert(
+              "Vision " + io[i].getName() + " has no recent data/connection.", AlertType.kWarning);
     }
+  }
+
+  /** Set true only after validating the received measurements and clock synchronization. */
+  public void setFusionEnabled(boolean enabled) {
+    fusionEnabled = enabled;
+  }
+
+  public boolean isFusionEnabled() {
+    return fusionEnabled;
+  }
+
+  public Rotation2d getTargetX(int cameraIndex) {
+    return inputs[cameraIndex].latestTargetObservation.tx();
+  }
+
+  public Optional<PoseObservation> getNewestPoseObservation(int cameraIndex) {
+    PoseObservation[] observations = inputs[cameraIndex].poseObservations;
+    return observations.length == 0
+        ? Optional.empty()
+        : Optional.of(observations[observations.length - 1]);
   }
 
   @Override
@@ -46,72 +83,152 @@ public class Vision extends SubsystemBase {
     for (int i = 0; i < io.length; i++) {
       io[i].updateInputs(inputs[i]);
       Logger.processInputs("Vision/Camera" + i, inputs[i]);
-      disconnectedAlerts[i].set(!inputs[i].connected);
+    }
 
-      List<Pose3d> acceptedRobotPoses = new ArrayList<>();
-      List<Pose3d> rejectedRobotPoses = new ArrayList<>();
+    Logger.recordOutput("Vision/FusionEnabled", fusionEnabled);
+    double nowSec = Timer.getFPGATimestamp();
+    List<Pose3d> allRawPoses = new ArrayList<>();
+    List<Pose3d> allAcceptedPoses = new ArrayList<>();
+    List<Pose3d> allRejectedPoses = new ArrayList<>();
+    List<Pose3d> allTagPoses = new ArrayList<>();
 
-      for (PoseObservation observation : inputs[i].poseObservations) {
-        Pose3d lensPose = observation.pose(); // This is the Lens on the field
-        Pose3d robotPose;
+    for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
+      String key = "Vision/Camera" + cameraIndex + "/";
+      disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
-        if (i == turretCameraIndex) {
-          // --- THE FIX: DYNAMIC TRANSFORM COMPOSITION ---
-          Rotation2d turretAngle = turretAngleSupplier.get();
+      List<Pose3d> tagPoses = new ArrayList<>();
+      List<Pose3d> rawPoses = new ArrayList<>();
+      List<Pose3d> acceptedPoses = new ArrayList<>();
+      List<Pose3d> rejectedPoses = new ArrayList<>();
+      int fusedCount = 0;
+      int acceptedCount = 0;
+      int rejectedCount = 0;
 
-          // 1. Create a transform that represents the turret's current rotation
-          Transform3d turretRotation =
-              new Transform3d(new Translation3d(), new Rotation3d(0, 0, turretAngle.getRadians()));
+      for (int tagId : inputs[cameraIndex].tagIds) {
+        aprilTagLayout.getTagPose(tagId).ifPresent(tagPoses::add);
+      }
 
-          // 2. Build the full chain from Robot Center -> Lens
-          // Chain: RobotCenter -> TurretPivot -> TurretRotation -> LensOffset
-          Transform3d robotToLensDynamic =
-              VisionConstants.ROBOT_TO_TURRET
-                  .plus(turretRotation)
-                  .plus(VisionConstants.TURRET_TO_CAMERA);
-
-          // 3. RobotPose = LensPose * (RobotToLens)^-1
-          robotPose = lensPose.transformBy(robotToLensDynamic.inverse());
-
-        } else {
-          // Static camera logic remains the same
-          // (Assuming the IO handled the static offset, or you handle it here)
-          robotPose = lensPose;
+      for (PoseObservation observation : inputs[cameraIndex].poseObservations) {
+        if (observation == null || observation.pose() == null) {
+          rejectedCount++;
+          continue;
+        }
+        Pose3d pose = observation.pose();
+        if (isFinitePose(pose)) {
+          rawPoses.add(pose);
         }
 
-        // Filtering
-        if (isValid(robotPose, observation)) {
-          acceptedRobotPoses.add(robotPose);
-          consumer.accept(
-              robotPose.toPose2d(), observation.timestamp(), calculateStdDevs(observation));
+        boolean reject = !isValidObservation(observation, nowSec);
+        if (reject) {
+          rejectedCount++;
+          if (isFinitePose(pose)) {
+            rejectedPoses.add(pose);
+          }
+          continue;
+        }
+
+        double range = observation.averageTagDistance();
+        Matrix<N3, N1> stdDevs;
+        if (Double.isFinite(range) && range >= 0.0) {
+          stdDevs =
+              observation.tagCount() > 1
+                  ? VisionConstants.kMultiTagStdDevs
+                  : VisionConstants.kSingleTagStdDevs;
+          stdDevs = stdDevs.times(1.0 + range * range / VisionConstants.STD_DEV_RANGE);
         } else {
-          rejectedRobotPoses.add(robotPose);
+          // Umbra does not currently publish camera-to-tag distance.
+          // Never weight using the distance to the field origin instead.
+          stdDevs = UMBRA_UNKNOWN_RANGE_STD_DEVS;
+        }
+
+        acceptedCount++;
+        acceptedPoses.add(pose);
+        Logger.recordOutput(key + "StdDevs", stdDevs);
+
+        // Raw and accepted measurements are logged even when fusion is disabled.
+        if (fusionEnabled) {
+          consumer.accept(pose.toPose2d(), observation.timestamp(), stdDevs);
+          fusedCount++;
         }
       }
-      Logger.recordOutput(
-          "Vision/Camera" + i + "/AcceptedPoses", acceptedRobotPoses.toArray(new Pose3d[0]));
-      Logger.recordOutput(
-          "Vision/Camera" + i + "/RejectedPoses", rejectedRobotPoses.toArray(new Pose3d[0]));
+
+      // ALWAYS write arrays, including empty ones. Otherwise AdvantageScope
+      // can keep rendering a previously accepted pose after tags disappear.
+      Logger.recordOutput(key + "Name", io[cameraIndex].getName());
+      Logger.recordOutput(key + "Connected", inputs[cameraIndex].connected);
+      Logger.recordOutput(key + "TagPoses", tagPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput(key + "RobotPoses", rawPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput(key + "AcceptedRobotPoses", acceptedPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput(key + "RejectedRobotPoses", rejectedPoses.toArray(new Pose3d[0]));
+      Logger.recordOutput(key + "ReceivedCount", inputs[cameraIndex].poseObservations.length);
+      Logger.recordOutput(key + "AcceptedCount", acceptedCount);
+      Logger.recordOutput(key + "RejectedCount", rejectedCount);
+      Logger.recordOutput(key + "FusedCount", fusedCount);
+
+      allTagPoses.addAll(tagPoses);
+      allRawPoses.addAll(rawPoses);
+      allAcceptedPoses.addAll(acceptedPoses);
+      allRejectedPoses.addAll(rejectedPoses);
     }
+
+    Logger.recordOutput("Vision/AllTagPoses", allTagPoses.toArray(new Pose3d[0]));
+    Logger.recordOutput("Vision/AllRobotPoses", allRawPoses.toArray(new Pose3d[0]));
+    Logger.recordOutput("Vision/AllAcceptedRobotPoses", allAcceptedPoses.toArray(new Pose3d[0]));
+    Logger.recordOutput("Vision/AllRejectedRobotPoses", allRejectedPoses.toArray(new Pose3d[0]));
   }
 
-  private boolean isValid(Pose3d pose, PoseObservation obs) {
-    return obs.tagCount() > 0
-        && (obs.tagCount() > 1 || obs.ambiguity() < VisionConstants.MAX_AMBIGUITY)
-        && pose.getX() > 0
-        && pose.getX() < VisionConstants.FIELD_LENGTH
-        && pose.getY() > 0
-        && pose.getY() < VisionConstants.FIELD_WIDTH;
+  private boolean isValidObservation(PoseObservation observation, double nowSec) {
+    Pose3d pose = observation.pose();
+    if (!isFinitePose(pose) || !Double.isFinite(observation.timestamp())) {
+      return false;
+    }
+
+    if (observation.tagCount() < 1) {
+      return false;
+    }
+    if (observation.tagCount() == 1
+        && (!Double.isFinite(observation.ambiguity())
+            || observation.ambiguity() > VisionConstants.MAX_AMBIGUITY)) {
+      return false;
+    }
+    if (pose.getX() < 0.0
+        || pose.getX() > aprilTagLayout.getFieldLength()
+        || pose.getY() < 0.0
+        || pose.getY() > aprilTagLayout.getFieldWidth()) {
+      return false;
+    }
+    double dist = observation.averageTagDistance();
+    if (observation.tagCount() == 1
+        && Double.isFinite(dist)
+        && dist > VisionConstants.MAX_AVERAGE_DISTANCE) {
+      return false;
+    }
+
+    // RobotEstimator timestamps use the roboRIO FPGA clock, in seconds.
+    // During simulated/replayed robot runs, clock progression may be different.
+    if (Constants.currentMode == Constants.Mode.REAL) {
+      double ageSec = nowSec - observation.timestamp();
+      if (ageSec < -MAX_FUTURE_SEC || ageSec > MAX_REAL_OBSERVATION_AGE_SEC) {
+        return false;
+      }
+    }
+    return true;
   }
 
-  private Matrix<N3, N1> calculateStdDevs(PoseObservation obs) {
-    var base =
-        (obs.tagCount() > 1) ? VisionConstants.kMultiTagStdDevs : VisionConstants.kSingleTagStdDevs;
-    double factor = 1.0 + (Math.pow(obs.averageTagDistance(), 2) / VisionConstants.STD_DEV_RANGE);
-    return base.times(factor);
+  private static boolean isFinitePose(Pose3d pose) {
+    return Double.isFinite(pose.getX())
+        && Double.isFinite(pose.getY())
+        && Double.isFinite(pose.getZ())
+        && Double.isFinite(pose.getRotation().getX())
+        && Double.isFinite(pose.getRotation().getY())
+        && Double.isFinite(pose.getRotation().getZ());
   }
 
+  @FunctionalInterface
   public interface VisionConsumer {
-    void accept(Pose2d pose, double timestamp, Matrix<N3, N1> stdDevs);
+    void accept(
+        Pose2d visionRobotPoseMeters,
+        double timestampSeconds,
+        Matrix<N3, N1> visionMeasurementStdDevs);
   }
 }

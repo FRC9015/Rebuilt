@@ -4,10 +4,11 @@ import static edu.wpi.first.units.Units.Meters;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 // import com.qelib.SpatialAutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -64,6 +65,7 @@ import frc.robot.subsystems.turret.TurretIOTalonFX;
 import frc.robot.subsystems.vision.ObjectDetection;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOUmbra;
 import org.ironmaple.simulation.IntakeSimulation;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -103,6 +105,8 @@ public class RobotContainer {
   private Trigger shooterIsAtSetpoint;
   private Trigger overrideZone;
   private Trigger runZoneLogic;
+  private Trigger ballTunnelStall;
+  private AprilTagFieldLayout aprilTagLayout;
 
   // Dashboard inputs
 
@@ -111,7 +115,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     gamestate = new GameState();
-
+    aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -129,15 +133,13 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                () -> new Rotation2d(turret.getTurretPositionRadians()),
-                2,
-                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
-                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("turret", new Transform3d()));
+                aprilTagLayout,
+                new VisionIOUmbra("port"),
+                new VisionIOUmbra("starboard"));
         indexer =
             new Indexer(
                 new IndexerIOTalonFX(
-                    MotorIDConstants.INDEXER1_MOTOR_ID));
+                    MotorIDConstants.INDEXER1_MOTOR_ID, MotorIDConstants.TUNNEL_MOTOR_ID));
         intake =
             new Intake(
                 new RollerIOTalonFX(
@@ -161,6 +163,7 @@ public class RobotContainer {
         shooterIsAtSetpoint = new Trigger(() -> shooter.returnShooterAtSetpoint());
         runZoneLogic = new Trigger(() -> zones.getRunMainZoneLogic());
         overrideZone = new Trigger(() -> zones.getOverrideZone());
+        ballTunnelStall = new Trigger(() -> indexer.getTunnelStalled());
         break;
 
       case SIM:
@@ -205,11 +208,11 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                () -> new Rotation2d(turret.getTurretPositionRadians()),
-                2,
-                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
-                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("turret", new Transform3d()));
+                aprilTagLayout,
+                new VisionIOPhotonVision(
+                    "stern", VisionConstants.STERN_CAMERA_POSE, aprilTagLayout),
+                new VisionIOPhotonVision(
+                    "starboard", VisionConstants.STARBOARD_CAMERA_POSE, aprilTagLayout));
 
         simShooter =
             new ShootAtAngleSim(simIntake, simDrive, turret, 6000, Units.degreesToRadians(45));
@@ -250,11 +253,11 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                () -> new Rotation2d(turret.getTurretPositionRadians()),
-                2,
-                new VisionIOPhotonVision("stern", VisionConstants.STERN_CAMERA_POSE),
-                new VisionIOPhotonVision("starboard", VisionConstants.STARBOARD_CAMERA_POSE),
-                new VisionIOPhotonVision("turret", new Transform3d()));
+                aprilTagLayout,
+                new VisionIOPhotonVision(
+                    "stern", VisionConstants.STERN_CAMERA_POSE, aprilTagLayout),
+                new VisionIOPhotonVision(
+                    "starboard", VisionConstants.STARBOARD_CAMERA_POSE, aprilTagLayout));
         hood = new Hood(new HoodIO() {});
         interpTables = new InterpTables();
 
@@ -372,9 +375,11 @@ public class RobotContainer {
             drive,
             interpTables.timeOfFlightInterp));
 
+    // THIS IS THE ONE TAHT ACTUALLY MATTERS CHANGE THIS ONE
     shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
+        Commands.startEnd(() -> shooter.setKickerSpeed(-1), () -> shooter.stopKicker())
+            .alongWith(indexer.runIndexer(20, 85))
+            .onlyIf(() -> !DriverStation.isTestEnabled()));
 
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -392,15 +397,11 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(75));
+    driverController.rightTrigger().whileTrue(intake.runRollerAtSpeed(100));
 
     operatorController
         .rightTrigger()
         .whileTrue(
-            // Commands.startEnd(
-            //         () -> driverController.setRumble(RumbleType.kBothRumble, 1),
-            //         () -> driverController.setRumble(RumbleType.kBothRumble, 0))
-            //     .alongWith(
             new ShooterAutoAimSequence(
                     shooter,
                     hood,
@@ -410,18 +411,35 @@ public class RobotContainer {
                     () -> drive.getPose(),
                     () -> zones.getZoneTargetPose(),
                     drive)
-                .alongWith(zones.override()));
+                .alongWith(zones.override())
+                .alongWith(
+                    DriveCommands.joystickDrive(
+                        drive,
+                        () -> -driverController.getLeftY(),
+                        () -> -driverController.getLeftX(),
+                        () -> -driverController.getRightX(),
+                        0.1)));
     driverController.leftTrigger().whileTrue(intake.runRollerAtSpeed(-100));
-    operatorController.rightBumper().whileTrue(indexer.runIndexer(-40));
+    driverController.y().whileTrue(intake.agitateIntakeCommand());
+    driverController.leftBumper().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
+    driverController.rightBumper().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
 
-    shooterIsAtSetpoint.whileTrue(
-        Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
-            .alongWith(indexer.runIndexer(50)));
+    operatorController
+        .rightBumper()
+        .whileTrue(
+            Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+                .alongWith(indexer.runIndexer(-20, -85)));
 
-    operatorController.x().whileTrue(intake.agitateIntakeCommand());
+    // shooterIsAtSetpoint.whileTrue(
+    //     Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
+    //         .alongWith(indexer.runIndexer(100, 60))
+    //         .onlyIf(() -> DriverStation.isTestEnabled()));
+
+    operatorController.leftTrigger().whileTrue(intake.agitateIntakeCommand());
     operatorController.b().onTrue(new InstantCommand(() -> zones.toggleRunMainZoneLogic()));
     operatorController.y().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.DEPLOYED));
     operatorController.a().onTrue(intake.setPivotPosition(PivotIO.PivotPositions.STOWED));
+    operatorController.x().whileTrue(intake.agitateIntakeCommand());
     operatorController
         .leftBumper()
         .whileTrue(
@@ -446,19 +464,9 @@ public class RobotContainer {
         .onTrue(shooter.incrementShooterCommand(-1).onlyIf(() -> DriverStation.isTest()));
     driverController
         .rightBumper()
-        .whileTrue(shooter.setKickerSpeedCommand(100).onlyIf(() -> DriverStation.isTest()));
-    driverController
-        .leftBumper()
-        .whileTrue(shooter.runShooterSpeed(12).onlyIf(() -> DriverStation.isTest()));
-    driverController
-        .y()
         .whileTrue(
-            new TurretAngleAim(
-                    () -> drive.getPose(),
-                    turret,
-                    () -> FieldConstants.HUB_POSE_BLUE,
-                    drive,
-                    interpTables.timeOfFlightInterp)
+            Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
+                .alongWith(indexer.runIndexer(100, 100))
                 .onlyIf(() -> DriverStation.isTest()));
     driverController
         .x()
@@ -467,7 +475,7 @@ public class RobotContainer {
                 .setPivotPosition(PivotIO.PivotPositions.DEPLOYED)
                 .onlyIf(() -> DriverStation.isTest()));
     driverController
-        .b()
+        .a()
         .onTrue(
             intake
                 .setPivotPosition(PivotIO.PivotPositions.STOWED)

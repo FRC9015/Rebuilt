@@ -46,7 +46,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setKickerSpeedReverse(double speedValue) {
-    io.setKickerSpeed(-speedValue);
+    io.setKickerSpeed(speedValue);
   }
 
   public Command setKickerSpeedCommand(double speedValue) {

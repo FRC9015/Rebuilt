@@ -129,14 +129,14 @@ public class Intake extends SubsystemBase {
                 .withTimeout(0.5),
             this.run(
                     () -> {
-                      setPivotPosition(PivotIO.PivotPositions.DEPLOYED.getPivotPosition());
+                      setPivotPosition(PivotIO.PivotPositions.AGITATE_MIDDLE.getPivotPosition());
                       setRollerSpeed(50);
                     })
                 .withTimeout(0.5))
         .repeatedly()
         .finallyDo(
             (interrupted) -> {
-              setPivotPosition(PivotIO.PivotPositions.DEPLOYED).withTimeout(0.5);
+              setPivotPosition(PivotIO.PivotPositions.AGITATE_MIDDLE).withTimeout(0.5);
               this.stopTheRollers();
             });
   }

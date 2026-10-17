@@ -76,12 +76,13 @@ public class TurretIOTalonFX implements TurretIO {
 
     inputs.turretAppliedVolts = motorAppliedVoltsSignal.getValueAsDouble();
     inputs.turretCurrentAmps = motorCurrentSignal.getValueAsDouble();
-    inputs.turretMotorPosition = motorPositionSignal.getValueAsDouble();
+    inputs.turretMotorPosition =
+        motorPositionSignal.getValueAsDouble() * TurretConstants.TURRET_GEAR_MAGIC_FIX_NUMBER;
     inputs.turretSetpoint = setpointDegrees;
 
     // Position logic simplified: motor position IS the turret position now
     inputs.turretResolvedPosition = inputs.turretMotorPosition;
-    inputs.turretResolvedPositionDegrees = inputs.turretMotorPosition * 360.0;
+    inputs.turretResolvedPositionDegrees = inputs.turretResolvedPosition * 360.0;
 
     inputs.turretError = (Math.abs(inputs.turretResolvedPositionDegrees - inputs.turretSetpoint));
   }
@@ -108,11 +109,10 @@ public class TurretIOTalonFX implements TurretIO {
 
   @Override
   public void setTurretPosition(double positionDegrees) {
-    double rotations = positionDegrees / 360.0;
+    double rotations = (positionDegrees / 360.0) / TurretConstants.TURRET_GEAR_MAGIC_FIX_NUMBER;
     // Clamp to safety bounds
     double safePosition =
-        MathUtil.clamp(
-            rotations, TurretConstants.MINROTATION + 0.05, TurretConstants.MAXROTATION - 0.05);
+        MathUtil.clamp(rotations, TurretConstants.MINROTATION, TurretConstants.MAXROTATION);
     turretMotor.setControl(motionMagicVoltage.withPosition(safePosition));
   }
 
