@@ -428,7 +428,7 @@ public class RobotContainer {
         .rightBumper()
         .whileTrue(
             Commands.startEnd(() -> shooter.setKickerSpeed(1), () -> shooter.stopKicker())
-                .alongWith(indexer.runIndexer(20, 85)));
+                .alongWith(indexer.runIndexer(-20, -85)));
 
     // shooterIsAtSetpoint.whileTrue(
     //     Commands.startEnd(() -> shooter.setKickerSpeed(100), () -> shooter.stopKicker())
